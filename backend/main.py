@@ -13,6 +13,7 @@ from fastapi import FastAPI, WebSocket, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.config import settings
 from backend.core.logging_config import setup_logging, set_correlation_id, get_correlation_id
@@ -359,6 +360,19 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle standard FastAPI/Starlette HTTP exceptions directly instead of defaulting to 500."""
+    correlation_id = get_correlation_id()
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": exc.detail,
+            "correlation_id": correlation_id,
+        }
+    )
+
+
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     """Catch-all exception handler - never return raw 500."""
@@ -379,9 +393,11 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 # ── CORS ──────────────────────────────────────────────────────
 
+# It is correct setup to add CORSMiddleware via add_middleware - this adds it to the TOP of the stack,
+# meaning it is the FIRST middleware executed on incoming requests and LAST on outgoing responses.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

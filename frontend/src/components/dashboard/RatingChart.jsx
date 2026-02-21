@@ -3,7 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { TrendingUp, Swords as SwordsIcon } from 'lucide-react';
 import dayjs from 'dayjs';
 
-export default function RatingChart({ history = [], currentElo = 1200 }) {
+export default function RatingChart({ history = [], currentElo = 0 }) {
     const data = useMemo(() => {
         if (!history.length) return [];
 

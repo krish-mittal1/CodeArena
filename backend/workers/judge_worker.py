@@ -38,12 +38,9 @@ from backend.models.submission import Submission
 from backend.models.submission_result import SubmissionResult
 from backend.models.test_case import TestCase
 from backend.services.judge_service import judge
-from backend.services.sandbox import run_code, ensure_sandbox_image, SandboxResult
+from backend.execution.sandbox import sandbox, ExecutionResult
 
 logger = logging.getLogger(__name__)
-
-# Thread pool for blocking Docker calls
-_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="sandbox")
 
 # In-memory queue for dev mode (no Redis)
 dev_queue: asyncio.Queue[str] = asyncio.Queue()
@@ -239,17 +236,14 @@ async def _process_submission_inner(
         memory_limit_mb = submission.problem.memory_limit_mb if submission.problem else 256
 
         for tc_idx, tc in enumerate(test_cases):
-            # Run in thread pool (Docker is blocking)
-            loop = asyncio.get_event_loop()
+            # Run asynchronously natively with the new execution engine
             try:
-                sandbox_result = await loop.run_in_executor(
-                    _executor,
-                    run_code,
-                    submission.code,
-                    submission.language,
-                    tc.input,
-                    time_limit_ms,
-                    memory_limit_mb,
+                sandbox_result = await sandbox.execute(
+                    language=submission.language,
+                    code=submission.code,
+                    stdin_data=tc.input,
+                    time_limit_ms=time_limit_ms,
+                    memory_limit_mb=memory_limit_mb,
                 )
             except Exception as sandbox_err:
                 logger.error(
@@ -257,7 +251,7 @@ async def _process_submission_inner(
                     f"{submission_id}, test case #{tc_idx}: {sandbox_err}",
                     exc_info=True,
                 )
-                sandbox_result = SandboxResult(
+                sandbox_result = ExecutionResult(
                     stdout="",
                     stderr=f"Execution engine error: {sandbox_err}",
                     exit_code=1,

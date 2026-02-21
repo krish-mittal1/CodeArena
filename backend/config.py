@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Application configuration via Pydantic Settings.
 All values are loaded from environment variables or .env file.
@@ -8,7 +9,7 @@ PRODUCTION: Fail-fast on missing required configs, no hardcoded secrets.
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field, field_validator
-
+from typing import Optional
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -77,10 +78,10 @@ class Settings(BaseSettings):
     matchmaking_elo_expand_step: int = Field(default=100, description="ELO window expansion step")
 
     # ── Sandbox ───────────────────────────────────────────────
-    sandbox_memory_limit: str = Field(default="256m", description="Sandbox memory limit")
+    sandbox_memory_limit: str = Field(default="512m", description="Sandbox memory limit")
     sandbox_cpu_quota: int = Field(default=50000, description="Sandbox CPU quota (microseconds)")
     sandbox_cpu_period: int = Field(default=100000, description="Sandbox CPU period (microseconds)")
-    sandbox_pids_limit: int = Field(default=64, description="Sandbox PID limit")
+    sandbox_pids_limit: int = Field(default=256, description="Sandbox PID limit")
     sandbox_compile_timeout: int = Field(default=15, description="Compilation timeout (seconds)")
     sandbox_run_timeout_default: int = Field(default=5, description="Default run timeout (seconds)")
     sandbox_total_timeout: int = Field(default=60, description="Total sandbox timeout (seconds)")
@@ -99,6 +100,14 @@ class Settings(BaseSettings):
     # ── Server ────────────────────────────────────────────────
     host: str = Field(default="0.0.0.0", description="Server host")
     port: int = Field(default=8000, description="Server port")
+    
+    # ── Email & Frontend ──────────────────────────────────────
+    frontend_url: str = Field(default="http://localhost:5173", description="Frontend base URL for links")
+    smtp_host: Optional[str] = Field(default=None, description="SMTP Server Host (e.g., smtp.gmail.com)")
+    smtp_port: int = Field(default=587, description="SMTP Server Port (e.g., 587)")
+    smtp_user: Optional[str] = Field(default=None, description="SMTP Username")
+    smtp_password: Optional[str] = Field(default=None, description="SMTP Password")
+    smtp_from_email: Optional[str] = Field(default="noreply@codearena.com", description="Sender email address")
     
     @property
     def is_production(self) -> bool:

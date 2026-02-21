@@ -5,7 +5,6 @@ Language configuration — Docker images, compile/run commands, file extensions.
 """
 
 from dataclasses import dataclass
-
 from backend.core.constants import Language
 
 
@@ -13,7 +12,7 @@ from backend.core.constants import Language
 class LanguageConfig:
     image: str
     file_extension: str
-    compile_cmd: str | None  # None if interpreted
+    compile_cmd: str | None
     run_cmd: str
     needs_compilation: bool = False
 
@@ -25,13 +24,19 @@ LANGUAGE_CONFIGS: dict[str, LanguageConfig] = {
         compile_cmd=None,
         run_cmd="python3 /sandbox/code.py",
     ),
+
+    # ✅ FIXED C++ CONFIG
     Language.CPP: LanguageConfig(
         image="codearena-runner-cpp",
         file_extension=".cpp",
-        compile_cmd="g++ -O2 -std=c++17 -o /sandbox/solution /sandbox/code.cpp",
+        compile_cmd=(
+            "g++ -O2 -std=gnu++17 -Wall -Wextra "
+            "-DONLINE_JUDGE -o /sandbox/solution /sandbox/code.cpp"
+        ),
         run_cmd="/sandbox/solution",
         needs_compilation=True,
     ),
+
     Language.JAVA: LanguageConfig(
         image="codearena-runner-java",
         file_extension=".java",
@@ -39,6 +44,7 @@ LANGUAGE_CONFIGS: dict[str, LanguageConfig] = {
         run_cmd="java -cp /sandbox Solution",
         needs_compilation=True,
     ),
+
     Language.JAVASCRIPT: LanguageConfig(
         image="codearena-runner-node",
         file_extension=".js",
@@ -49,7 +55,6 @@ LANGUAGE_CONFIGS: dict[str, LanguageConfig] = {
 
 
 def get_language_config(language: str) -> LanguageConfig:
-    """Get configuration for a language."""
     config = LANGUAGE_CONFIGS.get(language)
     if not config:
         raise ValueError(f"Unsupported language: {language}")

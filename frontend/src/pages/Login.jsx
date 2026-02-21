@@ -9,9 +9,8 @@ export default function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const { mutate: login, isPending, error } = useLogin();
-
     const errorMessage =
-        error?.response?.data?.detail || error?.message || '';
+        error?.response?.data?.error || error?.response?.data?.detail || error?.message || '';
 
     const handleSubmit = (e) => {
         e.preventDefault();

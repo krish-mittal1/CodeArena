@@ -1,0 +1,7 @@
+{
+    "exit_code": 1,
+    "stage": "compile",
+    "time_ms": 0,
+    "timed_out": false,
+    "oom_killed": false
+}

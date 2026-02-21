@@ -11,10 +11,12 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [clientError, setClientError] = useState('');
+    const [success, setSuccess] = useState(false);
     const { mutate: register, isPending, error: serverError } = useRegister();
 
     const errorMessage =
         clientError ||
+        serverError?.response?.data?.error ||
         serverError?.response?.data?.detail ||
         serverError?.message ||
         '';

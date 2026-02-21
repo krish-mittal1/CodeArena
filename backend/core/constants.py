@@ -54,8 +54,8 @@ class Difficulty(str, Enum):
 
 # ── ELO ───────────────────────────────────────────────────────
 
-ELO_DEFAULT = 1200
-ELO_FLOOR = 100
+ELO_DEFAULT = 0
+ELO_FLOOR = 0
 
 ELO_K_FACTORS = [
     (30, 40),    # 0–30 matches  → K=40

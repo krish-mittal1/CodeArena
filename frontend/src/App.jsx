@@ -11,6 +11,7 @@ import ErrorBoundary from './components/layout/ErrorBoundary';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+
 import Dashboard from './pages/Dashboard';
 import Battle from './pages/Battle';
 import History from './pages/History';
@@ -70,6 +71,7 @@ function AppRoutes() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
           <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
+
 
           {/* Protected */}
           <Route

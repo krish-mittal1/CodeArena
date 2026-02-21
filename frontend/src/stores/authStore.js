@@ -21,7 +21,7 @@ export const useAuthStore = create((set, get) => ({
     // ── Actions ─────────────────────────────────────
 
     /**
-     * Register → auto-login → load profile
+     * Register → login → fetch profile → navigate
      */
     register: async (username, email, password) => {
         const tokens = await authApi.register({ username, email, password });

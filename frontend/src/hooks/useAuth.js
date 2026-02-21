@@ -35,7 +35,16 @@ export function useRegister() {
     return useMutation({
         mutationFn: ({ username, email, password }) =>
             register(username, email, password),
-        onSuccess: () => navigate('/dashboard', { replace: true }),
+        onSuccess: () => navigate('/dashboard'),
+    });
+}
+
+/**
+ * Resend Verification mutation.
+ */
+export function useResendVerification() {
+    return useMutation({
+        mutationFn: ({ email }) => authApi.resendVerification({ email }),
     });
 }
 

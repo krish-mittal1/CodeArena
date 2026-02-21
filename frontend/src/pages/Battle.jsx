@@ -1,18 +1,4 @@
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   Battle Page — full split-pane layout
-   
-   Layout:
-     TimerBar (full width)
-     ┌──────────┬──────────────────┐
-     │ Problem  │ CodeEditor       │
-     │ Panel    │                  │
-     │          ├──────────────────┤
-     │          │ SubmissionPanel  │
-     └──────────┴──────────────────┘
-     MatchResultModal (overlay when match ends)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBattleStore } from '../stores/battleStore';
 import { problemApi } from '../api/auth';
@@ -21,7 +7,7 @@ import ProblemPanel from '../components/battle/ProblemPanel';
 import CodeEditor from '../components/battle/CodeEditor';
 import SubmissionPanel from '../components/battle/SubmissionPanel';
 import MatchResultModal from '../components/battle/MatchResultModal';
-import styles from '../styles/battle.module.css';
+import { Loader2 } from 'lucide-react';
 
 export default function Battle() {
     const { matchId } = useParams();
@@ -32,11 +18,14 @@ export default function Battle() {
     const problem = useBattleStore((s) => s.problem);
     const setProblem = useBattleStore((s) => s.setProblem);
 
-    // If user navigates directly to /battle/:id without match data, redirect
+    // Resizable pane state
+    const containerRef = useRef(null);
+    const [leftWidth, setLeftWidth] = useState(45); // percentage
+    const isDragging = useRef(false);
+
+    // If user navigates directly without match data, redirect back to dashboard
     useEffect(() => {
         if (!storeMatchId && matchId) {
-            // Could be a reconnection — for now redirect to dashboard
-            // TODO: add API call to fetch match state on direct nav
             const timer = setTimeout(() => {
                 if (!useBattleStore.getState().matchId) {
                     navigate('/dashboard', { replace: true });
@@ -96,37 +85,82 @@ export default function Battle() {
         };
     }, [reset]);
 
+    // Resizer logic
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            if (!isDragging.current || !containerRef.current) return;
+            const containerWidth = containerRef.current.getBoundingClientRect().width;
+            const newLeftWidth = (e.clientX / containerWidth) * 100;
+            // Constrain between 20% and 60%
+            if (newLeftWidth >= 20 && newLeftWidth <= 60) {
+                setLeftWidth(newLeftWidth);
+            }
+        };
+
+        const handleMouseUp = () => {
+            if (isDragging.current) {
+                isDragging.current = false;
+                document.body.style.cursor = 'default';
+                document.body.style.userSelect = 'auto';
+            }
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, []);
+
+    const startDrag = () => {
+        isDragging.current = true;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none'; // prevent text selection while dragging
+    };
+
     // Loading state
     if (!storeMatchId) {
         return (
-            <div className={styles.battlePage}>
-                <div className={styles.loading}>
-                    <div className={styles.loadingIcon}>⚔</div>
-                    <div className={styles.loadingText}>Joining match...</div>
-                    <div className={styles.loadingSub}>
-                        Match ID: {matchId}
-                    </div>
-                </div>
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-56px)] bg-[#0e0e11] text-zinc-400 gap-4">
+                <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
+                <h2 className="text-xl font-medium tracking-wide text-zinc-300">Provisioning Match Environment...</h2>
+                <p className="text-sm text-zinc-500 font-mono tracking-wider">ID: {matchId}</p>
             </div>
         );
     }
 
     return (
-        <div className={styles.battlePage}>
-            {/* Timer bar — full width */}
+        <div className="flex flex-col h-[calc(100vh-56px)] bg-[#0e0e11] overflow-hidden text-zinc-300 antialiased selection:bg-indigo-500/30">
+            {/* Timer bar — full width, top fixed */}
             <TimerBar />
 
             {/* Split pane body */}
-            <div className={styles.battleBody}>
+            <div ref={containerRef} className="flex flex-1 overflow-hidden relative">
+
                 {/* Left: Problem description */}
-                <div className={styles.leftPane}>
+                <div
+                    className="flex flex-col overflow-hidden bg-[#0e0e11] shrink-0"
+                    style={{ width: `${leftWidth}%` }}
+                >
                     <ProblemPanel />
                 </div>
 
-                <div className={styles.resizeHandle} />
+                {/* Resizer Handle */}
+                <div
+                    className="w-1.5 cursor-col-resize shrink-0 bg-transparent hover:bg-indigo-500/50 active:bg-indigo-500 transition-colors z-30 group relative"
+                    onMouseDown={startDrag}
+                >
+                    <div className="absolute inset-y-0 -left-1 -right-1" /> {/* Larger hit area */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-8 bg-zinc-700 group-hover:bg-white rounded-full transition-colors" />
+                </div>
 
                 {/* Right: Editor + Submissions */}
-                <div className={styles.rightPane}>
+                <div
+                    className="flex flex-col flex-1 overflow-hidden bg-[#18181b]"
+                    style={{ width: `${100 - leftWidth}%` }}
+                >
                     <CodeEditor />
                     <SubmissionPanel />
                 </div>
