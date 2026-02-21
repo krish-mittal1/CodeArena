@@ -81,52 +81,81 @@ export default function Navbar() {
                                 <div className="relative" ref={dropdownRef}>
                                     <button
                                         onClick={() => setDropdownOpen(!dropdownOpen)}
-                                        className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl hover:bg-bg-hover transition-all cursor-pointer"
+                                        className={`flex items-center gap-2.5 px-3 py-1.5 rounded-2xl transition-all cursor-pointer border ${dropdownOpen ? 'bg-bg-hover border-white/10 shadow-sm' : 'border-transparent hover:bg-bg-hover'}`}
                                     >
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-accent-secondary flex items-center justify-center text-white text-sm font-bold">
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-accent-secondary flex items-center justify-center text-white text-sm font-bold shadow-md shadow-accent-glow/20 ring-2 ring-bg-primary">
                                             {user?.username?.charAt(0).toUpperCase()}
                                         </div>
                                         <div className="hidden sm:block text-left">
-                                            <div className="text-sm font-medium text-text-primary">{user?.username}</div>
-                                            <div className="text-xs text-accent font-mono">{user?.elo ?? '—'} ELO</div>
+                                            <div className="text-sm font-bold text-text-primary leading-tight">{user?.username}</div>
+                                            <div className="text-[11px] text-accent font-mono font-medium tracking-wide mt-0.5">{user?.elo ?? '—'} ELO</div>
                                         </div>
                                         <ChevronDown
                                             size={14}
-                                            className={`text-text-muted transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
+                                            className={`text-text-muted transition-transform duration-200 ml-1 ${dropdownOpen ? 'rotate-180 text-text-primary' : ''}`}
                                         />
                                     </button>
 
                                     <AnimatePresence>
-                                        {dropdownOpen && (
-                                            <motion.div
-                                                initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                exit={{ opacity: 0, y: -8, scale: 0.96 }}
-                                                transition={{ duration: 0.15 }}
-                                                className="absolute right-0 mt-2 w-56 bg-bg-elevated border border-border rounded-xl shadow-2xl overflow-hidden"
-                                            >
-                                                <div className="px-4 py-3 border-b border-border">
-                                                    <p className="text-sm font-semibold text-text-primary">{user?.username}</p>
-                                                    <p className="text-xs text-text-secondary">{user?.email}</p>
-                                                </div>
+    {dropdownOpen && (
+        <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            // Changed width to w-80 for a bigger card
+            className="absolute right-0 mt-3 w-80 bg-bg-elevated/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)] overflow-hidden"
+        >
+            {/* User Info Header - Increased padding and gap */}
+            <div className="p-6 border-b border-white/10 bg-gradient-to-b from-white/[0.08] to-transparent flex items-center gap-5">
+                <div className="relative shrink-0">
+                    {/* Increased Avatar Size */}
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-accent to-accent-secondary flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-accent-glow/40 ring-4 ring-bg-elevated">
+                        {user?.username?.charAt(0).toUpperCase()}
+                    </div>
+                    {/* Increased Online Status Indicator */}
+                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-[2.5px] border-bg-elevated rounded-full"></div>
+                </div>
+                
+                <div className="flex-1 overflow-hidden">
+                    {/* Increased font sizes slightly for the header */}
+                    <p className="text-lg font-bold text-text-primary truncate">{user?.username}</p>
+                    <p className="text-sm text-text-muted truncate mt-0.5">{user?.email}</p>
+                    
+                    {/* ELO Badge */}
+                    <div className="mt-2.5 inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-accent/15 text-accent border border-accent/20 tracking-wide">
+                        🏆 {user?.elo ?? '—'} ELO
+                    </div>
+                </div>
+            </div>
 
-                                                <div className="py-1">
-                                                    <DropdownItem icon={User} label="Profile" onClick={() => { setDropdownOpen(false); navigate('/profile'); }} />
-                                                    <DropdownItem icon={Settings} label="Settings" onClick={() => { setDropdownOpen(false); navigate('/settings'); }} />
-                                                </div>
+            {/* Actions - Increased padding */}
+            <div className="p-3 space-y-1.5">
+                <DropdownItem 
+                    icon={User} 
+                    label="Profile" 
+                    onClick={() => { setDropdownOpen(false); navigate('/profile'); }} 
+                />
+                <DropdownItem 
+                    icon={Settings} 
+                    label="Settings" 
+                    onClick={() => { setDropdownOpen(false); navigate('/settings'); }} 
+                />
+            </div>
 
-                                                <div className="border-t border-border py-1">
-                                                    <DropdownItem
-                                                        icon={LogOut}
-                                                        label="Logout"
-                                                        danger
-                                                        onClick={() => { setDropdownOpen(false); handleLogout(); }}
-                                                    />
-                                                </div>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
+            {/* Logout Section */}
+            <div className="p-3 border-t border-white/10 bg-black/20">
+                <DropdownItem
+                    icon={LogOut}
+                    label="Logout"
+                    danger
+                    onClick={() => { setDropdownOpen(false); handleLogout(); }}
+                />
+            </div>
+        </motion.div>
+    )}
+</AnimatePresence>
+                                   </div>
                             </>
                         ) : (
                             <div className="flex items-center gap-2">
@@ -156,14 +185,22 @@ function DropdownItem({ icon: Icon, label, danger = false, onClick }) {
         <button
             onClick={onClick}
             className={`
-        w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors cursor-pointer
-        ${danger
-                    ? 'text-loss hover:bg-loss/10'
-                    : 'text-text-secondary hover:bg-bg-hover hover:text-text-primary'
+                group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-base font-medium transition-all duration-200 cursor-pointer
+                ${danger
+                    ? 'text-red-400 hover:bg-red-500/10 hover:text-red-300'
+                    : 'text-text-secondary hover:bg-white/10 hover:text-text-primary'
                 }
-      `}
+            `}
         >
-            <Icon size={16} />
+            <div className={`
+                p-2.5 rounded-xl transition-all duration-200 flex items-center justify-center
+                ${danger 
+                    ? 'bg-red-500/10 group-hover:bg-red-500/20 group-hover:scale-105' 
+                    : 'bg-white/5 group-hover:bg-white/10 group-hover:text-accent group-hover:scale-105'
+                }
+            `}>
+                <Icon size={18} />
+            </div>
             {label}
         </button>
     );

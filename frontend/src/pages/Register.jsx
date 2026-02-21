@@ -36,50 +36,53 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-[calc(100vh-64px)] bg-bg-root flex items-center justify-center p-4 relative overflow-hidden py-12">
+        <div className="min-h-[calc(100vh-64px)] bg-bg-root flex items-center justify-center p-4 relative overflow-hidden py-16">
             {/* Background effects */}
-            <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-[100px] pointer-events-none" />
-            <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-accent-secondary/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-1/4 left-1/4 w-[500px] h-[500px] bg-accent-secondary/10 rounded-full blur-[120px] pointer-events-none" />
 
             <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="w-full max-w-[480px] relative z-10"
+                transition={{ duration: 0.4 }}
+                className="w-full max-w-md relative z-10"
             >
-                <div className="bg-bg-elevated/80 backdrop-blur-xl border border-border rounded-3xl p-8 sm:p-10 shadow-2xl shadow-black/50 overflow-hidden relative">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent to-accent-secondary" />
+                <div className="bg-bg-elevated/90 backdrop-blur-2xl border border-border/80 rounded-3xl p-8 sm:p-10 shadow-2xl overflow-hidden relative flex flex-col gap-8">
+                    {/* Top Accent Line */}
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-accent via-accent-secondary to-accent" />
 
-                    <div className="mb-8 text-center">
-                        <div className="w-16 h-16 bg-gradient-to-br from-accent/20 to-accent-secondary/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-accent/20 shadow-inner">
-                            <UserPlus size={28} className="text-accent" />
+                    <div className="flex flex-col items-center text-center mt-2 gap-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-accent/20 to-accent-secondary/20 rounded-2xl flex items-center justify-center border border-accent/30 shadow-inner">
+                            <UserPlus size={32} className="text-accent" aria-hidden="true" />
                         </div>
-                        <h1 className="text-3xl font-extrabold text-text-primary tracking-tight">
-                            Join <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-secondary">CodeArena</span>
-                        </h1>
-                        <p className="text-text-secondary mt-2 text-sm">
-                            Create your account and start competing
-                        </p>
+                        <div>
+                            <h1 className="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">
+                                Join <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-secondary">CodeArena</span>
+                            </h1>
+                            <p className="text-base text-text-secondary mt-2">
+                                Create your account and start competing
+                            </p>
+                        </div>
                     </div>
 
                     {errorMessage && (
-                        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-xl text-sm font-medium mb-6 text-center shadow-inner">
+                        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="w-full flex items-center justify-center bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-xl text-sm font-medium text-center shadow-inner">
                             {errorMessage}
                         </motion.div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="space-y-1.5">
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                        <div className="flex flex-col gap-2">
                             <label className="text-sm font-semibold text-text-secondary ml-1" htmlFor="register-username">
                                 Username
                             </label>
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-muted group-focus-within:text-accent transition-colors">
-                                    <User size={18} />
+                            <div className="flex items-center w-full bg-bg-surface/50 border border-border/80 rounded-xl focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/40 transition-all shadow-inner group overflow-hidden">
+                                <div className="pl-4 pr-3 flex items-center justify-center pointer-events-none">
+                                    <User size={20} className="text-text-muted group-focus-within:text-accent transition-colors shrink-0" aria-hidden="true" />
                                 </div>
                                 <input
                                     id="register-username"
-                                    className="w-full bg-bg-surface/50 border border-border rounded-xl pl-11 pr-4 py-3 text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none transition-all"
+                                    className="w-full bg-transparent py-3.5 pr-4 text-base text-text-primary placeholder:text-text-muted/70 outline-none"
                                     type="text"
                                     placeholder="Choose a username"
                                     value={username}
@@ -92,17 +95,17 @@ export default function Register() {
                             </div>
                         </div>
 
-                        <div className="space-y-1.5">
+                        <div className="flex flex-col gap-2">
                             <label className="text-sm font-semibold text-text-secondary ml-1" htmlFor="register-email">
                                 Email
                             </label>
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-muted group-focus-within:text-accent transition-colors">
-                                    <Mail size={18} />
+                            <div className="flex items-center w-full bg-bg-surface/50 border border-border/80 rounded-xl focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/40 transition-all shadow-inner group overflow-hidden">
+                                <div className="pl-4 pr-3 flex items-center justify-center pointer-events-none">
+                                    <Mail size={20} className="text-text-muted group-focus-within:text-accent transition-colors shrink-0" aria-hidden="true" />
                                 </div>
                                 <input
                                     id="register-email"
-                                    className="w-full bg-bg-surface/50 border border-border rounded-xl pl-11 pr-4 py-3 text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none transition-all"
+                                    className="w-full bg-transparent py-3.5 pr-4 text-base text-text-primary placeholder:text-text-muted/70 outline-none"
                                     type="email"
                                     placeholder="you@example.com"
                                     value={email}
@@ -112,63 +115,61 @@ export default function Register() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                                <label className="text-sm font-semibold text-text-secondary ml-1" htmlFor="register-password">
-                                    Password
-                                </label>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-muted group-focus-within:text-accent transition-colors">
-                                        <Lock size={18} />
-                                    </div>
-                                    <input
-                                        id="register-password"
-                                        className="w-full bg-bg-surface/50 border border-border rounded-xl pl-11 pr-4 py-3 text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none transition-all"
-                                        type="password"
-                                        placeholder="Min 8 chars"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        minLength={8}
-                                    />
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm font-semibold text-text-secondary ml-1" htmlFor="register-password">
+                                Password
+                            </label>
+                            <div className="flex items-center w-full bg-bg-surface/50 border border-border/80 rounded-xl focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/40 transition-all shadow-inner group overflow-hidden">
+                                <div className="pl-4 pr-3 flex items-center justify-center pointer-events-none">
+                                    <Lock size={20} className="text-text-muted group-focus-within:text-accent transition-colors shrink-0" aria-hidden="true" />
                                 </div>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-sm font-semibold text-text-secondary ml-1" htmlFor="register-confirm">
-                                    Confirm <span className="hidden sm:inline">Password</span>
-                                </label>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-muted group-focus-within:text-accent transition-colors">
-                                        <CheckCircle2 size={18} />
-                                    </div>
-                                    <input
-                                        id="register-confirm"
-                                        className="w-full bg-bg-surface/50 border border-border rounded-xl pl-11 pr-4 py-3 text-text-primary placeholder:text-text-muted focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none transition-all"
-                                        type="password"
-                                        placeholder="Repeat password"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
+                                <input
+                                    id="register-password"
+                                    className="w-full bg-transparent py-3.5 pr-4 text-base text-text-primary placeholder:text-text-muted/70 outline-none"
+                                    type="password"
+                                    placeholder="Min 8 chars"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    minLength={8}
+                                />
                             </div>
                         </div>
 
-                        <Button
-                            variant="primary"
-                            type="submit"
-                            className="w-full py-4 text-base font-bold shadow-accent-glow/20 mt-4"
-                            disabled={isPending || !username || !email || !password || !confirmPassword}
-                        >
-                            <div className="flex items-center justify-center gap-2">
-                                {isPending ? 'Creating account...' : 'Create Account'}
-                                {!isPending && <ArrowRight size={18} />}
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm font-semibold text-text-secondary ml-1" htmlFor="register-confirm">
+                                Confirm Password
+                            </label>
+                            <div className="flex items-center w-full bg-bg-surface/50 border border-border/80 rounded-xl focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/40 transition-all shadow-inner group overflow-hidden">
+                                <div className="pl-4 pr-3 flex items-center justify-center pointer-events-none">
+                                    <CheckCircle2 size={20} className="text-text-muted group-focus-within:text-accent transition-colors shrink-0" aria-hidden="true" />
+                                </div>
+                                <input
+                                    id="register-confirm"
+                                    className="w-full bg-transparent py-3.5 pr-4 text-base text-text-primary placeholder:text-text-muted/70 outline-none"
+                                    type="password"
+                                    placeholder="Repeat password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    required
+                                />
                             </div>
-                        </Button>
+                        </div>
+
+                        <div className="pt-2">
+                            <Button
+                                variant="primary"
+                                type="submit"
+                                className="w-full py-3.5 text-lg font-bold rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.2)] hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={isPending || !username || !email || !password || !confirmPassword}
+                            >
+                                {isPending ? 'Creating account...' : 'Create Account'}
+                                {!isPending && <ArrowRight size={22} aria-hidden="true" />}
+                            </Button>
+                        </div>
                     </form>
 
-                    <div className="mt-8 text-center text-sm text-text-muted font-medium">
+                    <div className="text-center text-sm text-text-muted font-medium pt-2">
                         Already have an account?{' '}
                         <Link to="/login" className="text-accent hover:text-accent-hover hover:underline transition-colors font-semibold">
                             Log in instead

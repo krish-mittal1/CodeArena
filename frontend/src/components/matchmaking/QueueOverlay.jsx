@@ -55,59 +55,84 @@ export default function QueueOverlay() {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: 20 }}
                     transition={{ type: 'spring', duration: 0.5 }}
-                    className="relative w-full max-w-md mx-4 bg-bg-elevated border border-border rounded-2xl p-8 text-center shadow-2xl"
+                    className="relative w-full max-w-md mx-4 bg-bg-elevated/95 backdrop-blur-2xl border border-border/80 rounded-[2rem] p-8 sm:p-10 shadow-2xl overflow-hidden"
                 >
+                    {/* Top Accent Line */}
+                    <div className="absolute top-0 left-0 w-full h-[6px] bg-gradient-to-r from-accent via-accent-secondary to-accent" />
+
                     {status === 'searching' && (
-                        <>
-                            {/* Animated Swords */}
-                            <motion.div
-                                animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
-                                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                                className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-accent to-accent-secondary flex items-center justify-center shadow-xl mb-6"
-                                style={{ boxShadow: '0 0 40px rgba(124, 92, 252, 0.3)' }}
-                            >
-                                <Swords size={36} className="text-white" />
-                            </motion.div>
+                        <div className="flex flex-col items-center justify-between w-full min-h-[420px] gap-8 mt-2">
+                            {/* Top Section: Icon & Text */}
+                            <div className="flex flex-col items-center gap-5 w-full">
+                                {/* Animated Swords Badge */}
+                                <motion.div
+                                    animate={{ scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                                    className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.4)]"
+                                >
+                                    <Swords size={32} className="text-white drop-shadow-md" />
+                                </motion.div>
 
-                            <h2 className="text-2xl font-bold text-text-primary mb-2">Finding Opponent</h2>
-                            <p className="text-sm text-text-secondary mb-6">
-                                Matching you with a player near your skill level
-                            </p>
-
-                            {/* Timer */}
-                            <div className="bg-bg-surface rounded-xl px-6 py-4 mb-6 inline-block">
-                                <p className="text-3xl font-mono font-bold text-accent">{formatTime(waitSeconds)}</p>
-                                <p className="text-xs text-text-muted mt-1">Time in Queue</p>
-                            </div>
-
-                            {/* Estimated Wait */}
-                            <p className="text-xs text-text-muted mb-6">
-                                Estimated wait: ~{Math.max(10, 30 - waitSeconds)}s
-                            </p>
-
-                            {/* Loading Dots */}
-                            <div className="flex justify-center gap-2 mb-6">
-                                {[0, 1, 2].map((i) => (
-                                    <motion.div
-                                        key={i}
-                                        animate={{ scale: [1, 1.4, 1], opacity: [0.3, 1, 0.3] }}
-                                        transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
-                                        className="w-2.5 h-2.5 rounded-full bg-accent"
-                                    />
-                                ))}
-                            </div>
-
-                            {error && (
-                                <div className="bg-loss/10 border border-loss/20 text-loss text-sm rounded-xl px-4 py-2 mb-4">
-                                    {error}
+                                {/* Typography */}
+                                <div>
+                                    <h2 className="text-2xl font-bold text-white mb-2 text-center tracking-wide">
+                                        Finding Opponent
+                                    </h2>
+                                    <p className="text-sm text-gray-400 text-center max-w-[280px] mx-auto leading-relaxed">
+                                        Matching you with a player near your skill level...
+                                    </p>
                                 </div>
-                            )}
+                            </div>
 
-                            <Button variant="danger" size="md" onClick={leaveQueue} className="w-full">
-                                <X size={16} />
-                                Cancel Search
-                            </Button>
-                        </>
+                            {/* Middle Section: Timer & Loader */}
+                            <div className="flex flex-col items-center gap-6 w-full mt-2">
+                                {/* Timer Badge */}
+                                <div className="flex flex-col items-center">
+                                    <p className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-3 drop-shadow-sm">
+                                        Time in Queue
+                                    </p>
+                                    <div className="bg-purple-900/30 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.2)] rounded-full px-8 py-3 inline-block">
+                                        <p className="text-3xl font-mono text-purple-400 font-bold tracking-wider relative bottom-[1px]">
+                                            {formatTime(waitSeconds)}
+                                        </p>
+                                    </div>
+                                    <p className="text-xs text-text-muted mt-4 font-medium tracking-wide">
+                                        Estimated wait: ~{Math.max(10, 30 - waitSeconds)}s
+                                    </p>
+                                </div>
+
+                                {/* Center Aligned Loading Dots */}
+                                <div className="flex items-center justify-center gap-2 h-4 my-2">
+                                    {[0, 1, 2].map((i) => (
+                                        <motion.div
+                                            key={i}
+                                            animate={{ opacity: [0.2, 1, 0.2], scale: [0.8, 1.2, 0.8] }}
+                                            transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.2, ease: "easeInOut" }}
+                                            className="w-2.5 h-2.5 rounded-full bg-purple-500"
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Bottom Section: Error & Cancel */}
+                            <div className="w-full flex flex-col gap-4 mt-2">
+                                {/* Error Message */}
+                                {error && (
+                                    <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-xl px-4 py-3 w-full text-center">
+                                        {error}
+                                    </div>
+                                )}
+
+                                {/* Cancel Button */}
+                                <button
+                                    onClick={leaveQueue}
+                                    className="w-full flex items-center justify-center gap-2 py-4 bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 transition-all rounded-xl font-semibold shadow-inner text-base"
+                                >
+                                    <X size={20} />
+                                    Cancel Search
+                                </button>
+                            </div>
+                        </div>
                     )}
 
                     {status === 'found' && (

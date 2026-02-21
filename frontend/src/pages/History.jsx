@@ -3,17 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import {
     History as HistoryIcon, Filter, ChevronLeft, ChevronRight, Swords,
-    Calendar, Trophy, Clock, TrendingUp, User,
+    Calendar, Trophy, Clock, TrendingUp, TrendingDown, User, Minus
 } from 'lucide-react';
 import dayjs from 'dayjs';
 import { useAuthStore } from '../stores/authStore';
 import { matchApi } from '../api/auth';
-import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import EmptyState from '../components/ui/EmptyState';
 import { TableRowSkeleton } from '../components/ui/Skeleton';
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 15;
 
 export default function HistoryPage() {
     const user = useAuthStore((s) => s.user);
@@ -40,49 +39,52 @@ export default function HistoryPage() {
     const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
     return (
-        <div className="min-h-screen bg-bg-root">
-            <div className="w-full px-6 sm:px-10 lg:px-12 pt-12 pb-24">
+        <div className="min-h-[calc(100vh-64px)] w-full bg-bg-root flex flex-col">
+            {/* Expanded width to utilize screen space effectively and fix left alignment issue */}
+            <div className="w-full max-w-[1600px] mx-auto px-6 sm:px-10 py-10 pb-12 flex-1">
 
-                {/* Header & Filters */}
-                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-10">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-                        <h1 className="text-4xl sm:text-5xl font-extrabold text-text-primary flex items-center gap-4 tracking-tight">
-                            <HistoryIcon size={38} className="text-accent" />
-                            Match History
-                        </h1>
-                        <div className="h-10 w-px bg-border hidden sm:block"></div>
-                        <p className="text-lg text-text-muted font-medium">
-                            {filtered.length} {filtered.length === 1 ? 'match' : 'matches'} found
-                        </p>
+                {/* Sleek Header & Filters */}
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8"
+                >
+                    <div className="flex items-center gap-6">
+                        <div className="w-14 h-14 bg-gradient-to-br from-accent/20 to-accent-secondary/20 rounded-2xl flex items-center justify-center border border-accent/30 shadow-inner">
+                            <HistoryIcon size={28} className="text-accent" />
+                        </div>
+                        <div className="pt-1">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-wide">
+                                Match History
+                            </h1>
+                            <p className="text-gray-400 text-sm font-medium mt-1">
+                                {filtered.length} total matches played
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-4 flex-wrap">
-                        <div className="flex items-center gap-2 text-lg text-text-muted font-medium">
-                            <Filter size={20} />
-                            <span>Filter:</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {['all', 'win', 'loss', 'draw'].map((val) => (
-                                <button
-                                    key={val}
-                                    onClick={() => { setFilterResult(val); setPage(1); }}
-                                    className={`px-6 py-2.5 text-base font-semibold capitalize rounded-full border transition-all ${filterResult === val
-                                        ? 'bg-accent/15 text-accent border-accent/40 shadow-sm'
-                                        : 'bg-transparent border-border text-text-muted hover:text-text-primary hover:border-accent/40'
-                                        }`}
-                                >
-                                    {val}
-                                </button>
-                            ))}
-                        </div>
+                    {/* Unified Filter Pill Container */}
+                    <div className="flex items-center gap-1 p-1.5 bg-gray-900/60 border border-gray-800 rounded-xl backdrop-blur-sm shadow-inner">
+                        {['all', 'win', 'loss', 'draw'].map((val) => (
+                            <button
+                                key={val}
+                                onClick={() => { setFilterResult(val); setPage(1); }}
+                                className={`px-5 py-2 text-sm font-semibold capitalize rounded-lg transition-all ${filterResult === val
+                                    ? 'bg-accent text-white shadow-md'
+                                    : 'bg-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                                    }`}
+                            >
+                                {val}
+                            </button>
+                        ))}
                     </div>
                 </motion.div>
 
-                {/* Table */}
+                {/* Premium Table Card */}
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="rounded-xl border border-border bg-bg-elevated"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-bg-elevated/80 backdrop-blur-xl border border-gray-800 rounded-3xl shadow-2xl overflow-hidden"
                 >
                     {isLoading ? (
                         <table className="w-full text-sm">
@@ -93,32 +95,33 @@ export default function HistoryPage() {
                             </tbody>
                         </table>
                     ) : isError ? (
-                        <div className="py-20 text-center">
-                            <p className="text-loss text-sm font-medium">Failed to load match history</p>
+                        <div className="py-24 text-center">
+                            <p className="text-rose-400 text-sm font-medium">Failed to load match history.</p>
                         </div>
                     ) : filtered.length === 0 ? (
-                        <EmptyState
-                            icon={Swords}
-                            title="No matches found"
-                            description="Play some matches to see your history."
-                        />
+                        <div className="py-16">
+                            <EmptyState
+                                icon={Swords}
+                                title="No matches found"
+                                description="Play some matches to see your history appear here."
+                            />
+                        </div>
                     ) : (
                         <>
                             <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-
-                                    <thead className="text-sm uppercase tracking-wider text-text-muted border-b border-border">
+                                <table className="w-full text-sm text-left border-collapse">
+                                    <thead className="text-xs uppercase tracking-widest text-gray-500 bg-gray-900/40 border-b border-gray-800">
                                         <tr>
-                                            <th className="px-6 py-6 text-left font-semibold">Opponent</th>
-                                            <th className="px-6 py-6 text-left font-semibold">Result</th>
-                                            <th className="px-6 py-6 text-left font-semibold">Rating</th>
-                                            <th className="px-6 py-6 text-left hidden md:table-cell font-semibold">Date</th>
-                                            <th className="px-6 py-6 text-left hidden lg:table-cell font-semibold">Duration</th>
-                                            <th className="px-6 py-6"></th>
+                                            <th className="px-6 py-5 font-bold">Opponent</th>
+                                            <th className="px-6 py-5 font-bold">Result</th>
+                                            <th className="px-6 py-5 font-bold">Rating</th>
+                                            <th className="px-6 py-5 hidden md:table-cell font-bold">Date</th>
+                                            <th className="px-6 py-5 hidden lg:table-cell font-bold">Duration</th>
+                                            <th className="px-6 py-5"></th>
                                         </tr>
                                     </thead>
 
-                                    <tbody>
+                                    <tbody className="divide-y divide-gray-800/60">
                                         <AnimatePresence>
                                             {paginated.map((match, idx) => (
                                                 <MatchRow
@@ -129,45 +132,45 @@ export default function HistoryPage() {
                                             ))}
                                         </AnimatePresence>
                                     </tbody>
-
                                 </table>
                             </div>
 
+                            {/* Refined Pagination */}
                             {totalPages > 1 && (
-                                <div className="flex justify-center items-center gap-2 py-6 border-t border-border">
-                                    <Button
-                                        variant="secondary"
-                                        size="sm"
+                                <div className="flex justify-center items-center gap-3 py-6 bg-gray-900/20 border-t border-gray-800">
+                                    <button
                                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                                         disabled={page === 1}
+                                        className="p-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                     >
-                                        <ChevronLeft size={14} />
-                                    </Button>
+                                        <ChevronLeft size={20} />
+                                    </button>
 
-                                    {Array.from({ length: totalPages }).map((_, i) => {
-                                        const pageNum = i + 1;
-                                        return (
-                                            <button
-                                                key={pageNum}
-                                                onClick={() => setPage(pageNum)}
-                                                className={`w-8 h-8 rounded-md text-xs font-medium transition ${page === pageNum
-                                                    ? 'bg-accent/20 text-accent border border-accent/30'
-                                                    : 'text-text-muted hover:bg-bg-hover'
-                                                    }`}
-                                            >
-                                                {pageNum}
-                                            </button>
-                                        );
-                                    })}
+                                    <div className="flex items-center gap-1">
+                                        {Array.from({ length: totalPages }).map((_, i) => {
+                                            const pageNum = i + 1;
+                                            return (
+                                                <button
+                                                    key={pageNum}
+                                                    onClick={() => setPage(pageNum)}
+                                                    className={`w-10 h-10 rounded-lg text-sm font-bold transition-all ${page === pageNum
+                                                        ? 'bg-accent text-white shadow-md'
+                                                        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                                                        }`}
+                                                >
+                                                    {pageNum}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
 
-                                    <Button
-                                        variant="secondary"
-                                        size="sm"
+                                    <button
                                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                         disabled={page === totalPages}
+                                        className="p-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                     >
-                                        <ChevronRight size={14} />
-                                    </Button>
+                                        <ChevronRight size={20} />
+                                    </button>
                                 </div>
                             )}
                         </>
@@ -194,54 +197,62 @@ function MatchRow({ match, onClick }) {
     return (
         <tr
             onClick={onClick}
-            className="border-b border-border hover:bg-bg-hover transition cursor-pointer group"
+            className="hover:bg-white/[0.03] transition-colors cursor-pointer group"
         >
-            <td className="px-6 py-7">
-                <div className="flex items-center gap-5">
-                    <div className="w-12 h-12 rounded-full bg-accent/15 flex items-center justify-center text-lg font-bold text-accent shrink-0">
+            <td className="px-6 py-4">
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-base font-bold text-accent shrink-0 border border-accent/20 group-hover:scale-105 transition-transform">
                         {match.opponent_username?.charAt(0).toUpperCase() || '?'}
                     </div>
-                    <div>
-                        <div className="text-lg font-semibold text-text-primary group-hover:text-accent transition-colors">
+                    <div className="flex flex-col">
+                        <span className="font-bold text-white tracking-wide">
                             {match.opponent_username}
-                        </div>
-                        <div className="text-base text-text-muted mt-1 font-medium">
+                        </span>
+                        <span className="text-xs font-medium text-gray-500 mt-0.5">
                             {match.opponent_elo} ELO
-                        </div>
+                        </span>
                     </div>
                 </div>
             </td>
 
-            <td className="px-6 py-7">
-                <span className={`text-base px-6 py-2.5 rounded-full font-bold border flex w-fit items-center justify-center min-w-[100px] text-center ${isWin
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+            <td className="px-6 py-4">
+                <span className={`inline-flex items-center justify-center min-w-[85px] px-3 py-1.5 rounded-md font-bold text-xs uppercase tracking-wider border ${isWin
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                     : isDraw
-                        ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
-                        : 'bg-red-500/10 text-red-400 border-red-500/30'
+                        ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                        : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                     }`}>
-                    {isWin ? 'Win' : isDraw ? 'Draw' : 'Loss'}
+                    {isWin ? 'Victory' : isDraw ? 'Draw' : 'Defeat'}
                 </span>
             </td>
 
-            <td className="px-6 py-7">
-                <div className={`text-lg font-bold tracking-wide ${eloChange > 0 ? 'text-win' : eloChange < 0 ? 'text-loss' : 'text-text-muted'}`}>
-                    {eloChange > 0 ? `+${eloChange}` : eloChange}
+            <td className="px-6 py-4">
+                <div className="flex flex-col">
+                    <div className={`flex items-center gap-1.5 text-base font-bold ${eloChange > 0 ? 'text-emerald-400' : eloChange < 0 ? 'text-rose-400' : 'text-gray-400'
+                        }`}>
+                        {eloChange > 0 ? <TrendingUp size={16} /> : eloChange < 0 ? <TrendingDown size={16} /> : <Minus size={16} />}
+                        <span>{eloChange > 0 ? `+${eloChange}` : eloChange}</span>
+                    </div>
+                    <span className="text-xs font-medium text-gray-500 mt-0.5">
+                        {match.your_elo_before} → {match.your_elo_after ?? '—'}
+                    </span>
                 </div>
-                <div className="text-base text-text-muted mt-1 font-medium">
-                    {match.your_elo_before} → {match.your_elo_after ?? '—'}
-                </div>
             </td>
 
-            <td className="px-6 py-7 hidden md:table-cell text-lg font-medium text-text-secondary">
-                {match.started_at ? dayjs(match.started_at).format('D MMM YYYY') : '—'}
+            <td className="px-6 py-4 hidden md:table-cell">
+                <span className="text-sm font-medium text-gray-400">
+                    {match.started_at ? dayjs(match.started_at).format('DD MMM YYYY') : '—'}
+                </span>
             </td>
 
-            <td className="px-6 py-7 hidden lg:table-cell text-lg text-text-muted font-mono font-medium">
-                {durationStr}
+            <td className="px-6 py-4 hidden lg:table-cell">
+                <span className="text-sm font-medium text-gray-400">
+                    {durationStr}
+                </span>
             </td>
 
-            <td className="px-6 py-7 text-right">
-                <ChevronRight size={20} className="text-text-muted group-hover:text-accent transition-colors" />
+            <td className="px-6 py-4 text-right">
+                <ChevronRight size={20} className="text-gray-600 group-hover:text-accent group-hover:translate-x-1 transition-all inline-block" />
             </td>
         </tr>
     );
@@ -264,25 +275,27 @@ function MatchDetailModal({ match, onClose }) {
         <Modal isOpen={!!match} onClose={onClose} title="Match Details" size="md">
             <div className="space-y-6">
                 {/* Result Banner */}
-                <div className={`rounded-xl p-5 text-center ${isWin ? 'bg-win/10 border border-win/20' : isDraw ? 'bg-draw/10 border border-draw/20' : 'bg-loss/10 border border-loss/20'
+                <div className={`rounded-2xl p-6 text-center shadow-inner ${isWin ? 'bg-emerald-500/10 border border-emerald-500/20'
+                    : isDraw ? 'bg-amber-500/10 border border-amber-500/20'
+                        : 'bg-rose-500/10 border border-rose-500/20'
                     }`}>
-                    <Trophy size={28} className={`mx-auto mb-2 ${isWin ? 'text-win' : isDraw ? 'text-draw' : 'text-loss'}`} />
-                    <h3 className={`text-2xl font-extrabold ${isWin ? 'text-win' : isDraw ? 'text-draw' : 'text-loss'}`}>
+                    <Trophy size={32} className={`mx-auto mb-3 ${isWin ? 'text-emerald-400' : isDraw ? 'text-amber-400' : 'text-rose-400'}`} />
+                    <h3 className={`text-2xl font-extrabold tracking-tight ${isWin ? 'text-emerald-400' : isDraw ? 'text-amber-400' : 'text-rose-400'}`}>
                         {isWin ? 'Victory!' : isDraw ? 'Draw' : 'Defeat'}
                     </h3>
-                    <p className="text-xs text-text-muted mt-1">
+                    <p className="text-xs font-medium text-text-muted mt-2 opacity-80">
                         {match.started_at ? dayjs(match.started_at).format('D MMMM YYYY, HH:mm') : ''}
                     </p>
                 </div>
 
                 {/* Details Grid */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                     <DetailCard icon={User} label="Opponent" value={match.opponent_username} sub={`${match.opponent_elo} ELO`} />
                     <DetailCard
-                        icon={TrendingUp}
+                        icon={eloChange >= 0 ? TrendingUp : TrendingDown}
                         label="Rating Change"
                         value={eloChange > 0 ? `+${eloChange}` : `${eloChange}`}
-                        valueColor={eloChange > 0 ? 'text-win' : eloChange < 0 ? 'text-loss' : 'text-text-muted'}
+                        valueColor={eloChange > 0 ? 'text-emerald-400' : eloChange < 0 ? 'text-rose-400' : 'text-gray-400'}
                         sub={`${match.your_elo_before} → ${match.your_elo_after ?? '—'}`}
                     />
                     <DetailCard icon={Clock} label="Duration" value={durationStr} />
@@ -293,15 +306,15 @@ function MatchDetailModal({ match, onClose }) {
     );
 }
 
-function DetailCard({ icon: Icon, label, value, sub, valueColor = 'text-text-primary' }) {
+function DetailCard({ icon: Icon, label, value, sub, valueColor = 'text-white' }) {
     return (
-        <div className="bg-bg-surface/80 rounded-xl p-3.5">
-            <div className="flex items-center gap-2 mb-1.5">
-                <Icon size={13} className="text-text-muted" />
-                <span className="text-[11px] text-text-muted uppercase tracking-wider font-medium">{label}</span>
+        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4 hover:border-gray-700 transition-colors">
+            <div className="flex items-center gap-2 mb-2">
+                <Icon size={14} className="text-gray-500" />
+                <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">{label}</span>
             </div>
-            <p className={`text-sm font-bold ${valueColor}`}>{value}</p>
-            {sub && <p className="text-[11px] text-text-muted mt-0.5">{sub}</p>}
+            <p className={`text-base font-bold ${valueColor}`}>{value}</p>
+            {sub && <p className="text-xs font-medium text-gray-500 mt-1">{sub}</p>}
         </div>
     );
 }
