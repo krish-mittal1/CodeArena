@@ -1,0 +1,394 @@
+"""
+Match service — match lifecycle management, timer control, state transitions.
+"""
+
+import time
+import uuid
+import logging
+from datetime import datetime, timezone
+
+from redis.asyncio import Redis
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from backend.config import settings
+from backend.core.constants import MatchStatus, SubmissionStatus, RedisKey
+from backend.core.exceptions import MatchNotFound, MatchNotActive, MatchExpired, NotMatchParticipant
+from backend.models.match import Match
+from backend.models.submission import Submission
+from backend.services import rating_service
+
+logger = logging.getLogger(__name__)
+
+
+async def get_match(db: AsyncSession, match_id: uuid.UUID) -> Match:
+    """Get match with relationships loaded."""
+    result = await db.execute(
+        select(Match)
+        .where(Match.id == match_id)
+        .options(
+            selectinload(Match.player1),
+            selectinload(Match.player2),
+            selectinload(Match.problem),
+        )
+    )
+    match = result.scalar_one_or_none()
+    if not match:
+        raise MatchNotFound()
+    return match
+
+
+async def get_match_history(
+    db: AsyncSession, user_id: uuid.UUID, limit: int = 20, offset: int = 0
+) -> list[Match]:
+    """Get match history for a user."""
+    result = await db.execute(
+        select(Match)
+        .where(
+            ((Match.player1_id == user_id) | (Match.player2_id == user_id))
+            & (Match.status == MatchStatus.COMPLETED)
+        )
+        .order_by(Match.started_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .options(
+            selectinload(Match.player1),
+            selectinload(Match.player2),
+        )
+    )
+    return list(result.scalars().all())
+
+
+async def validate_match_active(
+    redis: Redis | None, match_id: uuid.UUID, user_id: uuid.UUID
+) -> None:
+    """Validate that a match is active and the user is a participant."""
+    match_id_str = str(match_id)
+
+    state = await redis.hgetall(RedisKey.match_state(match_id_str))
+    if not state:
+        raise MatchNotFound()
+
+    status = state.get(b"status", b"").decode()
+    if status != MatchStatus.ACTIVE:
+        raise MatchNotActive()
+
+    p1 = state.get(b"player1_id", b"").decode()
+    p2 = state.get(b"player2_id", b"").decode()
+    user_id_str = str(user_id)
+    if user_id_str != p1 and user_id_str != p2:
+        raise NotMatchParticipant()
+
+    # Check timer
+    timer_val = await redis.get(RedisKey.match_timer(match_id_str))
+    if timer_val:
+        expiry = float(timer_val)
+        if time.time() > expiry:
+            raise MatchExpired()
+
+
+async def get_remaining_time(redis: Redis | None, match_id: uuid.UUID) -> int | None:
+    """Get remaining seconds for an active match."""
+    if redis is None:
+        return None
+    timer_val = await redis.get(RedisKey.match_timer(str(match_id)))
+    if not timer_val:
+        return None
+    expiry = float(timer_val)
+    remaining = int(expiry - time.time())
+    return max(0, remaining)
+
+
+async def complete_match(
+    db: AsyncSession,
+    redis: Redis | None,
+    match_id: uuid.UUID,
+    reason: str = "timeout",
+) -> dict:
+    """
+    Complete a match: determine winner, update ELO, clean up Redis state.
+    
+    PRODUCTION: Idempotent - safe to call multiple times.
+    Returns empty dict if match is already completed.
+
+    Returns match result dict for WebSocket broadcast.
+    """
+    match = await get_match(db, match_id)
+    if match.status != MatchStatus.ACTIVE:
+        logger.debug(f"Match {match_id} already completed (status={match.status})")
+        return {}
+
+    # Determine winner from submissions
+    winner_id = await _determine_winner(db, match)
+
+    # Update ELO ratings
+    p1_new, p2_new, p1_delta, p2_delta = await rating_service.update_ratings(
+        db, match.player1_id, match.player2_id, winner_id
+    )
+
+    # Update match record (atomic transaction)
+    try:
+        match.status = MatchStatus.COMPLETED
+        match.winner_id = winner_id
+        match.ended_at = datetime.now(timezone.utc)
+        match.player1_elo_after = p1_new
+        match.player2_elo_after = p2_new
+
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Failed to complete match {match_id}: {e}")
+        raise
+
+    # Clean up Redis (skip if Redis disabled)
+    if redis is not None:
+        match_id_str = str(match_id)
+        await redis.delete(
+            RedisKey.match_state(match_id_str),
+            RedisKey.match_timer(match_id_str),
+            RedisKey.user_active_match(str(match.player1_id)),
+            RedisKey.user_active_match(str(match.player2_id)),
+        )
+
+    # Resolve usernames for frontend display
+    winner_username = None
+    loser_username = None
+    if winner_id:
+        if winner_id == match.player1_id:
+            winner_username = match.player1.username
+            loser_username = match.player2.username
+        else:
+            winner_username = match.player2.username
+            loser_username = match.player1.username
+
+    logger.info(f"Match {match_id} completed. Winner: {winner_id}. Reason: {reason}")
+
+    return {
+        "match_id": str(match_id),
+        "winner_id": str(winner_id) if winner_id else None,
+        "winner_username": winner_username,
+        "loser_username": loser_username,
+        "reason": reason,
+        "player1_id": str(match.player1_id),
+        "player2_id": str(match.player2_id),
+        "player1_elo_delta": p1_delta,
+        "player2_elo_delta": p2_delta,
+        "player1_new_elo": p1_new,
+        "player2_new_elo": p2_new,
+    }
+
+
+async def complete_match_with_winner(
+    db: AsyncSession,
+    redis: Redis | None,
+    match_id: uuid.UUID,
+    winner_id: uuid.UUID,
+    reason: str = "accepted",
+) -> dict:
+    """
+    Complete a match with a specific winner (used when a submission is ACCEPTED).
+
+    Unlike complete_match(), this does NOT re-query the DB for accepted submissions.
+    The caller already knows the winner — they are the submitter whose solution was accepted.
+
+    PRODUCTION: Idempotent - returns {} if match is already completed.
+    Uses the same result_data shape as complete_match().
+    """
+    match = await get_match(db, match_id)
+    if match.status != MatchStatus.ACTIVE:
+        logger.debug(f"Match {match_id} already completed (status={match.status})")
+        return {}
+
+    # Update ELO ratings
+    p1_new, p2_new, p1_delta, p2_delta = await rating_service.update_ratings(
+        db, match.player1_id, match.player2_id, winner_id
+    )
+
+    # Update match record (atomic transaction)
+    try:
+        match.status = MatchStatus.COMPLETED
+        match.winner_id = winner_id
+        match.ended_at = datetime.now(timezone.utc)
+        match.player1_elo_after = p1_new
+        match.player2_elo_after = p2_new
+
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Failed to complete match {match_id}: {e}")
+        raise
+
+    # Clean up Redis (skip if Redis disabled)
+    if redis is not None:
+        match_id_str = str(match_id)
+        await redis.delete(
+            RedisKey.match_state(match_id_str),
+            RedisKey.match_timer(match_id_str),
+            RedisKey.user_active_match(str(match.player1_id)),
+            RedisKey.user_active_match(str(match.player2_id)),
+        )
+
+    # Resolve usernames for frontend display
+    winner_username = None
+    loser_username = None
+    if winner_id == match.player1_id:
+        winner_username = match.player1.username
+        loser_username = match.player2.username
+    else:
+        winner_username = match.player2.username
+        loser_username = match.player1.username
+
+    logger.info(
+        f"Match {match_id} completed. "
+        f"Winner: {winner_id} ({winner_username}). Reason: {reason}"
+    )
+
+    return {
+        "match_id": str(match_id),
+        "winner_id": str(winner_id),
+        "winner_username": winner_username,
+        "loser_username": loser_username,
+        "reason": reason,
+        "player1_id": str(match.player1_id),
+        "player2_id": str(match.player2_id),
+        "player1_elo_delta": p1_delta,
+        "player2_elo_delta": p2_delta,
+        "player1_new_elo": p1_new,
+        "player2_new_elo": p2_new,
+    }
+
+
+async def forfeit_match(
+    db: AsyncSession,
+    redis: Redis | None,
+    match_id: uuid.UUID,
+    forfeiter_id: uuid.UUID,
+) -> dict:
+    """
+    Forfeit an active match on behalf of one player.
+
+    Rules:
+      - Only participants can forfeit
+      - Match must be ACTIVE; otherwise returns empty dict (idempotent)
+      - Opponent is declared winner
+      - ELO ratings are updated via rating_service
+      - Redis state (match_state, match_timer, user_active_match) is cleaned up
+
+    Returns:
+      Same result_data shape as complete_match(), or {} if already completed.
+    """
+    match = await get_match(db, match_id)
+
+    if match.status != MatchStatus.ACTIVE:
+        logger.debug(f"Match {match_id} already completed (status={match.status})")
+        return {}
+
+    # Verify forfeiter is a participant and determine winner
+    if forfeiter_id == match.player1_id:
+        winner_id = match.player2_id
+    elif forfeiter_id == match.player2_id:
+        winner_id = match.player1_id
+    else:
+        raise NotMatchParticipant()
+
+    # Update ELO ratings
+    p1_new, p2_new, p1_delta, p2_delta = await rating_service.update_ratings(
+        db, match.player1_id, match.player2_id, winner_id
+    )
+
+    # Persist match completion
+    try:
+        match.status = MatchStatus.COMPLETED
+        match.winner_id = winner_id
+        match.ended_at = datetime.now(timezone.utc)
+        match.player1_elo_after = p1_new
+        match.player2_elo_after = p2_new
+
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Failed to forfeit match {match_id}: {e}")
+        raise
+
+    # Clean up Redis (skip if Redis disabled)
+    if redis is not None:
+        match_id_str = str(match_id)
+        await redis.delete(
+            RedisKey.match_state(match_id_str),
+            RedisKey.match_timer(match_id_str),
+            RedisKey.user_active_match(str(match.player1_id)),
+            RedisKey.user_active_match(str(match.player2_id)),
+        )
+
+    logger.info(f"Match {match_id} forfeited by {forfeiter_id}. Winner: {winner_id}")
+
+    # Resolve usernames for frontend display
+    if winner_id == match.player1_id:
+        winner_username = match.player1.username
+        loser_username = match.player2.username
+    else:
+        winner_username = match.player2.username
+        loser_username = match.player1.username
+
+    return {
+        "match_id": str(match_id),
+        "winner_id": str(winner_id) if winner_id else None,
+        "winner_username": winner_username,
+        "loser_username": loser_username,
+        "reason": "forfeit",
+        "player1_id": str(match.player1_id),
+        "player2_id": str(match.player2_id),
+        "player1_elo_delta": p1_delta,
+        "player2_elo_delta": p2_delta,
+        "player1_new_elo": p1_new,
+        "player2_new_elo": p2_new,
+    }
+
+
+async def check_and_complete_expired_matches(
+    db: AsyncSession, redis: Redis
+) -> list[uuid.UUID]:
+    """
+    Scan for expired active matches and complete them.
+    Called periodically by the matchmaking worker.
+    """
+    result = await db.execute(
+        select(Match).where(Match.status == MatchStatus.ACTIVE)
+    )
+    matches = result.scalars().all()
+    completed = []
+
+    for match in matches:
+        remaining = await get_remaining_time(redis, match.id)
+        if remaining is not None and remaining <= 0:
+            await complete_match(db, redis, match.id, reason="timeout")
+            completed.append(match.id)
+
+    return completed
+
+
+async def _determine_winner(db: AsyncSession, match: Match) -> uuid.UUID | None:
+    """
+    Determine winner based on submissions.
+
+    Rules:
+    1. Player with accepted submission wins
+    2. If both accepted → first to submit accepted wins
+    3. If neither accepted → draw (None)
+    """
+    result = await db.execute(
+        select(Submission)
+        .where(
+            (Submission.match_id == match.id)
+            & (Submission.status == SubmissionStatus.ACCEPTED)
+        )
+        .order_by(Submission.judged_at.asc())
+    )
+    accepted_submissions = result.scalars().all()
+
+    if not accepted_submissions:
+        return None  # Draw
+
+    # First accepted submission wins
+    return accepted_submissions[0].user_id

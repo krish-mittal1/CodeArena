@@ -1,0 +1,102 @@
+.timerBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-default);
+}
+
+.left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.matchLabel {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+}
+
+.timerDisplay {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-family: var(--font-mono);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-lg);
+    color: var(--text-primary);
+    letter-spacing: 1px;
+}
+
+.timerDisplay.warning {
+    color: var(--color-tle);
+}
+
+.timerDisplay.critical {
+    color: var(--color-wrong);
+    animation: pulse 1s ease-in-out infinite;
+}
+
+.timerIcon {
+    font-size: var(--font-size-base);
+}
+
+.progressTrack {
+    flex: 1;
+    height: 3px;
+    background: var(--bg-elevated);
+    border-radius: var(--radius-full);
+    margin: 0 var(--space-lg);
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    background: var(--accent-primary);
+    transition: width 1s linear, background 0.5s ease;
+}
+
+.progressFill.warning {
+    background: var(--color-tle);
+}
+
+.progressFill.critical {
+    background: var(--color-wrong);
+}
+
+.right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.opponentTag {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.opponentName {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+.opponentElo {
+    color: var(--accent-primary);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+}
+
+.disconnectedBadge {
+    color: var(--color-wrong);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    padding: 2px 8px;
+    background: rgba(255, 82, 82, 0.1);
+    border-radius: var(--radius-full);
+}

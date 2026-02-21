@@ -1,0 +1,10 @@
+"""Models package — import all models for Alembic discovery."""
+
+from backend.models.user import User
+from backend.models.problem import Problem
+from backend.models.test_case import TestCase
+from backend.models.match import Match
+from backend.models.submission import Submission
+from backend.models.submission_result import SubmissionResult
+
+__all__ = ["User", "Problem", "TestCase", "Match", "Submission", "SubmissionResult"]
