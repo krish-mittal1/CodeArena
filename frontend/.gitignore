@@ -13,6 +13,7 @@ __pycache__/
 venv/
 fastapi-env/
 .env
+.env*
 
 # Pytest
 .pytest_cache/

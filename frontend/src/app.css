@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+    --color-bg-root: #06060b;
+    --color-bg-primary: #0a0a12;
+    --color-bg-secondary: #10101c;
+    --color-bg-elevated: #181828;
+    --color-bg-surface: #1e1e32;
+    --color-bg-hover: #24243a;
+
+    --color-accent: #7c5cfc;
+    --color-accent-hover: #9178ff;
+    --color-accent-glow: rgba(124, 92, 252, 0.25);
+    --color-accent-secondary: #4ecdc4;
+
+    --color-win: #00e676;
+    --color-loss: #ff5252;
+    --color-draw: #ffc107;
+
+    --color-text-primary: #e8e8f0;
+    --color-text-secondary: #8888a0;
+    --color-text-muted: #55556a;
+
+    --color-border: #2a2a40;
+    --color-border-hover: #3a3a58;
+
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* ── Base Reset ─────────────────────── */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-sans);
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-root);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+#root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Scrollbar ─────────────────────── */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-hover);
+}
+
+/* ── Animations ─────────────────────── */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 12px var(--color-accent-glow);
+    }
+
+    50% {
+        box-shadow: 0 0 28px var(--color-accent-glow);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+/* ── Dashboard Layout ─────────────────────── */
+.dashboard-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 48px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+    border-radius: 16px;
+}
+
+.graph-section {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 32px;
+    align-items: stretch;
+}
+
+.recent-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
