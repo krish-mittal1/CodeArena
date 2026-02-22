@@ -115,11 +115,12 @@ export default function Dashboard() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="relative bg-bg-elevated/80 backdrop-blur-sm border border-border rounded-2xl p-8 flex flex-col items-center justify-center text-center overflow-hidden"
+                        className="relative bg-bg-elevated/80 backdrop-blur-sm border border-border rounded-2xl flex flex-col overflow-hidden"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.06] to-accent-secondary/[0.04]" />
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-accent/10 rounded-full blur-3xl" />
-                        <div className="relative z-10">
+                        <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.06] to-accent-secondary/[0.04] pointer-events-none" />
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+
+                        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center p-8 pb-10">
                             <motion.div
                                 animate={{ y: [0, -8, 0] }}
                                 transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
@@ -129,12 +130,28 @@ export default function Dashboard() {
                                 <Swords size={28} className="text-white" />
                             </motion.div>
                             <h3 className="text-xl font-bold text-text-primary mb-1.5">Ready for Battle?</h3>
-                            <p className="text-sm text-text-secondary mb-6 max-w-[220px] mx-auto">
+                            <p className="text-sm text-text-secondary max-w-[240px] mx-auto">
                                 Queue up and duel an opponent near your rank
                             </p>
-                            <Button variant="primary" size="lg" onClick={joinQueue} disabled={isSearching} loading={isSearching} className="w-full">
-                                {isSearching ? 'Searching...' : '⚔ Find Match'}
-                            </Button>
+                        </div>
+
+                        <div className="relative z-10 w-full mt-auto">
+                            <button
+                                onClick={joinQueue}
+                                disabled={isSearching}
+                                className="w-full py-4 px-6 bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent text-white font-bold text-lg transition-all duration-300 disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_-10px_30px_rgba(124,92,252,0.15)] group"
+                            >
+                                {isSearching ? (
+                                    <span className="animate-pulse flex items-center gap-2">
+                                        Searching...
+                                    </span>
+                                ) : (
+                                    <>
+                                        <Swords size={20} className="group-hover:scale-110 transition-transform" />
+                                        Find Match
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </motion.div>
                 </div>

@@ -45,11 +45,11 @@ export default function CodeEditor() {
     };
 
     return (
-        <div className="flex flex-col flex-1 h-full bg-[#18181b] overflow-hidden relative">
+        <div className="flex flex-col flex-1 h-full bg-slate-950 overflow-hidden relative">
             {/* Sleek Toolbar Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-[#18181b] border-b border-zinc-800/80 shadow-sm z-10 shrink-0">
+            <div className="flex items-center justify-between px-6 py-3 bg-slate-900 border-b border-slate-800 shrink-0 z-10">
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-zinc-300">
+                    <div className="flex items-center gap-2 text-white">
                         <Code2 className="w-5 h-5 text-indigo-400" />
                         <span className="text-sm font-semibold tracking-wide">Workspace</span>
                     </div>
@@ -57,18 +57,18 @@ export default function CodeEditor() {
                     {/* Modern subtle language dropdown */}
                     <div className="relative group">
                         <select
-                            className="appearance-none bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 text-zinc-300 text-sm font-medium rounded-lg px-4 py-1.5 pr-8 outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer"
+                            className="appearance-none bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 text-sm font-medium rounded-lg px-4 py-1.5 pr-8 outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer"
                             value={language}
                             onChange={(e) => setLanguage(e.target.value)}
                             disabled={!!matchResult}
                         >
                             {LANGUAGES.map((lang) => (
-                                <option key={lang.id} value={lang.id} className="bg-zinc-900 text-zinc-300">
+                                <option key={lang.id} value={lang.id} className="bg-slate-900 text-slate-300">
                                     {lang.label}
                                 </option>
                             ))}
                         </select>
-                        <Settings2 className="w-4 h-4 text-zinc-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none group-hover:text-zinc-400 transition-colors" />
+                        <Settings2 className="w-4 h-4 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none group-hover:text-slate-400 transition-colors" />
                     </div>
                 </div>
 
@@ -77,7 +77,7 @@ export default function CodeEditor() {
                     <button
                         onClick={handleReset}
                         disabled={!!matchResult}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Reset to template"
                     >
                         <RotateCcw className="w-4 h-4" />
@@ -86,9 +86,9 @@ export default function CodeEditor() {
                     <button
                         onClick={handleSubmit}
                         disabled={!canSubmit}
-                        className={`flex items-center gap-2 px-5 py-1.5 rounded-lg text-sm font-bold shadow-lg transition-all ${canSubmit
-                                ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/20 active:scale-95'
-                                : 'bg-zinc-800 text-zinc-500 cursor-not-allowed shadow-none'
+                        className={`flex items-center gap-2 px-5 py-1.5 rounded-lg text-sm font-bold shadow-sm transition-all ${canSubmit
+                            ? 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                            : 'bg-slate-800 text-slate-500 cursor-not-allowed shadow-none'
                             }`}
                     >
                         {isSubmitting ? (
@@ -107,7 +107,7 @@ export default function CodeEditor() {
             </div>
 
             {/* Monaco Editor Container */}
-            <div className="flex-1 w-full bg-[#1e1e1e] relative">
+            <div className="flex-1 w-full bg-slate-950 relative">
                 <Editor
                     height="100%"
                     language={monacoLang}

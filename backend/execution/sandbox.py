@@ -260,6 +260,9 @@ class Sandbox:
         stdout = stdout_bytes.decode("utf-8", errors="replace")[:100_000]
         stderr = stderr_bytes.decode("utf-8", errors="replace")[:10_000]
 
+        if timed_out and not stderr:
+            stderr = "Execution Timeout - The sandbox container did not respond in time or Docker daemon frozen."
+
         if exit_code == DOCKER_OOM_EXIT_CODE and not timed_out:
             oom_killed = True
 

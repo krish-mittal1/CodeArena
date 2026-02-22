@@ -40,13 +40,13 @@ export default function TimerBar() {
     };
 
     return (
-        <div className="relative flex items-center justify-between px-6 py-3 bg-[#0e0e11] border-b border-zinc-800/80 shadow-md z-20">
+        <div className="relative flex items-center justify-between px-6 py-3 bg-slate-950 border-b border-slate-800 shadow-sm z-20">
             {/* Absolute Progress Bar */}
-            <div className="absolute bottom-0 left-0 h-[2px] w-full bg-zinc-900 overflow-hidden">
+            <div className="absolute bottom-0 left-0 h-[2px] w-full bg-slate-900 overflow-hidden">
                 <div
                     className={`h-full transition-all duration-1000 ease-linear ${isCritical ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'
-                            : isWarning ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.8)]'
-                                : 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)]'
+                        : isWarning ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.8)]'
+                            : 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)]'
                         }`}
                     style={{ width: `${pct}%` }}
                 />
@@ -55,31 +55,22 @@ export default function TimerBar() {
             {/* Left Zone: Branding & Nav */}
             <div className="flex items-center gap-8">
                 <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-indigo-500/20 rounded-lg border border-indigo-500/30">
+                    <div className="p-1.5 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
                         <Code2 className="w-5 h-5 text-indigo-400" />
                     </div>
-                    <span className="text-xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent tracking-tight">
+                    <span className="text-xl font-bold text-white tracking-tight">
                         CodeArena
                     </span>
                 </div>
-
-                <nav className="flex items-center gap-6">
-                    <Link to="/dashboard" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
-                        Dashboard
-                    </Link>
-                    <Link to="/history" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
-                        History
-                    </Link>
-                </nav>
             </div>
 
             {/* Center Zone: Battle Timer */}
             <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
-                <div className={`flex items-center gap-2 px-5 py-1.5 rounded-full border shadow-lg backdrop-blur-md transition-colors ${isCritical
-                        ? 'bg-red-500/10 border-red-500/50 text-red-400 shadow-red-500/20 animate-pulse'
-                        : isWarning
-                            ? 'bg-amber-500/10 border-amber-500/50 text-amber-400'
-                            : 'bg-zinc-800/50 border-zinc-700/50 text-zinc-200'
+                <div className={`flex items-center gap-2 px-5 py-1.5 rounded-full border shadow-sm backdrop-blur-md transition-colors ${isCritical
+                    ? 'bg-red-500/10 border-red-500/50 text-red-400 animate-pulse'
+                    : isWarning
+                        ? 'bg-amber-500/10 border-amber-500/50 text-amber-400'
+                        : 'bg-slate-900/50 border-slate-700/50 text-slate-200'
                     }`}>
                     <Clock className="w-4 h-4" />
                     <span className="font-mono font-bold tracking-wider text-base">
@@ -90,10 +81,10 @@ export default function TimerBar() {
 
             {/* Right Zone: Profile, Opponent, Actions */}
             <div className="flex items-center gap-6">
-                <div className="flex items-center gap-4 bg-zinc-900/50 rounded-lg p-1.5 border border-zinc-800/80">
+                <div className="flex items-center gap-4 bg-slate-900/50 rounded-lg p-1.5 border border-slate-800">
                     {/* User */}
                     {user && (
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-zinc-800/80 border border-zinc-700/50">
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-800/80 border border-slate-700/50">
                             <span className="text-sm font-medium text-white">{user.username}</span>
                             {user.elo != null && (
                                 <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded">
@@ -103,14 +94,14 @@ export default function TimerBar() {
                         </div>
                     )}
 
-                    <div className="text-zinc-500 px-1">
+                    <div className="text-slate-500 px-1">
                         <Swords className="w-4 h-4" />
                     </div>
 
                     {/* Opponent */}
                     {opponent && (
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-zinc-800/40 border border-zinc-700/30">
-                            <span className="text-sm font-medium text-zinc-300">{opponent.username}</span>
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-800/40 border border-slate-700/30">
+                            <span className="text-sm font-medium text-slate-300">{opponent.username}</span>
                             {opponent.elo != null && (
                                 <span className="text-xs font-bold text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded">
                                     {opponent.elo}

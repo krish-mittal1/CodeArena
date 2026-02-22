@@ -132,7 +132,7 @@ export default function Battle() {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-56px)] bg-[#0e0e11] overflow-hidden text-zinc-300 antialiased selection:bg-indigo-500/30">
+        <div className="flex flex-col h-screen bg-slate-950 overflow-hidden text-slate-300 antialiased selection:bg-indigo-500/30">
             {/* Timer bar — full width, top fixed */}
             <TimerBar />
 
@@ -141,7 +141,7 @@ export default function Battle() {
 
                 {/* Left: Problem description */}
                 <div
-                    className="flex flex-col overflow-hidden bg-[#0e0e11] shrink-0"
+                    className="flex flex-col overflow-hidden bg-slate-950 shrink-0"
                     style={{ width: `${leftWidth}%` }}
                 >
                     <ProblemPanel />
@@ -149,16 +149,15 @@ export default function Battle() {
 
                 {/* Resizer Handle */}
                 <div
-                    className="w-1.5 cursor-col-resize shrink-0 bg-transparent hover:bg-indigo-500/50 active:bg-indigo-500 transition-colors z-30 group relative"
+                    className="w-px cursor-col-resize shrink-0 bg-slate-800 hover:bg-slate-600 active:bg-indigo-500 transition-colors z-30 group relative"
                     onMouseDown={startDrag}
                 >
-                    <div className="absolute inset-y-0 -left-1 -right-1" /> {/* Larger hit area */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-8 bg-zinc-700 group-hover:bg-white rounded-full transition-colors" />
+                    <div className="absolute inset-y-0 -left-1.5 -right-1.5" /> {/* Larger hit area */}
                 </div>
 
                 {/* Right: Editor + Submissions */}
                 <div
-                    className="flex flex-col flex-1 overflow-hidden bg-[#18181b]"
+                    className="flex flex-col flex-1 overflow-hidden bg-slate-950"
                     style={{ width: `${100 - leftWidth}%` }}
                 >
                     <CodeEditor />

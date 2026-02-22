@@ -6,7 +6,7 @@ export default function ProblemPanel() {
 
     if (!problem) {
         return (
-            <div className="flex items-center justify-center h-full bg-[#0e0e11] text-zinc-500">
+            <div className="flex items-center justify-center h-full bg-slate-950 text-slate-500">
                 <div className="flex flex-col items-center gap-3 animate-pulse">
                     <FileText className="w-8 h-8 opacity-50" />
                     <span className="text-sm font-medium tracking-wide">Fetching problem constraints...</span>
@@ -25,10 +25,10 @@ export default function ProblemPanel() {
     const activeDifficultyColor = difficultyStyles[diffLevel] || difficultyStyles.medium;
 
     return (
-        <div className="flex flex-col h-full bg-[#0e0e11] overflow-hidden text-zinc-300">
+        <div className="flex flex-col h-full bg-slate-950 overflow-hidden text-slate-300">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800/80 bg-zinc-900/30">
-                <div className="flex items-center gap-2 text-zinc-100">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900">
+                <div className="flex items-center gap-2 text-white">
                     <FileText className="w-5 h-5 text-indigo-400" />
                     <span className="font-semibold tracking-wide">Problem Description</span>
                 </div>
@@ -40,35 +40,35 @@ export default function ProblemPanel() {
             </div>
 
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
 
                 {/* Title & Description */}
                 <div className="space-y-4">
                     <h2 className="text-3xl font-bold tracking-tight text-white mb-6">
                         {problem.title}
                     </h2>
-                    <div className="prose prose-invert prose-zinc max-w-none text-zinc-300 leading-relaxed">
+                    <div className="prose prose-invert prose-slate max-w-none text-slate-300 leading-relaxed">
                         <p className="whitespace-pre-wrap">{problem.description}</p>
                     </div>
                 </div>
 
                 {/* Examples */}
                 {problem.examples?.length > 0 && (
-                    <div className="space-y-6 pt-4 border-t border-zinc-800/50">
-                        <h3 className="text-lg font-semibold text-zinc-200 flex items-center gap-2">
+                    <div className="space-y-6 pt-4 border-t border-slate-800/50">
+                        <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
                             Examples
                         </h3>
                         {problem.examples.map((ex, i) => (
                             <div key={i} className="flex flex-col gap-3">
                                 <div>
-                                    <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Example {i + 1} Input</div>
-                                    <div className="bg-[#18181b] border border-zinc-800 rounded-xl p-4 font-mono text-sm text-zinc-300 whitespace-pre-wrap shrink-0 break-words shadow-inner">
+                                    <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">Example {i + 1} Input</div>
+                                    <div className="bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-sm text-slate-300 whitespace-pre-wrap shrink-0 break-words">
                                         {ex.input}
                                     </div>
                                 </div>
                                 <div>
-                                    <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Example {i + 1} Output</div>
-                                    <div className="bg-[#18181b] border border-zinc-800 rounded-xl p-4 font-mono text-emerald-400 text-sm whitespace-pre-wrap shrink-0 break-words shadow-inner">
+                                    <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1">Example {i + 1} Output</div>
+                                    <div className="bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-emerald-400 text-sm whitespace-pre-wrap shrink-0 break-words">
                                         {ex.output}
                                     </div>
                                 </div>
@@ -79,25 +79,25 @@ export default function ProblemPanel() {
 
                 {/* Constraints */}
                 {(problem.time_limit_ms || problem.memory_limit_mb) && (
-                    <div className="pt-4 border-t border-zinc-800/50">
-                        <h3 className="text-lg font-semibold text-zinc-200 flex items-center gap-2 mb-4">
+                    <div className="pt-4 border-t border-slate-800/50">
+                        <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2 mb-4">
                             <AlertCircle className="w-5 h-5 text-indigo-400" />
                             Constraints & Limits
                         </h3>
                         <div className="flex flex-col gap-3">
                             {problem.time_limit_ms && (
-                                <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-zinc-900/50 border border-zinc-800/80">
+                                <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-slate-900 border border-slate-800">
                                     <Clock className="w-5 h-5 text-amber-500" />
-                                    <span className="text-sm font-medium text-zinc-300">Time Limit:</span>
+                                    <span className="text-sm font-medium text-slate-300">Time Limit:</span>
                                     <span className="font-mono text-sm text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
                                         {problem.time_limit_ms} ms
                                     </span>
                                 </div>
                             )}
                             {problem.memory_limit_mb && (
-                                <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-zinc-900/50 border border-zinc-800/80">
+                                <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-slate-900 border border-slate-800">
                                     <HardDrive className="w-5 h-5 text-indigo-500" />
-                                    <span className="text-sm font-medium text-zinc-300">Memory Limit:</span>
+                                    <span className="text-sm font-medium text-slate-300">Memory Limit:</span>
                                     <span className="font-mono text-sm text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">
                                         {problem.memory_limit_mb} MB
                                     </span>
