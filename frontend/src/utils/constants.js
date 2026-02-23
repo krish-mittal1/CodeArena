@@ -2,8 +2,11 @@
    Frontend Constants — mirrors backend's core/constants.py
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-export const WS_BASE = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
+// Your Azure VM Public IP: 4.193.212.14
+const PROD_IP = '4.193.212.14';
+
+export const API_BASE = import.meta.env.VITE_API_URL || `http://${PROD_IP}:8000/api/v1`;
+export const WS_BASE = import.meta.env.VITE_WS_URL || `ws://${PROD_IP}:8000`;
 
 // ── WebSocket Events (mirrors WSEvent enum) ──────────
 export const WS_EVENTS = {
