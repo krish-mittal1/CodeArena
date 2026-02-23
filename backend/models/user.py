@@ -9,6 +9,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.db.base import Base
 from backend.core.constants import ELO_DEFAULT
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from backend.models.submission import Submission  # Adjust path if needed
 
 
 class User(Base):
