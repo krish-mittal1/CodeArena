@@ -13,10 +13,6 @@ class UserRegister(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=128)
 
-class ResendVerificationRequest(BaseModel):
-    username: str
-
-
 class UserLogin(BaseModel):
     username: str
     password: str

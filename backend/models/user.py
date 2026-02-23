@@ -21,11 +21,6 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     
-    # Email Verification
-    is_verified: Mapped[bool] = mapped_column(default=False, nullable=False)
-    verification_token_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    verification_token_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    
     elo: Mapped[int] = mapped_column(Integer, default=ELO_DEFAULT, nullable=False)
     matches_played: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     matches_won: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
