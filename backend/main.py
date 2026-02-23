@@ -395,9 +395,11 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 # It is correct setup to add CORSMiddleware via add_middleware - this adds it to the TOP of the stack,
 # meaning it is the FIRST middleware executed on incoming requests and LAST on outgoing responses.
+# ── CORS ──────────────────────────────────────────────────────
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:5173" , "https://code-arena-murex-ten.vercel.app"],
+    allow_origins=["*"],  # This allows ALL origins (Vercel, Localhost, etc.)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
