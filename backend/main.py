@@ -397,7 +397,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 # meaning it is the FIRST middleware executed on incoming requests and LAST on outgoing responses.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:5173" , "https://code-arena-murex-ten.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
