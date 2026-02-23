@@ -19,7 +19,8 @@ const api = axios.create({
 
 // ── Token injection ──────────────────────────────────
 
-let accessToken = null;
+// FIX: Initialize from storage so the token survives a page refresh
+let accessToken = storage.getAccessToken?.() || null;
 
 export function setAccessToken(token) {
     accessToken = token;
@@ -30,8 +31,11 @@ export function getAccessToken() {
 }
 
 api.interceptors.request.use((config) => {
-    if (accessToken) {
-        config.headers.Authorization = `Bearer ${accessToken}`;
+    // FIX: Pull from memory variable, but fallback to storage if memory is empty
+    const token = accessToken || storage.getAccessToken?.();
+    
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
 });
@@ -89,6 +93,8 @@ api.interceptors.response.use(
             const newRefreshToken = data.refresh_token;
 
             setAccessToken(newAccessToken);
+            // Ensure storage is updated with both tokens
+            storage.setAccessToken?.(newAccessToken); 
             storage.setRefreshToken(newRefreshToken);
 
             // Notify auth store
