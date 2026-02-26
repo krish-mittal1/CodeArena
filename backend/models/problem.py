@@ -25,6 +25,7 @@ class Problem(Base):
     constraints: Mapped[str] = mapped_column(Text, nullable=True)
     time_limit_ms: Mapped[int] = mapped_column(Integer, default=2000, nullable=False)
     memory_limit_mb: Mapped[int] = mapped_column(Integer, default=256, nullable=False)
+    rating: Mapped[int] = mapped_column(Integer, default=800, nullable=False, doc="Internal CF-style rating (800-1200), hidden from users")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)

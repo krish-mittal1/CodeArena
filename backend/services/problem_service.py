@@ -1,11 +1,12 @@
 """
-Problem service — problem CRUD and random selection for matches.
+Problem service — problem CRUD and ELO-based selection for matches.
 """
 
 import uuid
+import logging
 from typing import Sequence
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -13,6 +14,8 @@ from backend.core.exceptions import ProblemNotFound
 from backend.models.problem import Problem
 from backend.models.test_case import TestCase
 from backend.schemas.problem import ProblemCreate
+
+logger = logging.getLogger(__name__)
 
 
 async def create_problem(db: AsyncSession, data: ProblemCreate) -> Problem:
@@ -70,7 +73,7 @@ async def get_active_problems(db: AsyncSession) -> Sequence[Problem]:
 
 
 async def get_random_problem(db: AsyncSession) -> Problem:
-    """Select a random active problem for a match."""
+    """Select a random active problem for a match (fallback, no ELO filtering)."""
     result = await db.execute(
         select(Problem)
         .where(Problem.is_active == True)
@@ -82,6 +85,55 @@ async def get_random_problem(db: AsyncSession) -> Problem:
     if not problem:
         raise ProblemNotFound()
     return problem
+
+
+async def get_problem_for_match(db: AsyncSession, avg_elo: int) -> Problem:
+    """
+    Select a random active problem appropriate for the players' skill level.
+
+    ELO → Problem Rating Band:
+      0–400   → Easy   (rating 800–900)
+      400–800 → Medium (rating 1000–1100)
+      800+    → Hard   (rating 1100–1200)
+
+    Falls back to any random problem if no match in the target band.
+    """
+    if avg_elo < 400:
+        rating_low, rating_high = 800, 900
+    elif avg_elo < 800:
+        rating_low, rating_high = 1000, 1100
+    else:
+        rating_low, rating_high = 1100, 1200
+
+    # Try to find a problem in the target rating band
+    result = await db.execute(
+        select(Problem)
+        .where(
+            and_(
+                Problem.is_active == True,
+                Problem.rating >= rating_low,
+                Problem.rating <= rating_high,
+            )
+        )
+        .order_by(func.random())
+        .limit(1)
+        .options(selectinload(Problem.test_cases))
+    )
+    problem = result.scalar_one_or_none()
+
+    if problem:
+        logger.info(
+            f"[PROBLEM] Selected '{problem.title}' (rating={problem.rating}) "
+            f"for avg_elo={avg_elo} (band {rating_low}-{rating_high})"
+        )
+        return problem
+
+    # Fallback: any random active problem
+    logger.warning(
+        f"[PROBLEM] No problem in band {rating_low}-{rating_high} "
+        f"for avg_elo={avg_elo}, using random fallback"
+    )
+    return await get_random_problem(db)
 
 
 async def get_test_cases(db: AsyncSession, problem_id: uuid.UUID) -> Sequence[TestCase]:

@@ -265,12 +265,14 @@ class InMemoryMatchmakingQueue:
         p1_id: str, p1_elo: int,
         p2_id: str, p2_elo: int,
     ) -> uuid.UUID:
-        """Create match in PostgreSQL with a random problem."""
-        from backend.services.problem_service import get_random_problem
+        """Create match in PostgreSQL with an ELO-appropriate problem."""
+        from backend.services.problem_service import get_problem_for_match
         from backend.models.match import Match
 
+        avg_elo = (p1_elo + p2_elo) // 2
+
         async with session_factory() as db:
-            problem = await get_random_problem(db)
+            problem = await get_problem_for_match(db, avg_elo)
 
             match = Match(
                 player1_id=uuid.UUID(p1_id),

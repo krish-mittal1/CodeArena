@@ -33,7 +33,6 @@ export default function Profile() {
         enabled: !!user,
     });
 
-    // Compute win/loss/draw counts from actual results
     const { winCount, lossCount, drawCount } = useMemo(() => {
         let w = 0, l = 0, d = 0;
         history.forEach((m) => {
@@ -70,7 +69,7 @@ export default function Profile() {
                     <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                         {/* Avatar */}
                         <div className="relative group shrink-0">
-                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-accent to-accent-secondary flex items-center justify-center text-white text-3xl sm:text-4xl font-bold border-4 border-bg-elevated shadow-lg">
+                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-linear-to-br from-accent to-accent-secondary flex items-center justify-center text-white text-3xl sm:text-4xl font-bold border-4 border-bg-elevated shadow-lg">
                                 {user.username?.charAt(0).toUpperCase()}
                             </div>
                             <button className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
@@ -95,7 +94,7 @@ export default function Profile() {
                                             onChange={(e) => setTempBio(e.target.value)}
                                             maxLength={200}
                                             rows={2}
-                                            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-text-primary resize-none focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none"
+                                            className="flex-1 bg-bg-surface border border-border rounded-xl px-4 py-3 text-sm text-text-primary resize-none focus:border-accent focus:ring-1 focus:ring-accent/30 outline-none"
                                             placeholder="Tell us about yourself..."
                                         />
                                         <div className="flex flex-col gap-2">
@@ -105,8 +104,8 @@ export default function Profile() {
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-3 group">
-                                        <p className="text-sm text-gray-400">{bio}</p>
-                                        <button onClick={() => setEditingBio(true)} className="p-1.5 rounded-lg text-text-muted hover:text-accent hover:bg-white/5 opacity-0 group-hover:opacity-100 transition-all cursor-pointer">
+                                        <p className="text-sm text-text-secondary">{bio}</p>
+                                        <button onClick={() => setEditingBio(true)} className="p-1.5 rounded-lg text-text-muted hover:text-accent hover:bg-bg-hover opacity-0 group-hover:opacity-100 transition-all cursor-pointer">
                                             <Edit3 size={14} />
                                         </button>
                                     </div>
@@ -122,13 +121,13 @@ export default function Profile() {
                         ? Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
                         : stats.map((stat) => (
                             <motion.div key={stat.label} variants={item}>
-                                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg shrink-0`}>
+                                <div className="bg-bg-elevated/80 border border-border rounded-2xl p-6 hover:bg-bg-hover transition-colors flex items-center gap-4">
+                                    <div className={`w-12 h-12 rounded-xl bg-linear-to-br ${stat.color} flex items-center justify-center shadow-lg shrink-0`}>
                                         <stat.icon size={22} className="text-white" />
                                     </div>
                                     <div>
-                                        <p className="text-[11px] text-gray-400 uppercase tracking-widest font-semibold mb-1">{stat.label}</p>
-                                        <p className="text-2xl font-bold text-white tracking-tight leading-none">{stat.value}</p>
+                                        <p className="text-[11px] text-text-muted uppercase tracking-widest font-semibold mb-1">{stat.label}</p>
+                                        <p className="text-2xl font-bold text-text-primary tracking-tight leading-none">{stat.value}</p>
                                     </div>
                                 </div>
                             </motion.div>
@@ -137,7 +136,7 @@ export default function Profile() {
                 </motion.div>
 
                 {/* Rating Chart */}
-                <div className="h-[400px] w-full bg-white/5 border border-white/10 rounded-2xl p-6 mt-2">
+                <div className="h-[400px] w-full bg-bg-elevated/80 border border-border rounded-2xl p-6 mt-2">
                     {isLoading ? <ChartSkeleton /> : <RatingChart history={history} currentElo={user.elo} />}
                 </div>
 
@@ -146,7 +145,7 @@ export default function Profile() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="bg-white/5 border border-white/10 rounded-2xl p-8 mt-2"
+                    className="bg-bg-elevated/80 border border-border rounded-2xl p-8 mt-2"
                 >
                     <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2 mb-6">
                         <Code2 size={18} className="text-accent" />
@@ -174,7 +173,7 @@ export default function Profile() {
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${pct}%` }}
                                                 transition={{ duration: 0.8, delay: 0.1 }}
-                                                className={`h-full bg-gradient-to-r ${color} rounded-full`}
+                                                className={`h-full bg-linear-to-r ${color} rounded-full`}
                                             />
                                         </div>
                                     </div>

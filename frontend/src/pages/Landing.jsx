@@ -20,7 +20,7 @@ export default function Landing() {
     };
 
     return (
-        <div className="relative min-h-[calc(100vh-64px)] bg-[#09090b] overflow-hidden font-sans text-white">
+        <div className="relative min-h-[calc(100vh-64px)] bg-bg-root overflow-hidden font-sans text-text-primary">
 
             {/* --- BACKGROUND EFFECTS --- */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:32px_32px]" />
@@ -30,8 +30,8 @@ export default function Landing() {
                 <h1 className="text-[10rem] font-black tracking-tighter mt-4">CodeArena</h1>
             </div>
 
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-purple-600/20 rounded-full blur-[150px] pointer-events-none" />
-            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-accent/20 rounded-full blur-[150px] pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] pointer-events-none" />
 
             {/* --- MAIN CONTENT --- */}
             <div className="relative z-10 w-full max-w-6xl mx-auto px-6 pt-28 pb-20 flex flex-col items-center text-center">
@@ -44,12 +44,12 @@ export default function Landing() {
                 >
                     <motion.h1 variants={itemVariants} className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
                         Real-Time 1v1 <br className="hidden sm:block" />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-400 to-purple-400 animate-gradient-x">
+                        <span className="text-transparent bg-clip-text bg-linear-to-r from-accent to-accent-secondary">
                             Code Battles
                         </span>
                     </motion.h1>
 
-                    <motion.p variants={itemVariants} className="text-lg sm:text-xl text-zinc-400 leading-relaxed max-w-2xl mx-auto mb-12">
+                    <motion.p variants={itemVariants} className="text-lg sm:text-xl text-text-secondary leading-relaxed max-w-2xl mx-auto mb-12">
                         Experience the adrenaline of blitz chess combined with competitive programming.
                         Match up instantly, outcode your opponent, and climb the global ELO leaderboard.
                     </motion.p>
@@ -58,7 +58,7 @@ export default function Landing() {
                         {isAuthenticated ? (
                             <Link
                                 to="/dashboard"
-                                className="w-full sm:w-auto px-10 py-4 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold text-lg shadow-[0_0_30px_rgba(168,85,247,0.3)] hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] transition-all flex items-center justify-center gap-3"
+                                className="w-full sm:w-auto px-10 py-4 bg-accent hover:bg-accent-hover text-white rounded-xl font-bold text-lg shadow-[0_0_30px_var(--color-accent-glow)] hover:shadow-[0_0_40px_var(--color-accent-glow)] transition-all flex items-center justify-center gap-3"
                             >
                                 <Terminal size={20} />
                                 Enter Dashboard
@@ -67,14 +67,14 @@ export default function Landing() {
                             <>
                                 <Link
                                     to="/register"
-                                    className="w-full sm:w-auto px-10 py-4 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold text-lg shadow-[0_0_30px_rgba(168,85,247,0.3)] hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] transition-all flex items-center justify-center gap-3"
+                                    className="w-full sm:w-auto px-10 py-4 bg-accent hover:bg-accent-hover text-white rounded-xl font-bold text-lg shadow-[0_0_30px_var(--color-accent-glow)] hover:shadow-[0_0_40px_var(--color-accent-glow)] transition-all flex items-center justify-center gap-3"
                                 >
                                     <Swords size={20} />
                                     Start Competing
                                 </Link>
                                 <Link
                                     to="/login"
-                                    className="w-full sm:w-auto px-10 py-4 bg-[#121217] hover:bg-[#1a1a24] text-white border border-white/10 rounded-xl font-bold text-lg transition-all flex items-center justify-center"
+                                    className="w-full sm:w-auto px-10 py-4 bg-bg-secondary hover:bg-bg-elevated text-text-primary border border-border rounded-xl font-bold text-lg transition-all flex items-center justify-center"
                                 >
                                     Log In
                                 </Link>
@@ -114,14 +114,14 @@ export default function Landing() {
 function FeatureCard({ icon: Icon, title, description }) {
     return (
         <motion.div
-            className="group flex flex-col items-center text-center p-10 rounded-3xl bg-[#121217] border border-white/5 hover:border-purple-500/30 hover:bg-[#16161c] transition-all duration-300 relative overflow-hidden"
+            className="group flex flex-col items-center text-center p-10 rounded-3xl bg-bg-secondary border border-border hover:border-accent/30 hover:bg-bg-elevated transition-all duration-300 relative overflow-hidden"
         >
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-purple-500/0 group-hover:bg-purple-500/50 blur-[8px] transition-all duration-500" />
-            <div className="w-16 h-16 rounded-2xl bg-[#09090b] border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-purple-500/10 transition-all duration-300">
-                <Icon size={30} className="text-zinc-500 group-hover:text-purple-400 transition-colors" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-accent/0 group-hover:bg-accent/50 blur-[8px] transition-all duration-500" />
+            <div className="w-16 h-16 rounded-2xl bg-bg-root border border-border flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-accent/10 transition-all duration-300">
+                <Icon size={30} className="text-text-muted group-hover:text-accent transition-colors" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-4 tracking-wide">{title}</h3>
-            <p className="text-zinc-400 text-base leading-relaxed">{description}</p>
+            <h3 className="text-2xl font-bold text-text-primary mb-4 tracking-wide">{title}</h3>
+            <p className="text-text-secondary text-base leading-relaxed">{description}</p>
         </motion.div>
     );
 }

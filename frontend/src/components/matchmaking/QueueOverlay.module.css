@@ -1,7 +1,7 @@
 .overlay {
     position: fixed;
     inset: 0;
-    z-index: var(--z-overlay);
+    z-index: 700;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -11,10 +11,10 @@
 }
 
 .card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-lg);
-    padding: var(--space-2xl) var(--space-3xl);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 48px 64px;
     text-align: center;
     min-width: 380px;
     max-width: 460px;
@@ -31,7 +31,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), var(--accent-primary));
+    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-secondary), var(--color-accent));
     background-size: 200% 100%;
     animation: shimmer 2s linear infinite;
 }
@@ -49,40 +49,40 @@
 /* ── Searching animation ────────── */
 .swordsIcon {
     font-size: 3rem;
-    margin-bottom: var(--space-lg);
+    margin-bottom: 24px;
     display: inline-block;
     animation: pulse 2s ease-in-out infinite;
 }
 
 .title {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-    margin-bottom: var(--space-xs);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 4px;
 }
 
 .subtitle {
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    margin-bottom: var(--space-xl);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 32px;
 }
 
 /* ── Timer ───────────────────────── */
 .timer {
     font-family: var(--font-mono);
-    font-size: var(--font-size-3xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--accent-primary);
-    margin-bottom: var(--space-xs);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    margin-bottom: 4px;
     letter-spacing: 2px;
 }
 
 .timerLabel {
-    color: var(--text-muted);
-    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: var(--space-xl);
+    margin-bottom: 32px;
 }
 
 /* ── Dots loader ─────────────────── */
@@ -90,14 +90,14 @@
     display: flex;
     gap: 6px;
     justify-content: center;
-    margin-bottom: var(--space-xl);
+    margin-bottom: 32px;
 }
 
 .dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--accent-primary);
+    background: var(--color-accent);
     animation: dotPulse 1.4s ease-in-out infinite;
 }
 
@@ -127,16 +127,16 @@
 /* ── Cancel button ───────────────── */
 .cancelBtn {
     padding: 10px 28px;
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    transition: all 150ms ease;
 }
 
 .cancelBtn:hover {
-    color: var(--color-wrong);
+    color: var(--color-loss);
     border-color: rgba(255, 82, 82, 0.4);
     background: rgba(255, 82, 82, 0.08);
 }
@@ -144,29 +144,41 @@
 /* ── Found state ─────────────────── */
 .foundIcon {
     font-size: 3rem;
-    margin-bottom: var(--space-lg);
+    margin-bottom: 24px;
     display: inline-block;
     animation: glow 1s ease-in-out infinite alternate;
 }
 
+@keyframes glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 12px var(--color-accent-glow);
+    }
+
+    50% {
+        box-shadow: 0 0 28px var(--color-accent-glow);
+    }
+}
+
 .foundTitle {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-accepted);
-    margin-bottom: var(--space-sm);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-win);
+    margin-bottom: 8px;
 }
 
 .foundSubtitle {
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
 }
 
 /* ── Error state ─────────────────── */
 .error {
-    color: var(--color-wrong);
-    font-size: var(--font-size-sm);
-    margin-bottom: var(--space-md);
+    color: var(--color-loss);
+    font-size: 0.875rem;
+    margin-bottom: 16px;
     background: rgba(255, 82, 82, 0.1);
-    padding: var(--space-sm) var(--space-md);
-    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    border-radius: 6px;
 }

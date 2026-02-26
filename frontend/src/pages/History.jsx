@@ -40,38 +40,36 @@ export default function HistoryPage() {
 
     return (
         <div className="min-h-[calc(100vh-64px)] w-full bg-bg-root flex flex-col">
-            {/* Expanded width to utilize screen space effectively and fix left alignment issue */}
             <div className="w-full max-w-[1600px] mx-auto px-6 sm:px-10 py-10 pb-12 flex-1">
 
-                {/* Sleek Header & Filters */}
+                {/* Header & Filters */}
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8"
                 >
                     <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 bg-gradient-to-br from-accent/20 to-accent-secondary/20 rounded-2xl flex items-center justify-center border border-accent/30 shadow-inner">
+                        <div className="w-14 h-14 bg-accent/10 rounded-2xl flex items-center justify-center border border-accent/30 shadow-inner">
                             <HistoryIcon size={28} className="text-accent" />
                         </div>
                         <div className="pt-1">
-                            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-wide">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-wide">
                                 Match History
                             </h1>
-                            <p className="text-gray-400 text-sm font-medium mt-1">
+                            <p className="text-text-secondary text-sm font-medium mt-1">
                                 {filtered.length} total matches played
                             </p>
                         </div>
                     </div>
 
-                    {/* Unified Filter Pill Container */}
-                    <div className="flex items-center gap-1 p-1.5 bg-gray-900/60 border border-gray-800 rounded-xl backdrop-blur-sm shadow-inner">
+                    <div className="flex items-center gap-1 p-1.5 bg-bg-secondary border border-border rounded-xl backdrop-blur-sm shadow-inner">
                         {['all', 'win', 'loss', 'draw'].map((val) => (
                             <button
                                 key={val}
                                 onClick={() => { setFilterResult(val); setPage(1); }}
                                 className={`px-5 py-2 text-sm font-semibold capitalize rounded-lg transition-all ${filterResult === val
                                     ? 'bg-accent text-white shadow-md'
-                                    : 'bg-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                                    : 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-hover'
                                     }`}
                             >
                                 {val}
@@ -80,11 +78,11 @@ export default function HistoryPage() {
                     </div>
                 </motion.div>
 
-                {/* Premium Table Card */}
+                {/* Table Card */}
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-bg-elevated/80 backdrop-blur-xl border border-gray-800 rounded-3xl shadow-2xl overflow-hidden"
+                    className="bg-bg-elevated/80 backdrop-blur-xl border border-border rounded-3xl shadow-2xl overflow-hidden"
                 >
                     {isLoading ? (
                         <table className="w-full text-sm">
@@ -96,7 +94,7 @@ export default function HistoryPage() {
                         </table>
                     ) : isError ? (
                         <div className="py-24 text-center">
-                            <p className="text-rose-400 text-sm font-medium">Failed to load match history.</p>
+                            <p className="text-loss text-sm font-medium">Failed to load match history.</p>
                         </div>
                     ) : filtered.length === 0 ? (
                         <div className="py-16">
@@ -110,7 +108,7 @@ export default function HistoryPage() {
                         <>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm text-left border-collapse">
-                                    <thead className="text-xs uppercase tracking-widest text-gray-500 bg-gray-900/40 border-b border-gray-800">
+                                    <thead className="text-xs uppercase tracking-widest text-text-muted bg-bg-secondary/40 border-b border-border">
                                         <tr>
                                             <th className="px-6 py-5 font-bold">Opponent</th>
                                             <th className="px-6 py-5 font-bold">Result</th>
@@ -121,7 +119,7 @@ export default function HistoryPage() {
                                         </tr>
                                     </thead>
 
-                                    <tbody className="divide-y divide-gray-800/60">
+                                    <tbody className="divide-y divide-border/30">
                                         <AnimatePresence>
                                             {paginated.map((match, idx) => (
                                                 <MatchRow
@@ -135,13 +133,13 @@ export default function HistoryPage() {
                                 </table>
                             </div>
 
-                            {/* Refined Pagination */}
+                            {/* Pagination */}
                             {totalPages > 1 && (
-                                <div className="flex justify-center items-center gap-3 py-6 bg-gray-900/20 border-t border-gray-800">
+                                <div className="flex justify-center items-center gap-3 py-6 bg-bg-secondary/20 border-t border-border">
                                     <button
                                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                                         disabled={page === 1}
-                                        className="p-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                        className="p-2 rounded-lg text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                     >
                                         <ChevronLeft size={20} />
                                     </button>
@@ -155,7 +153,7 @@ export default function HistoryPage() {
                                                     onClick={() => setPage(pageNum)}
                                                     className={`w-10 h-10 rounded-lg text-sm font-bold transition-all ${page === pageNum
                                                         ? 'bg-accent text-white shadow-md'
-                                                        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                                                        : 'text-text-secondary hover:bg-bg-hover hover:text-text-primary'
                                                         }`}
                                                 >
                                                     {pageNum}
@@ -167,7 +165,7 @@ export default function HistoryPage() {
                                     <button
                                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                         disabled={page === totalPages}
-                                        className="p-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                        className="p-2 rounded-lg text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                     >
                                         <ChevronRight size={20} />
                                     </button>
@@ -197,7 +195,7 @@ function MatchRow({ match, onClick }) {
     return (
         <tr
             onClick={onClick}
-            className="hover:bg-white/0.03 transition-colors cursor-pointer group"
+            className="hover:bg-bg-hover/40 transition-colors cursor-pointer group"
         >
             <td className="px-6 py-4">
                 <div className="flex items-center gap-4">
@@ -205,10 +203,10 @@ function MatchRow({ match, onClick }) {
                         {match.opponent_username?.charAt(0).toUpperCase() || '?'}
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-bold text-white tracking-wide">
+                        <span className="font-bold text-text-primary tracking-wide">
                             {match.opponent_username}
                         </span>
-                        <span className="text-xs font-medium text-gray-500 mt-0.5">
+                        <span className="text-xs font-medium text-text-muted mt-0.5">
                             {match.opponent_elo} ELO
                         </span>
                     </div>
@@ -217,10 +215,10 @@ function MatchRow({ match, onClick }) {
 
             <td className="px-6 py-4">
                 <span className={`inline-flex items-center justify-center min-w-[85px] px-3 py-1.5 rounded-md font-bold text-xs uppercase tracking-wider border ${isWin
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                    ? 'bg-win/10 text-win border-win/20'
                     : isDraw
-                        ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                        : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                        ? 'bg-draw/10 text-draw border-draw/20'
+                        : 'bg-loss/10 text-loss border-loss/20'
                     }`}>
                     {isWin ? 'Victory' : isDraw ? 'Draw' : 'Defeat'}
                 </span>
@@ -228,31 +226,31 @@ function MatchRow({ match, onClick }) {
 
             <td className="px-6 py-4">
                 <div className="flex flex-col">
-                    <div className={`flex items-center gap-1.5 text-base font-bold ${eloChange > 0 ? 'text-emerald-400' : eloChange < 0 ? 'text-rose-400' : 'text-gray-400'
+                    <div className={`flex items-center gap-1.5 text-base font-bold ${eloChange > 0 ? 'text-win' : eloChange < 0 ? 'text-loss' : 'text-text-muted'
                         }`}>
                         {eloChange > 0 ? <TrendingUp size={16} /> : eloChange < 0 ? <TrendingDown size={16} /> : <Minus size={16} />}
                         <span>{eloChange > 0 ? `+${eloChange}` : eloChange}</span>
                     </div>
-                    <span className="text-xs font-medium text-gray-500 mt-0.5">
+                    <span className="text-xs font-medium text-text-muted mt-0.5">
                         {match.your_elo_before} → {match.your_elo_after ?? '—'}
                     </span>
                 </div>
             </td>
 
             <td className="px-6 py-4 hidden md:table-cell">
-                <span className="text-sm font-medium text-gray-400">
+                <span className="text-sm font-medium text-text-secondary">
                     {match.started_at ? dayjs(match.started_at).format('DD MMM YYYY') : '—'}
                 </span>
             </td>
 
             <td className="px-6 py-4 hidden lg:table-cell">
-                <span className="text-sm font-medium text-gray-400">
+                <span className="text-sm font-medium text-text-secondary">
                     {durationStr}
                 </span>
             </td>
 
             <td className="px-6 py-4 text-right">
-                <ChevronRight size={20} className="text-gray-600 group-hover:text-accent group-hover:translate-x-1 transition-all inline-block" />
+                <ChevronRight size={20} className="text-text-muted group-hover:text-accent group-hover:translate-x-1 transition-all inline-block" />
             </td>
         </tr>
     );
@@ -275,12 +273,12 @@ function MatchDetailModal({ match, onClose }) {
         <Modal isOpen={!!match} onClose={onClose} title="Match Details" size="md">
             <div className="space-y-6">
                 {/* Result Banner */}
-                <div className={`rounded-2xl p-6 text-center shadow-inner ${isWin ? 'bg-emerald-500/10 border border-emerald-500/20'
-                    : isDraw ? 'bg-amber-500/10 border border-amber-500/20'
-                        : 'bg-rose-500/10 border border-rose-500/20'
+                <div className={`rounded-2xl p-6 text-center shadow-inner ${isWin ? 'bg-win/10 border border-win/20'
+                    : isDraw ? 'bg-draw/10 border border-draw/20'
+                        : 'bg-loss/10 border border-loss/20'
                     }`}>
-                    <Trophy size={32} className={`mx-auto mb-3 ${isWin ? 'text-emerald-400' : isDraw ? 'text-amber-400' : 'text-rose-400'}`} />
-                    <h3 className={`text-2xl font-extrabold tracking-tight ${isWin ? 'text-emerald-400' : isDraw ? 'text-amber-400' : 'text-rose-400'}`}>
+                    <Trophy size={32} className={`mx-auto mb-3 ${isWin ? 'text-win' : isDraw ? 'text-draw' : 'text-loss'}`} />
+                    <h3 className={`text-2xl font-extrabold tracking-tight ${isWin ? 'text-win' : isDraw ? 'text-draw' : 'text-loss'}`}>
                         {isWin ? 'Victory!' : isDraw ? 'Draw' : 'Defeat'}
                     </h3>
                     <p className="text-xs font-medium text-text-muted mt-2 opacity-80">
@@ -295,7 +293,7 @@ function MatchDetailModal({ match, onClose }) {
                         icon={eloChange >= 0 ? TrendingUp : TrendingDown}
                         label="Rating Change"
                         value={eloChange > 0 ? `+${eloChange}` : `${eloChange}`}
-                        valueColor={eloChange > 0 ? 'text-emerald-400' : eloChange < 0 ? 'text-rose-400' : 'text-gray-400'}
+                        valueColor={eloChange > 0 ? 'text-win' : eloChange < 0 ? 'text-loss' : 'text-text-muted'}
                         sub={`${match.your_elo_before} → ${match.your_elo_after ?? '—'}`}
                     />
                     <DetailCard icon={Clock} label="Duration" value={durationStr} />
@@ -306,15 +304,15 @@ function MatchDetailModal({ match, onClose }) {
     );
 }
 
-function DetailCard({ icon: Icon, label, value, sub, valueColor = 'text-white' }) {
+function DetailCard({ icon: Icon, label, value, sub, valueColor = 'text-text-primary' }) {
     return (
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4 hover:border-gray-700 transition-colors">
+        <div className="bg-bg-secondary border border-border rounded-xl p-4 hover:border-border-hover transition-colors">
             <div className="flex items-center gap-2 mb-2">
-                <Icon size={14} className="text-gray-500" />
-                <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">{label}</span>
+                <Icon size={14} className="text-text-muted" />
+                <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">{label}</span>
             </div>
             <p className={`text-base font-bold ${valueColor}`}>{value}</p>
-            {sub && <p className="text-xs font-medium text-gray-500 mt-1">{sub}</p>}
+            {sub && <p className="text-xs font-medium text-text-muted mt-1">{sub}</p>}
         </div>
     );
 }

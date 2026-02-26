@@ -425,8 +425,9 @@ async def _create_match(
     PRODUCTION: Atomic transaction with rollback on failure.
     If Redis operations fail, PostgreSQL transaction is rolled back.
     """
-    # Select a random active problem
-    problem = await problem_service.get_random_problem(db)
+    # Select an ELO-appropriate problem
+    avg_elo = (p1_elo + p2_elo) // 2
+    problem = await problem_service.get_problem_for_match(db, avg_elo)
 
     # ── PostgreSQL: persist match (in transaction) ────────
     match = Match(

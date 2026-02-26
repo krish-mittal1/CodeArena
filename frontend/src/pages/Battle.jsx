@@ -78,7 +78,6 @@ export default function Battle() {
     // Cleanup on unmount
     useEffect(() => {
         return () => {
-            // Only reset if match is over
             if (useBattleStore.getState().matchResult) {
                 reset();
             }
@@ -91,7 +90,6 @@ export default function Battle() {
             if (!isDragging.current || !containerRef.current) return;
             const containerWidth = containerRef.current.getBoundingClientRect().width;
             const newLeftWidth = (e.clientX / containerWidth) * 100;
-            // Constrain between 20% and 60%
             if (newLeftWidth >= 20 && newLeftWidth <= 60) {
                 setLeftWidth(newLeftWidth);
             }
@@ -117,23 +115,23 @@ export default function Battle() {
     const startDrag = () => {
         isDragging.current = true;
         document.body.style.cursor = 'col-resize';
-        document.body.style.userSelect = 'none'; // prevent text selection while dragging
+        document.body.style.userSelect = 'none';
     };
 
     // Loading state
     if (!storeMatchId) {
         return (
-            <div className="flex flex-col items-center justify-center h-[calc(100vh-56px)] bg-[#0e0e11] text-zinc-400 gap-4">
-                <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
-                <h2 className="text-xl font-medium tracking-wide text-zinc-300">Provisioning Match Environment...</h2>
-                <p className="text-sm text-zinc-500 font-mono tracking-wider">ID: {matchId}</p>
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-56px)] bg-bg-root text-text-secondary gap-4">
+                <Loader2 className="w-12 h-12 text-accent animate-spin" />
+                <h2 className="text-xl font-medium tracking-wide text-text-primary">Provisioning Match Environment...</h2>
+                <p className="text-sm text-text-muted font-mono tracking-wider">ID: {matchId}</p>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col h-screen bg-slate-950 overflow-hidden text-slate-300 antialiased selection:bg-indigo-500/30">
-            {/* Timer bar — full width, top fixed */}
+        <div className="flex flex-col h-screen bg-bg-root overflow-hidden text-text-primary antialiased selection:bg-accent/30">
+            {/* Timer bar */}
             <TimerBar />
 
             {/* Split pane body */}
@@ -141,7 +139,7 @@ export default function Battle() {
 
                 {/* Left: Problem description */}
                 <div
-                    className="flex flex-col overflow-hidden bg-slate-950 shrink-0"
+                    className="flex flex-col overflow-hidden bg-bg-root shrink-0"
                     style={{ width: `${leftWidth}%` }}
                 >
                     <ProblemPanel />
@@ -149,15 +147,15 @@ export default function Battle() {
 
                 {/* Resizer Handle */}
                 <div
-                    className="w-px cursor-col-resize shrink-0 bg-slate-800 hover:bg-slate-600 active:bg-indigo-500 transition-colors z-30 group relative"
+                    className="w-px cursor-col-resize shrink-0 bg-border hover:bg-border-hover active:bg-accent transition-colors z-30 group relative"
                     onMouseDown={startDrag}
                 >
-                    <div className="absolute inset-y-0 -left-1.5 -right-1.5" /> {/* Larger hit area */}
+                    <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
                 </div>
 
                 {/* Right: Editor + Submissions */}
                 <div
-                    className="flex flex-col flex-1 overflow-hidden bg-slate-950"
+                    className="flex flex-col flex-1 overflow-hidden bg-bg-root"
                     style={{ width: `${100 - leftWidth}%` }}
                 >
                     <CodeEditor />

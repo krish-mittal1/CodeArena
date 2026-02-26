@@ -1,7 +1,7 @@
 .overlay {
     position: fixed;
     inset: 0;
-    z-index: var(--z-modal-backdrop);
+    z-index: 400;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -11,10 +11,10 @@
 }
 
 .modal {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-lg);
-    padding: var(--space-2xl) var(--space-3xl);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 48px 64px;
     text-align: center;
     min-width: 400px;
     max-width: 500px;
@@ -33,51 +33,51 @@
 }
 
 .modal.win::before {
-    background: linear-gradient(90deg, var(--color-accepted), var(--accent-secondary));
+    background: linear-gradient(90deg, var(--color-win), var(--color-accent-secondary));
 }
 
 .modal.loss::before {
-    background: linear-gradient(90deg, var(--color-wrong), var(--color-mle));
+    background: linear-gradient(90deg, var(--color-loss), #ff9800);
 }
 
 .modal.draw::before {
-    background: linear-gradient(90deg, var(--color-tle), var(--accent-primary));
+    background: linear-gradient(90deg, var(--color-draw), var(--color-accent));
 }
 
 .icon {
     font-size: 4rem;
-    margin-bottom: var(--space-md);
+    margin-bottom: 16px;
 }
 
 .title {
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-bold);
-    margin-bottom: var(--space-sm);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
 }
 
 .title.win {
-    color: var(--color-accepted);
+    color: var(--color-win);
 }
 
 .title.loss {
-    color: var(--color-wrong);
+    color: var(--color-loss);
 }
 
 .title.draw {
-    color: var(--color-tle);
+    color: var(--color-draw);
 }
 
 .subtitle {
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    margin-bottom: var(--space-xl);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 32px;
 }
 
 .statsRow {
     display: flex;
     justify-content: center;
-    gap: var(--space-xl);
-    margin-bottom: var(--space-xl);
+    gap: 32px;
+    margin-bottom: 32px;
 }
 
 .stat {
@@ -86,57 +86,57 @@
 
 .statValue {
     font-family: var(--font-mono);
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
 }
 
 .statValue.positive {
-    color: var(--color-accepted);
+    color: var(--color-win);
 }
 
 .statValue.negative {
-    color: var(--color-wrong);
+    color: var(--color-loss);
 }
 
 .statLabel {
-    font-size: var(--font-size-xs);
-    color: var(--text-muted);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
     margin-top: 2px;
 }
 
 .actions {
     display: flex;
-    gap: var(--space-md);
+    gap: 16px;
     justify-content: center;
 }
 
 .primaryBtn {
     padding: 10px 24px;
-    background: var(--accent-primary);
+    background: var(--color-accent);
     color: white;
-    font-weight: var(--font-weight-semibold);
-    font-size: var(--font-size-sm);
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
+    font-weight: 600;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    transition: all 150ms ease;
 }
 
 .primaryBtn:hover {
-    background: var(--accent-primary-hover);
-    box-shadow: var(--shadow-glow);
+    background: var(--color-accent-hover);
+    box-shadow: 0 0 24px var(--color-accent-glow);
 }
 
 .secondaryBtn {
     padding: 10px 24px;
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    transition: all 150ms ease;
 }
 
 .secondaryBtn:hover {
-    border-color: var(--border-hover);
-    color: var(--text-primary);
+    border-color: var(--color-border-hover);
+    color: var(--color-text-primary);
 }
