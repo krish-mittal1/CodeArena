@@ -14,8 +14,8 @@ export default function Settings() {
     };
 
     return (
-        /* THE FIX: Added `flex flex-col items-center` to the outermost div.
-           This absolutely guarantees horizontal centering next to your sidebar.
+        /* THE FIX: flex flex-col items-center guarantees horizontal centering.
+           Tailwind Fix: min-h-[calc(100vh-64px)] is great for staying below the navbar.
         */
         <div className="w-full min-h-[calc(100vh-64px)] bg-[#09090b] flex flex-col items-center pt-16 sm:pt-20 px-4 pb-24">
             
@@ -29,7 +29,8 @@ export default function Settings() {
                     transition={{ duration: 0.5, ease: 'easeOut' }}
                     className="flex flex-col items-center text-center"
                 >
-                    <div className="w-20 h-20 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-[1.25rem] flex items-center justify-center border border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.15)] mb-6">
+                    {/* FIXED: bg-linear-to-br used for canonical styling */}
+                    <div className="w-20 h-20 bg-linear-to-br from-purple-500/20 to-indigo-500/20 rounded-[1.25rem] flex items-center justify-center border border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.15)] mb-6">
                         <SettingsIcon size={36} className="text-purple-400" />
                     </div>
                     <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">

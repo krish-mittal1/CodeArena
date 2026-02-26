@@ -24,9 +24,6 @@ export default function Dashboard() {
     const user = useAuthStore((s) => s.user);
     const queueStatus = useMatchmakingStore((s) => s.status);
     const joinQueue = useMatchmakingStore((s) => s.joinQueue);
-    const leaveQueue = useMatchmakingStore((s) => s.leaveQueue);
-    const resetQueue = useMatchmakingStore((s) => s.reset);
-    const matchId = useBattleStore((s) => s.matchId);
     const hasInitializedRef = useRef(false);
     const navigate = useNavigate();
 
@@ -39,10 +36,6 @@ export default function Dashboard() {
     useEffect(() => {
         if (hasInitializedRef.current) return;
         hasInitializedRef.current = true;
-        if (matchId) return;
-        if (queueStatus !== 'idle') {
-            (async () => { await leaveQueue(); resetQueue(); })();
-        }
     }, []);
 
     if (!user) return null;
@@ -60,26 +53,23 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-bg-root pb-20">
-            {/* Subtle background glow */}
-            <div className="absolute inset-x-0 top-0 h-[350px] pointer-events-none overflow-hidden">
-                <div className="mx-auto w-[600px] h-[300px] bg-accent/5 rounded-full blur-3xl translate-y-[-30%]" />
+            {/* FIXED: h-87.5 instead of h-[350px] */}
+            <div className="absolute inset-x-0 top-0 h-87.5 pointer-events-none overflow-hidden">
+                {/* FIXED: w-150 h-75 instead of w-[600px] h-[300px] */}
+                <div className="mx-auto w-150 h-75 bg-accent/5 rounded-full blur-3xl translate-y-[-30%]" />
             </div>
 
-            {/* ── Main container ────────────────────────── */}
             <div className="dashboard-container relative z-10">
-
-                {/* ── Welcome Header ─────────────────────── */}
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
                     <h1 className="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">
                         Welcome back,{' '}
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-secondary">
+                        <span className="text-transparent bg-clip-text bg-linear-to-r from-accent to-accent-secondary">
                             {user.username}
                         </span>
                     </h1>
                     <p className="text-text-secondary mt-2 text-base">Your arena awaits. Let&apos;s climb the ranks.</p>
                 </motion.div>
 
-                {/* ── Stats Grid (4 cards) ───────────────── */}
                 <div className="stats-grid">
                     {historyLoading
                         ? Array.from({ length: 4 }).map((_, i) => <div key={i}><StatCardSkeleton /></div>)
@@ -91,8 +81,8 @@ export default function Dashboard() {
                                 transition={{ duration: 0.4, delay: i * 0.1 }}
                             >
                                 <div className={`stat-card relative overflow-hidden bg-bg-elevated/80 backdrop-blur-md border border-border transition-all duration-300 group hover:border-border-hover hover:shadow-xl ${stat.glow}`}>
-                                    <div className={`absolute -top-6 -right-6 w-28 h-28 bg-gradient-to-br ${stat.color} opacity-[0.07] rounded-full group-hover:opacity-[0.12] transition-opacity duration-500`} />
-                                    <div className={`relative z-10 w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg ${stat.glow} shrink-0`}>
+                                    <div className={`absolute -top-6 -right-6 w-28 h-28 bg-linear-to-br ${stat.color} opacity-10 rounded-full group-hover:opacity-15 transition-opacity duration-500`} />
+                                    <div className={`relative z-10 w-12 h-12 rounded-xl bg-linear-to-br ${stat.color} flex items-center justify-center shadow-lg ${stat.glow} shrink-0`}>
                                         <stat.icon size={22} className="text-white" />
                                     </div>
                                     <div className="relative z-10 flex flex-col text-right">
@@ -105,7 +95,6 @@ export default function Dashboard() {
                     }
                 </div>
 
-                {/* ── Rating Graph + Find Match CTA ───────── */}
                 <div className="graph-section">
                     <div>
                         {historyLoading ? <ChartSkeleton /> : <RatingChart history={history || []} currentElo={user.elo} />}
@@ -117,20 +106,20 @@ export default function Dashboard() {
                         transition={{ delay: 0.3 }}
                         className="relative bg-bg-elevated/80 backdrop-blur-sm border border-border rounded-2xl flex flex-col overflow-hidden"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.06] to-accent-secondary/[0.04] pointer-events-none" />
+                        <div className="absolute inset-0 bg-linear-to-br from-accent/6 to-accent-secondary/4 pointer-events-none" />
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
 
                         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center p-8 pb-10">
                             <motion.div
                                 animate={{ y: [0, -8, 0] }}
                                 transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                                className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-accent to-accent-secondary flex items-center justify-center shadow-2xl mb-5"
+                                className="w-16 h-16 mx-auto rounded-2xl bg-linear-to-br from-accent to-accent-secondary flex items-center justify-center shadow-2xl mb-5"
                                 style={{ boxShadow: '0 8px 40px rgba(124, 92, 252, 0.35)' }}
                             >
                                 <Swords size={28} className="text-white" />
                             </motion.div>
                             <h3 className="text-xl font-bold text-text-primary mb-1.5">Ready for Battle?</h3>
-                            <p className="text-sm text-text-secondary max-w-[240px] mx-auto">
+                            <p className="text-sm text-text-secondary max-w-60 mx-auto">
                                 Queue up and duel an opponent near your rank
                             </p>
                         </div>
@@ -139,7 +128,7 @@ export default function Dashboard() {
                             <button
                                 onClick={joinQueue}
                                 disabled={isSearching}
-                                className="w-full py-4 px-6 bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent text-white font-bold text-lg transition-all duration-300 disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_-10px_30px_rgba(124,92,252,0.15)] group"
+                                className="w-full py-4 px-6 bg-linear-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent text-white font-bold text-lg transition-all duration-300 disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_-10px_30px_rgba(124,92,252,0.15)] group"
                             >
                                 {isSearching ? (
                                     <span className="animate-pulse flex items-center gap-2">
@@ -156,7 +145,6 @@ export default function Dashboard() {
                     </motion.div>
                 </div>
 
-                {/* ── Recent Matches ─────────────────────── */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -255,7 +243,8 @@ function RecentMatchRow({ match, index }) {
                 <Badge color={isWin ? 'green' : isDraw ? 'yellow' : 'red'}>
                     {isWin ? 'Win' : isDraw ? 'Draw' : 'Loss'}
                 </Badge>
-                <span className={`text-sm font-mono font-bold min-w-[44px] text-right ${eloChange > 0 ? 'text-win' : eloChange < 0 ? 'text-loss' : 'text-text-muted'
+                {/* FIXED: min-w-11 instead of min-w-[44px] */}
+                <span className={`text-sm font-mono font-bold min-w-11 text-right ${eloChange > 0 ? 'text-win' : eloChange < 0 ? 'text-loss' : 'text-text-muted'
                     }`}>
                     {eloChange > 0 ? `+${eloChange}` : eloChange}
                 </span>
