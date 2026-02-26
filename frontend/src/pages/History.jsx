@@ -197,7 +197,7 @@ function MatchRow({ match, onClick }) {
     return (
         <tr
             onClick={onClick}
-            className="hover:bg-white/[0.03] transition-colors cursor-pointer group"
+            className="hover:bg-white/0.03 transition-colors cursor-pointer group"
         >
             <td className="px-6 py-4">
                 <div className="flex items-center gap-4">

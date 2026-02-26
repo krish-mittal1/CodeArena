@@ -6,8 +6,10 @@ Main entry point: uvicorn main:app
 import logging
 import asyncio
 import uuid
+import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,7 +26,7 @@ from backend.websocket.handlers import (
     handle_player_connection,
     handle_spectator_connection,
 )
-from backend.db.session import AsyncSessionLocal
+from backend.db.session import AsyncSessionLocal, engine
 from backend.workers.judge_worker import run_dev_worker
 from backend.services.matchmaking_memory import run_matchmaking_poller
 from backend.core.exceptions import AppException
@@ -38,6 +40,37 @@ from sqlalchemy.orm import selectinload
 setup_logging()
 
 logger = logging.getLogger(__name__)
+
+
+async def run_migrations() -> None:
+    """
+    Apply all pending Alembic migrations (upgrade head) on startup.
+
+    Uses the existing async engine to avoid creating a second connection pool.
+    Runs the migration commands synchronously inside `run_sync` so Alembic's
+    synchronous API works transparently on the async connection.
+    """
+    from alembic.config import Config
+    from alembic import command
+
+    logger.info("Running Alembic migrations …")
+
+    # Resolve the project root (parent of the 'backend' package)
+    project_root = Path(__file__).resolve().parent.parent
+    alembic_cfg = Config(str(project_root / "alembic.ini"))
+    alembic_cfg.set_main_option("script_location", str(project_root / "backend" / "db" / "migrations"))
+
+    # Override the DB URL so Alembic uses the same URL as the app
+    alembic_cfg.set_main_option("sqlalchemy.url", settings.database_url)
+
+    def _run_upgrade(connection):
+        alembic_cfg.attributes["connection"] = connection
+        command.upgrade(alembic_cfg, "head")
+
+    async with engine.begin() as conn:
+        await conn.run_sync(_run_upgrade)
+
+    logger.info("Alembic migrations applied successfully")
 
 
 @asynccontextmanager
@@ -54,6 +87,12 @@ async def lifespan(app: FastAPI):
     
     # ── Startup ───────────────────────────────────────────
     logger.info(f"Starting {settings.app_name}...")
+
+    # ── Apply database migrations ─────────────────────────
+    try:
+        await run_migrations()
+    except Exception as exc:
+        logger.error(f"Alembic migration failed: {exc}", exc_info=True)
     
     redis = None
     judge_task = None
