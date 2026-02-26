@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Swords, LayoutDashboard, History, User, Bell, Settings, LogOut, ChevronDown,
@@ -13,6 +13,8 @@ export default function Navbar() {
     const matchId = useBattleStore((s) => s.matchId);
     const handleLogout = useLogout();
     const navigate = useNavigate();
+    const location = useLocation();
+    const isOnLogin = location.pathname === '/login';
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -97,77 +99,83 @@ export default function Navbar() {
                                     </button>
 
                                     <AnimatePresence>
-    {dropdownOpen && (
-        <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-            // Changed width to w-80 for a bigger card
-            className="absolute right-0 mt-3 w-80 bg-bg-elevated/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)] overflow-hidden"
-        >
-            {/* User Info Header - Increased padding and gap */}
-            <div className="p-6 border-b border-white/10 bg-gradient-to-b from-white/[0.08] to-transparent flex items-center gap-5">
-                <div className="relative shrink-0">
-                    {/* Increased Avatar Size */}
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-accent to-accent-secondary flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-accent-glow/40 ring-4 ring-bg-elevated">
-                        {user?.username?.charAt(0).toUpperCase()}
-                    </div>
-                    {/* Increased Online Status Indicator */}
-                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-[2.5px] border-bg-elevated rounded-full"></div>
-                </div>
-                
-                <div className="flex-1 overflow-hidden">
-                    {/* Increased font sizes slightly for the header */}
-                    <p className="text-lg font-bold text-text-primary truncate">{user?.username}</p>
-                    <p className="text-sm text-text-muted truncate mt-0.5">{user?.email}</p>
-                    
-                    {/* ELO Badge */}
-                    <div className="mt-2.5 inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-accent/15 text-accent border border-accent/20 tracking-wide">
-                        🏆 {user?.elo ?? '—'} ELO
-                    </div>
-                </div>
-            </div>
+                                        {dropdownOpen && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                                transition={{ duration: 0.15, ease: "easeOut" }}
+                                                // Changed width to w-80 for a bigger card
+                                                className="absolute right-0 mt-3 w-80 bg-bg-elevated/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)] overflow-hidden"
+                                            >
+                                                {/* User Info Header - Increased padding and gap */}
+                                                <div className="p-6 border-b border-white/10 bg-gradient-to-b from-white/[0.08] to-transparent flex items-center gap-5">
+                                                    <div className="relative shrink-0">
+                                                        {/* Increased Avatar Size */}
+                                                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-accent to-accent-secondary flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-accent-glow/40 ring-4 ring-bg-elevated">
+                                                            {user?.username?.charAt(0).toUpperCase()}
+                                                        </div>
+                                                        {/* Increased Online Status Indicator */}
+                                                        <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-[2.5px] border-bg-elevated rounded-full"></div>
+                                                    </div>
 
-            {/* Actions - Increased padding */}
-            <div className="p-3 space-y-1.5">
-                <DropdownItem 
-                    icon={User} 
-                    label="Profile" 
-                    onClick={() => { setDropdownOpen(false); navigate('/profile'); }} 
-                />
-                <DropdownItem 
-                    icon={Settings} 
-                    label="Settings" 
-                    onClick={() => { setDropdownOpen(false); navigate('/settings'); }} 
-                />
-            </div>
+                                                    <div className="flex-1 overflow-hidden">
+                                                        {/* Increased font sizes slightly for the header */}
+                                                        <p className="text-lg font-bold text-text-primary truncate">{user?.username}</p>
+                                                        <p className="text-sm text-text-muted truncate mt-0.5">{user?.email}</p>
 
-            {/* Logout Section */}
-            <div className="p-3 border-t border-white/10 bg-black/20">
-                <DropdownItem
-                    icon={LogOut}
-                    label="Logout"
-                    danger
-                    onClick={() => { setDropdownOpen(false); handleLogout(); }}
-                />
-            </div>
-        </motion.div>
-    )}
-</AnimatePresence>
-                                   </div>
+                                                        {/* ELO Badge */}
+                                                        <div className="mt-2.5 inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-accent/15 text-accent border border-accent/20 tracking-wide">
+                                                            🏆 {user?.elo ?? '—'} ELO
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Actions - Increased padding */}
+                                                <div className="p-3 space-y-1.5">
+                                                    <DropdownItem
+                                                        icon={User}
+                                                        label="Profile"
+                                                        onClick={() => { setDropdownOpen(false); navigate('/profile'); }}
+                                                    />
+                                                    <DropdownItem
+                                                        icon={Settings}
+                                                        label="Settings"
+                                                        onClick={() => { setDropdownOpen(false); navigate('/settings'); }}
+                                                    />
+                                                </div>
+
+                                                {/* Logout Section */}
+                                                <div className="p-3 border-t border-white/10 bg-black/20">
+                                                    <DropdownItem
+                                                        icon={LogOut}
+                                                        label="Logout"
+                                                        danger
+                                                        onClick={() => { setDropdownOpen(false); handleLogout(); }}
+                                                    />
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             </>
                         ) : (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-4">
                                 <Link
                                     to="/login"
-                                    className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
+                                    className={isOnLogin
+                                        ? "px-4 py-2 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-xl transition-colors shadow-lg shadow-accent-glow/30"
+                                        : "px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
+                                    }
                                 >
                                     Login
                                 </Link>
                                 <Link
                                     to="/register"
-                                    className="px-4 py-2 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-xl transition-colors shadow-lg shadow-accent-glow/30"
+                                    className={!isOnLogin
+                                        ? "px-4 py-2 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-xl transition-colors shadow-lg shadow-accent-glow/30"
+                                        : "px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
+                                    }
                                 >
                                     Register
                                 </Link>
@@ -194,8 +202,8 @@ function DropdownItem({ icon: Icon, label, danger = false, onClick }) {
         >
             <div className={`
                 p-2.5 rounded-xl transition-all duration-200 flex items-center justify-center
-                ${danger 
-                    ? 'bg-red-500/10 group-hover:bg-red-500/20 group-hover:scale-105' 
+                ${danger
+                    ? 'bg-red-500/10 group-hover:bg-red-500/20 group-hover:scale-105'
                     : 'bg-white/5 group-hover:bg-white/10 group-hover:text-accent group-hover:scale-105'
                 }
             `}>

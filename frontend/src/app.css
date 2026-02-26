@@ -29,17 +29,9 @@
     --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
-/* ── Base Reset ─────────────────────── */
-*,
-*::before,
-*::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/* ── Base styles (Tailwind preflight handles the reset) ─── */
 
 html {
-    font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
