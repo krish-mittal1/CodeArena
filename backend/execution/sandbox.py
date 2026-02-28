@@ -24,6 +24,18 @@ TIMEOUT_EXIT_CODE = 124
 MAX_CONCURRENT_CONTAINERS = 4
 _container_semaphore = asyncio.Semaphore(MAX_CONCURRENT_CONTAINERS)
 
+# Docker-in-Docker path translation:
+# The API container writes files to /app/.sandbox_tmp/ (container path).
+# The .:/app bind mount maps this to $SANDBOX_HOST_WORKDIR/.sandbox_tmp/ on the host.
+# Runner containers need the HOST path in their -v flag.
+_CONTAINER_APP_DIR = "/app"
+_HOST_WORKDIR = os.environ.get("SANDBOX_HOST_WORKDIR", _CONTAINER_APP_DIR)
+
+def _to_host_path(container_path: str) -> str:
+    """Translate a container path under /app/ to the equivalent host path."""
+    rel = os.path.relpath(container_path, _CONTAINER_APP_DIR)
+    return os.path.join(_HOST_WORKDIR, rel)
+
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #  Structured result
@@ -88,10 +100,11 @@ class Sandbox:
 
         async with _container_semaphore:
 
-            # Use /tmp/codearena which is shared between API container and host
-            # (required for Docker-in-Docker volume mounts to work)
-            os.makedirs("/tmp/codearena", exist_ok=True)
-            with tempfile.TemporaryDirectory(prefix=f"codearena_{exec_id}_", dir="/tmp/codearena") as tmpdir:
+            # Write temp files under /app/.sandbox_tmp/ which is shared
+            # with the host via the .:/app bind mount in docker-compose
+            sandbox_tmp = os.path.join(_CONTAINER_APP_DIR, ".sandbox_tmp")
+            os.makedirs(sandbox_tmp, exist_ok=True)
+            with tempfile.TemporaryDirectory(prefix=f"codearena_{exec_id}_", dir=sandbox_tmp) as tmpdir:
 
                 # ── Write source code
                 filename = (
@@ -138,7 +151,7 @@ class Sandbox:
                     "--cpus", "0.5",
 
                     "--tmpfs", "/tmp:size=64m,nosuid",
-                    "-v", f"{tmpdir}:/sandbox:rw",
+                    "-v", f"{_to_host_path(tmpdir)}:/sandbox:rw",
 
                     "--rm",
                     "--entrypoint", "sh",
@@ -184,7 +197,7 @@ class Sandbox:
             "--cpus", "0.5",
 
             "--tmpfs", "/tmp:size=64m,nosuid",
-            "-v", f"{tmpdir}:/sandbox:rw",
+            "-v", f"{_to_host_path(tmpdir)}:/sandbox:rw",
 
             "--rm",
             "--entrypoint", "sh",
