@@ -19,5 +19,5 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 EXPOSE 8000
 
-# Run with 4 workers for production scalability
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+# Single worker required: WebSocket connections + matchmaking state are in-memory
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
