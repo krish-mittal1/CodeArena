@@ -88,7 +88,10 @@ class Sandbox:
 
         async with _container_semaphore:
 
-            with tempfile.TemporaryDirectory(prefix=f"codearena_{exec_id}_") as tmpdir:
+            # Use /tmp/codearena which is shared between API container and host
+            # (required for Docker-in-Docker volume mounts to work)
+            os.makedirs("/tmp/codearena", exist_ok=True)
+            with tempfile.TemporaryDirectory(prefix=f"codearena_{exec_id}_", dir="/tmp/codearena") as tmpdir:
 
                 # ── Write source code
                 filename = (

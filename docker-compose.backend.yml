@@ -11,6 +11,7 @@ services:
       - .:/app
       - /app/.venv
       - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/codearena:/tmp/codearena
     depends_on:
       - api_postgres
       - redis
