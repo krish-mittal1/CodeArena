@@ -11,6 +11,10 @@ export const authApi = {
         api.post('/auth/refresh', { refresh_token: refreshToken }).then((r) => r.data),
     verifyEmail: (token) => api.get(`/auth/verify-email?token=${token}`).then((r) => r.data),
     resendVerification: (data) => api.post('/auth/resend-verification', data).then((r) => r.data),
+
+    // OTP
+    requestOTP: (email) => api.post('/auth/request-otp', { email }).then((r) => r.data),
+    verifyOTP: (email, otp) => api.post('/auth/verify-otp', { email, otp }).then((r) => r.data),
 };
 
 export const userApi = {

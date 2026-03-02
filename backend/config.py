@@ -108,7 +108,15 @@ class Settings(BaseSettings):
     smtp_user: Optional[str] = Field(default=None, description="SMTP Username")
     smtp_password: Optional[str] = Field(default=None, description="SMTP Password")
     smtp_from_email: Optional[str] = Field(default="noreply@codearena.com", description="Sender email address")
-    
+
+    # ── OTP / Resend ─────────────────────────────────────────
+    resend_api_key: Optional[str] = Field(default=None, description="Resend API key for sending OTP emails")
+    otp_from_email: str = Field(default="CodeArena <noreply@codearena.com>", description="OTP sender email address")
+    otp_expire_seconds: int = Field(default=300, description="OTP validity period (seconds)")
+    otp_max_attempts: int = Field(default=5, description="Max wrong OTP attempts before lockout")
+    otp_rate_limit_email: int = Field(default=3, description="Max OTP requests per email per hour")
+    otp_rate_limit_ip: int = Field(default=5, description="Max OTP requests per IP per hour")
+
     @property
     def is_production(self) -> bool:
         return self.environment == "production"

@@ -1,0 +1,60 @@
+"""
+OTP auth routes — request and verify email OTP.
+"""
+
+import logging
+
+from fastapi import APIRouter, Depends, Request
+
+from backend.db.session import get_db, AsyncSession
+from backend.schemas.otp import OTPRequest, OTPVerify, OTPResponse
+from backend.schemas.user import TokenResponse
+from backend.services import otp_service
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+@router.post("/request-otp", response_model=OTPResponse)
+async def request_otp(data: OTPRequest, request: Request):
+    """
+    Send a 6-digit OTP to the given email.
+    Rate limited: 3/email/hour, 5/IP/hour.
+    Always returns success to prevent user enumeration.
+    """
+    ip = request.client.host if request.client else "unknown"
+
+    try:
+        await otp_service.request_otp(data.email, ip)
+    except Exception as e:
+        # Re-raise structured exceptions (rate limit, disposable email)
+        from backend.core.exceptions import AppException
+        if isinstance(e, AppException):
+            raise
+        # Swallow other errors to prevent user enumeration
+        logger.error(f"OTP request failed for {data.email}: {e}", exc_info=True)
+
+    return OTPResponse(message="If this email is valid, you will receive a verification code shortly.")
+
+
+@router.post("/verify-otp", response_model=TokenResponse)
+async def verify_otp(
+    data: OTPVerify,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Verify OTP and return JWT tokens.
+    Auto-creates user if email not registered.
+    """
+    ip = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+
+    return await otp_service.verify_otp(
+        email=data.email,
+        otp=data.otp,
+        ip=ip,
+        user_agent=user_agent,
+        db=db,
+    )

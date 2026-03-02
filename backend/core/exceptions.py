@@ -80,3 +80,25 @@ class UnsupportedLanguage(AppException):
 class ProblemNotFound(AppException):
     def __init__(self):
         super().__init__(status.HTTP_404_NOT_FOUND, "Problem not found")
+
+
+# ── OTP ──────────────────────────────────────────────────────
+
+class OTPRateLimited(AppException):
+    def __init__(self):
+        super().__init__(status.HTTP_429_TOO_MANY_REQUESTS, "Too many OTP requests. Try again later.")
+
+
+class OTPInvalid(AppException):
+    def __init__(self):
+        super().__init__(status.HTTP_401_UNAUTHORIZED, "Invalid or expired OTP")
+
+
+class OTPMaxAttemptsExceeded(AppException):
+    def __init__(self):
+        super().__init__(status.HTTP_429_TOO_MANY_REQUESTS, "Too many failed attempts. Request a new OTP.")
+
+
+class DisposableEmailBlocked(AppException):
+    def __init__(self):
+        super().__init__(status.HTTP_400_BAD_REQUEST, "Disposable email addresses are not allowed")
