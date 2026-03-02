@@ -88,10 +88,11 @@ async def lifespan(app: FastAPI):
     # ── Startup ───────────────────────────────────────────
     logger.info(f"Starting {settings.app_name}...")
 
-    # ── Database migrations (run manually: alembic upgrade head) ──
-    # Auto-migration disabled — causes deadlock with async engine + run_sync.
-    # Run migrations manually before deploying: alembic upgrade head
-    logger.info("Skipping auto-migration (run 'alembic upgrade head' manually if needed)")
+    # ── Apply database migrations ─────────────────────────
+    try:
+        await run_migrations()
+    except Exception as exc:
+        logger.error(f"Alembic migration failed: {exc}", exc_info=True)
     
     redis = None
     judge_task = None
