@@ -88,13 +88,10 @@ async def lifespan(app: FastAPI):
     # ── Startup ───────────────────────────────────────────
     logger.info(f"Starting {settings.app_name}...")
 
-    # ── Apply database migrations ─────────────────────────
-    try:
-        await asyncio.wait_for(run_migrations(), timeout=30)
-    except asyncio.TimeoutError:
-        logger.error("Alembic migration timed out after 30s — skipping. DB may have stale locks.")
-    except Exception as exc:
-        logger.error(f"Alembic migration failed: {exc}", exc_info=True)
+    # ── Database migrations (run manually: alembic upgrade head) ──
+    # Auto-migration disabled — causes deadlock with async engine + run_sync.
+    # Run migrations manually before deploying: alembic upgrade head
+    logger.info("Skipping auto-migration (run 'alembic upgrade head' manually if needed)")
     
     redis = None
     judge_task = None
