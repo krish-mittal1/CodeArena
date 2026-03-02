@@ -90,7 +90,9 @@ async def lifespan(app: FastAPI):
 
     # ── Apply database migrations ─────────────────────────
     try:
-        await run_migrations()
+        await asyncio.wait_for(run_migrations(), timeout=30)
+    except asyncio.TimeoutError:
+        logger.error("Alembic migration timed out after 30s — skipping. DB may have stale locks.")
     except Exception as exc:
         logger.error(f"Alembic migration failed: {exc}", exc_info=True)
     
