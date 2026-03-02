@@ -15,6 +15,7 @@ export const authApi = {
     // OTP
     requestOTP: (email) => api.post('/auth/request-otp', { email }).then((r) => r.data),
     verifyOTP: (email, otp) => api.post('/auth/verify-otp', { email, otp }).then((r) => r.data),
+    verifyOTPOnly: (email, otp) => api.post('/auth/verify-otp-only', { email, otp }).then((r) => r.data),
 };
 
 export const userApi = {

@@ -202,6 +202,46 @@ async def request_otp(email: str, ip: str) -> None:
     await _send_otp_email(email, otp)
 
 
+async def verify_otp_only(email: str, otp: str) -> bool:
+    """Verify OTP without creating a user — just check the code is valid.
+    Used for registration email verification.
+    Returns True if valid, raises otherwise.
+    """
+    email = email.lower().strip()
+
+    r = await _get_otp_redis()
+    otp_key = _KEY_OTP.format(email=email)
+    attempts_key = _KEY_ATTEMPTS.format(email=email)
+
+    # Check attempt count
+    attempts = await r.get(attempts_key)
+    if attempts and int(attempts) >= settings.otp_max_attempts:
+        await r.delete(otp_key)
+        raise OTPMaxAttemptsExceeded()
+
+    # Retrieve stored hash
+    stored_hash = await r.get(otp_key)
+    if not stored_hash:
+        raise OTPInvalid()
+
+    # Constant-time comparison
+    if not _compare_otp(otp, stored_hash):
+        pipe = r.pipeline()
+        pipe.incr(attempts_key)
+        pipe.expire(attempts_key, settings.otp_expire_seconds, nx=True)
+        await pipe.execute()
+        raise OTPInvalid()
+
+    # OTP valid — delete it (single-use)
+    pipe = r.pipeline()
+    pipe.delete(otp_key)
+    pipe.delete(attempts_key)
+    await pipe.execute()
+
+    logger.info(f"OTP: email verified (check only) for {email}")
+    return True
+
+
 async def verify_otp(
     email: str,
     otp: str,

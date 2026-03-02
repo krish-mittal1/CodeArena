@@ -58,3 +58,13 @@ async def verify_otp(
         user_agent=user_agent,
         db=db,
     )
+
+
+@router.post("/verify-otp-only", response_model=OTPResponse)
+async def verify_otp_only(data: OTPVerify):
+    """
+    Verify OTP only — does NOT create a user or issue tokens.
+    Used for registration email verification.
+    """
+    await otp_service.verify_otp_only(email=data.email, otp=data.otp)
+    return OTPResponse(message="Email verified successfully.")

@@ -67,8 +67,8 @@ export default function Register() {
         setClientError('');
         setOtpLoading(true);
         try {
-            // Verify OTP first
-            await authApi.verifyOTP(email, otpString);
+            // Verify OTP only (doesn't create user or tokens)
+            await authApi.verifyOTPOnly(email, otpString);
             // OTP valid → register the account (useRegister hook navigates on success)
             register({ username, email, password });
         } catch (err) {
