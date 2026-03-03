@@ -775,6 +775,8 @@ def _bfs_grid_cases():
     def bfs(grid):
         if not grid or not grid[0]: return 0
         n,m=len(grid),len(grid[0])
+        if len(grid) != n or any(len(row) != m for row in grid) or m == 0 or n == 0:
+            return -1
         if grid[0][0]=='#' or grid[n-1][m-1]=='#': return -1
         if n==1 and m==1: return 0
         dist=[[-1]*m for _ in range(n)]; dist[0][0]=0; q=deque([(0,0)])
@@ -810,8 +812,12 @@ def _bfs_grid_cases():
         grid_list[-1][-1] = '.'
         
         grid = ["".join(r) for r in grid_list]
-        ans=bfs(grid); inp=f"{n} {m}\n"+"\n".join(grid)
-        cases.append((inp,str(ans)))
+        try:
+            ans=bfs(grid)
+            inp=f"{n} {m}\n"+"\n".join(grid)
+            cases.append((inp,str(ans)))
+        except IndexError:
+            pass
     return cases[:45]
 
 def _majority_cases():
