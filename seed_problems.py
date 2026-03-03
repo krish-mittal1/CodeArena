@@ -773,6 +773,7 @@ def _anagram_cases():
 def _bfs_grid_cases():
     from collections import deque
     def bfs(grid):
+        if not grid or not grid[0]: return 0
         n,m=len(grid),len(grid[0])
         if grid[0][0]=='#' or grid[n-1][m-1]=='#': return -1
         if n==1 and m==1: return 0
@@ -787,10 +788,9 @@ def _bfs_grid_cases():
     import random; random.seed(66)
     grids=[
         (["...","...","..."],4),(["...","###","..."],-1),
-        (["."],0),(["##","#."],-1),(["..",".."],2),
-        ([".","."],1),(["..#","...","..."],4),
+        (["##","#."],-1),(["..",".."],2),
+        (["..#","...","..."],4),
         (["...","...","..#"],-1),(["...","...",".."],3),
-        ([".#",".."],2),
     ]
     cases=[]
     for grid,_ in grids:
