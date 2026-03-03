@@ -438,7 +438,11 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # This allows ALL origins (Vercel, Localhost, etc.)
+    allow_origins=[
+        "http://localhost:5173",
+        "https://codexarena.app",
+        "https://www.codexarena.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
