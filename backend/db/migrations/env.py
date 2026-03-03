@@ -30,7 +30,7 @@ if db_url:
     config.set_main_option("sqlalchemy.url", db_url)
 
 if config.config_file_name is not None and not config.attributes.get("connection"):
-    fileConfig(config.config_file_name)
+    if not config.attributes.get("connection"): fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
 

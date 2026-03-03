@@ -55,14 +55,20 @@ async def run_migrations() -> None:
 
     logger.info("Running Alembic migrations …")
 
-    def _run_upgrade():
-        project_root = Path(__file__).resolve().parent.parent
-        alembic_cfg = Config(str(project_root / "alembic.ini"))
-        alembic_cfg.set_main_option("script_location", str(project_root / "backend" / "db" / "migrations"))
-        alembic_cfg.set_main_option("sqlalchemy.url", settings.database_url)
+    # Resolve the project root (parent of the 'backend' package)
+    project_root = Path(__file__).resolve().parent.parent
+    alembic_cfg = Config(str(project_root / "alembic.ini"))
+    alembic_cfg.set_main_option("script_location", str(project_root / "backend" / "db" / "migrations"))
+
+    # Override the DB URL so Alembic uses the same URL as the app
+    alembic_cfg.set_main_option("sqlalchemy.url", settings.database_url)
+
+    def _run_upgrade(connection):
+        alembic_cfg.attributes["connection"] = connection
         command.upgrade(alembic_cfg, "head")
 
-    await asyncio.to_thread(_run_upgrade)
+    async with engine.begin() as conn:
+        await conn.run_sync(_run_upgrade)
 
     logger.info("Alembic migrations applied successfully")
 
@@ -432,11 +438,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://codexarena.app",
-        "https://www.codexarena.app"
-    ],
+    allow_origins=["*"],  # This allows ALL origins (Vercel, Localhost, etc.)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
