@@ -226,7 +226,7 @@ async def _process_submission_inner(
             f"test_cases={len(test_cases)}"
         )
 
-        # ── Execute each test case ────────────────────────
+        # ── Execute ALL test cases in ONE container ─────────
         passed = 0
         overall_verdict = Verdict.ACCEPTED
         max_time_ms = 0
@@ -235,35 +235,35 @@ async def _process_submission_inner(
         time_limit_ms = submission.problem.time_limit_ms if submission.problem else 2000
         memory_limit_mb = submission.problem.memory_limit_mb if submission.problem else 256
 
-        for tc_idx, tc in enumerate(test_cases):
-            # Run asynchronously natively with the new execution engine
-            try:
-                sandbox_result = await sandbox.execute(
-                    language=submission.language,
-                    code=submission.code,
-                    stdin_data=tc.input,
-                    time_limit_ms=time_limit_ms,
-                    memory_limit_mb=memory_limit_mb,
-                )
-            except Exception as sandbox_err:
-                logger.error(
-                    f"[JUDGE] Sandbox execution crashed for submission "
-                    f"{submission_id}, test case #{tc_idx}: {sandbox_err}",
-                    exc_info=True,
-                )
-                sandbox_result = ExecutionResult(
+        # Batch execute: compile once, run all tests in a single container
+        try:
+            batch_results = await sandbox.execute_batch(
+                language=submission.language,
+                code=submission.code,
+                test_inputs=[tc.input for tc in test_cases],
+                time_limit_ms=time_limit_ms,
+                memory_limit_mb=memory_limit_mb,
+            )
+        except Exception as batch_err:
+            logger.error(
+                f"[JUDGE] Batch execution crashed for submission "
+                f"{submission_id}: {batch_err}",
+                exc_info=True,
+            )
+            # Fallback: mark all as runtime error
+            batch_results = [
+                ExecutionResult(
                     stdout="",
-                    stderr=f"Execution engine error: {sandbox_err}",
-                    exit_code=1,
-                    timed_out=False,
-                    oom_killed=False,
-                    time_ms=0,
-                    memory_kb=0,
-                    stage="run",
+                    stderr=f"Execution engine error: {batch_err}",
+                    exit_code=1, timed_out=False, oom_killed=False,
+                    time_ms=0, memory_kb=0, stage="run",
                 )
+            ] * len(test_cases)
 
-            # ── Determine verdict ─────────────────────────
-            # COMPILATION ERROR: separate from runtime error
+        # ── Judge each result (fail-fast on first failure) ──
+        for tc_idx, (tc, sandbox_result) in enumerate(zip(test_cases, batch_results)):
+
+            # ── COMPILATION ERROR check ───────────────────
             if sandbox_result.stage == "compile" and sandbox_result.exit_code != 0:
                 tc_result_obj = SubmissionResult(
                     submission_id=submission.id,
@@ -331,7 +331,7 @@ async def _process_submission_inner(
                 passed += 1
             else:
                 overall_verdict = verdict
-                # Stop on first failure (competitive style)
+                # Stop judging on first failure (competitive style)
                 break
 
         # ── Update submission status ──────────────────────

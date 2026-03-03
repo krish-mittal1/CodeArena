@@ -179,6 +179,230 @@ class Sandbox:
                 return result
 
 
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    #  Batch execution — compile once, run ALL tests in ONE container
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    async def execute_batch(
+        self,
+        language: str,
+        code: str,
+        test_inputs: list[str],
+        time_limit_ms: int | None = None,
+        memory_limit_mb: int | None = None,
+    ) -> list[ExecutionResult]:
+        """
+        Execute code against multiple test inputs in a SINGLE Docker container.
+
+        1. Write source code + all test input files to a shared temp dir
+        2. Compile once (if needed) in one container
+        3. Create a runner script that loops through all inputs
+        4. Run the runner in ONE container — each test is a child process
+        5. Read per-test output/error/meta files and return results
+
+        This reduces N test cases from N (or 2N) Docker containers down to
+        1 compile container + 1 run container = 2 containers total.
+        """
+        if not test_inputs:
+            return []
+
+        exec_id = uuid.uuid4().hex[:8]
+        config = get_language_config(language)
+        num_tests = len(test_inputs)
+
+        timeout_per_test = (time_limit_ms / 1000.0) if time_limit_ms else 2.0
+
+        mem_limit_str = settings.sandbox_memory_limit.rstrip("mM")
+        try:
+            mem_mb = memory_limit_mb or int(mem_limit_str)
+        except ValueError:
+            mem_mb = memory_limit_mb or 256
+
+        sandbox_tmp = os.path.join(_CONTAINER_APP_DIR, ".sandbox_tmp")
+        os.makedirs(sandbox_tmp, exist_ok=True)
+        os.chmod(sandbox_tmp, 0o777)
+
+        with tempfile.TemporaryDirectory(prefix=f"codearena_{exec_id}_", dir=sandbox_tmp) as tmpdir:
+            os.chmod(tmpdir, 0o777)
+
+            # ── Write source code (once) ──────────────────
+            filename = (
+                f"Solution{config.file_extension}"
+                if language == "java"
+                else f"code{config.file_extension}"
+            )
+            code_path = os.path.join(tmpdir, filename)
+            with open(code_path, "w", encoding="utf-8") as f:
+                f.write(code)
+            os.chmod(code_path, 0o777)
+
+            # ── Write ALL test inputs ─────────────────────
+            for i, inp in enumerate(test_inputs):
+                inp_data = inp or ""
+                if inp_data and not inp_data.endswith("\n"):
+                    inp_data += "\n"
+                inp_path = os.path.join(tmpdir, f"input_{i}.txt")
+                with open(inp_path, "w", encoding="utf-8") as f:
+                    f.write(inp_data)
+                os.chmod(inp_path, 0o777)
+
+            async with _container_semaphore:
+
+                # ── Compile once (if needed) ──────────────
+                if config.needs_compilation:
+                    compile_result = await self._run_compile(
+                        exec_id, config, tmpdir, mem_mb
+                    )
+                    if compile_result is not None:
+                        # Compilation failed → return same error for ALL tests
+                        return [compile_result] * num_tests
+
+                # ── Write runner script ───────────────────
+                # Use integer timeout (ceiling) for the `timeout` command
+                timeout_s = int(timeout_per_test) + 1
+                runner_script = f"""#!/bin/sh
+i=0
+while [ $i -lt {num_tests} ]; do
+    START_S=$(date +%s 2>/dev/null || echo 0)
+    timeout {timeout_s}s {config.run_cmd} < /sandbox/input_${{i}}.txt > /sandbox/output_${{i}}.txt 2>/sandbox/error_${{i}}.txt
+    EXIT_CODE=$?
+    END_S=$(date +%s 2>/dev/null || echo 0)
+    if [ "$START_S" != "0" ] && [ "$END_S" != "0" ]; then
+        ELAPSED_MS=$(( (END_S - START_S) * 1000 ))
+    else
+        ELAPSED_MS=0
+    fi
+    echo "${{EXIT_CODE}}|${{ELAPSED_MS}}" > /sandbox/meta_${{i}}.txt
+    i=$((i + 1))
+done
+"""
+                runner_path = os.path.join(tmpdir, "runner.sh")
+                with open(runner_path, "w", encoding="utf-8") as f:
+                    f.write(runner_script)
+                os.chmod(runner_path, 0o777)
+
+                # ── Run ALL tests in ONE container ────────
+                # Total timeout = per_test * num_tests + generous overhead
+                total_timeout = (timeout_per_test + 1) * num_tests + 15.0
+                container_name = f"codearena-batch-{exec_id}"
+
+                docker_args = [
+                    "docker", "run",
+                    "--name", container_name,
+
+                    "--network", "none",
+                    "--cap-drop", "ALL",
+                    "--security-opt", "no-new-privileges:true",
+
+                    "--memory", f"{mem_mb}m",
+                    "--memory-swap", f"{mem_mb}m",
+                    "--pids-limit", str(settings.sandbox_pids_limit),
+                    "--ulimit", "stack=67108864:67108864",
+                    "--cpus", "0.5",
+
+                    "--tmpfs", "/tmp:size=64m,nosuid",
+                    "-v", f"{_to_host_path(tmpdir)}:/sandbox:rw",
+
+                    "--rm",
+                    "--entrypoint", "sh",
+
+                    config.image,
+                    "/sandbox/runner.sh",
+                ]
+
+                batch_timed_out = False
+                try:
+                    def _sync_run():
+                        return subprocess.run(
+                            docker_args,
+                            capture_output=True,
+                            timeout=total_timeout + 5.0,
+                        )
+
+                    loop = asyncio.get_event_loop()
+                    await loop.run_in_executor(None, _sync_run)
+
+                except subprocess.TimeoutExpired:
+                    batch_timed_out = True
+                    await self._force_kill_container(container_name)
+
+                except Exception as e:
+                    err = ExecutionResult(
+                        stdout="",
+                        stderr=f"Batch execution error: {type(e).__name__}: {e}",
+                        exit_code=1, time_ms=0, memory_kb=0,
+                        timed_out=False, oom_killed=False, stage="run",
+                    )
+                    return [err] * num_tests
+
+                # ── Parse per-test results ────────────────
+                results: list[ExecutionResult] = []
+                for i in range(num_tests):
+                    stdout = self._read_file_safe(
+                        os.path.join(tmpdir, f"output_{i}.txt")
+                    )
+                    stderr = self._read_file_safe(
+                        os.path.join(tmpdir, f"error_{i}.txt")
+                    )
+                    meta = self._read_file_safe(
+                        os.path.join(tmpdir, f"meta_{i}.txt")
+                    )
+
+                    exit_code = 1
+                    time_ms = 0
+                    tc_timed_out = False
+                    oom_killed = False
+
+                    if meta:
+                        parts = meta.strip().split("|")
+                        if len(parts) >= 2:
+                            try:
+                                exit_code = int(parts[0])
+                                time_ms = int(parts[1])
+                            except ValueError:
+                                pass
+
+                    # timeout command returns 124 on timeout
+                    if exit_code == TIMEOUT_EXIT_CODE:
+                        tc_timed_out = True
+
+                    # Docker OOM killer returns 137
+                    if exit_code == DOCKER_OOM_EXIT_CODE:
+                        oom_killed = True
+
+                    results.append(ExecutionResult(
+                        stdout=stdout[:100_000],
+                        stderr=stderr[:10_000],
+                        exit_code=exit_code,
+                        time_ms=time_ms,
+                        memory_kb=0,
+                        timed_out=tc_timed_out,
+                        oom_killed=oom_killed,
+                        stage="run",
+                    ))
+
+                # If batch container itself timed out, fill remaining with TLE
+                if batch_timed_out and len(results) < num_tests:
+                    for _ in range(num_tests - len(results)):
+                        results.append(ExecutionResult(
+                            stdout="", stderr="Container batch timed out",
+                            exit_code=TIMEOUT_EXIT_CODE, time_ms=0,
+                            memory_kb=0, timed_out=True,
+                            oom_killed=False, stage="run",
+                        ))
+
+                return results
+
+    @staticmethod
+    def _read_file_safe(path: str) -> str:
+        """Read a file, returning empty string if it doesn't exist."""
+        try:
+            with open(path, "r", encoding="utf-8", errors="replace") as f:
+                return f.read()
+        except (FileNotFoundError, OSError):
+            return ""
+
+
     async def _run_compile(
         self,
         exec_id: str,
