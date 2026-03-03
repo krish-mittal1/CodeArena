@@ -2,11 +2,13 @@
    Frontend Constants — mirrors backend's core/constants.py
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
+// Auto-detect production vs development
+const IS_PROD = typeof window !== 'undefined' && (window.location.hostname === 'codexarena.app' || window.location.hostname === 'www.codexarena.app');
 // Your Azure VM Public IP: 4.193.212.14
 const PROD_IP = '4.193.212.14';
 
-export const API_BASE = import.meta.env.VITE_API_URL || `http://${PROD_IP}:8000/api/v1`;
-export const WS_BASE = import.meta.env.VITE_WS_URL || `ws://${PROD_IP}:8000`;
+export const API_BASE = import.meta.env.VITE_API_URL || (IS_PROD ? 'https://api.codexarena.app/api/v1' : `http://${PROD_IP}:8000/api/v1`);
+export const WS_BASE = import.meta.env.VITE_WS_URL || (IS_PROD ? 'wss://api.codexarena.app' : `ws://${PROD_IP}:8000`);
 
 // ── WebSocket Events (mirrors WSEvent enum) ──────────
 export const WS_EVENTS = {

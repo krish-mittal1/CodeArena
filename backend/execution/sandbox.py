@@ -98,29 +98,37 @@ class Sandbox:
         if stdin_data and not stdin_data.endswith("\n"):
             stdin_data += "\n"
 
-        async with _container_semaphore:
+        # Write temp files under /app/.sandbox_tmp/ which is shared
+        # with the host via the .:/app bind mount in docker-compose
+        sandbox_tmp = os.path.join(_CONTAINER_APP_DIR, ".sandbox_tmp")
+        os.makedirs(sandbox_tmp, exist_ok=True)
+        # Ensure the parent directory is fully accessible to runner containers
+        os.chmod(sandbox_tmp, 0o777)
 
-            # Write temp files under /app/.sandbox_tmp/ which is shared
-            # with the host via the .:/app bind mount in docker-compose
-            sandbox_tmp = os.path.join(_CONTAINER_APP_DIR, ".sandbox_tmp")
-            os.makedirs(sandbox_tmp, exist_ok=True)
-            with tempfile.TemporaryDirectory(prefix=f"codearena_{exec_id}_", dir=sandbox_tmp) as tmpdir:
+        with tempfile.TemporaryDirectory(prefix=f"codearena_{exec_id}_", dir=sandbox_tmp) as tmpdir:
+            # Make the generated tmpdir world-accessible
+            os.chmod(tmpdir, 0o777)
 
-                # ── Write source code
-                filename = (
-                    f"Solution{config.file_extension}"
-                    if language == "java"
-                    else f"code{config.file_extension}"
-                )
+            # ── Write source code
+            filename = (
+                f"Solution{config.file_extension}"
+                if language == "java"
+                else f"code{config.file_extension}"
+            )
 
-                code_path = os.path.join(tmpdir, filename)
-                with open(code_path, "w", encoding="utf-8") as f:
-                    f.write(code)
+            code_path = os.path.join(tmpdir, filename)
+            with open(code_path, "w", encoding="utf-8") as f:
+                f.write(code)
+            os.chmod(code_path, 0o777)
 
-                # ── Write input
-                stdin_path = os.path.join(tmpdir, "input.txt")
-                with open(stdin_path, "w", encoding="utf-8") as f:
-                    f.write(stdin_data or "")
+            # ── Write input
+            stdin_path = os.path.join(tmpdir, "input.txt")
+            with open(stdin_path, "w", encoding="utf-8") as f:
+                f.write(stdin_data or "")
+            os.chmod(stdin_path, 0o777)
+
+            async with _container_semaphore:
+
 
                 # ── Compilation step (if needed)
                 if config.needs_compilation:
