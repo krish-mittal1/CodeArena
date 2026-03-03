@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
 Seed script: inserts 22 competitive programming problems with 40-50 test cases each.
-Run: python seed_problems.py
-Requires: psycopg2  (pip install psycopg2-binary)
+Uses asyncpg (already in the api venv). Run inside the api container:
+  docker exec api sh -c 'cd /app && .venv/bin/python /tmp/seed_problems.py'
 """
 
+import asyncio
 import uuid
-import psycopg2
+import asyncpg
 
-DB = dict(host="localhost", port=5432, dbname="codexarena", user="postgres", password="krishisunique")
+DB_DSN = "postgresql://postgres:krishisunique@api_postgres:5432/codexarena"
 
 PROBLEMS = [
     # ── 800-rated ─────────────────────────────────────────────────
@@ -837,39 +838,37 @@ def _rotate_cases():
 
 # ── Main ──────────────────────────────────────────────────────────
 
-def main():
-    conn = psycopg2.connect(**DB)
-    cur = conn.cursor()
+async def main():
+    conn = await asyncpg.connect(DB_DSN)
 
     total_problems = 0
     total_cases = 0
 
     for prob in PROBLEMS:
         prob_id = str(uuid.uuid4())
-        cur.execute(
+        await conn.execute(
             """INSERT INTO problems
                (id, title, description, difficulty, input_format, output_format,
                 constraints, time_limit_ms, memory_limit_mb, is_active, created_at, rating)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,true,NOW(),%s)
+               VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,true,NOW(),$10)
                ON CONFLICT DO NOTHING""",
-            (prob_id, prob["title"], prob["description"], prob["difficulty"],
-             prob["input_format"], prob["output_format"], prob["constraints"],
-             prob["time_limit_ms"], prob["memory_limit_mb"], prob["rating"])
+            uuid.UUID(prob_id), prob["title"], prob["description"], prob["difficulty"],
+            prob["input_format"], prob["output_format"], prob["constraints"],
+            prob["time_limit_ms"], prob["memory_limit_mb"], prob["rating"]
         )
         cases = prob["gen"]()
         for idx, (inp, out) in enumerate(cases, 1):
-            cur.execute(
+            await conn.execute(
                 """INSERT INTO test_cases (id, problem_id, input, expected_output, is_sample, order_index)
-                   VALUES (%s,%s,%s,%s,%s,%s)""",
-                (str(uuid.uuid4()), prob_id, inp, out, idx <= 3, idx)
+                   VALUES ($1,$2,$3,$4,$5,$6)""",
+                uuid.UUID(str(uuid.uuid4())), uuid.UUID(prob_id), inp, out, idx <= 3, idx
             )
             total_cases += 1
         total_problems += 1
         print(f"  ✔ [{prob['rating']}] {prob['title']} — {len(cases)} test cases")
 
-    conn.commit()
-    cur.close(); conn.close()
+    await conn.close()
     print(f"\n✅ Done! Inserted {total_problems} problems and {total_cases} test cases.")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
