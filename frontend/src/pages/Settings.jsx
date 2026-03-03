@@ -20,7 +20,7 @@ export default function Settings() {
                     transition={{ duration: 0.5, ease: 'easeOut' }}
                     className="flex flex-col items-center text-center"
                 >
-                    <div className="w-20 h-20 bg-accent/10 rounded-[1.25rem] flex items-center justify-center border border-accent/30 shadow-[0_0_30px_var(--color-accent-glow)] mb-6">
+                    <div className="w-20 h-20 bg-accent/10 rounded-xl flex items-center justify-center border border-accent/20 mb-6">
                         <SettingsIcon size={36} className="text-accent" />
                     </div>
                     <h1 className="text-4xl sm:text-5xl font-extrabold text-text-primary tracking-tight">
@@ -56,22 +56,22 @@ function SettingsSection({ icon: Icon, title, description }) {
 
     return (
         <motion.div variants={itemVariants}>
-            <div className="group flex items-center justify-between p-6 sm:p-7 bg-bg-secondary border border-border rounded-2xl hover:bg-bg-elevated hover:border-accent/30 hover:shadow-xl hover:shadow-accent/5 transition-all duration-300 cursor-pointer">
+            <div className="group flex items-center justify-between p-6 sm:p-7 bg-bg-secondary border border-border rounded-xl hover:bg-bg-elevated hover:border-border-hover transition-colors duration-200 cursor-pointer">
                 <div className="flex items-center gap-6">
-                    <div className="w-14 h-14 rounded-xl bg-bg-root border border-border flex items-center justify-center group-hover:border-accent/40 group-hover:bg-accent/10 transition-all duration-300 shadow-inner">
-                        <Icon size={24} className="text-text-muted group-hover:text-accent transition-colors duration-300" />
+                    <div className="w-14 h-14 rounded-lg bg-bg-root border border-border flex items-center justify-center group-hover:bg-accent/10 transition-colors duration-200">
+                        <Icon size={24} className="text-text-muted group-hover:text-accent transition-colors duration-200" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-text-primary tracking-wide group-hover:text-accent-hover transition-colors duration-300">
+                        <h3 className="text-lg font-bold text-text-primary tracking-wide">
                             {title}
                         </h3>
-                        <p className="text-sm text-text-muted font-medium mt-1 group-hover:text-text-secondary transition-colors duration-300">
+                        <p className="text-sm text-text-muted font-medium mt-1">
                             {description}
                         </p>
                     </div>
                 </div>
                 <div className="pr-2 sm:pr-4">
-                    <ChevronRight size={24} className="text-text-muted group-hover:text-accent group-hover:translate-x-1.5 transition-all duration-300" />
+                    <ChevronRight size={24} className="text-text-muted group-hover:text-text-secondary transition-colors" />
                 </div>
             </div>
         </motion.div>

@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 
 const variants = {
-    primary: 'bg-accent hover:bg-accent-hover text-white shadow-lg shadow-accent-glow',
+    primary: 'bg-accent hover:bg-accent-hover text-white',
     secondary: 'bg-bg-elevated hover:bg-bg-hover text-text-primary border border-border',
     danger: 'bg-loss/20 hover:bg-loss/30 text-loss border border-loss/30',
     ghost: 'hover:bg-bg-elevated text-text-secondary hover:text-text-primary',

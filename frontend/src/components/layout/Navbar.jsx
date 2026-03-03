@@ -36,8 +36,8 @@ export default function Navbar() {
     };
 
     const linkClass = ({ isActive }) =>
-        `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
-            ? 'bg-accent/15 text-accent shadow-sm shadow-accent-glow/20'
+        `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${isActive
+            ? 'bg-accent/10 text-accent'
             : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover'
         } ${matchId ? 'opacity-50 pointer-events-none' : ''}`;
 
@@ -47,7 +47,7 @@ export default function Navbar() {
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-2.5 group">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-accent-secondary flex items-center justify-center shadow-lg shadow-accent-glow/30 group-hover:shadow-accent-glow/50 transition-shadow">
+                        <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center">
                             <Swords size={18} className="text-white" />
                         </div>
                         <span className="text-lg font-bold text-text-primary">
@@ -85,7 +85,7 @@ export default function Navbar() {
                                         onClick={() => setDropdownOpen(!dropdownOpen)}
                                         className={`flex items-center gap-2.5 px-3 py-1.5 rounded-2xl transition-all cursor-pointer border ${dropdownOpen ? 'bg-bg-hover border-white/10 shadow-sm' : 'border-transparent hover:bg-bg-hover'}`}
                                     >
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-accent-secondary flex items-center justify-center text-white text-sm font-bold shadow-md shadow-accent-glow/20 ring-2 ring-bg-primary">
+                                        <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white text-sm font-bold ring-2 ring-bg-primary">
                                             {user?.username?.charAt(0).toUpperCase()}
                                         </div>
                                         <div className="hidden sm:block text-left">
@@ -106,13 +106,13 @@ export default function Navbar() {
                                                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                                                 transition={{ duration: 0.15, ease: "easeOut" }}
                                                 // Changed width to w-80 for a bigger card
-                                                className="absolute right-0 mt-3 w-80 bg-bg-elevated/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)] overflow-hidden"
+                                                className="absolute right-0 mt-3 w-80 bg-bg-elevated border border-border rounded-xl shadow-xl overflow-hidden"
                                             >
                                                 {/* User Info Header - Increased padding and gap */}
-                                                <div className="p-6 border-b border-white/10 bg-gradient-to-b from-white/[0.08] to-transparent flex items-center gap-5">
+                                                <div className="p-6 border-b border-border flex items-center gap-5">
                                                     <div className="relative shrink-0">
                                                         {/* Increased Avatar Size */}
-                                                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-accent to-accent-secondary flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-accent-glow/40 ring-4 ring-bg-elevated">
+                                                        <div className="w-14 h-14 rounded-full bg-accent flex items-center justify-center text-white font-bold text-2xl">
                                                             {user?.username?.charAt(0).toUpperCase()}
                                                         </div>
                                                         {/* Increased Online Status Indicator */}
@@ -125,7 +125,7 @@ export default function Navbar() {
                                                         <p className="text-sm text-text-muted truncate mt-0.5">{user?.email}</p>
 
                                                         {/* ELO Badge */}
-                                                        <div className="mt-2.5 inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-accent/15 text-accent border border-accent/20 tracking-wide">
+                                                        <div className="mt-2.5 inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-accent/10 text-accent border border-accent/20 tracking-wide">
                                                             🏆 {user?.elo ?? '—'} ELO
                                                         </div>
                                                     </div>
@@ -146,7 +146,7 @@ export default function Navbar() {
                                                 </div>
 
                                                 {/* Logout Section */}
-                                                <div className="p-3 border-t border-white/10 bg-black/20">
+                                                <div className="p-3 border-t border-border">
                                                     <DropdownItem
                                                         icon={LogOut}
                                                         label="Logout"
@@ -164,7 +164,7 @@ export default function Navbar() {
                                 <Link
                                     to="/login"
                                     className={isOnLogin
-                                        ? "px-4 py-2 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-xl transition-colors shadow-lg shadow-accent-glow/30"
+                                        ? "px-4 py-2 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-lg transition-colors"
                                         : "px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
                                     }
                                 >
@@ -173,7 +173,7 @@ export default function Navbar() {
                                 <Link
                                     to="/register"
                                     className={!isOnLogin
-                                        ? "px-4 py-2 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-xl transition-colors shadow-lg shadow-accent-glow/30"
+                                        ? "px-4 py-2 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-lg transition-colors"
                                         : "px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
                                     }
                                 >

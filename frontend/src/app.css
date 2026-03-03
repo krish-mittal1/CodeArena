@@ -2,34 +2,32 @@
 @import "tailwindcss";
 
 @theme {
-    --color-bg-root: #06060b;
-    --color-bg-primary: #0a0a12;
-    --color-bg-secondary: #10101c;
-    --color-bg-elevated: #181828;
-    --color-bg-surface: #1e1e32;
-    --color-bg-hover: #24243a;
+    --color-bg-root: #0f1117;
+    --color-bg-primary: #161b22;
+    --color-bg-secondary: #1c2333;
+    --color-bg-elevated: #222d3d;
+    --color-bg-surface: #2a3545;
+    --color-bg-hover: #313d4f;
 
-    --color-accent: #7c5cfc;
-    --color-accent-hover: #9178ff;
-    --color-accent-glow: rgba(124, 92, 252, 0.25);
-    --color-accent-secondary: #4ecdc4;
+    --color-accent: #3b82f6;
+    --color-accent-hover: #5a9cf6;
 
-    --color-win: #00e676;
-    --color-loss: #ff5252;
-    --color-draw: #ffc107;
+    --color-win: #22c55e;
+    --color-loss: #ef4444;
+    --color-draw: #eab308;
 
-    --color-text-primary: #e8e8f0;
-    --color-text-secondary: #8888a0;
-    --color-text-muted: #55556a;
+    --color-text-primary: #e6edf3;
+    --color-text-secondary: #8b949e;
+    --color-text-muted: #484f58;
 
-    --color-border: #2a2a40;
-    --color-border-hover: #3a3a58;
+    --color-border: #30363d;
+    --color-border-hover: #484f58;
 
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
-/* ── Base styles (Tailwind preflight handles the reset) ─── */
+/* ── Base styles ─── */
 
 html {
     -webkit-font-smoothing: antialiased;
@@ -67,41 +65,6 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--color-border-hover);
-}
-
-/* ── Animations ─────────────────────── */
-@keyframes shimmer {
-    0% {
-        background-position: -200% 0;
-    }
-
-    100% {
-        background-position: 200% 0;
-    }
-}
-
-@keyframes pulse-glow {
-
-    0%,
-    100% {
-        box-shadow: 0 0 12px var(--color-accent-glow);
-    }
-
-    50% {
-        box-shadow: 0 0 28px var(--color-accent-glow);
-    }
-}
-
-@keyframes float {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-6px);
-    }
 }
 
 /* ── Dashboard Layout ─────────────────────── */

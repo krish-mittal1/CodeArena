@@ -53,7 +53,7 @@ function AppRoutes() {
     return (
       <div className="min-h-screen bg-bg-root flex items-center justify-center">
         <div className="text-center">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-accent to-accent-secondary flex items-center justify-center shadow-xl shadow-accent-glow/40 mb-4 animate-pulse">
+          <div className="w-14 h-14 mx-auto rounded-xl bg-accent flex items-center justify-center mb-4 animate-pulse">
             <span className="text-2xl">⚔</span>
           </div>
           <p className="text-text-secondary text-sm font-medium">Loading CodeArena...</p>
@@ -129,17 +129,16 @@ export default function App() {
             position="bottom-right"
             toastOptions={{
               style: {
-                background: '#181828',
-                color: '#e8e8f0',
-                borderRadius: '12px',
-                border: '1px solid #2a2a40',
-                fontSize: '14px',
+                background: '#1c2333',
+                color: '#e6edf3',
+                borderRadius: '8px',
+                border: '1px solid #30363d',
               },
               success: {
-                iconTheme: { primary: '#00e676', secondary: '#181828' },
+                iconTheme: { primary: '#22c55e', secondary: '#1c2333' },
               },
               error: {
-                iconTheme: { primary: '#ff5252', secondary: '#181828' },
+                iconTheme: { primary: '#ef4444', secondary: '#1c2333' },
               },
             }}
           />

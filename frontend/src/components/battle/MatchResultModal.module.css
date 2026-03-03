@@ -33,15 +33,15 @@
 }
 
 .modal.win::before {
-    background: linear-gradient(90deg, var(--color-win), var(--color-accent-secondary));
+    background: var(--color-win);
 }
 
 .modal.loss::before {
-    background: linear-gradient(90deg, var(--color-loss), #ff9800);
+    background: var(--color-loss);
 }
 
 .modal.draw::before {
-    background: linear-gradient(90deg, var(--color-draw), var(--color-accent));
+    background: var(--color-draw);
 }
 
 .icon {
@@ -123,7 +123,7 @@
 
 .primaryBtn:hover {
     background: var(--color-accent-hover);
-    box-shadow: 0 0 24px var(--color-accent-glow);
+    background: var(--color-accent-hover);
 }
 
 .secondaryBtn {

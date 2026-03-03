@@ -25,7 +25,7 @@ export default function RatingChart({ history = [], currentElo = 0 }) {
 
     if (data.length === 0) {
         return (
-            <div className="bg-bg-elevated/80 backdrop-blur-sm border border-border rounded-2xl p-6">
+            <div className="bg-bg-secondary border border-border rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2 mb-6">
                     <TrendingUp size={18} className="text-accent" />
                     Rating Progression
@@ -44,7 +44,7 @@ export default function RatingChart({ history = [], currentElo = 0 }) {
     const maxElo = Math.max(...allElos) + 50;
 
     return (
-        <div className="bg-bg-elevated/80 backdrop-blur-sm border border-border rounded-2xl p-6">
+        <div className="bg-bg-secondary border border-border rounded-xl p-6">
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
                     <TrendingUp size={18} className="text-accent" />
@@ -60,33 +60,33 @@ export default function RatingChart({ history = [], currentElo = 0 }) {
                 <AreaChart data={data} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
                     <defs>
                         <linearGradient id="eloGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#7c5cfc" stopOpacity={0.35} />
-                            <stop offset="100%" stopColor="#7c5cfc" stopOpacity={0} />
+                            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
+                            <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
                         </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#2a2a40" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#30363d" vertical={false} />
                     <XAxis
                         dataKey="date"
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fill: '#55556a', fontSize: 11 }}
+                        tick={{ fill: '#484f58', fontSize: 11 }}
                         interval="preserveStartEnd"
                     />
                     <YAxis
                         domain={[minElo, maxElo]}
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fill: '#55556a', fontSize: 11 }}
+                        tick={{ fill: '#484f58', fontSize: 11 }}
                     />
-                    <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#7c5cfc', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                    <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }} />
                     <Area
                         type="monotone"
                         dataKey="elo"
-                        stroke="#7c5cfc"
+                        stroke="#3b82f6"
                         strokeWidth={2.5}
                         fill="url(#eloGradient)"
                         dot={false}
-                        activeDot={{ r: 5, fill: '#7c5cfc', stroke: '#181828', strokeWidth: 3 }}
+                        activeDot={{ r: 5, fill: '#3b82f6', stroke: '#1c2333', strokeWidth: 3 }}
                         isAnimationActive={true}
                         animationDuration={1200}
                         animationEasing="ease-out"

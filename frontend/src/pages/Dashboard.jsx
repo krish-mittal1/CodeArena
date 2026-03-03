@@ -45,27 +45,20 @@ export default function Dashboard() {
     const recentMatches = (history || []).slice(0, 5);
 
     const stats = [
-        { label: 'ELO Rating', value: formatElo(user.elo), icon: Trophy, color: 'from-amber-500 to-orange-600', glow: 'shadow-amber-500/20' },
-        { label: 'Matches Played', value: user.matches_played, icon: Target, color: 'from-blue-500 to-cyan-500', glow: 'shadow-blue-500/20' },
-        { label: 'Wins', value: user.matches_won, icon: Flame, color: 'from-emerald-500 to-green-500', glow: 'shadow-emerald-500/20' },
-        { label: 'Win Rate', value: winRate, icon: TrendingUp, color: 'from-violet-500 to-purple-600', glow: 'shadow-violet-500/20' },
+        { label: 'ELO Rating', value: formatElo(user.elo), icon: Trophy },
+        { label: 'Matches Played', value: user.matches_played, icon: Target },
+        { label: 'Wins', value: user.matches_won, icon: Flame },
+        { label: 'Win Rate', value: winRate, icon: TrendingUp },
     ];
 
     return (
         <div className="min-h-screen bg-bg-root pb-20">
-            {/* FIXED: h-87.5 instead of h-[350px] */}
-            <div className="absolute inset-x-0 top-0 h-87.5 pointer-events-none overflow-hidden">
-                {/* FIXED: w-150 h-75 instead of w-[600px] h-[300px] */}
-                <div className="mx-auto w-150 h-75 bg-accent/5 rounded-full blur-3xl translate-y-[-30%]" />
-            </div>
 
             <div className="dashboard-container relative z-10">
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
                     <h1 className="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">
                         Welcome back,{' '}
-                        <span className="text-transparent bg-clip-text bg-linear-to-r from-accent to-accent-secondary">
-                            {user.username}
-                        </span>
+                        <span className="text-accent">{user.username}</span>
                     </h1>
                     <p className="text-text-secondary mt-2 text-base">Your arena awaits. Let&apos;s climb the ranks.</p>
                 </motion.div>
@@ -80,13 +73,12 @@ export default function Dashboard() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.4, delay: i * 0.1 }}
                             >
-                                <div className={`stat-card relative overflow-hidden bg-bg-elevated/80 backdrop-blur-md border border-border transition-all duration-300 group hover:border-border-hover hover:shadow-xl ${stat.glow}`}>
-                                    <div className={`absolute -top-6 -right-6 w-28 h-28 bg-linear-to-br ${stat.color} opacity-10 rounded-full group-hover:opacity-15 transition-opacity duration-500`} />
-                                    <div className={`relative z-10 w-12 h-12 rounded-xl bg-linear-to-br ${stat.color} flex items-center justify-center shadow-lg ${stat.glow} shrink-0`}>
-                                        <stat.icon size={22} className="text-white" />
+                                <div className="stat-card bg-bg-secondary border border-border transition-colors duration-200 hover:border-border-hover">
+                                    <div className="w-11 h-11 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                                        <stat.icon size={20} className="text-accent" />
                                     </div>
-                                    <div className="relative z-10 flex flex-col text-right">
-                                        <p className="text-sm text-text-muted uppercase tracking-wider font-semibold mb-1">{stat.label}</p>
+                                    <div className="flex flex-col text-right">
+                                        <p className="text-xs text-text-muted uppercase tracking-wider font-semibold mb-1">{stat.label}</p>
                                         <p className="text-2xl font-bold text-text-primary font-mono tracking-tight">{stat.value}</p>
                                     </div>
                                 </div>
@@ -104,31 +96,23 @@ export default function Dashboard() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="relative bg-bg-elevated/80 backdrop-blur-sm border border-border rounded-2xl flex flex-col overflow-hidden"
+                        className="bg-bg-secondary border border-border rounded-xl flex flex-col overflow-hidden"
                     >
-                        <div className="absolute inset-0 bg-linear-to-br from-accent/6 to-accent-secondary/4 pointer-events-none" />
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
-
-                        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center p-8 pb-10">
-                            <motion.div
-                                animate={{ y: [0, -8, 0] }}
-                                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                                className="w-16 h-16 mx-auto rounded-2xl bg-linear-to-br from-accent to-accent-secondary flex items-center justify-center shadow-2xl mb-5"
-                                style={{ boxShadow: '0 8px 40px rgba(124, 92, 252, 0.35)' }}
-                            >
-                                <Swords size={28} className="text-white" />
-                            </motion.div>
+                        <div className="flex-1 flex flex-col items-center justify-center text-center p-8 pb-10">
+                            <div className="w-14 h-14 mx-auto rounded-xl bg-accent flex items-center justify-center mb-5">
+                                <Swords size={26} className="text-white" />
+                            </div>
                             <h3 className="text-xl font-bold text-text-primary mb-1.5">Ready for Battle?</h3>
                             <p className="text-sm text-text-secondary max-w-60 mx-auto">
                                 Queue up and duel an opponent near your rank
                             </p>
                         </div>
 
-                        <div className="relative z-10 w-full mt-auto">
+                        <div className="w-full mt-auto">
                             <button
                                 onClick={joinQueue}
                                 disabled={isSearching}
-                                className="w-full py-4 px-6 bg-linear-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent text-white font-bold text-lg transition-all duration-300 disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_-10px_30px_rgba(124,92,252,0.15)] group"
+                                className="w-full py-4 px-6 bg-accent hover:bg-accent-hover text-white font-bold text-lg transition-colors disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {isSearching ? (
                                     <span className="animate-pulse flex items-center gap-2">
@@ -136,7 +120,7 @@ export default function Dashboard() {
                                     </span>
                                 ) : (
                                     <>
-                                        <Swords size={20} className="group-hover:scale-110 transition-transform" />
+                                        <Swords size={20} />
                                         Find Match
                                     </>
                                 )}
@@ -149,7 +133,7 @@ export default function Dashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="recent-section bg-bg-elevated/80 backdrop-blur-sm border border-border rounded-2xl overflow-hidden"
+                    className="recent-section bg-bg-secondary border border-border rounded-xl overflow-hidden"
                 >
                     <div className="flex items-center justify-between px-6 py-5 border-b border-border/60">
                         <h3 className="text-xl font-semibold text-text-primary flex items-center gap-2.5">
@@ -220,9 +204,9 @@ function RecentMatchRow({ match, index }) {
             className="flex items-center justify-between px-6 py-5 hover:bg-bg-hover/40 transition-colors group"
         >
             <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isWin ? 'bg-win/15 text-win ring-1 ring-win/20'
-                    : isDraw ? 'bg-draw/15 text-draw ring-1 ring-draw/20'
-                        : 'bg-loss/15 text-loss ring-1 ring-loss/20'
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${isWin ? 'bg-win/15 text-win'
+                    : isDraw ? 'bg-draw/15 text-draw'
+                        : 'bg-loss/15 text-loss'
                     }`}>
                     {isWin ? 'W' : isDraw ? 'D' : 'L'}
                 </div>
@@ -243,7 +227,6 @@ function RecentMatchRow({ match, index }) {
                 <Badge color={isWin ? 'green' : isDraw ? 'yellow' : 'red'}>
                     {isWin ? 'Win' : isDraw ? 'Draw' : 'Loss'}
                 </Badge>
-                {/* FIXED: min-w-11 instead of min-w-[44px] */}
                 <span className={`text-sm font-mono font-bold min-w-11 text-right ${eloChange > 0 ? 'text-win' : eloChange < 0 ? 'text-loss' : 'text-text-muted'
                     }`}>
                     {eloChange > 0 ? `+${eloChange}` : eloChange}

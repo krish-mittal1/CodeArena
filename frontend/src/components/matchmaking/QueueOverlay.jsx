@@ -55,10 +55,10 @@ export default function QueueOverlay() {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: 20 }}
                     transition={{ type: 'spring', duration: 0.5 }}
-                    className="relative w-full max-w-md mx-4 bg-bg-elevated/95 backdrop-blur-2xl border border-border/80 rounded-[2rem] p-8 sm:p-10 shadow-2xl overflow-hidden"
+                    className="relative w-full max-w-md mx-4 bg-bg-elevated border border-border rounded-xl p-8 sm:p-10 shadow-xl overflow-hidden"
                 >
                     {/* Top Accent Line */}
-                    <div className="absolute top-0 left-0 w-full h-[6px] bg-gradient-to-r from-accent via-accent-secondary to-accent" />
+                    <div className="absolute top-0 left-0 w-full h-1 bg-accent" />
 
                     {status === 'searching' && (
                         <div className="flex flex-col items-center justify-between w-full min-h-[420px] gap-8 mt-2">
@@ -68,7 +68,7 @@ export default function QueueOverlay() {
                                 <motion.div
                                     animate={{ scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] }}
                                     transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                                    className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.4)]"
+                                    className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center"
                                 >
                                     <Swords size={32} className="text-white drop-shadow-md" />
                                 </motion.div>
@@ -91,8 +91,8 @@ export default function QueueOverlay() {
                                     <p className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-3 drop-shadow-sm">
                                         Time in Queue
                                     </p>
-                                    <div className="bg-purple-900/30 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.2)] rounded-full px-8 py-3 inline-block">
-                                        <p className="text-3xl font-mono text-purple-400 font-bold tracking-wider relative bottom-[1px]">
+                                    <div className="bg-accent/10 border border-accent/20 rounded-full px-8 py-3 inline-block">
+                                        <p className="text-3xl font-mono text-accent font-bold tracking-wider relative bottom-[1px]">
                                             {formatTime(waitSeconds)}
                                         </p>
                                     </div>
@@ -108,7 +108,7 @@ export default function QueueOverlay() {
                                             key={i}
                                             animate={{ opacity: [0.2, 1, 0.2], scale: [0.8, 1.2, 0.8] }}
                                             transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.2, ease: "easeInOut" }}
-                                            className="w-2.5 h-2.5 rounded-full bg-purple-500"
+                                            className="w-2.5 h-2.5 rounded-full bg-accent"
                                         />
                                     ))}
                                 </div>
@@ -126,7 +126,7 @@ export default function QueueOverlay() {
                                 {/* Cancel Button */}
                                 <button
                                     onClick={leaveQueue}
-                                    className="w-full flex items-center justify-center gap-2 py-4 bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 transition-all rounded-xl font-semibold shadow-inner text-base"
+                                    className="w-full flex items-center justify-center gap-2 py-4 bg-loss/10 text-loss hover:bg-loss/20 border border-loss/20 transition-colors rounded-lg font-semibold text-base"
                                 >
                                     <X size={20} />
                                     Cancel Search
@@ -141,7 +141,7 @@ export default function QueueOverlay() {
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{ type: 'spring', damping: 10, stiffness: 200 }}
-                                className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-win/80 to-accent-secondary flex items-center justify-center shadow-xl mb-6"
+                                className="w-20 h-20 mx-auto rounded-xl bg-win flex items-center justify-center mb-6"
                             >
                                 <span className="text-3xl">🎯</span>
                             </motion.div>

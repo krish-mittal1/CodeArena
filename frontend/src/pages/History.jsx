@@ -49,7 +49,7 @@ export default function HistoryPage() {
                     className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8"
                 >
                     <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 bg-accent/10 rounded-2xl flex items-center justify-center border border-accent/30 shadow-inner">
+                        <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center border border-accent/20">
                             <HistoryIcon size={28} className="text-accent" />
                         </div>
                         <div className="pt-1">
@@ -62,7 +62,7 @@ export default function HistoryPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-1 p-1.5 bg-bg-secondary border border-border rounded-xl backdrop-blur-sm shadow-inner">
+                    <div className="flex items-center gap-1 p-1.5 bg-bg-secondary border border-border rounded-lg">
                         {['all', 'win', 'loss', 'draw'].map((val) => (
                             <button
                                 key={val}
@@ -82,7 +82,7 @@ export default function HistoryPage() {
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-bg-elevated/80 backdrop-blur-xl border border-border rounded-3xl shadow-2xl overflow-hidden"
+                    className="bg-bg-secondary border border-border rounded-xl overflow-hidden"
                 >
                     {isLoading ? (
                         <table className="w-full text-sm">
@@ -199,7 +199,7 @@ function MatchRow({ match, onClick }) {
         >
             <td className="px-6 py-4">
                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-base font-bold text-accent shrink-0 border border-accent/20 group-hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-base font-bold text-accent shrink-0 border border-accent/20">
                         {match.opponent_username?.charAt(0).toUpperCase() || '?'}
                     </div>
                     <div className="flex flex-col">
