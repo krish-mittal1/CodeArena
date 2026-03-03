@@ -55,20 +55,14 @@ async def run_migrations() -> None:
 
     logger.info("Running Alembic migrations …")
 
-    # Resolve the project root (parent of the 'backend' package)
-    project_root = Path(__file__).resolve().parent.parent
-    alembic_cfg = Config(str(project_root / "alembic.ini"))
-    alembic_cfg.set_main_option("script_location", str(project_root / "backend" / "db" / "migrations"))
-
-    # Override the DB URL so Alembic uses the same URL as the app
-    alembic_cfg.set_main_option("sqlalchemy.url", settings.database_url)
-
-    def _run_upgrade(connection):
-        alembic_cfg.attributes["connection"] = connection
+    def _run_upgrade():
+        project_root = Path(__file__).resolve().parent.parent
+        alembic_cfg = Config(str(project_root / "alembic.ini"))
+        alembic_cfg.set_main_option("script_location", str(project_root / "backend" / "db" / "migrations"))
+        alembic_cfg.set_main_option("sqlalchemy.url", settings.database_url)
         command.upgrade(alembic_cfg, "head")
 
-    async with engine.begin() as conn:
-        await conn.run_sync(_run_upgrade)
+    await asyncio.to_thread(_run_upgrade)
 
     logger.info("Alembic migrations applied successfully")
 
