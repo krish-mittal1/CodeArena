@@ -797,10 +797,19 @@ def _bfs_grid_cases():
         ans=bfs(grid); n,m=len(grid),len(grid[0])
         inp=f"{n} {m}\n"+"\n".join(grid); cases.append((inp,str(ans)))
     for _ in range(35):
-        n=random.randint(1,8); m=random.randint(2,8)
-        grid=["".join(random.choice(".#.") for _ in range(m)) for _ in range(n)]
-        grid[0]='.'+grid[0][1:]; grid[n-1]=grid[n-1][:-1]+'.'
-        if not grid[0] or not grid[n-1]: continue
+        n=random.randint(1,8); m=random.randint(1,8)
+        grid_list = []
+        for i in range(n):
+            row = []
+            for j in range(m):
+                row.append(random.choice(['.', '#', '.']))
+            grid_list.append(row)
+        
+        # force start and end open
+        grid_list[0][0] = '.'
+        grid_list[-1][-1] = '.'
+        
+        grid = ["".join(r) for r in grid_list]
         ans=bfs(grid); inp=f"{n} {m}\n"+"\n".join(grid)
         cases.append((inp,str(ans)))
     return cases[:45]
