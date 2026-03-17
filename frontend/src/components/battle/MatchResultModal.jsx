@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBattleStore } from '../../stores/battleStore';
 import { formatEloDelta } from '../../utils/formatters';
-import styles from './MatchResultModal.module.css';
+import { Trophy, Skull, Handshake } from 'lucide-react';
 
 export default function MatchResultModal() {
     const matchResult = useBattleStore((s) => s.matchResult);
@@ -26,9 +26,11 @@ export default function MatchResultModal() {
     const isLoss = result === 'loss';
     const isDraw = result === 'draw' || result === 'time_up';
 
-    const icon = isWin ? '🏆' : isLoss ? '💀' : '🤝';
-    const title = isWin ? 'Victory!' : isLoss ? 'Defeat' : (reason === 'forfeit' ? 'Forfeit' : 'Draw');
-    const resultClass = isWin ? 'win' : isLoss ? 'loss' : 'draw';
+    const Icon = isWin ? Trophy : isLoss ? Skull : Handshake;
+    const title = isWin ? 'Victory' : isLoss ? 'Defeat' : (reason === 'forfeit' ? 'Forfeit' : 'Draw');
+    
+    const colorClass = isWin ? 'text-win' : isLoss ? 'text-loss' : 'text-draw';
+    const borderColorClass = isWin ? 'border-win' : isLoss ? 'border-loss' : 'border-draw';
 
     const handleDashboard = () => {
         reset();
@@ -36,39 +38,54 @@ export default function MatchResultModal() {
     };
 
     return (
-        <div className={styles.overlay}>
-            <div className={`${styles.modal} ${styles[resultClass]}`}>
-                <div className={styles.icon}>{icon}</div>
-                <h2 className={`${styles.title} ${styles[resultClass]}`}>{title}</h2>
-                <p className={styles.subtitle}>
-                    {isWin && (reason === 'forfeit'
-                        ? `${winner_username || 'Your opponent'} forfeited the match.`
-                        : `You solved the problem before ${winner_username || 'your opponent'}!`)}
-                    {isLoss && (reason === 'forfeit'
-                        ? 'You forfeited the match.'
-                        : `${winner_username || 'Your opponent'} solved it first.`)}
-                    {isDraw && reason !== 'forfeit' && 'Neither player solved the problem in time.'}
-                </p>
+        <div className="fixed inset-0 z-[400] flex items-center justify-center bg-bg-root/90 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className={`bg-bg-primary border ${borderColorClass} border-t-4 p-8 min-w-[380px] max-w-lg shadow-2xl relative`}>
+                <div className="flex flex-col items-center text-center">
+                    <Icon className={`w-12 h-12 mb-4 ${colorClass}`} />
+                    <h2 className={`text-2xl font-bold tracking-tight mb-2 ${colorClass}`}>
+                        {title}
+                    </h2>
+                    <p className="text-sm text-text-secondary mb-8">
+                        {isWin && (reason === 'forfeit'
+                            ? `${winner_username || 'Your opponent'} forfeited.`
+                            : `You solved it before ${winner_username || 'your opponent'}.`)}
+                        {isLoss && (reason === 'forfeit'
+                            ? 'You forfeited the match.'
+                            : `${winner_username || 'Your opponent'} solved it first.`)}
+                        {isDraw && reason !== 'forfeit' && 'Neither player solved the problem in time.'}
+                    </p>
 
-                <div className={styles.statsRow}>
                     {elo_change != null && (
-                        <div className={styles.stat}>
-                            <div
-                                className={`${styles.statValue} ${elo_change >= 0 ? styles.positive : styles.negative}`}
-                            >
+                        <div className="flex flex-col items-center justify-center mb-8 px-8 py-4 bg-bg-surface border border-border rounded-sm w-full">
+                            <div className={`font-mono text-2xl font-bold ${elo_change >= 0 ? 'text-win' : 'text-loss'}`}>
                                 {formatEloDelta(elo_change)}
                             </div>
-                            <div className={styles.statLabel}>ELO</div>
+                            <div className="text-[10px] uppercase font-bold tracking-wider text-text-muted mt-1">
+                                Rating Change
+                            </div>
                         </div>
                     )}
-                </div>
 
-                <div className={styles.actions}>
-                    <button className={styles.secondaryBtn} onClick={handleDashboard}>
-                        Go to Dashboard
+                    <button 
+                        className="w-full px-4 py-2 bg-bg-surface border border-border text-sm font-semibold text-text-primary hover:bg-bg-hover hover:border-text-muted transition-colors rounded-sm"
+                        onClick={handleDashboard}
+                    >
+                        Return to Dashboard
                     </button>
                 </div>
+                
+                {/* Auto close progress indicator */}
+                <div className="absolute bottom-0 left-0 h-0.5 bg-bg-surface w-full">
+                    <div className="h-full bg-text-muted animate-[shrink_5s_linear_forwards]" style={{ transformOrigin: 'left' }} />
+                </div>
             </div>
+            
+            <style>{`
+                @keyframes shrink {
+                    from { transform: scaleX(1); }
+                    to { transform: scaleX(0); }
+                }
+            `}</style>
         </div>
     );
 }

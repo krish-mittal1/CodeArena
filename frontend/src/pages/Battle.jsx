@@ -7,7 +7,7 @@ import ProblemPanel from '../components/battle/ProblemPanel';
 import CodeEditor from '../components/battle/CodeEditor';
 import SubmissionPanel from '../components/battle/SubmissionPanel';
 import MatchResultModal from '../components/battle/MatchResultModal';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileCode2, TestTube2, Settings, History } from 'lucide-react';
 
 export default function Battle() {
     const { matchId } = useParams();
@@ -89,7 +89,9 @@ export default function Battle() {
         const handleMouseMove = (e) => {
             if (!isDragging.current || !containerRef.current) return;
             const containerWidth = containerRef.current.getBoundingClientRect().width;
-            const newLeftWidth = (e.clientX / containerWidth) * 100;
+            
+            // Adjust for the 48px activity bar width
+            const newLeftWidth = ((e.clientX - 48) / containerWidth) * 100;
             if (newLeftWidth >= 20 && newLeftWidth <= 60) {
                 setLeftWidth(newLeftWidth);
             }
@@ -130,40 +132,58 @@ export default function Battle() {
     }
 
     return (
-        <div className="flex flex-col h-screen bg-bg-root overflow-hidden text-text-primary antialiased selection:bg-accent/30">
-            {/* Timer bar */}
+        <div className="flex flex-col h-screen bg-bg-root text-text-primary antialiased overflow-hidden">
+            {/* Top Navigation Bar / Actions */}
             <TimerBar />
 
-            {/* Split pane body */}
-            <div ref={containerRef} className="flex flex-1 overflow-hidden relative">
+            {/* Main Application Body */}
+            <div className="flex flex-1 overflow-hidden relative">
+                
+                {/* IDE-like Activity Bar (Leftmost) */}
+                <div className="w-12 bg-bg-primary border-r border-border shrink-0 flex flex-col items-center py-4 gap-6 z-10 selection:bg-transparent">
+                    <button className="text-text-primary relative group focus:outline-none" title="Problem Description">
+                        <div className="absolute -left-3 top-0 bottom-0 w-[2px] bg-accent"></div>
+                        <FileCode2 className="w-6 h-6 opacity-100" />
+                    </button>
+                    <button className="text-text-muted hover:text-text-primary transition-colors focus:outline-none" title="Test Cases">
+                        <TestTube2 className="w-6 h-6" />
+                    </button>
+                    <button className="text-text-muted hover:text-text-primary transition-colors focus:outline-none" title="Submission History">
+                        <History className="w-6 h-6" />
+                    </button>
+                    <div className="flex-1"></div>
+                    <button className="text-text-muted hover:text-text-primary transition-colors focus:outline-none" title="Settings">
+                        <Settings className="w-6 h-6" />
+                    </button>
+                </div>
 
-                {/* Left: Problem description */}
+                {/* Left: Problem Details Pane */}
                 <div
                     className="flex flex-col overflow-hidden bg-bg-root shrink-0"
-                    style={{ width: `${leftWidth}%` }}
+                    style={{ width: `calc(${leftWidth}% - 48px)` }}
                 >
                     <ProblemPanel />
                 </div>
 
-                {/* Resizer Handle */}
+                {/* Resizer Handle (Flat Design) */}
                 <div
-                    className="w-px cursor-col-resize shrink-0 bg-border hover:bg-border-hover active:bg-accent transition-colors z-30 group relative"
+                    ref={containerRef}
+                    className="w-px cursor-col-resize shrink-0 bg-border hover:bg-accent active:bg-accent transition-colors z-30 group relative"
                     onMouseDown={startDrag}
                 >
-                    <div className="absolute inset-y-0 -left-1.5 -right-1.5" />
+                    <div className="absolute inset-y-0 -left-1 -right-1" />
                 </div>
 
-                {/* Right: Editor + Submissions */}
+                {/* Right: Code Editor & Execution Panel */}
                 <div
                     className="flex flex-col flex-1 overflow-hidden bg-bg-root"
-                    style={{ width: `${100 - leftWidth}%` }}
                 >
                     <CodeEditor />
                     <SubmissionPanel />
                 </div>
             </div>
 
-            {/* Match result modal (overlay) */}
+            {/* Modals */}
             <MatchResultModal />
         </div>
     );
