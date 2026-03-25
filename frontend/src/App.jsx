@@ -17,6 +17,8 @@ import Battle from './pages/Battle';
 import History from './pages/History';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import Problems from './pages/Problems';
+import Practice from './pages/Practice';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -107,6 +109,23 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 {matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <Settings />}
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/problems"
+            element={
+              <ProtectedRoute>
+                {matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <Problems />}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/practice/:problemId"
+            element={
+              <ProtectedRoute>
+                <Practice />
               </ProtectedRoute>
             }
           />

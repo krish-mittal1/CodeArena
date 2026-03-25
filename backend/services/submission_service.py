@@ -74,6 +74,68 @@ async def get_submission(db: AsyncSession, submission_id: uuid.UUID) -> Submissi
     return result.scalar_one_or_none()
 
 
+async def create_practice_submission(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    problem_id: uuid.UUID,
+    code: str,
+    language: str,
+    redis: Redis | None = None,
+) -> Submission:
+    """
+    Create a practice submission (no match required).
+    Sets match_id=None and enqueues for execution.
+    """
+    result = await db.execute(
+        select(func.count(TestCase.id)).where(TestCase.problem_id == problem_id)
+    )
+    total_test_cases = result.scalar_one()
+
+    submission = Submission(
+        match_id=None,
+        user_id=user_id,
+        problem_id=problem_id,
+        language=language,
+        code=code,
+        status=SubmissionStatus.QUEUED,
+        total_test_cases=total_test_cases,
+    )
+    db.add(submission)
+    await db.commit()
+    await db.refresh(submission)
+
+    # Enqueue for worker processing
+    if redis is not None:
+        await redis.lpush(
+            RedisKey.SUBMISSION_QUEUE,
+            json.dumps({"submission_id": str(submission.id)})
+        )
+        logger.info(f"Practice submission {submission.id} enqueued to Redis")
+    else:
+        from backend.workers.judge_worker import dev_queue
+        await dev_queue.put(str(submission.id))
+        logger.info(f"Practice submission {submission.id} enqueued to dev queue")
+
+    return submission
+
+
+async def get_practice_submissions(
+    db: AsyncSession, user_id: uuid.UUID, problem_id: uuid.UUID
+) -> list[Submission]:
+    """Get a user's practice submissions for a specific problem."""
+    query = (
+        select(Submission)
+        .where(
+            Submission.user_id == user_id,
+            Submission.problem_id == problem_id,
+            Submission.match_id.is_(None),
+        )
+        .order_by(Submission.submitted_at.desc())
+    )
+    result = await db.execute(query)
+    return list(result.scalars().all())
+
+
 async def get_match_submissions(
     db: AsyncSession, match_id: uuid.UUID, user_id: uuid.UUID | None = None
 ) -> list[Submission]:
