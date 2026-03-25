@@ -282,7 +282,7 @@ export default function Practice() {
                     </div>
 
                     {/* Monaco Editor */}
-                    <div className="flex-1 w-full bg-bg-root relative">
+                    <div className="flex-1 w-full bg-bg-root relative min-h-0">
                         <Editor
                             height="100%"
                             language={monacoLang}
