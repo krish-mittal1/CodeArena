@@ -16,7 +16,7 @@ class SubmissionCreate(BaseModel):
 
 class SubmissionResponse(BaseModel):
     id: uuid.UUID
-    match_id: uuid.UUID
+    match_id: uuid.UUID | None = None
     user_id: uuid.UUID
     language: str
     status: str
