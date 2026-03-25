@@ -4,7 +4,8 @@ import uuid
 import random
 import os
 
-DB_DSN = os.environ.get("DATABASE_URL", "postgresql://postgres:krishisunique@api_postgres:5432/codexarena")
+raw_url = os.environ.get("DATABASE_URL", "postgresql://postgres:krishisunique@api_postgres:5432/codexarena")
+DB_DSN = raw_url.replace("postgresql+asyncpg://", "postgresql://")
 
 def _two_sum_cases():
     random.seed(42)
