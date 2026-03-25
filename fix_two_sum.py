@@ -70,8 +70,10 @@ async def main():
         
     prob_id = prob["id"]
     
-    # Delete existing test cases
-    print("Deleting old faulty test cases for Two Sum...")
+    # Delete existing test cases and their associated submission histories
+    print("Deleting old faulty test cases (and associated submissions) for Two Sum...")
+    await conn.execute("DELETE FROM submission_results WHERE test_case_id IN (SELECT id FROM test_cases WHERE problem_id = $1)", prob_id)
+    await conn.execute("DELETE FROM submissions WHERE problem_id = $1", prob_id)
     await conn.execute("DELETE FROM test_cases WHERE problem_id = $1", prob_id)
     
     # Generate exactly 45 completely valid test cases
