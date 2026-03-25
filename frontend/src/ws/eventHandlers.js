@@ -85,7 +85,7 @@ export function registerEventHandlers() {
                     problem_id: data.problem_id,
                     problem_title: data.problem_title,
                     opponent: opponent,
-                    duration_seconds: data.duration_seconds || 900,
+                    duration_seconds: data.duration_seconds || 1800,
                 };
 
                 console.log('[WS] Setting battle store with:', battleData);

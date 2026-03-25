@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBattleStore } from '../../stores/battleStore';
 import { formatEloDelta } from '../../utils/formatters';
-import { Trophy, Skull, Handshake } from 'lucide-react';
+import { Trophy, Skull, Handshake, Clock } from 'lucide-react';
 
 export default function MatchResultModal() {
     const matchResult = useBattleStore((s) => s.matchResult);
@@ -24,12 +24,13 @@ export default function MatchResultModal() {
 
     const isWin = result === 'win';
     const isLoss = result === 'loss';
-    const isDraw = result === 'draw' || result === 'time_up';
+    const isTimeUp = result === 'time_up';
+    const isDraw = result === 'draw' || isTimeUp;
 
-    const Icon = isWin ? Trophy : isLoss ? Skull : Handshake;
-    const title = isWin ? 'Victory' : isLoss ? 'Defeat' : (reason === 'forfeit' ? 'Forfeit' : 'Draw');
+    const Icon = isWin ? Trophy : isLoss ? Skull : isTimeUp ? Clock : Handshake;
+    const title = isWin ? 'Victory' : isLoss ? 'Defeat' : isTimeUp ? "Time's Up!" : (reason === 'forfeit' ? 'Forfeit' : 'Draw');
     
-    const colorClass = isWin ? 'text-win' : isLoss ? 'text-loss' : 'text-draw';
+    const colorClass = isWin ? 'text-win' : isLoss ? 'text-loss' : isTimeUp ? 'text-draw' : 'text-draw';
     const borderColorClass = isWin ? 'border-win' : isLoss ? 'border-loss' : 'border-draw';
 
     const handleDashboard = () => {
@@ -52,16 +53,17 @@ export default function MatchResultModal() {
                         {isLoss && (reason === 'forfeit'
                             ? 'You forfeited the match.'
                             : `${winner_username || 'Your opponent'} solved it first.`)}
-                        {isDraw && reason !== 'forfeit' && 'Neither player solved the problem in time.'}
+                        {isTimeUp && 'Neither player solved the problem in time. No rating change.'}
+                        {isDraw && !isTimeUp && reason !== 'forfeit' && 'The match ended in a draw.'}
                     </p>
 
                     {elo_change != null && (
                         <div className="flex flex-col items-center justify-center mb-8 px-8 py-4 bg-bg-surface border border-border rounded-sm w-full">
-                            <div className={`font-mono text-2xl font-bold ${elo_change >= 0 ? 'text-win' : 'text-loss'}`}>
+                            <div className={`font-mono text-2xl font-bold ${isTimeUp ? 'text-text-muted' : elo_change >= 0 ? 'text-win' : 'text-loss'}`}>
                                 {formatEloDelta(elo_change)}
                             </div>
                             <div className="text-[10px] uppercase font-bold tracking-wider text-text-muted mt-1">
-                                Rating Change
+                                {isTimeUp ? 'No Rating Change' : 'Rating Change'}
                             </div>
                         </div>
                     )}

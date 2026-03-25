@@ -14,7 +14,7 @@ export const useBattleStore = create((set, get) => ({
     problemId: null,
     problem: null,
     opponent: null,
-    duration: 900,
+    duration: 1800,
 
     // ── Timer ──────────────────────────────────────
     remainingSeconds: 0,
@@ -43,8 +43,8 @@ export const useBattleStore = create((set, get) => ({
         problemId: data.problem_id || data.problem?.id || null,
         problem: data.problem || null,
         opponent: data.opponent || null,
-        duration: data.duration_seconds || 900,
-        remainingSeconds: data.duration_seconds || 900,
+        duration: data.duration_seconds || 1800,
+        remainingSeconds: data.duration_seconds || 1800,
         timerRunning: false,
         submissionStatus: 'idle',
         lastVerdict: null,
@@ -104,7 +104,7 @@ export const useBattleStore = create((set, get) => ({
         problemId: null,
         problem: null,
         opponent: null,
-        duration: 900,
+        duration: 1800,
         remainingSeconds: 0,
         timerRunning: false,
         language: 'python',

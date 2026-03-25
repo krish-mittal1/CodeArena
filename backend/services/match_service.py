@@ -122,10 +122,17 @@ async def complete_match(
     # Determine winner from submissions
     winner_id = await _determine_winner(db, match)
 
-    # Update ELO ratings
-    p1_new, p2_new, p1_delta, p2_delta = await rating_service.update_ratings(
-        db, match.player1_id, match.player2_id, winner_id
-    )
+    # Skip ELO update on timeout draw (neither player solved it)
+    if reason == "timeout" and winner_id is None:
+        p1_new = match.player1.elo
+        p2_new = match.player2.elo
+        p1_delta = 0
+        p2_delta = 0
+    else:
+        # Update ELO ratings
+        p1_new, p2_new, p1_delta, p2_delta = await rating_service.update_ratings(
+            db, match.player1_id, match.player2_id, winner_id
+        )
 
     # Update match record (atomic transaction)
     try:
