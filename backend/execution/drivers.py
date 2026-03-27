@@ -220,17 +220,17 @@ def _cpp_json_serializer(return_type: str) -> str:
         return '    cout << fixed << setprecision(5) << result << endl;'
     elif return_type == "int[]":
         return '''    cout << "[";
-    for (int i = 0; i < result.size(); i++) {
+    for (size_t i = 0; i < result.size(); i++) {
         if (i > 0) cout << ",";
         cout << result[i];
     }
     cout << "]" << endl;'''
     elif return_type == "int[][]":
         return '''    cout << "[";
-    for (int i = 0; i < result.size(); i++) {
+    for (size_t i = 0; i < result.size(); i++) {
         if (i > 0) cout << ",";
         cout << "[";
-        for (int j = 0; j < result[i].size(); j++) {
+        for (size_t j = 0; j < result[i].size(); j++) {
             if (j > 0) cout << ",";
             cout << result[i][j];
         }
@@ -239,7 +239,7 @@ def _cpp_json_serializer(return_type: str) -> str:
     cout << "]" << endl;'''
     elif return_type == "str[]":
         return '''    cout << "[";
-    for (int i = 0; i < result.size(); i++) {
+    for (size_t i = 0; i < result.size(); i++) {
         if (i > 0) cout << ",";
         cout << "\\"" << result[i] << "\\"";
     }
@@ -272,7 +272,7 @@ using namespace std;
 string parseJsonString(const string& s) {{
     string res;
     bool inStr = false;
-    for (int i = 0; i < s.size(); i++) {{
+    for (size_t i = 0; i < s.size(); i++) {{
         if (s[i] == '"') {{ inStr = !inStr; continue; }}
         if (inStr) {{
             if (s[i] == '\\\\' && i+1 < s.size()) {{ res += s[++i]; continue; }}
@@ -324,7 +324,7 @@ vector<string> parseJsonStringArray(const string& s) {{
     vector<string> res;
     bool inStr = false;
     string current;
-    for (int i = 0; i < s.size(); i++) {{
+    for (size_t i = 0; i < s.size(); i++) {{
         if (s[i] == '"') {{
             if (inStr) {{
                 res.push_back(current);
