@@ -90,7 +90,7 @@ export default function PrivateRoomOverlay({ isOpen, onClose }) {
                 onClose();
             }
         } catch (err) {
-            setJoinError(err.response?.data?.detail || "Failed to join room");
+            setJoinError(err.response?.data?.error || "Failed to join room");
         } finally {
             setIsJoining(false);
         }

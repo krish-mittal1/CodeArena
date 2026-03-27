@@ -23,7 +23,9 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 # ── JWT ───────────────────────────────────────────────────────
 
-def create_access_token(subject: str, extra: dict | None = None) -> str:
+from typing import Optional
+
+def create_access_token(subject: str, extra: Optional[dict] = None) -> str:
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.jwt_access_token_expire_minutes
     )

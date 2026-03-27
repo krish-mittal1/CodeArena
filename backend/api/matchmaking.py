@@ -144,8 +144,13 @@ async def join_private_room(
             raise HTTPException(status_code=400, detail="Cannot join your own room")
             
         # Get creator user to get ELO
-        from backend.services import user_service
-        creator_user = await user_service.get_user(db, uuid.UUID(creator_id))
+        from sqlalchemy import select
+        from backend.models.user import User
+        
+        res = await db.execute(select(User).where(User.id == uuid.UUID(creator_id)))
+        creator_user = res.scalar_one_or_none()
+        if not creator_user:
+            raise HTTPException(status_code=404, detail="Creator account not found")
         
         # Create match
         try:
@@ -174,8 +179,13 @@ async def join_private_room(
         if creator_id == uid_joiner:
             raise HTTPException(status_code=400, detail="Cannot join your own room")
             
-        from backend.services import user_service
-        creator_user = await user_service.get_user(db, uuid.UUID(creator_id))
+        from sqlalchemy import select
+        from backend.models.user import User
+        
+        res = await db.execute(select(User).where(User.id == uuid.UUID(creator_id)))
+        creator_user = res.scalar_one_or_none()
+        if not creator_user:
+            raise HTTPException(status_code=404, detail="Creator account not found")
         
         from backend.db.session import async_session_maker
         try:
