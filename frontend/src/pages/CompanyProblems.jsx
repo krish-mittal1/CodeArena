@@ -37,6 +37,12 @@ export default function CompanyProblems() {
             "Johnson & Johnson", "Byju's", "Flipkart", "NVIDIA", 
             "Google", "Microsoft", "Amazon", "Meta", "Apple", 
             "Netflix", "Adobe"
+        ],
+        "Sort an array of 0's 1's and 2's": [
+            "Flipkart", "JP Morgan", "Swiggy", "Qualcomm", 
+            "NVIDIA", "PwC", "Morgan Stanley", "KPMG", 
+            "Google", "Microsoft", "Amazon", "Meta", 
+            "Apple", "Netflix", "Adobe"
         ]
     };
 
