@@ -12,30 +12,42 @@ export default function CompanyProblems() {
 
     const company = COMPANIES.find((c) => c.id === companyId);
 
-    const { data: problems = [], isLoading } = useQuery({
-        queryKey: ['problems'],
-        queryFn: problemApi.getAll,
+    const PROBLEM_COMPANY_MAPPING = {
+        "Print the matrix in spiral manner": [
+            "Visa", "Reddit", "Twilio", "Square", "Nutanix",
+            "Flipkart", "Target", "AMD", "American Express",
+            "Alibaba", "Unity Technologies", "Activision Blizzard",
+            "Bain & Company", "Medtronic", "Goldman Sachs",
+            "Splunk", "Bloomberg", "Dropbox", "PwC",
+            "Philips Healthcare", "Oracle", "Ubisoft", "Uber",
+            "JPMorgan Chase", "IBM", "TCS", "Cognizant",
+            "Accenture", "Infosys", "Capgemini", "Wipro"
+        ],
+        "3 Sum": [
+            "Teladoc Health", "Oracle", "DoorDash", "Nutanix", 
+            "Epic Games", "ARM", "Wayfair", "Robinhood", 
+            "Cloudflare", "Mastercard", "Optum", "Stripe", 
+            "Goldman Sachs", "Bain & Company", "Visa", "Deloitte", 
+            "MongoDB", "Airbnb", "Rakuten", "KPMG", "AMD", 
+            "Johnson & Johnson", "Byju's", "Flipkart", "NVIDIA", 
+            "Google", "Microsoft", "Amazon", "Meta", "Apple", 
+            "Netflix", "Adobe"
+        ]
+    };
+
+    const companyProblems = problems.filter(p => {
+        let title = p.title;
+        // Normalization for the db title
+        if (title.includes("Spiral")) title = "Print the matrix in spiral manner";
+        
+        const mappedCompanies = PROBLEM_COMPANY_MAPPING[title];
+        if (!mappedCompanies) return false;
+        
+        return mappedCompanies.some(tc => 
+            tc.toLowerCase() === company.name.toLowerCase() || 
+            company.name.toLowerCase().includes(tc.toLowerCase())
+        );
     });
-
-    const targetCompanies = [
-        "Visa", "Reddit", "Twilio", "Square", "Nutanix",
-        "Flipkart", "Target", "AMD", "American Express",
-        "Alibaba", "Unity Technologies", "Activision Blizzard",
-        "Bain & Company", "Medtronic", "Goldman Sachs",
-        "Splunk", "Bloomberg", "Dropbox", "PwC",
-        "Philips Healthcare", "Oracle", "Ubisoft", "Uber",
-        "JPMorgan Chase", "IBM", "TCS", "Cognizant",
-        "Accenture", "Infosys", "Capgemini", "Wipro"
-    ];
-
-    const isTargetCompany = company && targetCompanies.some(tc => 
-        tc.toLowerCase() === company.name.toLowerCase() || 
-        company.name.toLowerCase().includes(tc.toLowerCase())
-    );
-
-    const companyProblems = isTargetCompany 
-        ? problems.filter(p => p.title === "Print the matrix in spiral manner" || p.title.includes("Spiral"))
-        : [];
 
     if (!company) {
         return (
