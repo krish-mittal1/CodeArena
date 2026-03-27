@@ -1,4 +1,3 @@
-from typing import Optional, Union
 """
 Matchmaking routes — join/leave queue.
 Routes handle both Redis-backed and in-memory (dev-mode) matchmaking.
@@ -30,7 +29,7 @@ router = APIRouter(prefix="/matchmaking", tags=["Matchmaking"])
 @router.post("/join")
 async def join_queue(
     current_user: User = Depends(get_current_user),
-    redis: Optional[Redis] = Depends(get_redis),
+    redis: Redis | None = Depends(get_redis),
 ):
     """Join the matchmaking queue."""
     if redis is not None:
@@ -53,7 +52,7 @@ async def join_queue(
 @router.delete("/leave")
 async def leave_queue(
     current_user: User = Depends(get_current_user),
-    redis: Optional[Redis] = Depends(get_redis),
+    redis: Redis | None = Depends(get_redis),
 ):
     """Leave the matchmaking queue."""
     if redis is not None:
@@ -67,7 +66,7 @@ async def leave_queue(
 @router.get("/status")
 async def queue_status(
     current_user: User = Depends(get_current_user),
-    redis: Optional[Redis] = Depends(get_redis),
+    redis: Redis | None = Depends(get_redis),
 ):
     """Check queue position, wait time, and current ELO window."""
     if redis is not None:
@@ -87,7 +86,7 @@ def generate_room_code(length=6):
 @router.post("/private/create")
 async def create_private_room(
     current_user: User = Depends(get_current_user),
-    redis: Optional[Redis] = Depends(get_redis),
+    redis: Redis | None = Depends(get_redis),
 ):
     """Create a private room and return a join code."""
     code = generate_room_code()
@@ -120,7 +119,7 @@ class JoinRoomRequest(BaseModel):
 async def join_private_room(
     payload: JoinRoomRequest,
     current_user: User = Depends(get_current_user),
-    redis: Optional[Redis] = Depends(get_redis),
+    redis: Redis | None = Depends(get_redis),
     db: AsyncSession = Depends(get_db),
 ):
     """Join a private room by code."""
@@ -205,7 +204,7 @@ async def join_private_room(
 async def private_room_status(
     code: str,
     current_user: User = Depends(get_current_user),
-    redis: Optional[Redis] = Depends(get_redis),
+    redis: Redis | None = Depends(get_redis),
 ):
     """Poll if a private room has been joined by an opponent."""
     code = code.upper().strip()

@@ -1,4 +1,3 @@
-from typing import Optional, Union
 from __future__ import annotations
 
 """
@@ -13,7 +12,7 @@ from backend.core.constants import Language
 class LanguageConfig:
     image: str
     file_extension: str
-    compile_cmd: Optional[str]
+    compile_cmd: str | None
     run_cmd: str
     needs_compilation: bool = False
 

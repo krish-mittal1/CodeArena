@@ -1,4 +1,3 @@
-from typing import Optional, Union
 """Match schemas."""
 
 import uuid
@@ -18,10 +17,10 @@ class MatchResponse(BaseModel):
     winner_id: uuid.UUID | None = None
     player1_elo_before: int
     player2_elo_before: int
-    player1_elo_after: Optional[int] = None
-    player2_elo_after: Optional[int] = None
+    player1_elo_after: int | None = None
+    player2_elo_after: int | None = None
     started_at: datetime
-    ended_at: Optional[datetime] = None
+    ended_at: datetime | None = None
     duration_seconds: int
 
     model_config = {"from_attributes": True}
@@ -32,7 +31,7 @@ class MatchHistoryItem(BaseModel):
     opponent_username: str
     opponent_elo: int
     your_elo_before: int
-    your_elo_after: Optional[int]
+    your_elo_after: int | None
     result: str  # "win" | "loss" | "draw"
     started_at: datetime
     duration_seconds: int
@@ -41,4 +40,4 @@ class MatchHistoryItem(BaseModel):
 class MatchSummary(BaseModel):
     match_id: uuid.UUID
     status: str
-    remaining_seconds: Optional[int] = None
+    remaining_seconds: int | None = None

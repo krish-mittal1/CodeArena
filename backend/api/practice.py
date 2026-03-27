@@ -1,4 +1,3 @@
-from typing import Optional, Union
 """
 Practice routes — submit code for solo practice (no match required).
 """
@@ -34,7 +33,7 @@ async def practice_submit(
     data: PracticeSubmissionCreate,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    redis: Optional[Redis] = Depends(get_redis),
+    redis: Redis | None = Depends(get_redis),
 ):
     """Submit code for a practice problem (no match required)."""
     # Validate problem exists

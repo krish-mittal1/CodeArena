@@ -1,4 +1,3 @@
-from typing import Optional, Union
 """
 Match routes — match details and history.
 """
@@ -73,7 +72,7 @@ async def forfeit_match(
     match_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    redis: Optional[Redis] = Depends(get_redis),
+    redis: Redis | None = Depends(get_redis),
 ):
     """
     Forfeit an active match.

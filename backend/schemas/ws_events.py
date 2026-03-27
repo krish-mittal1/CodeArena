@@ -1,4 +1,3 @@
-from typing import Optional, Union
 """WebSocket event payload schemas."""
 
 import uuid
@@ -34,8 +33,8 @@ class WSSubmissionResult(BaseModel):
     verdict: str
     passed: int
     total: int
-    runtime_ms: Optional[int] = None
-    memory_kb: Optional[int] = None
+    runtime_ms: int | None = None
+    memory_kb: int | None = None
 
 
 class WSOpponentSubmitted(BaseModel):

@@ -1,4 +1,3 @@
-from typing import Optional, Union
 """
 Submission routes — submit code during a match.
 Works in both Redis and dev (no-Redis) modes.
@@ -26,7 +25,7 @@ async def submit_code(
     data: SubmissionCreate,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    redis: Optional[Redis] = Depends(get_redis),
+    redis: Redis | None = Depends(get_redis),
 ):
     """
     Submit code for a match problem.

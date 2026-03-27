@@ -1,4 +1,3 @@
-from typing import Optional, Union
 """
 Auth service — registration, login, token management.
 """
@@ -66,7 +65,7 @@ async def refresh_tokens(db: AsyncSession, refresh_token: str) -> TokenResponse:
     return _create_tokens(user)
 
 
-async def get_user_by_id(db: AsyncSession, user_id: uuid.UUID) -> Optional[User]:
+async def get_user_by_id(db: AsyncSession, user_id: uuid.UUID) -> User | None:
     """Fetch user by ID."""
     result = await db.execute(select(User).where(User.id == user_id))
     return result.scalar_one_or_none()

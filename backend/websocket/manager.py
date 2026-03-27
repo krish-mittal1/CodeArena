@@ -1,4 +1,3 @@
-from typing import Optional, Union
 """
 WebSocket ConnectionManager — production-grade, async-safe, room-based
 event broadcasting with Redis pub/sub for horizontal scaling.
@@ -110,14 +109,14 @@ class ConnectionManager:
         self._lock = asyncio.Lock()
 
         # ── Redis pub/sub ─────────────────────────────────
-        self._redis: Optional[Redis] = None
+        self._redis: Redis | None = None
         self._pubsub = None
         self._listener_task: asyncio.Task | None = None
         self._instance_id = id(self)  # Unique per process (echo guard)
 
     # ── Lifecycle ─────────────────────────────────────────────
 
-    async def init(self, redis: Optional[Redis]):
+    async def init(self, redis: Redis | None):
         """
         Initialize Redis pub/sub listener. Called once at app startup.
         
@@ -387,8 +386,8 @@ class ConnectionManager:
         verdict: str,
         passed: int,
         total: int,
-        runtime_ms: Optional[int],
-        memory_kb: Optional[int],
+        runtime_ms: int | None,
+        memory_kb: int | None,
         submission_id: str,
     ):
         """
@@ -461,7 +460,7 @@ class ConnectionManager:
     #  Introspection
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    async def get_room_info(self, room_id: str) -> Optional[dict]:
+    async def get_room_info(self, room_id: str) -> dict | None:
         """Get metadata about a room (for admin/debug endpoints)."""
         async with self._lock:
             room = self._rooms.get(room_id)

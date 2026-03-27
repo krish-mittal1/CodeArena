@@ -1,4 +1,3 @@
-from typing import Optional, Union
 """
 Match service — match lifecycle management, timer control, state transitions.
 """
@@ -62,7 +61,7 @@ async def get_match_history(
 
 
 async def validate_match_active(
-    redis: Optional[Redis], match_id: uuid.UUID, user_id: uuid.UUID
+    redis: Redis | None, match_id: uuid.UUID, user_id: uuid.UUID
 ) -> None:
     """Validate that a match is active and the user is a participant."""
     match_id_str = str(match_id)
@@ -89,7 +88,7 @@ async def validate_match_active(
             raise MatchExpired()
 
 
-async def get_remaining_time(redis: Optional[Redis], match_id: uuid.UUID) -> Optional[int]:
+async def get_remaining_time(redis: Redis | None, match_id: uuid.UUID) -> int | None:
     """Get remaining seconds for an active match."""
     if redis is None:
         return None
@@ -103,7 +102,7 @@ async def get_remaining_time(redis: Optional[Redis], match_id: uuid.UUID) -> Opt
 
 async def complete_match(
     db: AsyncSession,
-    redis: Optional[Redis],
+    redis: Redis | None,
     match_id: uuid.UUID,
     reason: str = "timeout",
 ) -> dict:
@@ -189,7 +188,7 @@ async def complete_match(
 
 async def complete_match_with_winner(
     db: AsyncSession,
-    redis: Optional[Redis],
+    redis: Redis | None,
     match_id: uuid.UUID,
     winner_id: uuid.UUID,
     reason: str = "accepted",
@@ -269,7 +268,7 @@ async def complete_match_with_winner(
 
 async def forfeit_match(
     db: AsyncSession,
-    redis: Optional[Redis],
+    redis: Redis | None,
     match_id: uuid.UUID,
     forfeiter_id: uuid.UUID,
 ) -> dict:

@@ -1,4 +1,3 @@
-from typing import Optional, Union
 """
 In-memory matchmaking — dev-mode fallback when Redis is disabled.
 
@@ -136,7 +135,7 @@ class InMemoryMatchmakingQueue:
 
         return True
 
-    async def get_queue_position(self, user_id: uuid.UUID) -> Optional[dict]:
+    async def get_queue_position(self, user_id: uuid.UUID) -> dict | None:
         uid = str(user_id)
         async with self._lock:
             # Already matched

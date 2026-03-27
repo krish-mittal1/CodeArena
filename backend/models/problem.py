@@ -25,10 +25,9 @@ class Problem(Base):
     constraints: Mapped[str] = mapped_column(Text, nullable=True)
     
     # ── LeetCode Execution Architecture ──
-    from typing import Optional
-    method_name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
-    parameters: Mapped[dict] = mapped_column(JSONB, nullable=True)
-    return_type: Mapped[str] = mapped_column(String(100), nullable=True)
+    method_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    parameters: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    return_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
     
     time_limit_ms: Mapped[int] = mapped_column(Integer, default=2000, nullable=False)
     memory_limit_mb: Mapped[int] = mapped_column(Integer, default=256, nullable=False)

@@ -1,4 +1,3 @@
-from typing import Optional, Union
 """
 Submission service — accept code submissions and enqueue for execution.
 Supports both Redis queue (production) and in-process queue (dev mode).
@@ -28,7 +27,7 @@ async def create_submission(
     problem_id: uuid.UUID,
     code: str,
     language: str,
-    redis: Optional[Redis] = None,
+    redis: Redis | None = None,
 ) -> Submission:
     """
     Create a submission record and enqueue it for async processing.
@@ -69,7 +68,7 @@ async def create_submission(
     return submission
 
 
-async def get_submission(db: AsyncSession, submission_id: uuid.UUID) -> Optional[Submission]:
+async def get_submission(db: AsyncSession, submission_id: uuid.UUID) -> Submission | None:
     """Get a submission by ID."""
     result = await db.execute(
         select(Submission).where(Submission.id == submission_id)
@@ -83,7 +82,7 @@ async def create_practice_submission(
     problem_id: uuid.UUID,
     code: str,
     language: str,
-    redis: Optional[Redis] = None,
+    redis: Redis | None = None,
 ) -> Submission:
     """
     Create a practice submission (no match required).
