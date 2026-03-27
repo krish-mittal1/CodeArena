@@ -4,8 +4,16 @@ import uuid
 from datetime import datetime
 
 from pydantic import BaseModel, Field
+from typing import Optional
 
 from backend.core.constants import Language
+
+
+class FailedTestCaseDetails(BaseModel):
+    input: str
+    expected_output: str
+    actual_output: Optional[str] = None
+    error_output: Optional[str] = None
 
 
 class SubmissionCreate(BaseModel):
@@ -23,9 +31,10 @@ class SubmissionResponse(BaseModel):
     passed_test_cases: int
     total_test_cases: int
     execution_time_ms: int | None = None
-    memory_used_kb: int | None = None
+    memory_used_kb: Optional[int] = None
     submitted_at: datetime
-    judged_at: datetime | None = None
+    judged_at: Optional[datetime] = None
+    failed_test_case: Optional[FailedTestCaseDetails] = None
 
     model_config = {"from_attributes": True}
 

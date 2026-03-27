@@ -9,10 +9,12 @@ import logging
 
 from redis.asyncio import Redis
 from sqlalchemy import select, func
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.constants import SubmissionStatus, RedisKey
 from backend.models.submission import Submission
+from backend.models.submission_result import SubmissionResult
 from backend.models.test_case import TestCase
 
 logger = logging.getLogger(__name__)
@@ -130,6 +132,9 @@ async def get_practice_submissions(
             Submission.problem_id == problem_id,
             Submission.match_id.is_(None),
         )
+        .options(
+            selectinload(Submission.results).selectinload(SubmissionResult.test_case)
+        )
         .order_by(Submission.submitted_at.desc())
     )
     result = await db.execute(query)
@@ -143,7 +148,10 @@ async def get_match_submissions(
     query = select(Submission).where(Submission.match_id == match_id)
     if user_id:
         query = query.where(Submission.user_id == user_id)
-    query = query.order_by(Submission.submitted_at.desc())
+        
+    query = query.options(
+        selectinload(Submission.results).selectinload(SubmissionResult.test_case)
+    ).order_by(Submission.submitted_at.desc())
 
     result = await db.execute(query)
     return list(result.scalars().all())

@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import datetime, timezone
+from typing import Optional, List
 
 from sqlalchemy import String, Integer, DateTime, ForeignKey, Index
 from sqlalchemy.dialects.postgresql import UUID
@@ -26,7 +27,7 @@ class Match(Base):
     problem_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("problems.id"), nullable=False
     )
-    winner_id: Mapped[uuid.UUID | None] = mapped_column(
+    winner_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
     )
     status: Mapped[str] = mapped_column(
@@ -34,20 +35,20 @@ class Match(Base):
     )
     player1_elo_before: Mapped[int] = mapped_column(Integer, nullable=False)
     player2_elo_before: Mapped[int] = mapped_column(Integer, nullable=False)
-    player1_elo_after: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    player2_elo_after: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    player1_elo_after: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    player2_elo_after: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
-    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    ended_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     duration_seconds: Mapped[int] = mapped_column(Integer, nullable=False, default=900)
 
     # Relationships
     player1: Mapped["User"] = relationship("User", foreign_keys=[player1_id])
     player2: Mapped["User"] = relationship("User", foreign_keys=[player2_id])
     problem: Mapped["Problem"] = relationship("Problem")
-    winner: Mapped["User | None"] = relationship("User", foreign_keys=[winner_id])
-    submissions: Mapped[list["Submission"]] = relationship(back_populates="match")
+    winner: Mapped[Optional["User"]] = relationship("User", foreign_keys=[winner_id])
+    submissions: Mapped[List["Submission"]] = relationship(back_populates="match")
 
     __table_args__ = (
         Index("idx_matches_players", "player1_id", "player2_id"),

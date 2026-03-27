@@ -1,6 +1,7 @@
 """SubmissionResult model — per-test-case verdict."""
 
 import uuid
+from typing import Optional
 
 from sqlalchemy import String, Text, Integer, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
@@ -24,8 +25,8 @@ class SubmissionResult(Base):
     verdict: Mapped[str] = mapped_column(String(30), nullable=False)
     execution_time_ms: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     memory_used_kb: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    actual_output: Mapped[str | None] = mapped_column(Text, nullable=True)
-    error_output: Mapped[str | None] = mapped_column(Text, nullable=True)
+    actual_output: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_output: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Relationships
     submission: Mapped["Submission"] = relationship(back_populates="results")

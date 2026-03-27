@@ -350,6 +350,40 @@ export default function Practice() {
                             {verdict.status === 'error' && verdict.message && (
                                 <p className="text-xs text-loss mt-2">{verdict.message}</p>
                             )}
+
+                            {verdict.status !== 'accepted' && verdict.status !== 'running' && verdict.status !== 'queued' && verdict.failed_test_case && (
+                                <motion.div 
+                                    initial={{ opacity: 0, height: 0 }} 
+                                    animate={{ opacity: 1, height: 'auto' }} 
+                                    className="mt-4 pt-4 border-t border-border"
+                                >
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-3 flex items-center gap-2">
+                                        <AlertTriangle size={14} className="text-loss" />
+                                        Failed Test Case
+                                    </h3>
+                                    
+                                    <div className="space-y-3">
+                                        <div className="bg-bg-root rounded-md p-3 border border-border">
+                                            <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Input</p>
+                                            <pre className="text-xs text-text-primary font-mono whitespace-pre-wrap">{verdict.failed_test_case.input}</pre>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="bg-bg-root rounded-md p-3 border border-border">
+                                                <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Expected Output</p>
+                                                <pre className="text-xs text-text-primary font-mono whitespace-pre-wrap">{verdict.failed_test_case.expected_output}</pre>
+                                            </div>
+                                            
+                                            <div className="bg-bg-root rounded-md p-3 border border-loss/30">
+                                                <p className="text-[10px] font-bold uppercase text-loss mb-1">Actual Output / Error</p>
+                                                <pre className="text-xs font-mono whitespace-pre-wrap text-loss/90">
+                                                    {verdict.failed_test_case.error_output || verdict.failed_test_case.actual_output || "No output generated"}
+                                                </pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
                         </motion.div>
                     )}
                 </div>
