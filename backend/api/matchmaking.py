@@ -110,15 +110,20 @@ async def create_private_room(
     return {"status": "created", "code": code}
 
 
+from pydantic import BaseModel
+
+class JoinRoomRequest(BaseModel):
+    code: str
+
 @router.post("/private/join")
 async def join_private_room(
-    payload: dict,
+    payload: JoinRoomRequest,
     current_user: User = Depends(get_current_user),
     redis: Redis | None = Depends(get_redis),
     db: AsyncSession = Depends(get_db),
 ):
     """Join a private room by code."""
-    code = payload.get("code", "").upper().strip()
+    code = payload.code.upper().strip()
     if not code:
         raise HTTPException(status_code=400, detail="Room code required")
 
