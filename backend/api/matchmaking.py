@@ -187,10 +187,10 @@ async def join_private_room(
         if not creator_user:
             raise HTTPException(status_code=404, detail="Creator account not found")
         
-        from backend.db.session import async_session_maker
+        from backend.db.session import AsyncSessionLocal
         try:
             match_id = await memory_queue.create_private_match(
-                async_session_maker,
+                AsyncSessionLocal,
                 creator_id, creator_user.elo,
                 uid_joiner, current_user.elo
             )
