@@ -6,7 +6,7 @@
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 import { create } from 'zustand';
-import { CODE_TEMPLATES } from '../utils/constants';
+import { CODE_TEMPLATES, generateBoilerplate } from '../utils/constants';
 
 export const useBattleStore = create((set, get) => ({
     // ── Match metadata ─────────────────────────────
@@ -52,6 +52,7 @@ export const useBattleStore = create((set, get) => ({
         opponentActivity: null,
         opponentDisconnected: false,
         matchResult: null,
+        code: data.problem ? (generateBoilerplate(get().language, data.problem) || CODE_TEMPLATES[get().language] || '') : CODE_TEMPLATES[get().language],
     }),
 
     onRoomJoined: (data) => set({
@@ -59,12 +60,19 @@ export const useBattleStore = create((set, get) => ({
         timerRunning: true,
     }),
 
-    setLanguage: (language) => set({
-        language,
-        code: get().code === CODE_TEMPLATES[get().language]
-            ? (CODE_TEMPLATES[language] || '')
-            : get().code,
-    }),
+    setLanguage: (language) => {
+        const currentCode = get().code;
+        const currentLang = get().language;
+        const problem = get().problem;
+        const isDefault = currentCode === (generateBoilerplate(currentLang, problem) || CODE_TEMPLATES[currentLang] || '') || currentCode === CODE_TEMPLATES[currentLang];
+        
+        set({
+            language,
+            code: isDefault 
+                ? (generateBoilerplate(language, problem) || CODE_TEMPLATES[language] || '')
+                : currentCode,
+        });
+    },
 
     setCode: (code) => set({ code }),
 

@@ -1,7 +1,7 @@
 import Editor from '@monaco-editor/react';
 import { useBattleStore } from '../../stores/battleStore';
 import { submissionApi } from '../../api/auth';
-import { LANGUAGES, CODE_TEMPLATES } from '../../utils/constants';
+import { LANGUAGES, CODE_TEMPLATES, generateBoilerplate } from '../../utils/constants';
 import { Code2, Play, RotateCcw, Settings2 } from 'lucide-react';
 
 export default function CodeEditor() {
@@ -41,7 +41,7 @@ export default function CodeEditor() {
     };
 
     const handleReset = () => {
-        setCode(CODE_TEMPLATES[language] || '');
+        setCode(generateBoilerplate(language, problem) || CODE_TEMPLATES[language] || '');
     };
 
     return (
