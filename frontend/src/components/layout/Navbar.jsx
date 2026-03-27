@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Swords, LayoutDashboard, History, User, Bell, Settings, LogOut, ChevronDown, BookOpen,
+    Swords, LayoutDashboard, History, User, Bell, Settings, LogOut, ChevronDown, Building2,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useBattleStore } from '../../stores/battleStore';
@@ -63,7 +63,7 @@ export default function Navbar() {
                                 Dashboard
                             </NavLink>
                             <NavLink to="/problems" className={linkClass} onClick={matchId ? handleLockedNav('/problems') : undefined}>
-                                <BookOpen size={16} />
+                                <Building2 size={16} />
                                 Practice
                             </NavLink>
                             <NavLink to="/history" className={linkClass} onClick={matchId ? handleLockedNav('/history') : undefined}>

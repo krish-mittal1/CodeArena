@@ -1,50 +1,33 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
-    Search, BookOpen, Filter, ChevronRight, Code2, Tag,
+    Search, Building2, ChevronRight, Briefcase,
 } from 'lucide-react';
-import { problemApi } from '../api/auth';
-import Badge from '../components/ui/Badge';
-
-const DIFFICULTY_COLORS = {
-    easy: 'green',
-    medium: 'yellow',
-    hard: 'red',
-};
-
-function extractTopic(description) {
-    const match = description?.match(/\*\*Topic:\s*(.+?)\*\*/);
-    return match ? match[1].trim() : 'General';
-}
+import { COMPANIES, COMPANY_CATEGORIES } from '../utils/companies';
 
 export default function Problems() {
     const navigate = useNavigate();
     const [search, setSearch] = useState('');
-    const [selectedTopic, setSelectedTopic] = useState('All');
-    const [selectedDifficulty, setSelectedDifficulty] = useState('All');
+    const [selectedCategory, setSelectedCategory] = useState('All');
 
-    const { data: problems = [], isLoading } = useQuery({
-        queryKey: ['problems'],
-        queryFn: problemApi.getAll,
-    });
-
-    // Extract unique topics
-    const topics = useMemo(() => {
-        const topicSet = new Set(problems.map((p) => extractTopic(p.description)));
-        return ['All', ...Array.from(topicSet).sort()];
-    }, [problems]);
-
-    // Filter problems
     const filtered = useMemo(() => {
-        return problems.filter((p) => {
-            const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase());
-            const matchesTopic = selectedTopic === 'All' || extractTopic(p.description) === selectedTopic;
-            const matchesDifficulty = selectedDifficulty === 'All' || p.difficulty === selectedDifficulty;
-            return matchesSearch && matchesTopic && matchesDifficulty;
+        return COMPANIES.filter((c) => {
+            const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
+            const matchesCategory = selectedCategory === 'All' || c.category === selectedCategory;
+            return matchesSearch && matchesCategory;
         });
-    }, [problems, search, selectedTopic, selectedDifficulty]);
+    }, [search, selectedCategory]);
+
+    // Group companies by category for displaying counts
+    const categoryCounts = useMemo(() => {
+        const counts = {};
+        COMPANIES.forEach((c) => {
+            counts[c.category] = (counts[c.category] || 0) + 1;
+        });
+        counts['All'] = COMPANIES.length;
+        return counts;
+    }, []);
 
     return (
         <div className="min-h-screen bg-bg-root pb-20">
@@ -53,14 +36,14 @@ export default function Problems() {
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
                     <div className="flex items-center gap-3 mb-1">
                         <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                            <BookOpen size={20} className="text-accent" />
+                            <Building2 size={20} className="text-accent" />
                         </div>
                         <div>
                             <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
-                                Problem Bank
+                                Company Hub
                             </h1>
                             <p className="text-text-secondary text-sm">
-                                {problems.length} problems available &middot; Practice at your pace
+                                {COMPANIES.length} companies &middot; Practice company-wise questions
                             </p>
                         </div>
                     </div>
@@ -71,128 +54,111 @@ export default function Problems() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="mt-6 flex flex-col sm:flex-row gap-3"
+                    className="mt-6 space-y-4"
                 >
                     {/* Search */}
-                    <div className="relative flex-1">
+                    <div className="relative max-w-md">
                         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
                         <input
                             type="text"
-                            placeholder="Search problems..."
+                            placeholder="Search companies..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full pl-10 pr-4 py-2.5 bg-bg-secondary border border-border rounded-lg text-sm text-text-primary placeholder-text-muted focus:border-accent focus:outline-none transition-colors"
                         />
                     </div>
 
-                    {/* Topic Filter */}
-                    <div className="relative">
-                        <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
-                        <select
-                            value={selectedTopic}
-                            onChange={(e) => setSelectedTopic(e.target.value)}
-                            className="appearance-none pl-9 pr-8 py-2.5 bg-bg-secondary border border-border rounded-lg text-sm text-text-primary focus:border-accent focus:outline-none transition-colors cursor-pointer"
-                        >
-                            {topics.map((t) => (
-                                <option key={t} value={t} className="bg-bg-primary">{t}</option>
-                            ))}
-                        </select>
-                        <Filter size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
-                    </div>
-
-                    {/* Difficulty Filter */}
-                    <div className="flex gap-1.5">
-                        {['All', 'easy', 'medium', 'hard'].map((d) => (
+                    {/* Category Chips */}
+                    <div className="flex flex-wrap gap-2">
+                        {COMPANY_CATEGORIES.map((cat) => (
                             <button
-                                key={d}
-                                onClick={() => setSelectedDifficulty(d)}
-                                className={`px-3 py-2 rounded-lg text-xs font-semibold capitalize transition-all border ${
-                                    selectedDifficulty === d
-                                        ? 'bg-accent/10 border-accent/30 text-accent'
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border ${
+                                    selectedCategory === cat
+                                        ? 'bg-accent/15 border-accent/40 text-accent shadow-sm shadow-accent/10'
                                         : 'bg-bg-secondary border-border text-text-secondary hover:border-border-hover hover:text-text-primary'
                                 }`}
                             >
-                                {d}
+                                {cat}
+                                <span className="ml-1.5 opacity-60">{categoryCounts[cat] || 0}</span>
                             </button>
                         ))}
                     </div>
                 </motion.div>
 
-                {/* Problem Table */}
+                {/* Companies Grid */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="mt-6 bg-bg-secondary border border-border rounded-xl overflow-hidden"
+                    className="mt-8"
                 >
-                    {/* Header Row */}
-                    <div className="hidden sm:grid grid-cols-[1fr_120px_100px_80px] gap-4 px-6 py-3 border-b border-border/60 text-xs font-semibold text-text-muted uppercase tracking-wider">
-                        <span>Problem</span>
-                        <span>Topic</span>
-                        <span>Difficulty</span>
-                        <span></span>
-                    </div>
-
-                    {isLoading ? (
-                        <div className="divide-y divide-border/30">
-                            {Array.from({ length: 8 }).map((_, i) => (
-                                <div key={i} className="px-6 py-4 flex items-center gap-4">
-                                    <div className="w-8 h-8 rounded-lg bg-bg-surface animate-pulse" />
-                                    <div className="flex-1 space-y-2">
-                                        <div className="h-4 w-48 bg-bg-surface rounded animate-pulse" />
-                                        <div className="h-3 w-24 bg-bg-surface rounded animate-pulse" />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : filtered.length === 0 ? (
+                    {filtered.length === 0 ? (
                         <div className="py-16 text-center">
-                            <Code2 size={40} className="mx-auto text-text-muted/40 mb-3" />
-                            <p className="text-text-secondary text-sm font-medium">No problems found</p>
-                            <p className="text-text-muted text-xs mt-1">Try adjusting your filters</p>
+                            <Briefcase size={40} className="mx-auto text-text-muted/40 mb-3" />
+                            <p className="text-text-secondary text-sm font-medium">No companies found</p>
+                            <p className="text-text-muted text-xs mt-1">Try adjusting your search or filters</p>
                         </div>
                     ) : (
-                        <div className="divide-y divide-border/30">
-                            {filtered.map((problem, idx) => {
-                                const topic = extractTopic(problem.description);
-                                return (
-                                    <motion.div
-                                        key={problem.id}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: Math.min(idx * 0.02, 0.5) }}
-                                        onClick={() => navigate(`/practice/${problem.id}`)}
-                                        className="grid grid-cols-1 sm:grid-cols-[1fr_120px_100px_80px] gap-2 sm:gap-4 px-6 py-4 hover:bg-bg-hover/40 transition-colors cursor-pointer group items-center"
-                                    >
-                                        {/* Title */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {filtered.map((company, idx) => (
+                                <motion.div
+                                    key={company.id}
+                                    initial={{ opacity: 0, y: 15 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: Math.min(idx * 0.02, 0.6) }}
+                                    onClick={() => navigate(`/company/${company.id}`)}
+                                    className="group relative bg-bg-secondary border border-border rounded-xl p-5 cursor-pointer transition-all duration-300 hover:border-border-hover hover:bg-bg-hover/40 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-0.5"
+                                >
+                                    {/* Accent top line */}
+                                    <div
+                                        className="absolute top-0 left-4 right-4 h-[2px] rounded-b-full opacity-40 group-hover:opacity-80 transition-opacity"
+                                        style={{ backgroundColor: company.color }}
+                                    />
+
+                                    <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent text-xs font-bold shrink-0">
-                                                {idx + 1}
+                                            {/* Logo / Emoji */}
+                                            <div
+                                                className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0 transition-transform group-hover:scale-110"
+                                                style={{ backgroundColor: `${company.color}15` }}
+                                            >
+                                                {company.logo}
                                             </div>
-                                            <span className="text-sm font-medium text-text-primary group-hover:text-accent transition-colors truncate">
-                                                {problem.title}
-                                            </span>
+                                            <div className="min-w-0">
+                                                <h3 className="text-sm font-bold text-text-primary group-hover:text-accent transition-colors truncate">
+                                                    {company.name}
+                                                </h3>
+                                                <span
+                                                    className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider"
+                                                    style={{
+                                                        color: company.color,
+                                                        backgroundColor: `${company.color}12`,
+                                                    }}
+                                                >
+                                                    {company.category}
+                                                </span>
+                                            </div>
                                         </div>
+                                        <ChevronRight
+                                            size={16}
+                                            className="text-text-muted group-hover:text-accent transition-all group-hover:translate-x-0.5 shrink-0 mt-1"
+                                        />
+                                    </div>
 
-                                        {/* Topic */}
-                                        <span className="text-xs text-text-secondary font-medium truncate">
-                                            {topic}
+                                    {/* Footer */}
+                                    <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between">
+                                        <span className="text-[11px] text-text-muted font-medium">
+                                            Questions coming soon
                                         </span>
-
-                                        {/* Difficulty */}
-                                        <div>
-                                            <Badge color={DIFFICULTY_COLORS[problem.difficulty] || 'gray'}>
-                                                {problem.difficulty}
-                                            </Badge>
-                                        </div>
-
-                                        {/* Arrow */}
-                                        <div className="hidden sm:flex justify-end">
-                                            <ChevronRight size={16} className="text-text-muted group-hover:text-accent transition-colors" />
-                                        </div>
-                                    </motion.div>
-                                );
-                            })}
+                                        <span
+                                            className="w-2 h-2 rounded-full opacity-50"
+                                            style={{ backgroundColor: company.color }}
+                                        />
+                                    </div>
+                                </motion.div>
+                            ))}
                         </div>
                     )}
                 </motion.div>
