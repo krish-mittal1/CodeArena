@@ -49,12 +49,12 @@ export const LANGUAGES = [
     { id: 'javascript', label: 'JavaScript', monacoId: 'javascript' },
 ];
 
-// ── Default code templates (LeetCode-style) ────────
+// ── Default code templates (Standard I/O fallback) ────────
 export const CODE_TEMPLATES = {
-    python: 'class Solution:\n    def solve(self):\n        # Write your solution here\n        pass\n',
-    cpp: '#include <bits/stdc++.h>\nusing namespace std;\n\nclass Solution {\npublic:\n    // Write your solution here\n};\n',
-    java: 'import java.util.*;\n\nclass Solution {\n    // Write your solution here\n}\n',
-    javascript: '/**\n * Write your solution here\n */\nclass Solution {\n    solve() {\n        \n    }\n}\n\nmodule.exports = Solution;\n',
+    python: 'import sys\n\ndef solve():\n    # Read from sys.stdin\n    # input_data = sys.stdin.read().split()\n    pass\n\nif __name__ == "__main__":\n    solve()\n',
+    cpp: '#include <iostream>\n#include <string>\n#include <vector>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    // Optimize standard I/O operations for performance\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    \n    // Write your solution here\n    \n    return 0;\n}\n',
+    java: 'import java.util.*;\nimport java.io.*;\n\npublic class Solution {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        // Write your solution here\n        \n    }\n}\n',
+    javascript: 'const fs = require("fs");\n\nfunction solve() {\n    const input = fs.readFileSync("/dev/stdin", "utf-8").trim().split("\\n");\n    // Write your solution here\n    \n}\n\nsolve();\n',
 };
 
 // ── Type mappings for boilerplate generation ────────
