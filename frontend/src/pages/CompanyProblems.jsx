@@ -17,7 +17,25 @@ export default function CompanyProblems() {
         queryFn: problemApi.getAll,
     });
 
-    const companyProblems = problems.filter(p => p.title === "Print the matrix in spiral manner" || p.title.includes("Spiral"));
+    const targetCompanies = [
+        "Visa", "Reddit", "Twilio", "Square", "Nutanix",
+        "Flipkart", "Target", "AMD", "American Express",
+        "Alibaba", "Unity Technologies", "Activision Blizzard",
+        "Bain & Company", "Medtronic", "Goldman Sachs",
+        "Splunk", "Bloomberg", "Dropbox", "PwC",
+        "Philips Healthcare", "Oracle", "Ubisoft", "Uber",
+        "JPMorgan Chase", "IBM", "TCS", "Cognizant",
+        "Accenture", "Infosys", "Capgemini", "Wipro"
+    ];
+
+    const isTargetCompany = company && targetCompanies.some(tc => 
+        tc.toLowerCase() === company.name.toLowerCase() || 
+        company.name.toLowerCase().includes(tc.toLowerCase())
+    );
+
+    const companyProblems = isTargetCompany 
+        ? problems.filter(p => p.title === "Print the matrix in spiral manner" || p.title.includes("Spiral"))
+        : [];
 
     if (!company) {
         return (
