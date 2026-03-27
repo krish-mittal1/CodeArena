@@ -140,7 +140,7 @@ export default function Practice() {
                     >
                         <ArrowLeft size={18} />
                     </button>
-                    <h2 className="text-sm font-bold text-text-primary truncate max-w-[300px]">
+                    <h2 className="text-sm font-bold text-text-primary truncate max-w-[200px] sm:max-w-[300px]">
                         {problem.title}
                     </h2>
                     <Badge color={problem.difficulty === 'easy' ? 'green' : problem.difficulty === 'medium' ? 'yellow' : 'red'}>
@@ -150,9 +150,9 @@ export default function Practice() {
             </div>
 
             {/* Main Split */}
-            <div className="flex-1 flex overflow-hidden">
+            <div className="practice-split">
                 {/* Left: Problem Description */}
-                <div className="w-[45%] min-w-[350px] border-r border-border overflow-y-auto">
+                <div className="practice-problem-pane">
                     <div className="p-6 space-y-5">
                         {/* Description */}
                         <div>
@@ -232,7 +232,7 @@ export default function Practice() {
                 </div>
 
                 {/* Right: Editor + Verdict */}
-                <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="practice-editor-pane">
                     {/* Editor Toolbar */}
                     <div className="flex items-center justify-between px-4 py-2 bg-bg-primary border-b border-border shrink-0">
                         <div className="flex items-center gap-4">

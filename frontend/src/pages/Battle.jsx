@@ -89,7 +89,7 @@ export default function Battle() {
         const handleMouseMove = (e) => {
             if (!isDragging.current || !containerRef.current) return;
             const containerWidth = containerRef.current.getBoundingClientRect().width;
-            
+
             // Adjust for the 48px activity bar width
             const newLeftWidth = ((e.clientX - 48) / containerWidth) * 100;
             if (newLeftWidth >= 20 && newLeftWidth <= 60) {
@@ -138,7 +138,7 @@ export default function Battle() {
 
             {/* Main Application Body */}
             <div className="flex flex-1 overflow-hidden relative">
-                
+
                 {/* IDE-like Activity Bar (Leftmost) */}
                 <div className="w-12 bg-bg-primary border-r border-border shrink-0 flex flex-col items-center py-4 gap-6 z-10 selection:bg-transparent">
                     <button className="text-text-primary relative group focus:outline-none" title="Problem Description">

@@ -77,10 +77,31 @@ body {
     gap: 56px;
 }
 
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 28px 16px;
+        gap: 32px;
+    }
+}
+
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 24px;
+}
+
+@media (max-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
 }
 
 .stat-card {
@@ -91,6 +112,13 @@ body {
     border-radius: 16px;
 }
 
+@media (max-width: 480px) {
+    .stat-card {
+        padding: 16px;
+        border-radius: 12px;
+    }
+}
+
 .graph-section {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -98,8 +126,57 @@ body {
     align-items: stretch;
 }
 
+@media (max-width: 900px) {
+    .graph-section {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
 .recent-section {
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+/* ── Practice Page: Mobile-first split ──── */
+.practice-split {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.practice-problem-pane {
+    width: 45%;
+    min-width: 350px;
+    border-right: 1px solid var(--color-border);
+    overflow-y: auto;
+}
+
+.practice-editor-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .practice-split {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .practice-problem-pane {
+        width: 100%;
+        min-width: 0;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+        max-height: none;
+        overflow: visible;
+    }
+
+    .practice-editor-pane {
+        min-height: 400px;
+        height: 60vh;
+    }
 }
