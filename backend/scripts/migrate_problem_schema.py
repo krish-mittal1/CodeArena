@@ -2,7 +2,9 @@ import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
 
-DATABASE_URL = "postgresql+asyncpg://postgres:krishisunique@localhost:5432/codearena"
+from backend.config import settings
+
+DATABASE_URL = settings.database_url
 
 async def upgrade_db():
     engine = create_async_engine(DATABASE_URL)
