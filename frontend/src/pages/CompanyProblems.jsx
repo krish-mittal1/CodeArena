@@ -12,6 +12,11 @@ export default function CompanyProblems() {
 
     const company = COMPANIES.find((c) => c.id === companyId);
 
+    const { data: problems = [], isLoading } = useQuery({
+        queryKey: ['problems'],
+        queryFn: problemApi.getAll,
+    });
+
     const PROBLEM_COMPANY_MAPPING = {
         "Print the matrix in spiral manner": [
             "Visa", "Reddit", "Twilio", "Square", "Nutanix",
