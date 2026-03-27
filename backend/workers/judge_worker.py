@@ -207,6 +207,7 @@ async def _process_submission_inner(
                 Submission.id == submission_id,
                 Submission.status == SubmissionStatus.QUEUED
             )
+            .options(selectinload(Submission.problem))
         )
         submission = result.scalar_one_or_none()
         if not submission:
@@ -236,6 +237,15 @@ async def _process_submission_inner(
         memory_limit_mb = submission.problem.memory_limit_mb if submission.problem else 256
 
         # Batch execute: compile once, run all tests in a single container
+        # Build problem_meta for LeetCode-style driver injection
+        problem_meta = None
+        if submission.problem and submission.problem.method_name:
+            problem_meta = {
+                "method_name": submission.problem.method_name,
+                "parameters": submission.problem.parameters,
+                "return_type": submission.problem.return_type,
+            }
+        
         try:
             batch_results = await sandbox.execute_batch(
                 language=submission.language,
@@ -243,6 +253,7 @@ async def _process_submission_inner(
                 test_inputs=[tc.input for tc in test_cases],
                 time_limit_ms=time_limit_ms,
                 memory_limit_mb=memory_limit_mb,
+                problem_meta=problem_meta,
             )
         except Exception as batch_err:
             logger.error(
@@ -291,12 +302,16 @@ async def _process_submission_inner(
                 )
                 return
             else:
+                problem_title = submission.problem.title if submission.problem else None
+                is_leetcode = problem_meta is not None
                 verdict = judge(
                     actual_output=sandbox_result.stdout,
                     expected_output=tc.expected_output,
                     exit_code=sandbox_result.exit_code,
                     timed_out=sandbox_result.timed_out,
                     oom_killed=sandbox_result.oom_killed,
+                    problem_title=problem_title,
+                    is_leetcode_mode=is_leetcode,
                 )
 
             # ── Log per-test-case details ─────────────────

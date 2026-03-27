@@ -1,9 +1,15 @@
 """
 Judge service — compare actual output against expected output.
-No fake logic, real line-by-line comparison.
+Supports both:
+  1. Traditional line-by-line string comparison (competitive programming)
+  2. JSON-based structural comparison (LeetCode driver mode)
+  3. Custom checkers for specific problems (e.g., 3 Sum)
 """
 
+import json
 import logging
+import re
+from typing import Any
 
 from backend.core.constants import Verdict
 
@@ -16,6 +22,8 @@ def judge(
     exit_code: int,
     timed_out: bool,
     oom_killed: bool,
+    problem_title: str = None,
+    is_leetcode_mode: bool = False,
 ) -> Verdict:
     """
     Determine the verdict for a single test case execution.
@@ -26,6 +34,8 @@ def judge(
         exit_code: process exit code (0 = success)
         timed_out: whether the process exceeded time limit
         oom_killed: whether the process was killed for exceeding memory
+        problem_title: title of the problem (for custom checkers)
+        is_leetcode_mode: if True, use JSON structural comparison
 
     Returns:
         Verdict enum value
@@ -48,10 +58,18 @@ def judge(
         return Verdict.RUNTIME_ERROR
 
     # ── Priority 4: Compare output ────────────────────────
-    # Handle None inputs safely — treat as empty string
     actual = actual_output if actual_output is not None else ""
     expected = expected_output if expected_output is not None else ""
 
+    # LeetCode driver mode: JSON structural comparison
+    if is_leetcode_mode:
+        return _judge_json(actual, expected)
+
+    # Legacy custom checker for 3 Sum (non-driver mode fallback)
+    if problem_title in ("3 Sum", "3Sum", "Three Sum", "ThreeSum") and not is_leetcode_mode:
+        return _judge_3_sum(actual, expected)
+
+    # Standard line-by-line comparison
     actual_lines = _normalize_output(actual)
     expected_lines = _normalize_output(expected)
 
@@ -81,8 +99,114 @@ def _normalize_output(output: str) -> list[str]:
 
     lines = [line.rstrip() for line in output.strip().split("\n")]
 
-    # Remove trailing empty lines
     while lines and lines[-1] == "":
         lines.pop()
 
     return lines
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  JSON-based comparison (LeetCode driver mode)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+def _normalize_json_value(val: Any) -> Any:
+    """
+    Recursively normalize a parsed JSON value for comparison.
+    - Lists of lists: sort inner lists, then sort outer list
+    - This handles problems like 3Sum where order doesn't matter
+    """
+    if isinstance(val, list):
+        normalized = [_normalize_json_value(item) for item in val]
+        # Try to sort if all elements are comparable
+        try:
+            normalized.sort()
+        except TypeError:
+            pass
+        return normalized
+    return val
+
+
+def _judge_json(actual: str, expected: str) -> Verdict:
+    """
+    Parse both outputs as JSON, normalize, and compare structurally.
+    This handles order-independent comparison of arrays/lists.
+    """
+    try:
+        actual_val = json.loads(actual.strip())
+    except (json.JSONDecodeError, ValueError):
+        logger.info(
+            f"[JUDGE] Verdict=WRONG_ANSWER (JSON parse failed for actual output) "
+            f"actual_preview={repr(actual[:300])}"
+        )
+        return Verdict.WRONG_ANSWER
+
+    try:
+        expected_val = json.loads(expected.strip())
+    except (json.JSONDecodeError, ValueError):
+        # If expected isn't valid JSON, fall back to string comparison
+        logger.warning(f"[JUDGE] Expected output is not valid JSON, falling back to string comparison")
+        actual_lines = _normalize_output(actual)
+        expected_lines = _normalize_output(expected)
+        if actual_lines == expected_lines:
+            return Verdict.ACCEPTED
+        return Verdict.WRONG_ANSWER
+
+    # Normalize both values
+    actual_normalized = _normalize_json_value(actual_val)
+    expected_normalized = _normalize_json_value(expected_val)
+
+    if actual_normalized == expected_normalized:
+        logger.debug("[JUDGE] Verdict=ACCEPTED (JSON comparison)")
+        return Verdict.ACCEPTED
+
+    logger.info(
+        f"[JUDGE] Verdict=WRONG_ANSWER (JSON comparison)\n"
+        f"        ACTUAL={repr(str(actual_normalized)[:300])}\n"
+        f"      EXPECTED={repr(str(expected_normalized)[:300])}"
+    )
+    return Verdict.WRONG_ANSWER
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  Custom 3 Sum checker (legacy stdin/stdout fallback)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+def _parse_3sum_output(text: str, is_expected: bool = False) -> list[tuple[int, int, int]]:
+    tokens = re.findall(r'-?\d+', text)
+    nums = [int(x) for x in tokens]
+    if not nums:
+        return []
+    
+    if is_expected:
+        nums = nums[1:]
+    else:
+        if (len(nums) - 1) % 3 == 0 and nums[0] == (len(nums) - 1) // 3:
+            nums = nums[1:]
+        elif len(nums) % 3 == 1:
+            nums = nums[1:]
+
+    triplets = []
+    valid_length = (len(nums) // 3) * 3
+    for i in range(0, valid_length, 3):
+        t = (nums[i], nums[i+1], nums[i+2])
+        triplets.append(tuple(sorted(t)))
+
+    unique_triplets = list(set(triplets))
+    unique_triplets.sort()
+    return unique_triplets
+
+
+def _judge_3_sum(actual: str, expected: str) -> Verdict:
+    actual_triplets = _parse_3sum_output(actual, is_expected=False)
+    expected_triplets = _parse_3sum_output(expected, is_expected=True)
+
+    if actual_triplets == expected_triplets:
+        logger.debug("[JUDGE] Verdict=ACCEPTED (Custom 3 Sum)")
+        return Verdict.ACCEPTED
+    
+    logger.info(
+        f"[JUDGE] Verdict=WRONG_ANSWER (Custom 3 Sum)\n"
+        f"        ACTUAL={actual_triplets}\n"
+        f"      EXPECTED={expected_triplets}"
+    )
+    return Verdict.WRONG_ANSWER

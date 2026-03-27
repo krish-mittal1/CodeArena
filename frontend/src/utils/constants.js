@@ -49,13 +49,77 @@ export const LANGUAGES = [
     { id: 'javascript', label: 'JavaScript', monacoId: 'javascript' },
 ];
 
-// ── Default code templates ──────────────────────────
+// ── Default code templates (LeetCode-style) ────────
 export const CODE_TEMPLATES = {
-    python: `# Write your solution here\nimport sys\ninput = sys.stdin.readline\n\ndef solve():\n    pass\n\nsolve()\n`,
-    cpp: `#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    \n    return 0;\n}\n`,
-    java: `import java.util.*;\n\npublic class Solution {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        \n    }\n}\n`,
-    javascript: `// Read input line by line\nconst lines = [];\nlet currentLine = 0;\n\n// For browser/node environments - read from stdin\nprocess.stdin.setEncoding('utf8');\nprocess.stdin.on('data', (chunk) => {\n    const inputLines = chunk.trim().split('\\n');\n    lines.push(...inputLines);\n});\n\nprocess.stdin.on('end', () => {\n    // solve here\n    // Access input via: lines[currentLine++]\n});\n`,
+    python: 'class Solution:\n    def solve(self):\n        # Write your solution here\n        pass\n',
+    cpp: '#include <bits/stdc++.h>\nusing namespace std;\n\nclass Solution {\npublic:\n    // Write your solution here\n};\n',
+    java: 'import java.util.*;\n\nclass Solution {\n    // Write your solution here\n}\n',
+    javascript: '/**\n * Write your solution here\n */\nclass Solution {\n    solve() {\n        \n    }\n}\n\nmodule.exports = Solution;\n',
 };
+
+// ── Type mappings for boilerplate generation ────────
+const TYPE_MAPS = {
+    python: {
+        'int': 'int', 'int[]': 'List[int]', 'int[][]': 'List[List[int]]',
+        'str': 'str', 'str[]': 'List[str]', 'bool': 'bool',
+        'float': 'float', 'float[]': 'List[float]',
+    },
+    cpp: {
+        'int': 'int', 'int[]': 'vector<int>', 'int[][]': 'vector<vector<int>>',
+        'str': 'string', 'str[]': 'vector<string>', 'bool': 'bool',
+        'float': 'double', 'float[]': 'vector<double>',
+    },
+    java: {
+        'int': 'int', 'int[]': 'int[]', 'int[][]': 'int[][]',
+        'str': 'String', 'str[]': 'String[]', 'bool': 'boolean',
+        'float': 'double', 'float[]': 'double[]',
+    },
+    javascript: {
+        'int': 'number', 'int[]': 'number[]', 'int[][]': 'number[][]',
+        'str': 'string', 'str[]': 'string[]', 'bool': 'boolean',
+        'float': 'number', 'float[]': 'number[]',
+    },
+};
+
+/**
+ * Generate problem-specific class Solution boilerplate from API signature.
+ * Falls back to generic CODE_TEMPLATES if no signature is available.
+ */
+export function generateBoilerplate(language, problem) {
+    if (!problem?.method_name || !problem?.parameters || !problem?.return_type) {
+        return CODE_TEMPLATES[language] || '';
+    }
+
+    const { method_name, parameters, return_type } = problem;
+    const map = TYPE_MAPS[language] || TYPE_MAPS.python;
+
+    if (language === 'python') {
+        const params = parameters.map(p => `${p.name}: ${map[p.type] || 'Any'}`).join(', ');
+        const retType = map[return_type] || 'Any';
+        return `from typing import List, Optional\n\nclass Solution:\n    def ${method_name}(self, ${params}) -> ${retType}:\n        # Write your solution here\n        pass\n`;
+    }
+
+    if (language === 'cpp') {
+        const params = parameters.map(p => `${map[p.type] || 'int'}& ${p.name}`).join(', ');
+        const retType = map[return_type] || 'int';
+        return `#include <bits/stdc++.h>\nusing namespace std;\n\nclass Solution {\npublic:\n    ${retType} ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n};\n`;
+    }
+
+    if (language === 'java') {
+        const params = parameters.map(p => `${map[p.type] || 'int'} ${p.name}`).join(', ');
+        const retType = map[return_type] || 'int';
+        return `import java.util.*;\n\nclass Solution {\n    public ${retType} ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n}\n`;
+    }
+
+    if (language === 'javascript') {
+        const params = parameters.map(p => p.name).join(', ');
+        const paramDocs = parameters.map(p => ` * @param {${map[p.type] || 'any'}} ${p.name}`).join('\n');
+        const retDoc = map[return_type] || 'any';
+        return `/**\n${paramDocs}\n * @return {${retDoc}}\n */\nclass Solution {\n    ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n}\n\nmodule.exports = Solution;\n`;
+    }
+
+    return CODE_TEMPLATES[language] || '';
+}
 
 // ── Match Status ────────────────────────────────────
 export const MATCH_STATUS = {

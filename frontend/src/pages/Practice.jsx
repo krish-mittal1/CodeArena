@@ -8,7 +8,7 @@ import {
     CheckCircle2, XCircle, Clock, AlertTriangle,
 } from 'lucide-react';
 import { problemApi, practiceApi } from '../api/auth';
-import { LANGUAGES, CODE_TEMPLATES, VERDICTS } from '../utils/constants';
+import { LANGUAGES, CODE_TEMPLATES, VERDICTS, generateBoilerplate } from '../utils/constants';
 import Badge from '../components/ui/Badge';
 
 const STATUS_ICONS = {
@@ -34,6 +34,13 @@ export default function Practice() {
         queryFn: () => problemApi.getById(problemId),
         enabled: !!problemId,
     });
+
+    // Set boilerplate when problem loads
+    useEffect(() => {
+        if (problem) {
+            setCode(generateBoilerplate(language, problem) || CODE_TEMPLATES[language] || '');
+        }
+    }, [problem]);
 
     const { data: history = [], refetch: refetchHistory } = useQuery({
         queryKey: ['practiceHistory', problemId],
@@ -89,13 +96,13 @@ export default function Practice() {
     };
 
     const handleReset = () => {
-        setCode(CODE_TEMPLATES[language] || '');
+        setCode(generateBoilerplate(language, problem) || CODE_TEMPLATES[language] || '');
         setVerdict(null);
     };
 
     const handleLanguageChange = (newLang) => {
         setLanguage(newLang);
-        setCode(CODE_TEMPLATES[newLang] || '');
+        setCode(generateBoilerplate(newLang, problem) || CODE_TEMPLATES[newLang] || '');
     };
 
     if (isLoading) {

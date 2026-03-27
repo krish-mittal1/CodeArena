@@ -2,6 +2,8 @@
 
 import uuid
 
+from typing import Optional, Any
+
 from pydantic import BaseModel, Field
 
 from backend.core.constants import Difficulty
@@ -44,6 +46,9 @@ class ProblemPublic(BaseModel):
     constraints: str | None
     time_limit_ms: int
     memory_limit_mb: int
+    method_name: Optional[str] = None
+    parameters: Optional[Any] = None
+    return_type: Optional[str] = None
     sample_cases: list[TestCasePublic] = []
 
     model_config = {"from_attributes": True}

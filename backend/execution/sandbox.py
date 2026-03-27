@@ -15,6 +15,7 @@ from dataclasses import dataclass
 
 from backend.config import settings
 from backend.execution.languages import get_language_config
+from backend.execution.drivers import generate_driver
 
 logger = logging.getLogger(__name__)
 
@@ -190,6 +191,7 @@ class Sandbox:
         test_inputs: list[str],
         time_limit_ms: int | None = None,
         memory_limit_mb: int | None = None,
+        problem_meta: dict | None = None,
     ) -> list[ExecutionResult]:
         """
         Execute code against multiple test inputs in a SINGLE Docker container.
@@ -226,15 +228,47 @@ class Sandbox:
             os.chmod(tmpdir, 0o777)
 
             # ── Write source code (once) ──────────────────
-            filename = (
-                f"Solution{config.file_extension}"
-                if language == "java"
-                else f"code{config.file_extension}"
-            )
+            # In LeetCode driver mode for Python, save as solution.py
+            # to avoid collision with Python's built-in 'code' module
+            is_driver_mode = problem_meta and problem_meta.get("method_name")
+            if language == "java":
+                filename = f"Solution{config.file_extension}"
+            elif language == "python" and is_driver_mode:
+                filename = f"solution{config.file_extension}"
+            else:
+                filename = f"code{config.file_extension}"
             code_path = os.path.join(tmpdir, filename)
             with open(code_path, "w", encoding="utf-8") as f:
                 f.write(code)
             os.chmod(code_path, 0o777)
+
+            # ── Generate and write driver (LeetCode mode) ──
+            driver_code = None
+            driver_filename = None
+            if problem_meta and problem_meta.get("method_name"):
+                driver_code = generate_driver(
+                    language=language,
+                    method_name=problem_meta["method_name"],
+                    parameters=problem_meta.get("parameters", []),
+                    return_type=problem_meta.get("return_type", "int"),
+                )
+            
+            if driver_code:
+                if language == "python":
+                    driver_filename = "driver.py"
+                elif language == "javascript":
+                    driver_filename = "driver.js"
+                elif language == "cpp":
+                    driver_filename = "driver.cpp"
+                elif language == "java":
+                    driver_filename = "Main.java"
+                
+                if driver_filename:
+                    driver_path = os.path.join(tmpdir, driver_filename)
+                    with open(driver_path, "w", encoding="utf-8") as f:
+                        f.write(driver_code)
+                    os.chmod(driver_path, 0o777)
+                    logger.info(f"[SANDBOX] {exec_id}: LeetCode driver injected ({driver_filename})")
 
             # ── Write ALL test inputs ─────────────────────
             for i, inp in enumerate(test_inputs):
@@ -249,7 +283,9 @@ class Sandbox:
             async with _container_semaphore:
 
                 # ── Compile once (if needed) ──────────────
-                if config.needs_compilation:
+                # Skip normal compilation in driver mode for compiled languages
+                # (C++/Java) — the driver handles its own compilation below
+                if config.needs_compilation and not (driver_code and language in ("cpp", "java")):
                     compile_result = await self._run_compile(
                         exec_id, config, tmpdir, mem_mb
                     )
@@ -260,11 +296,45 @@ class Sandbox:
                 # ── Write runner script ───────────────────
                 # Use integer timeout (ceiling) for the `timeout` command
                 timeout_s = int(timeout_per_test) + 1
+                
+                # Determine run command: use driver if available
+                if driver_code and driver_filename:
+                    if language == "python":
+                        run_cmd = "python3 /sandbox/driver.py"
+                    elif language == "javascript":
+                        run_cmd = "node /sandbox/driver.js"
+                    elif language == "cpp":
+                        # For C++, driver includes user code via #include
+                        # We need to compile the driver instead
+                        run_cmd = "/sandbox/solution"  # compiled binary
+                    elif language == "java":
+                        run_cmd = "java -cp /sandbox Main"
+                    else:
+                        run_cmd = config.run_cmd
+                else:
+                    run_cmd = config.run_cmd
+                    
+                # For C++ with driver, we need to compile the driver file
+                if driver_code and language == "cpp":
+                    compile_result = await self._run_compile_custom(
+                        exec_id, config, tmpdir, mem_mb,
+                        compile_cmd=f"g++ -O2 -std=gnu++17 -Wall -o /sandbox/solution /sandbox/driver.cpp"
+                    )
+                    if compile_result is not None:
+                        return [compile_result] * num_tests
+                elif driver_code and language == "java":
+                    # Compile both Main.java (driver) and Solution.java (user code)
+                    compile_result = await self._run_compile_custom(
+                        exec_id, config, tmpdir, mem_mb,
+                        compile_cmd="javac /sandbox/Main.java /sandbox/Solution.java -d /sandbox"
+                    )
+                    if compile_result is not None:
+                        return [compile_result] * num_tests
                 runner_script = f"""#!/bin/sh
 i=0
 while [ $i -lt {num_tests} ]; do
     START_S=$(date +%s 2>/dev/null || echo 0)
-    timeout {timeout_s}s {config.run_cmd} < /sandbox/input_${{i}}.txt > /sandbox/output_${{i}}.txt 2>/sandbox/error_${{i}}.txt
+    timeout {timeout_s}s {run_cmd} < /sandbox/input_${{i}}.txt > /sandbox/output_${{i}}.txt 2>/sandbox/error_${{i}}.txt
     EXIT_CODE=$?
     END_S=$(date +%s 2>/dev/null || echo 0)
     if [ "$START_S" != "0" ] && [ "$END_S" != "0" ]; then
@@ -436,6 +506,51 @@ done
 
             config.image,
             "-c", compile_cmd,
+        ]
+
+        result = await self._run_process(
+            exec_id,
+            docker_args,
+            container_name,
+            settings.sandbox_compile_timeout,
+            stage="compile",
+        )
+
+        if result.exit_code != 0:
+            return result
+
+        return None
+
+
+    async def _run_compile_custom(
+        self,
+        exec_id: str,
+        config,
+        tmpdir: str,
+        mem_mb: int,
+        compile_cmd: str = "",
+    ) -> ExecutionResult | None:
+        """Compile with a custom command (used for driver-based compilation)."""
+        container_name = f"codearena-compile-drv-{exec_id}"
+        full_cmd = f"cd /sandbox && {compile_cmd}"
+
+        docker_args = [
+            "docker", "run",
+            "--name", container_name,
+            "--network", "none",
+            "--cap-drop", "ALL",
+            "--security-opt", "no-new-privileges:true",
+            "--memory", "512m",
+            "--memory-swap", "512m",
+            "--pids-limit", str(settings.sandbox_pids_limit),
+            "--ulimit", "stack=67108864:67108864",
+            "--cpus", "0.5",
+            "--tmpfs", "/tmp:size=64m,nosuid",
+            "-v", f"{_to_host_path(tmpdir)}:/sandbox:rw",
+            "--rm",
+            "--entrypoint", "sh",
+            config.image,
+            "-c", full_cmd,
         ]
 
         result = await self._run_process(
