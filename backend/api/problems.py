@@ -60,5 +60,8 @@ def _to_public(problem) -> ProblemPublic:
         constraints=problem.constraints,
         time_limit_ms=problem.time_limit_ms,
         memory_limit_mb=problem.memory_limit_mb,
+        method_name=getattr(problem, "method_name", None),
+        parameters=getattr(problem, "parameters", None),
+        return_type=getattr(problem, "return_type", None),
         sample_cases=sample_cases,
     )
