@@ -441,7 +441,7 @@ done
                         oom_killed = True
 
                     results.append(ExecutionResult(
-                        stdout=stdout[:100_000],
+                        stdout=stdout[:2_000_000],
                         stderr=stderr[:10_000],
                         exit_code=exit_code,
                         time_ms=time_ms,
