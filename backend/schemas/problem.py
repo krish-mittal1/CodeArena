@@ -22,7 +22,7 @@ class ProblemCreate(BaseModel):
     difficulty: Difficulty = Difficulty.MEDIUM
     input_format: str
     output_format: str
-    constraints: str | None = None
+    constraints: Optional[str] = None
     time_limit_ms: int = Field(2000, ge=500, le=10000)
     memory_limit_mb: int = Field(256, ge=32, le=512)
     test_cases: list[TestCaseCreate] = Field(..., min_length=1)
@@ -43,7 +43,7 @@ class ProblemPublic(BaseModel):
     difficulty: str
     input_format: str
     output_format: str
-    constraints: str | None
+    constraints: Optional[str]
     time_limit_ms: int
     memory_limit_mb: int
     method_name: Optional[str] = None

@@ -1,3 +1,4 @@
+from typing import Optional, Union
 """
 Matchmaking service — ELO-based queue + pairing with Redis.
 
@@ -213,7 +214,7 @@ async def leave_queue(redis: Redis, user_id: uuid.UUID) -> bool:
     return True
 
 
-async def get_queue_position(redis: Redis, user_id: uuid.UUID) -> dict | None:
+async def get_queue_position(redis: Redis, user_id: uuid.UUID) -> Optional[dict]:
     """
     Get a player's queue status: position, wait time, current ELO window.
     Returns None if not in queue.
@@ -371,7 +372,7 @@ def _find_closest_candidate(
     player_index: int,
     excluded: set[str],
     window: int,
-) -> dict | None:
+) -> Optional[dict]:
     """
     Find the closest-ELO opponent within the allowed window.
 

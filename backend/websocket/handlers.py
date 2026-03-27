@@ -1,3 +1,4 @@
+from typing import Optional, Union
 """
 WebSocket event handlers — player connection lifecycle, spectator handling,
 and incoming message routing.
@@ -37,7 +38,7 @@ logger = logging.getLogger(__name__)
 #  Player WebSocket Handler
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-async def handle_player_connection(websocket: WebSocket, token: str, redis: Redis | None):
+async def handle_player_connection(websocket: WebSocket, token: str, redis: Optional[Redis]):
     """
     Full lifecycle of a player's WebSocket connection:
 
@@ -101,7 +102,7 @@ async def handle_player_connection(websocket: WebSocket, token: str, redis: Redi
         await manager.disconnect_player(user_id)
 
 
-async def _auto_join_match_room(user_id: str, redis: Redis | None):
+async def _auto_join_match_room(user_id: str, redis: Optional[Redis]):
     """
     Check if the user has an active match in Redis.
     If so, auto-join the room — handles reconnection gracefully.
@@ -221,7 +222,7 @@ async def _recover_active_match_from_db(user_id: str) -> None:
     logger.info(f"[WS] Recovered active match for {user_id} → {room_id} (remaining={remaining}s)")
 
 
-async def _player_receive_loop(user_id: str, websocket: WebSocket, redis: Redis | None):
+async def _player_receive_loop(user_id: str, websocket: WebSocket, redis: Optional[Redis]):
     """
     Listen for incoming messages from the player.
     Only heartbeats are expected — game actions use REST endpoints.
@@ -269,7 +270,7 @@ async def _player_receive_loop(user_id: str, websocket: WebSocket, redis: Redis 
 #  Spectator WebSocket Handler
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-async def handle_spectator_connection(websocket: WebSocket, match_id: str, redis: Redis | None):
+async def handle_spectator_connection(websocket: WebSocket, match_id: str, redis: Optional[Redis]):
     """
     Handle a spectator's read-only WebSocket connection.
 
@@ -347,7 +348,7 @@ async def handle_spectator_connection(websocket: WebSocket, match_id: str, redis
 #  Helpers
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-async def _get_remaining_time(redis: Redis | None, match_id: str) -> int | None:
+async def _get_remaining_time(redis: Optional[Redis], match_id: str) -> Optional[int]:
     """Read match expiry timestamp from Redis and compute remaining seconds."""
     if redis is None:
         return None

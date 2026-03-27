@@ -30,7 +30,7 @@ class SubmissionResponse(BaseModel):
     status: str
     passed_test_cases: int
     total_test_cases: int
-    execution_time_ms: int | None = None
+    execution_time_ms: Optional[int] = None
     memory_used_kb: Optional[int] = None
     submitted_at: datetime
     judged_at: Optional[datetime] = None
