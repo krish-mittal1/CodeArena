@@ -1,0 +1,92 @@
+// ── Company data for Practice → Companies tab ──────────────────────────
+// Each company: { id, name, logo (emoji fallback), category, color (hex for card accent) }
+
+export const COMPANY_CATEGORIES = [
+    'All',
+    'FAANG+',
+    'Big Tech',
+    'Finance & Trading',
+    'Indian IT',
+    'Product (India)',
+    'Product (Global)',
+    'Consulting',
+];
+
+export const COMPANIES = [
+    // ── FAANG+ ──────────────────────────────────────────
+    { id: 'google',        name: 'Google',          logo: '🔍', category: 'FAANG+',            color: '#4285F4' },
+    { id: 'amazon',        name: 'Amazon',          logo: '📦', category: 'FAANG+',            color: '#FF9900' },
+    { id: 'apple',         name: 'Apple',           logo: '🍎', category: 'FAANG+',            color: '#A2AAAD' },
+    { id: 'meta',          name: 'Meta',            logo: '♾️',  category: 'FAANG+',            color: '#0668E1' },
+    { id: 'netflix',       name: 'Netflix',         logo: '🎬', category: 'FAANG+',            color: '#E50914' },
+    { id: 'microsoft',     name: 'Microsoft',       logo: '🪟', category: 'FAANG+',            color: '#00A4EF' },
+
+    // ── Big Tech ────────────────────────────────────────
+    { id: 'uber',          name: 'Uber',            logo: '🚗', category: 'Big Tech',          color: '#000000' },
+    { id: 'airbnb',        name: 'Airbnb',          logo: '🏠', category: 'Big Tech',          color: '#FF5A5F' },
+    { id: 'stripe',        name: 'Stripe',          logo: '💳', category: 'Big Tech',          color: '#635BFF' },
+    { id: 'salesforce',    name: 'Salesforce',      logo: '☁️',  category: 'Big Tech',          color: '#00A1E0' },
+    { id: 'adobe',         name: 'Adobe',           logo: '🎨', category: 'Big Tech',          color: '#FF0000' },
+    { id: 'oracle',        name: 'Oracle',          logo: '🏛️',  category: 'Big Tech',          color: '#F80000' },
+    { id: 'nvidia',        name: 'NVIDIA',          logo: '🎮', category: 'Big Tech',          color: '#76B900' },
+    { id: 'intel',         name: 'Intel',           logo: '💻', category: 'Big Tech',          color: '#0071C5' },
+    { id: 'ibm',           name: 'IBM',             logo: '🖥️',  category: 'Big Tech',          color: '#054ADA' },
+    { id: 'twitter',       name: 'X (Twitter)',     logo: '𝕏',  category: 'Big Tech',          color: '#1DA1F2' },
+    { id: 'linkedin',      name: 'LinkedIn',        logo: '🔗', category: 'Big Tech',          color: '#0A66C2' },
+    { id: 'snapchat',      name: 'Snap',            logo: '👻', category: 'Big Tech',          color: '#FFFC00' },
+    { id: 'spotify',       name: 'Spotify',         logo: '🎵', category: 'Big Tech',          color: '#1DB954' },
+    { id: 'samsung',       name: 'Samsung',         logo: '📱', category: 'Big Tech',          color: '#1428A0' },
+    { id: 'qualcomm',      name: 'Qualcomm',        logo: '📡', category: 'Big Tech',          color: '#3253DC' },
+    { id: 'vmware',        name: 'VMware',          logo: '🖧',  category: 'Big Tech',          color: '#607078' },
+    { id: 'servicenow',    name: 'ServiceNow',      logo: '⚙️',  category: 'Big Tech',          color: '#81B5A1' },
+    { id: 'atlassian',     name: 'Atlassian',       logo: '🔷', category: 'Big Tech',          color: '#0052CC' },
+
+    // ── Finance & Trading ───────────────────────────────
+    { id: 'goldmansachs',  name: 'Goldman Sachs',   logo: '🏦', category: 'Finance & Trading', color: '#6F9FD8' },
+    { id: 'morganstanley', name: 'Morgan Stanley',  logo: '📊', category: 'Finance & Trading', color: '#002B5C' },
+    { id: 'jpmorgan',      name: 'JP Morgan',       logo: '💰', category: 'Finance & Trading', color: '#003087' },
+    { id: 'deshaw',        name: 'DE Shaw',         logo: '📈', category: 'Finance & Trading', color: '#1B365D' },
+    { id: 'janestreet',    name: 'Jane Street',     logo: '🔢', category: 'Finance & Trading', color: '#1A4D2E' },
+    { id: 'citadel',       name: 'Citadel',         logo: '🏰', category: 'Finance & Trading', color: '#003366' },
+    { id: 'tower',         name: 'Tower Research',  logo: '🗼', category: 'Finance & Trading', color: '#C41230' },
+    { id: 'visa',          name: 'Visa',            logo: '💳', category: 'Finance & Trading', color: '#1A1F71' },
+    { id: 'mastercard',    name: 'Mastercard',      logo: '💎', category: 'Finance & Trading', color: '#EB001B' },
+
+    // ── Indian IT / Services ────────────────────────────
+    { id: 'infosys',       name: 'Infosys',         logo: '🏢', category: 'Indian IT',         color: '#007CC3' },
+    { id: 'tcs',           name: 'TCS',             logo: '🏗️',  category: 'Indian IT',         color: '#2F2FA2' },
+    { id: 'wipro',         name: 'Wipro',           logo: '🌐', category: 'Indian IT',         color: '#341C53' },
+    { id: 'hcl',           name: 'HCL Technologies',logo: '⚡', category: 'Indian IT',         color: '#0073CF' },
+    { id: 'techmahindra',  name: 'Tech Mahindra',   logo: '🔧', category: 'Indian IT',         color: '#6A1B9A' },
+    { id: 'cognizant',     name: 'Cognizant',       logo: '🧠', category: 'Indian IT',         color: '#1A3E72' },
+    { id: 'ltimindtree',   name: 'LTIMindtree',     logo: '🌳', category: 'Indian IT',         color: '#E31937' },
+    { id: 'mphasis',       name: 'Mphasis',         logo: '🔵', category: 'Indian IT',         color: '#0063B1' },
+    { id: 'persistent',    name: 'Persistent Systems', logo: '🔗', category: 'Indian IT',      color: '#E65100' },
+
+    // ── Product Companies (India) ───────────────────────
+    { id: 'flipkart',      name: 'Flipkart',        logo: '🛒', category: 'Product (India)',   color: '#2874F0' },
+    { id: 'razorpay',      name: 'Razorpay',        logo: '⚡', category: 'Product (India)',   color: '#0C2451' },
+    { id: 'swiggy',        name: 'Swiggy',          logo: '🍔', category: 'Product (India)',   color: '#FC8019' },
+    { id: 'zomato',        name: 'Zomato',          logo: '🍕', category: 'Product (India)',   color: '#CB202D' },
+    { id: 'paytm',         name: 'Paytm',           logo: '📲', category: 'Product (India)',   color: '#00BAF2' },
+    { id: 'cred',          name: 'CRED',            logo: '💳', category: 'Product (India)',   color: '#1E1E1E' },
+    { id: 'phonepe',       name: 'PhonePe',         logo: '📞', category: 'Product (India)',   color: '#5F259F' },
+    { id: 'meesho',        name: 'Meesho',          logo: '🛍️',  category: 'Product (India)',   color: '#F43397' },
+    { id: 'dream11',       name: 'Dream11',         logo: '🏏', category: 'Product (India)',   color: '#E50000' },
+    { id: 'zerodha',       name: 'Zerodha',         logo: '📉', category: 'Product (India)',   color: '#387ED1' },
+
+    // ── Product Companies (Global) ──────────────────────
+    { id: 'shopify',       name: 'Shopify',         logo: '🛍️',  category: 'Product (Global)',  color: '#96BF48' },
+    { id: 'databricks',    name: 'Databricks',      logo: '🧱', category: 'Product (Global)',  color: '#FF3621' },
+    { id: 'snowflake',     name: 'Snowflake',       logo: '❄️',  category: 'Product (Global)',  color: '#29B5E8' },
+    { id: 'palantir',      name: 'Palantir',        logo: '🔮', category: 'Product (Global)',  color: '#101113' },
+    { id: 'twilio',        name: 'Twilio',          logo: '📱', category: 'Product (Global)',  color: '#F22F46' },
+
+    // ── Consulting ──────────────────────────────────────
+    { id: 'deloitte',      name: 'Deloitte',        logo: '📋', category: 'Consulting',        color: '#86BC25' },
+    { id: 'accenture',     name: 'Accenture',       logo: '📐', category: 'Consulting',        color: '#A100FF' },
+    { id: 'capgemini',     name: 'Capgemini',       logo: '🌀', category: 'Consulting',        color: '#0070AD' },
+    { id: 'pwc',           name: 'PwC',             logo: '📑', category: 'Consulting',        color: '#D04A02' },
+    { id: 'kpmg',          name: 'KPMG',            logo: '📊', category: 'Consulting',        color: '#00338D' },
+    { id: 'ey',            name: 'Ernst & Young',   logo: '📝', category: 'Consulting',        color: '#FFE600' },
+];
