@@ -478,3 +478,36 @@ async def _create_match(
         # Match will still work, but Redis state may be inconsistent
 
     return match.id
+
+
+async def create_private_match(
+    db: AsyncSession,
+    redis: Redis,
+    p1_id: str,
+    p1_elo: int,
+    p2_id: str,
+    p2_elo: int,
+) -> uuid.UUID:
+    """
+    Directly create a match between two specific users (for private rooms).
+    Checks if either user is already in an active match first.
+    """
+    # 1. Reject if either user is already in a match
+    p1_active = await redis.get(RedisKey.user_active_match(p1_id))
+    p2_active = await redis.get(RedisKey.user_active_match(p2_id))
+    
+    if p1_active or p2_active:
+        raise AlreadyInMatch()
+
+    # 2. Ensure they are removed from the global matchmaking queue
+    await leave_queue(redis, uuid.UUID(p1_id))
+    await leave_queue(redis, uuid.UUID(p2_id))
+
+    # 3. Use the existing robust _create_match function
+    match_id = await _create_match(db, redis, p1_id, p1_elo, p2_id, p2_elo)
+    
+    logger.info(
+        f"[MATCHMAKING] Private match {match_id} created manually for "
+        f"{p1_id} vs {p2_id}"
+    )
+    return match_id

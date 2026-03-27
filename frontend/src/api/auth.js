@@ -27,6 +27,11 @@ export const matchmakingApi = {
     join: () => api.post('/matchmaking/join').then((r) => r.data),
     leave: () => api.delete('/matchmaking/leave').then((r) => r.data),
     status: () => api.get('/matchmaking/status').then((r) => r.data),
+    
+    // Private Rooms
+    createPrivateRoom: () => api.post('/matchmaking/private/create').then((r) => r.data),
+    joinPrivateRoom: (code) => api.post('/matchmaking/private/join', { code }).then((r) => r.data),
+    getPrivateRoomStatus: (code) => api.get(`/matchmaking/private/status/${code}`).then((r) => r.data),
 };
 
 export const matchApi = {

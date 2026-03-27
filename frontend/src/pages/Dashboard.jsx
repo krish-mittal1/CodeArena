@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
-    Trophy, Target, Flame, TrendingUp, Swords, Clock, ChevronRight,
+    Trophy, Target, Flame, TrendingUp, Swords, Clock, ChevronRight, Users,
 } from 'lucide-react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -13,6 +13,7 @@ import { useMatchmakingStore } from '../stores/matchmakingStore';
 import { matchApi } from '../api/auth';
 import { formatWinRate, formatElo } from '../utils/formatters';
 import QueueOverlay from '../components/matchmaking/QueueOverlay';
+import PrivateRoomOverlay from '../components/matchmaking/PrivateRoomOverlay';
 import RatingChart from '../components/dashboard/RatingChart';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
@@ -26,6 +27,7 @@ export default function Dashboard() {
     const joinQueue = useMatchmakingStore((s) => s.joinQueue);
     const hasInitializedRef = useRef(false);
     const navigate = useNavigate();
+    const [privateOverlayOpen, setPrivateOverlayOpen] = useState(false);
 
     const { data: history, isLoading: historyLoading, isError } = useQuery({
         queryKey: ['matchHistory'],
@@ -108,11 +110,11 @@ export default function Dashboard() {
                             </p>
                         </div>
 
-                        <div className="w-full mt-auto">
+                        <div className="w-full mt-auto flex flex-col gap-2 px-6 pb-6 pt-2">
                             <button
                                 onClick={joinQueue}
                                 disabled={isSearching}
-                                className="w-full py-4 px-6 bg-accent hover:bg-accent-hover text-white font-bold text-lg transition-colors disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="w-full py-4 px-6 bg-accent hover:bg-accent-hover text-white font-bold text-lg transition-colors disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2 rounded-xl shadow-lg shadow-accent/20"
                             >
                                 {isSearching ? (
                                     <span className="animate-pulse flex items-center gap-2">
@@ -124,6 +126,13 @@ export default function Dashboard() {
                                         Find Match
                                     </>
                                 )}
+                            </button>
+                            <button
+                                onClick={() => setPrivateOverlayOpen(true)}
+                                className="w-full py-3.5 px-6 bg-bg-surface hover:bg-bg-hover border border-border text-text-primary font-semibold text-base transition-colors flex items-center justify-center gap-2 rounded-xl"
+                            >
+                                <Users size={18} className="text-accent" />
+                                Play with Friend
                             </button>
                         </div>
                     </motion.div>
@@ -187,6 +196,7 @@ export default function Dashboard() {
             </div>
 
             <QueueOverlay />
+            <PrivateRoomOverlay isOpen={privateOverlayOpen} onClose={() => setPrivateOverlayOpen(false)} />
         </div>
     );
 }

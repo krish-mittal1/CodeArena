@@ -367,6 +367,51 @@ class InMemoryMatchmakingQueue:
             f"{user1_id} ({before_1}) and {user2_id} ({before_2})"
         )
 
+    async def create_private_match(
+        self,
+        session_factory: async_sessionmaker,
+        p1_id: str, p1_elo: int,
+        p2_id: str, p2_elo: int,
+    ) -> uuid.UUID:
+        """
+        Directly create a private match bypassing the queue and ELO logic.
+        """
+        async with self._lock:
+            if p1_id in self._active_matches or p2_id in self._active_matches:
+                from backend.core.exceptions import AlreadyInMatch
+                raise AlreadyInMatch()
+
+            # Ensure they are removed from the queue
+            self._queue.pop(p1_id, None)
+            self._queue.pop(p2_id, None)
+            self._pending_pair.add(p1_id)
+            self._pending_pair.add(p2_id)
+
+        try:
+            match_id = await self._create_match(
+                session_factory, p1_id, p1_elo, p2_id, p2_elo
+            )
+
+            async with self._lock:
+                self._pending_pair.discard(p1_id)
+                self._pending_pair.discard(p2_id)
+                self._active_matches[p1_id] = str(match_id)
+                self._active_matches[p2_id] = str(match_id)
+
+            logger.info(
+                f"[MM-DEV] PRIVATE MATCH CREATED: {p1_id} vs {p2_id} | match={match_id}"
+            )
+            # Notify both players via WebSocket
+            await self._notify_match_found(session_factory, match_id, p1_id, p2_id)
+
+            return match_id
+
+        except Exception as e:
+            async with self._lock:
+                self._pending_pair.discard(p1_id)
+                self._pending_pair.discard(p2_id)
+            logger.error(f"[MM-DEV] Private Match creation failed: {e}", exc_info=True)
+            raise e
 
 def _calculate_elo_window(wait_seconds: float) -> int:
     expansions = int(wait_seconds / settings.matchmaking_elo_expand_interval_seconds)
