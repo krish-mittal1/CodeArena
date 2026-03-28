@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
 # Failsafe: Ensure groq is installed even if uv sync has lock issues
-RUN .venv/bin/pip install groq
+RUN uv pip install groq
 
 ENV PATH="/app/.venv/bin:$PATH"
 
