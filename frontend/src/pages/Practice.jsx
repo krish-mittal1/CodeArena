@@ -11,6 +11,7 @@ import { problemApi, practiceApi } from '../api/auth';
 import { LANGUAGES, CODE_TEMPLATES, VERDICTS, generateBoilerplate } from '../utils/constants';
 import Badge from '../components/ui/Badge';
 import AIAnalysisPanel from '../components/ui/AIAnalysisPanel';
+import ReactMarkdown from 'react-markdown';
 
 const STATUS_ICONS = {
     accepted: CheckCircle2,
@@ -199,8 +200,6 @@ export default function Practice() {
                 {/* Left: Problem Description */}
                 <div className="practice-problem-pane">
                     <div className="p-6 space-y-5">
-import ReactMarkdown from 'react-markdown';
-
                         {/* Description */}
                         <div>
                             <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-3">Description</h3>
