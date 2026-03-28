@@ -58,7 +58,7 @@ export default function Practice() {
 
     // Auto-trigger AI analysis when verdict is finalized
     const triggerAIAnalysis = async (sub) => {
-        if (!sub?.id || !problemId) return;
+        if (!sub?.id || !problemId || aiLoading) return;
         setAiLoading(true);
         setAiAnalysis(null);
         setShowAIPanel(true);
