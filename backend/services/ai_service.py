@@ -1,9 +1,11 @@
 """
-AI Code Analysis Service — uses Google Gemini to analyze submitted code.
+AI Code Analysis Service — uses Groq REST API (via httpx) to analyze submitted code.
+Zero external SDK dependencies required.
 """
 
 import json
 import logging
+import httpx
 from typing import Optional
 
 from backend.config import settings
@@ -34,9 +36,9 @@ Rules:
 - Be profoundly insightful, educational, and strictly professional.
 """
 
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 # In-memory cache to prevent redundant AI calls for the same submission ID
-# Keys are submission IDs (str), values are the analysis dicts
 AI_CACHE = {}
 
 
@@ -54,8 +56,8 @@ async def analyze_code(
     submission_id: Optional[str] = None,
 ) -> dict:
     """
-    Call Groq (Llama 3) to analyze the user's submitted code.
-    Returns a structured dict with analysis or a fallback on failure.
+    Call Groq REST API (Llama 3) to analyze submitted code.
+    Uses httpx directly — no groq SDK needed.
     """
     # 1. Check Cache first
     if submission_id and submission_id in AI_CACHE:
@@ -64,16 +66,12 @@ async def analyze_code(
 
     if not settings.groq_api_key:
         logger.warning("GROQ_API_KEY not set — returning placeholder analysis")
-        return _fallback_analysis(verdict_status, "Groq API Key missing")
+        return _fallback_analysis(verdict_status, "Groq API Key missing. Add GROQ_API_KEY to .env")
 
-    try:
-        from groq import Groq
-        client = Groq(api_key=settings.groq_api_key)
-        
-        # Build context message
-        failed_section = ""
-        if failed_input:
-            failed_section = f"""
+    # Build context message
+    failed_section = ""
+    if failed_input:
+        failed_section = f"""
 Failed Test Case:
   Input: {failed_input}
   Expected Output: {expected_output or 'N/A'}
@@ -81,7 +79,7 @@ Failed Test Case:
   Error Output: {error_output or 'N/A'}
 """
 
-        prompt = f"""Problem: {problem_title}
+    prompt = f"""Problem: {problem_title}
 
 Description:
 {problem_description}
@@ -101,58 +99,77 @@ Verdict: {verdict_status}
 
 Analyze the code and return EXACTLY the JSON object as instructed."""
 
-        # Retry logic for 429 Errors
-        max_retries = 3
-        last_error = ""
-        for attempt in range(max_retries):
-            try:
-                logger.info(f"Calling Groq for {problem_title} (Attempt {attempt+1})...")
-                chat_completion = client.chat.completions.create(
-                    messages=[
-                        {"role": "system", "content": _SYSTEM_PROMPT},
-                        {"role": "user", "content": prompt},
-                    ],
-                    model="llama-3.3-70b-versatile",
-                    response_format={"type": "json_object"},
-                    max_completion_tokens=4096,
-                )
-                raw = chat_completion.choices[0].message.content.strip()
-                break
-            except Exception as e:
-                last_error = str(e)
-                if "429" in last_error or "rate_limit" in last_error.lower():
-                    logger.warning(f"Groq 429 hit. Waiting... {last_error}")
-                    if attempt < max_retries - 1:
-                        import asyncio
-                        await asyncio.sleep((attempt + 1) * 2)
-                        continue
-                raise e
-        else:
-             raise Exception(f"Failed after {max_retries} retries: {last_error}")
+    headers = {
+        "Authorization": f"Bearer {settings.groq_api_key}",
+        "Content-Type": "application/json",
+    }
 
-        result = json.loads(raw)
-        
-        # 2. Save to Cache on success
-        if submission_id:
-            AI_CACHE[submission_id] = result
-            
-        return result
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {"role": "system", "content": _SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ],
+        "response_format": {"type": "json_object"},
+        "max_completion_tokens": 4096,
+    }
 
-    except json.JSONDecodeError as e:
-        logger.error(f"Groq returned invalid JSON: {e}")
-        return _fallback_analysis(verdict_status, "Invalid AI response format")
-    except Exception as e:
-        error_msg = str(e)
-        logger.error(f"Groq API error: {error_msg}")
-        if "401" in error_msg or "authentication" in error_msg.lower():
-            return _fallback_analysis(verdict_status, "Invalid Groq API Key in .env")
-        if "429" in error_msg or "rate_limit" in error_msg.lower():
-            return _fallback_analysis(verdict_status, "Groq Rate Limit Exceeded. Please try again in 1 minute.")
-        return _fallback_analysis(verdict_status, f"AI Error: {error_msg[:60]}...")
+    # Retry logic
+    max_retries = 3
+    last_error = ""
+
+    for attempt in range(max_retries):
+        try:
+            logger.info(f"Calling Groq REST API for '{problem_title}' (Attempt {attempt + 1}/{max_retries})...")
+
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(GROQ_API_URL, headers=headers, json=payload)
+
+            if response.status_code == 429:
+                last_error = "Rate limit exceeded"
+                logger.warning(f"Groq 429 hit. Retrying in {(attempt + 1) * 2}s...")
+                import asyncio
+                await asyncio.sleep((attempt + 1) * 2)
+                continue
+
+            if response.status_code == 401:
+                logger.error("Groq API key is invalid (401)")
+                return _fallback_analysis(verdict_status, "Invalid Groq API Key in .env")
+
+            if response.status_code != 200:
+                last_error = f"HTTP {response.status_code}: {response.text[:100]}"
+                logger.error(f"Groq API error: {last_error}")
+                raise Exception(last_error)
+
+            data = response.json()
+            raw = data["choices"][0]["message"]["content"].strip()
+            result = json.loads(raw)
+
+            # Save to cache on success
+            if submission_id:
+                AI_CACHE[submission_id] = result
+
+            logger.info(f"AI analysis complete for '{problem_title}'")
+            return result
+
+        except json.JSONDecodeError as e:
+            logger.error(f"Groq returned invalid JSON: {e}")
+            return _fallback_analysis(verdict_status, "Invalid AI response format")
+        except Exception as e:
+            last_error = str(e)
+            logger.error(f"Groq API error (attempt {attempt + 1}): {last_error}")
+            if attempt < max_retries - 1:
+                import asyncio
+                await asyncio.sleep((attempt + 1) * 2)
+                continue
+
+    # All retries failed
+    logger.error(f"All {max_retries} Groq API attempts failed: {last_error}")
+    return _fallback_analysis(verdict_status, f"AI Error: {last_error[:60]}")
 
 
 def _fallback_analysis(verdict_status: str, error_reason: str = "AI analysis is currently unavailable") -> dict:
-    """Return a minimal analysis object when Gemini is unavailable."""
+    """Return a minimal analysis object when AI is unavailable."""
     return {
         "verdict_explanation": f"Your submission received verdict: {verdict_status}.",
         "time_complexity": "N/A",
