@@ -147,6 +147,7 @@ async def analyze_submission(
         expected_output=expected_output,
         actual_output=actual_output,
         error_output=error_output,
+        submission_id=str(submission.id),
     )
 
     logger.info(

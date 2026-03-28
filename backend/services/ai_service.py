@@ -35,6 +35,11 @@ Rules:
 """
 
 
+# In-memory cache to prevent redundant AI calls for the same submission ID
+# Keys are submission IDs (str), values are the analysis dicts
+AI_CACHE = {}
+
+
 async def analyze_code(
     problem_title: str,
     problem_description: str,
@@ -46,11 +51,17 @@ async def analyze_code(
     expected_output: Optional[str] = None,
     actual_output: Optional[str] = None,
     error_output: Optional[str] = None,
+    submission_id: Optional[str] = None,  # Added for caching
 ) -> dict:
     """
     Call Gemini to analyze the user's submitted code.
     Returns a structured dict with analysis or a fallback on failure.
     """
+    # 1. Check Cache first
+    if submission_id and submission_id in AI_CACHE:
+        logger.info(f"Returning cached AI analysis for submission {submission_id}")
+        return AI_CACHE[submission_id]
+
     if not settings.gemini_api_key:
         logger.warning("GEMINI_API_KEY not set — returning placeholder analysis")
         return _fallback_analysis(verdict_status)
@@ -58,8 +69,10 @@ async def analyze_code(
     try:
         import google.generativeai as genai
         genai.configure(api_key=settings.gemini_api_key)
+        
+        # Use a Lite model for much higher quota / better RPM for free tier
         model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash",
+            model_name="gemini-2.0-flash-lite",
             system_instruction=_SYSTEM_PROMPT,
         )
 
@@ -99,14 +112,16 @@ Analyze the code and return the JSON object as instructed."""
         last_error = ""
         for attempt in range(max_retries):
             try:
+                logger.info(f"Calling Gemini for {problem_title} (Attempt {attempt+1})...")
                 response = model.generate_content(prompt)
                 raw = response.text.strip()
                 break
             except Exception as e:
                 last_error = str(e)
                 if "429" in last_error or "quota" in last_error.lower():
+                    logger.warning(f"Gemini 429 hit. Waiting... {last_error}")
                     if attempt < max_retries - 1:
-                        wait_time = (attempt + 1) * 2  # 2s, 4s
+                        wait_time = (attempt + 1) * 3
                         import asyncio
                         await asyncio.sleep(wait_time)
                         continue
@@ -120,7 +135,13 @@ Analyze the code and return the JSON object as instructed."""
             if raw.endswith("```"):
                 raw = raw.rsplit("```", 1)[0]
 
-        return json.loads(raw)
+        result = json.loads(raw)
+        
+        # 2. Save to Cache on success
+        if submission_id:
+            AI_CACHE[submission_id] = result
+            
+        return result
 
     except json.JSONDecodeError as e:
         logger.error(f"Gemini returned invalid JSON: {e}")
