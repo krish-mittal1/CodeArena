@@ -70,9 +70,9 @@ async def analyze_code(
         import google.generativeai as genai
         genai.configure(api_key=settings.gemini_api_key)
         
-        # Use a Lite model for much higher quota / better RPM for free tier
+        # Standard model confirmed available
         model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash-lite",
+            model_name="gemini-2.0-flash",
             system_instruction=_SYSTEM_PROMPT,
         )
 

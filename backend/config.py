@@ -120,6 +120,13 @@ class Settings(BaseSettings):
     # ── Gemini AI ─────────────────────────────────────────────
     gemini_api_key: Optional[str] = Field(default=None, description="Google Gemini API key for AI code analysis")
 
+    @field_validator("gemini_api_key")
+    @classmethod
+    def validate_gemini_key(cls, v: Optional[str]) -> Optional[str]:
+        if v:
+            return v.strip()
+        return v
+
     @property
     def is_production(self) -> bool:
         return self.environment == "production"
