@@ -57,10 +57,9 @@ async def analyze_code(
 
     try:
         import google.generativeai as genai
-
         genai.configure(api_key=settings.gemini_api_key)
         model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash",
+            model_name="gemini-1.5-flash",
             system_instruction=_SYSTEM_PROMPT,
         )
 
@@ -112,9 +111,11 @@ Analyze the code and return the JSON object as instructed."""
     except Exception as e:
         error_msg = str(e)
         logger.error(f"Gemini API error: {error_msg}")
-        # Detect invalid API key specifically
+        # Detect quota and key issues specifically
         if "API_KEY_INVALID" in error_msg or "400" in error_msg:
             return _fallback_analysis(verdict_status, "Invalid Gemini API Key in .env")
+        if "429" in error_msg or "quota" in error_msg.lower():
+            return _fallback_analysis(verdict_status, "AI Quota Exceeded (Free Tier limit). Please wait 1 minute and try again.")
         return _fallback_analysis(verdict_status, f"AI Error: {error_msg[:50]}...")
 
 
