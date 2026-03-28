@@ -108,13 +108,17 @@ Analyze the code and return the JSON object as instructed."""
 
     except json.JSONDecodeError as e:
         logger.error(f"Gemini returned invalid JSON: {e}")
-        return _fallback_analysis(verdict_status)
+        return _fallback_analysis(verdict_status, "Invalid AI response format")
     except Exception as e:
-        logger.error(f"Gemini API error: {e}")
-        return _fallback_analysis(verdict_status)
+        error_msg = str(e)
+        logger.error(f"Gemini API error: {error_msg}")
+        # Detect invalid API key specifically
+        if "API_KEY_INVALID" in error_msg or "400" in error_msg:
+            return _fallback_analysis(verdict_status, "Invalid Gemini API Key in .env")
+        return _fallback_analysis(verdict_status, f"AI Error: {error_msg[:50]}...")
 
 
-def _fallback_analysis(verdict_status: str) -> dict:
+def _fallback_analysis(verdict_status: str, error_reason: str = "AI analysis is currently unavailable") -> dict:
     """Return a minimal analysis object when Gemini is unavailable."""
     return {
         "verdict_explanation": f"Your submission received verdict: {verdict_status}.",
@@ -122,7 +126,7 @@ def _fallback_analysis(verdict_status: str) -> dict:
         "space_complexity": "N/A",
         "issues": [],
         "failed_test_explanation": "",
-        "optimized_approach": "AI analysis is currently unavailable. Please check back later.",
+        "optimized_approach": f"{error_reason}. Please check your server configuration and API key.",
         "optimized_time_complexity": "N/A",
         "optimized_space_complexity": "N/A",
         "improved_code": "",
