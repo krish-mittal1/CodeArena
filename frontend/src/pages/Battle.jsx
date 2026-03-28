@@ -125,7 +125,7 @@ export default function Battle() {
         return (
             <div className="flex flex-col items-center justify-center h-[calc(100vh-56px)] bg-bg-root text-text-secondary gap-4">
                 <Loader2 className="w-12 h-12 text-accent animate-spin" />
-                <h2 className="text-xl font-medium tracking-wide text-text-primary">Provisioning Match Environment...</h2>
+                <h2 className="text-xl font-medium tracking-[-0.03em] text-text-primary">Provisioning Match Environment...</h2>
                 <p className="text-sm text-text-muted font-mono tracking-wider">ID: {matchId}</p>
             </div>
         );
@@ -140,7 +140,7 @@ export default function Battle() {
             <div className="flex flex-1 overflow-hidden relative">
 
                 {/* IDE-like Activity Bar (Leftmost) */}
-                <div className="w-12 bg-bg-primary border-r border-border shrink-0 flex flex-col items-center py-4 gap-6 z-10 selection:bg-transparent">
+                <div className="w-12 bg-bg-primary border-r border-border shrink-0 flex flex-col items-center py-4 gap-6 z-10 selection:bg-transparent shadow-[6px_0_16px_rgba(0,0,0,0.12)]">
                     <button className="text-text-primary relative group focus:outline-none" title="Problem Description">
                         <div className="absolute -left-3 top-0 bottom-0 w-[2px] bg-accent"></div>
                         <FileCode2 className="w-6 h-6 opacity-100" />

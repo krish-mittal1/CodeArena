@@ -155,7 +155,7 @@ export default function Practice() {
         return (
             <div className="min-h-screen bg-bg-root flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-3 animate-pulse">
+                    <div className="w-12 h-12 rounded-[16px_12px_14px_10px] bg-accent/10 flex items-center justify-center mx-auto mb-3 animate-pulse shadow-[2px_2px_0_rgba(0,0,0,0.12)]">
                         <Code2 size={22} className="text-accent" />
                     </div>
                     <p className="text-text-secondary text-sm">Loading problem...</p>
@@ -178,17 +178,20 @@ export default function Practice() {
     return (
         <div className="h-[calc(100vh-64px)] bg-bg-root flex flex-col overflow-hidden">
             {/* Top Bar */}
-            <div className="flex items-center justify-between px-4 py-2 bg-bg-primary border-b border-border shrink-0">
+            <div className="flex items-center justify-between px-4 py-3 bg-bg-primary border-b border-border shrink-0 shadow-[0_8px_16px_rgba(0,0,0,0.12)]">
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => navigate('/problems')}
-                        className="p-1.5 rounded-md hover:bg-bg-hover text-text-secondary hover:text-text-primary transition-colors"
+                        className="p-1.5 rounded-[12px_9px_11px_8px] hover:bg-bg-hover text-text-secondary hover:text-text-primary transition-colors"
                     >
                         <ArrowLeft size={18} />
                     </button>
-                    <h2 className="text-sm font-bold text-text-primary truncate max-w-[200px] sm:max-w-[300px]">
+                    <div>
+                        <p className="editorial-kicker mb-1">Practice room</p>
+                        <h2 className="text-sm font-bold text-text-primary truncate max-w-[200px] sm:max-w-[300px]">
                         {problem.title}
-                    </h2>
+                        </h2>
+                    </div>
                     <Badge color={problem.difficulty === 'easy' ? 'green' : problem.difficulty === 'medium' ? 'yellow' : 'red'}>
                         {problem.difficulty}
                     </Badge>
@@ -202,7 +205,7 @@ export default function Practice() {
                     <div className="p-6 space-y-5">
                         {/* Description */}
                         <div>
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-3">Description</h3>
+                            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-3">Description</h3>
                             <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
                                 {problem.description}
                             </div>
@@ -210,20 +213,20 @@ export default function Practice() {
 
                         {/* Input Format */}
                         <div>
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Input Format</h3>
+                            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-2">Input Format</h3>
                             <p className="text-sm text-text-secondary">{problem.input_format}</p>
                         </div>
 
                         {/* Output Format */}
                         <div>
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Output Format</h3>
+                            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-2">Output Format</h3>
                             <p className="text-sm text-text-secondary">{problem.output_format}</p>
                         </div>
 
                         {/* Constraints */}
                         {problem.constraints && (
                             <div>
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Constraints</h3>
+                                <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-2">Constraints</h3>
                                 <p className="text-sm text-text-secondary font-mono whitespace-pre-wrap">{problem.constraints}</p>
                             </div>
                         )}
@@ -231,10 +234,10 @@ export default function Practice() {
                         {/* Sample Cases */}
                         {problem.sample_cases?.length > 0 && (
                             <div>
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-3">Examples</h3>
+                                <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-3">Examples</h3>
                                 <div className="space-y-3">
                                     {problem.sample_cases.map((tc, i) => (
-                                        <div key={i} className="bg-bg-surface border border-border rounded-lg overflow-hidden">
+                                        <div key={i} className="paper-card-soft overflow-hidden">
                                             <div className="grid grid-cols-2 divide-x divide-border">
                                                 <div className="p-3">
                                                     <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Input</p>
@@ -254,14 +257,14 @@ export default function Practice() {
                         {/* Submission History */}
                         {history.length > 0 && (
                             <div>
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-3">
+                                <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-3">
                                     Your Submissions ({history.length})
                                 </h3>
                                 <div className="space-y-1.5">
                                     {history.slice(0, 10).map((sub) => {
                                         const v = VERDICTS[sub.status];
                                         return (
-                                            <div key={sub.id} className="flex items-center justify-between px-3 py-2 bg-bg-surface border border-border rounded-md text-xs">
+                                            <div key={sub.id} className="flex items-center justify-between px-3 py-2 bg-bg-surface border border-border rounded-[12px_9px_11px_8px] text-xs">
                                                 <span className="font-medium" style={{ color: v?.color }}>
                                                     {v?.icon} {v?.label || sub.status}
                                                 </span>
@@ -288,7 +291,7 @@ export default function Practice() {
                             </div>
                             <div className="relative group">
                                 <select
-                                    className="appearance-none bg-bg-surface border border-border hover:border-text-muted text-text-primary text-xs font-medium rounded-sm px-3 py-1 pr-7 outline-none focus:border-accent transition-all cursor-pointer"
+                                    className="appearance-none bg-bg-surface border border-border hover:border-text-muted text-text-primary text-xs font-medium rounded-[12px_9px_11px_8px] px-3 py-1 pr-7 outline-none focus:border-accent transition-all cursor-pointer"
                                     value={language}
                                     onChange={(e) => handleLanguageChange(e.target.value)}
                                 >
@@ -304,7 +307,7 @@ export default function Practice() {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={handleReset}
-                                className="flex items-center gap-1.5 px-3 py-1 rounded-sm text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-1 rounded-[12px_9px_11px_8px] text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors"
                                 title="Reset to template"
                             >
                                 <RotateCcw className="w-3.5 h-3.5" />
@@ -313,9 +316,9 @@ export default function Practice() {
                             <button
                                 onClick={handleSubmit}
                                 disabled={submitMutation.isPending || polling || !code.trim()}
-                                className={`flex items-center gap-1.5 px-4 py-1 rounded-sm text-xs font-bold transition-all ${
+                                className={`flex items-center gap-1.5 px-4 py-1 rounded-[12px_9px_11px_8px] text-xs font-bold transition-all ${
                                     !submitMutation.isPending && !polling && code.trim()
-                                        ? 'bg-win hover:bg-win/90 text-white'
+                                        ? 'bg-accent hover:bg-accent-hover text-white border border-[#e29a6c] shadow-[3px_3px_0_rgba(0,0,0,0.16)]'
                                         : 'bg-bg-surface border border-border text-text-muted cursor-not-allowed'
                                 }`}
                             >
@@ -409,7 +412,7 @@ export default function Practice() {
                                     {aiAnalysis && !showAIPanel && (
                                         <button
                                             onClick={() => setShowAIPanel(true)}
-                                            className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors text-xs font-semibold"
+                                            className="flex items-center gap-1 px-2.5 py-1 rounded-[12px_9px_11px_8px] bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors text-xs font-semibold"
                                         >
                                             <Sparkles size={11} />
                                             View AI Analysis
@@ -427,24 +430,24 @@ export default function Practice() {
                                     animate={{ opacity: 1, height: 'auto' }}
                                     className="mt-4 pt-4 border-t border-border"
                                 >
-                                    <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-3 flex items-center gap-2">
+                                    <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-3 flex items-center gap-2">
                                         <AlertTriangle size={14} className="text-loss" />
                                         Failed Test Case
                                     </h3>
                                     
                                     <div className="space-y-3">
-                                        <div className="bg-bg-root rounded-md p-3 border border-border">
+                                        <div className="bg-bg-root rounded-[12px_9px_11px_8px] p-3 border border-border">
                                             <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Input</p>
                                             <pre className="text-xs text-text-primary font-mono whitespace-pre-wrap">{verdict.failed_test_case.input}</pre>
                                         </div>
                                         
                                         <div className="grid grid-cols-2 gap-3">
-                                            <div className="bg-bg-root rounded-md p-3 border border-border">
+                                            <div className="bg-bg-root rounded-[12px_9px_11px_8px] p-3 border border-border">
                                                 <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Expected Output</p>
                                                 <pre className="text-xs text-text-primary font-mono whitespace-pre-wrap">{verdict.failed_test_case.expected_output}</pre>
                                             </div>
                                             
-                                            <div className="bg-bg-root rounded-md p-3 border border-loss/30">
+                                            <div className="bg-bg-root rounded-[12px_9px_11px_8px] p-3 border border-loss/30">
                                                 <p className="text-[10px] font-bold uppercase text-loss mb-1">Actual Output / Error</p>
                                                 <pre className="text-xs font-mono whitespace-pre-wrap text-loss/90">
                                                     {verdict.failed_test_case.error_output || verdict.failed_test_case.actual_output || "No output generated"}

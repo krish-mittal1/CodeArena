@@ -110,7 +110,7 @@ export default function PrivateRoomOverlay({ isOpen, onClose }) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[700] flex items-center justify-center bg-black/80 backdrop-blur-md"
+                className="fixed inset-0 z-[700] flex items-center justify-center bg-black/78 backdrop-blur-sm"
             >
                 <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
                 <motion.div
@@ -118,36 +118,37 @@ export default function PrivateRoomOverlay({ isOpen, onClose }) {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 10 }}
                     transition={{ type: 'spring', duration: 0.5 }}
-                    className="relative w-full max-w-sm mx-4 bg-bg-elevated border border-border rounded-xl p-6 sm:p-8 shadow-2xl overflow-hidden"
+                    className="relative w-full max-w-sm mx-4 paper-card grain-panel p-6 sm:p-8 overflow-hidden"
                 >
                     <button 
                         onClick={onClose}
-                        className="absolute top-4 right-4 text-text-muted hover:text-text-primary transition-colors"
+                        className="absolute top-4 right-4 text-text-muted hover:text-text-primary transition-colors rounded-[12px_9px_11px_8px] p-1 hover:bg-bg-hover"
                     >
                         <X size={20} />
                     </button>
 
                     {view === 'select' && (
                         <div className="flex flex-col items-center gap-6 mt-2">
-                            <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-2">
+                            <div className="w-12 h-12 rounded-[16px_12px_14px_10px] bg-accent/10 flex items-center justify-center mb-2 shadow-[2px_2px_0_rgba(0,0,0,0.14)]">
                                 <Users size={28} className="text-accent" />
                             </div>
                             <div className="text-center">
-                                <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">Play with Friend</h2>
+                                <p className="editorial-kicker mb-2">Private match</p>
+                                <h2 className="text-2xl font-bold text-text-primary mb-2 tracking-[-0.04em]">Play with Friend</h2>
                                 <p className="text-sm text-text-secondary">Create a private match or join an existing one using a room code.</p>
                             </div>
 
                             <div className="w-full flex flex-col gap-3 mt-4">
                                 <button
                                     onClick={handleCreateRoom}
-                                    className="w-full py-4 px-4 bg-accent hover:bg-accent-hover text-white rounded-lg font-bold transition-colors flex items-center justify-center gap-2 shadow-lg shadow-accent/20"
+                                    className="w-full py-4 px-4 bg-accent hover:bg-accent-hover text-white rounded-[18px_14px_16px_12px] font-bold transition-colors flex items-center justify-center gap-2 border border-[#e29a6c] shadow-[4px_4px_0_rgba(0,0,0,0.18)]"
                                 >
                                     <Users size={18} />
                                     Create Room
                                 </button>
                                 <button
                                     onClick={() => setView('join')}
-                                    className="w-full py-4 px-4 bg-bg-surface hover:bg-bg-hover text-text-primary border border-border rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                                    className="w-full py-4 px-4 bg-bg-surface hover:bg-bg-hover text-text-primary border border-border rounded-[18px_14px_16px_12px] font-semibold transition-colors flex items-center justify-center gap-2 shadow-[3px_3px_0_rgba(0,0,0,0.12)]"
                                 >
                                     <UserPlus size={18} />
                                     Join Room
@@ -158,7 +159,7 @@ export default function PrivateRoomOverlay({ isOpen, onClose }) {
 
                     {view === 'create' && (
                         <div className="flex flex-col items-center gap-6 mt-2">
-                            <h2 className="text-2xl font-bold text-white mb-2">Waiting for Friend</h2>
+                            <h2 className="text-2xl font-bold text-text-primary mb-2 tracking-[-0.04em]">Waiting for Friend</h2>
                             
                             {isCreating ? (
                                 <div className="py-8 flex flex-col items-center justify-center gap-4">
@@ -171,13 +172,13 @@ export default function PrivateRoomOverlay({ isOpen, onClose }) {
                                         Share this code with your friend to connect instantly:
                                     </p>
                                     
-                                    <div className="bg-bg-root border border-border rounded-lg p-6 w-full relative group">
+                                    <div className="human-input p-6 w-full relative group">
                                         <p className="text-4xl font-mono text-center font-bold tracking-[0.2em] text-accent">
                                             {roomCode}
                                         </p>
                                         <button 
                                             onClick={copyToClipboard}
-                                            className="absolute top-2 right-2 p-2 rounded-md bg-bg-surface hover:bg-bg-hover text-text-muted hover:text-white transition-colors"
+                                            className="absolute top-2 right-2 p-2 rounded-[12px_9px_11px_8px] bg-bg-surface hover:bg-bg-hover text-text-muted hover:text-white transition-colors"
                                             title="Copy Code"
                                         >
                                             {copied ? <CheckCircle2 size={16} className="text-win" /> : <Copy size={16} />}
@@ -195,7 +196,7 @@ export default function PrivateRoomOverlay({ isOpen, onClose }) {
 
                     {view === 'join' && (
                         <div className="flex flex-col items-center gap-6 mt-2">
-                            <h2 className="text-2xl font-bold text-white mb-2">Join Room</h2>
+                            <h2 className="text-2xl font-bold text-text-primary mb-2 tracking-[-0.04em]">Join Room</h2>
                             <p className="text-sm text-text-secondary text-center mb-2">
                                 Enter the 6-character room code from your friend.
                             </p>
@@ -207,11 +208,11 @@ export default function PrivateRoomOverlay({ isOpen, onClose }) {
                                     onChange={(e) => setJoinInput(e.target.value.toUpperCase())}
                                     placeholder="e.g. A1B2C3"
                                     maxLength={6}
-                                    className="w-full bg-bg-root border border-border focus:border-accent text-center text-3xl font-mono font-bold py-4 rounded-lg outline-none transition-colors tracking-[0.2em] uppercase placeholder:text-text-muted/30"
+                                    className="w-full human-input text-center text-3xl font-mono font-bold py-4 outline-none transition-colors tracking-[0.2em] uppercase placeholder:text-text-muted/30"
                                     autoFocus
                                 />
                                 {joinError && (
-                                    <p className="text-xs text-loss text-center font-medium bg-loss/10 py-2 rounded-md border border-loss/20">
+                                    <p className="text-xs text-loss text-center font-medium bg-loss/10 py-2 rounded-[12px_9px_11px_8px] border border-loss/20">
                                         {joinError}
                                     </p>
                                 )}
@@ -219,7 +220,7 @@ export default function PrivateRoomOverlay({ isOpen, onClose }) {
                                 <button
                                     type="submit"
                                     disabled={isJoining || joinInput.length !== 6}
-                                    className="w-full py-4 bg-accent hover:bg-accent-hover text-white rounded-lg font-bold transition-colors shadow-lg shadow-accent/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
+                                    className="w-full py-4 bg-accent hover:bg-accent-hover text-white rounded-[18px_14px_16px_12px] font-bold transition-colors border border-[#e29a6c] shadow-[4px_4px_0_rgba(0,0,0,0.18)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
                                 >
                                     {isJoining ? (
                                         <><Loader2 size={18} className="animate-spin" /> Joining...</>

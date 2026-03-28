@@ -35,11 +35,12 @@ export default function Problems() {
                 {/* Header */}
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
                     <div className="flex items-center gap-3 mb-1">
-                        <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-[14px_11px_13px_9px] bg-accent/10 flex items-center justify-center shadow-[2px_2px_0_rgba(0,0,0,0.14)]">
                             <Building2 size={20} className="text-accent" />
                         </div>
                         <div>
-                            <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+                            <p className="editorial-kicker mb-2">Practice map</p>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-[-0.05em]">
                                 Company Hub
                             </h1>
                             <p className="text-text-secondary text-sm">
@@ -64,7 +65,7 @@ export default function Problems() {
                             placeholder="Search companies..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 bg-bg-secondary border border-border rounded-lg text-sm text-text-primary placeholder-text-muted focus:border-accent focus:outline-none transition-colors"
+                            className="w-full pl-10 pr-4 py-2.5 human-input text-sm text-text-primary placeholder-text-muted focus:outline-none transition-colors"
                         />
                     </div>
 
@@ -76,7 +77,7 @@ export default function Problems() {
                                 onClick={() => setSelectedCategory(cat)}
                                 className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border ${
                                     selectedCategory === cat
-                                        ? 'bg-accent/15 border-accent/40 text-accent shadow-sm shadow-accent/10'
+                                        ? 'bg-bg-hover border-border text-text-primary'
                                         : 'bg-bg-secondary border-border text-text-secondary hover:border-border-hover hover:text-text-primary'
                                 }`}
                             >
@@ -109,19 +110,13 @@ export default function Problems() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: Math.min(idx * 0.02, 0.6) }}
                                     onClick={() => navigate(`/company/${company.id}`)}
-                                    className="group relative bg-bg-secondary border border-border rounded-xl p-5 cursor-pointer transition-all duration-300 hover:border-border-hover hover:bg-bg-hover/40 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-0.5"
+                                    className="group relative paper-card-soft grain-panel p-5 cursor-pointer transition-all duration-300 hover:border-border-hover hover:bg-bg-hover/40 hover:-translate-y-0.5"
                                 >
-                                    {/* Accent top line */}
-                                    <div
-                                        className="absolute top-0 left-4 right-4 h-[2px] rounded-b-full opacity-40 group-hover:opacity-80 transition-opacity"
-                                        style={{ backgroundColor: company.color }}
-                                    />
-
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-3">
                                             {/* Logo / Emoji */}
                                             <div
-                                                className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0 transition-transform group-hover:scale-110"
+                                                className="w-11 h-11 rounded-[16px_12px_14px_10px] flex items-center justify-center text-xl shrink-0 transition-transform group-hover:scale-110 shadow-[2px_2px_0_rgba(0,0,0,0.12)]"
                                                 style={{ backgroundColor: `${company.color}15` }}
                                             >
                                                 {company.logo}

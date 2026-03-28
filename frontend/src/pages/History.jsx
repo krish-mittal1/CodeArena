@@ -49,11 +49,12 @@ export default function HistoryPage() {
                     className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8"
                 >
                     <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 bg-accent/10 rounded-xl flex items-center justify-center border border-accent/20">
+                        <div className="w-14 h-14 bg-accent/10 rounded-[18px_14px_16px_12px] flex items-center justify-center border border-accent/20 shadow-[3px_3px_0_rgba(0,0,0,0.16)]">
                             <HistoryIcon size={28} className="text-accent" />
                         </div>
                         <div className="pt-1">
-                            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-wide">
+                            <p className="editorial-kicker mb-2">Match archive</p>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-[-0.05em]">
                                 Match History
                             </h1>
                             <p className="text-text-secondary text-sm font-medium mt-1">
@@ -62,14 +63,14 @@ export default function HistoryPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-1 p-1.5 bg-bg-secondary border border-border rounded-lg">
+                    <div className="flex items-center gap-1 p-1.5 paper-card-soft">
                         {['all', 'win', 'loss', 'draw'].map((val) => (
                             <button
                                 key={val}
                                 onClick={() => { setFilterResult(val); setPage(1); }}
-                                className={`px-5 py-2 text-sm font-semibold capitalize rounded-lg transition-all ${filterResult === val
-                                    ? 'bg-accent text-white shadow-md'
-                                    : 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-hover'
+                                className={`px-5 py-2 text-sm font-semibold capitalize rounded-[14px_11px_13px_9px] transition-all ${filterResult === val
+                                    ? 'bg-bg-hover text-text-primary border border-border'
+                                    : 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-hover border border-transparent'
                                     }`}
                             >
                                 {val}
@@ -82,7 +83,7 @@ export default function HistoryPage() {
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-bg-secondary border border-border rounded-xl overflow-hidden"
+                    className="paper-card grain-panel overflow-hidden"
                 >
                     {isLoading ? (
                         <table className="w-full text-sm">
@@ -139,7 +140,7 @@ export default function HistoryPage() {
                                     <button
                                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                                         disabled={page === 1}
-                                        className="p-2 rounded-lg text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                        className="p-2 rounded-[14px_11px_13px_9px] text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed border border-transparent hover:border-border"
                                     >
                                         <ChevronLeft size={20} />
                                     </button>
@@ -151,9 +152,9 @@ export default function HistoryPage() {
                                                 <button
                                                     key={pageNum}
                                                     onClick={() => setPage(pageNum)}
-                                                    className={`w-10 h-10 rounded-lg text-sm font-bold transition-all ${page === pageNum
-                                                        ? 'bg-accent text-white shadow-md'
-                                                        : 'text-text-secondary hover:bg-bg-hover hover:text-text-primary'
+                                                    className={`w-10 h-10 rounded-[14px_11px_13px_9px] text-sm font-bold transition-all ${page === pageNum
+                                                        ? 'bg-bg-hover text-text-primary border border-border'
+                                                        : 'text-text-secondary hover:bg-bg-hover hover:text-text-primary border border-transparent'
                                                         }`}
                                                 >
                                                     {pageNum}
@@ -165,7 +166,7 @@ export default function HistoryPage() {
                                     <button
                                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                         disabled={page === totalPages}
-                                        className="p-2 rounded-lg text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                        className="p-2 rounded-[14px_11px_13px_9px] text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed border border-transparent hover:border-border"
                                     >
                                         <ChevronRight size={20} />
                                     </button>
@@ -199,7 +200,7 @@ function MatchRow({ match, onClick }) {
         >
             <td className="px-6 py-4">
                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-base font-bold text-accent shrink-0 border border-accent/20">
+                    <div className="w-10 h-10 rounded-[14px_11px_13px_9px] bg-accent/10 flex items-center justify-center text-base font-bold text-accent shrink-0 border border-accent/20 shadow-[2px_2px_0_rgba(0,0,0,0.12)]">
                         {match.opponent_username?.charAt(0).toUpperCase() || '?'}
                     </div>
                     <div className="flex flex-col">
@@ -214,7 +215,7 @@ function MatchRow({ match, onClick }) {
             </td>
 
             <td className="px-6 py-4">
-                <span className={`inline-flex items-center justify-center min-w-[85px] px-3 py-1.5 rounded-md font-bold text-xs uppercase tracking-wider border ${isWin
+                <span className={`inline-flex items-center justify-center min-w-[85px] px-3 py-1.5 rounded-[12px_9px_11px_8px] font-bold text-xs uppercase tracking-wider border ${isWin
                     ? 'bg-win/10 text-win border-win/20'
                     : isDraw
                         ? 'bg-draw/10 text-draw border-draw/20'
@@ -273,7 +274,7 @@ function MatchDetailModal({ match, onClose }) {
         <Modal isOpen={!!match} onClose={onClose} title="Match Details" size="md">
             <div className="space-y-6">
                 {/* Result Banner */}
-                <div className={`rounded-2xl p-6 text-center shadow-inner ${isWin ? 'bg-win/10 border border-win/20'
+                <div className={`rounded-[24px_18px_22px_16px] p-6 text-center shadow-inner ${isWin ? 'bg-win/10 border border-win/20'
                     : isDraw ? 'bg-draw/10 border border-draw/20'
                         : 'bg-loss/10 border border-loss/20'
                     }`}>
@@ -306,7 +307,7 @@ function MatchDetailModal({ match, onClose }) {
 
 function DetailCard({ icon: Icon, label, value, sub, valueColor = 'text-text-primary' }) {
     return (
-        <div className="bg-bg-secondary border border-border rounded-xl p-4 hover:border-border-hover transition-colors">
+        <div className="paper-card-soft p-4 hover:border-border-hover transition-colors">
             <div className="flex items-center gap-2 mb-2">
                 <Icon size={14} className="text-text-muted" />
                 <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">{label}</span>

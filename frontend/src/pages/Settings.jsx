@@ -18,12 +18,13 @@ export default function Settings() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, ease: 'easeOut' }}
-                    className="flex flex-col items-center text-center"
+                    className="paper-card grain-panel flex flex-col items-center text-center px-8 py-12"
                 >
-                    <div className="w-20 h-20 bg-accent/10 rounded-xl flex items-center justify-center border border-accent/20 mb-6">
+                    <div className="w-20 h-20 bg-accent/10 rounded-[22px_18px_20px_14px] flex items-center justify-center border border-accent/20 mb-6 shadow-[4px_4px_0_rgba(0,0,0,0.16)]">
                         <SettingsIcon size={36} className="text-accent" />
                     </div>
-                    <h1 className="text-4xl sm:text-5xl font-extrabold text-text-primary tracking-tight">
+                    <p className="editorial-kicker mb-2">Preferences</p>
+                    <h1 className="text-4xl sm:text-5xl font-bold text-text-primary tracking-[-0.05em]">
                         Settings
                     </h1>
                     <p className="text-text-secondary font-medium mt-3 text-lg max-w-md">
@@ -56,9 +57,9 @@ function SettingsSection({ icon: Icon, title, description }) {
 
     return (
         <motion.div variants={itemVariants}>
-            <div className="group flex items-center justify-between p-6 sm:p-7 bg-bg-secondary border border-border rounded-xl hover:bg-bg-elevated hover:border-border-hover transition-colors duration-200 cursor-pointer">
+            <div className="group paper-card-soft grain-panel flex items-center justify-between p-6 sm:p-7 hover:bg-bg-elevated hover:border-border-hover transition-colors duration-200 cursor-pointer">
                 <div className="flex items-center gap-6">
-                    <div className="w-14 h-14 rounded-lg bg-bg-root border border-border flex items-center justify-center group-hover:bg-accent/10 transition-colors duration-200">
+                    <div className="w-14 h-14 rounded-[16px_12px_14px_10px] bg-bg-root border border-border flex items-center justify-center group-hover:bg-accent/10 transition-colors duration-200 shadow-[2px_2px_0_rgba(0,0,0,0.12)]">
                         <Icon size={24} className="text-text-muted group-hover:text-accent transition-colors duration-200" />
                     </div>
                     <div>

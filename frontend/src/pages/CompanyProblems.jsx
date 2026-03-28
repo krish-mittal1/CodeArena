@@ -77,7 +77,7 @@ export default function CompanyProblems() {
                     <p className="text-text-secondary text-sm font-medium">Company not found</p>
                     <button
                         onClick={() => navigate('/problems')}
-                        className="mt-4 px-4 py-2 rounded-lg bg-accent/10 text-accent text-sm font-medium hover:bg-accent/20 transition-colors"
+                        className="mt-4 px-4 py-2 rounded-[14px_11px_13px_9px] bg-accent/10 text-accent text-sm font-medium hover:bg-accent/20 transition-colors"
                     >
                         ← Back to Companies
                     </button>
@@ -105,25 +105,18 @@ export default function CompanyProblems() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.05 }}
-                    className="bg-bg-secondary border border-border rounded-2xl p-8 relative overflow-hidden"
+                    className="paper-card grain-panel p-8 relative overflow-hidden"
                 >
-                    {/* Accent gradient */}
-                    <div
-                        className="absolute top-0 left-0 right-0 h-1 opacity-60"
-                        style={{
-                            background: `linear-gradient(90deg, ${company.color}, ${company.color}00)`,
-                        }}
-                    />
-
                     <div className="flex items-center gap-5">
                         <div
-                            className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shrink-0"
+                            className="w-16 h-16 rounded-[22px_18px_20px_14px] flex items-center justify-center text-3xl shrink-0 shadow-[3px_3px_0_rgba(0,0,0,0.14)]"
                             style={{ backgroundColor: `${company.color}15` }}
                         >
                             {company.logo}
                         </div>
                         <div>
-                            <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+                            <p className="editorial-kicker mb-2">Company set</p>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-[-0.05em]">
                                 {company.name}
                             </h1>
                             <span
@@ -151,7 +144,7 @@ export default function CompanyProblems() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 + idx * 0.05 }}
                                 onClick={() => navigate(`/practice/${prob.id}`)}
-                                className="group relative bg-bg-secondary border border-border hover:border-accent/50 rounded-xl p-5 cursor-pointer transition-all overflow-hidden"
+                                className="group relative paper-card-soft grain-panel hover:border-accent/50 p-5 cursor-pointer transition-all overflow-hidden"
                             >
                                 <div className="flex items-center justify-between z-10 relative">
                                     <div>
@@ -164,7 +157,7 @@ export default function CompanyProblems() {
                                             </Badge>
                                         </div>
                                     </div>
-                                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all">
+                                    <div className="w-10 h-10 rounded-[14px_11px_13px_9px] bg-accent/10 flex items-center justify-center translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all">
                                         <Play className="w-4 h-4 text-accent translate-x-0.5" />
                                     </div>
                                 </div>
@@ -176,9 +169,9 @@ export default function CompanyProblems() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.15 }}
-                        className="mt-8 bg-bg-secondary border border-border rounded-2xl p-12 text-center"
+                        className="mt-8 paper-card grain-panel p-12 text-center"
                     >
-                        <div className="w-16 h-16 mx-auto rounded-2xl bg-accent/10 flex items-center justify-center mb-5">
+                        <div className="w-16 h-16 mx-auto rounded-[22px_18px_20px_14px] bg-accent/10 flex items-center justify-center mb-5 shadow-[3px_3px_0_rgba(0,0,0,0.14)]">
                             <Clock size={28} className="text-accent" />
                         </div>
                         <h2 className="text-xl font-bold text-text-primary mb-2">

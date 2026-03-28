@@ -48,18 +48,15 @@ export default function QueueOverlay() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[700] flex items-center justify-center bg-black/80 backdrop-blur-md"
+                className="fixed inset-0 z-[700] flex items-center justify-center bg-black/78 backdrop-blur-sm"
             >
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: 20 }}
                     transition={{ type: 'spring', duration: 0.5 }}
-                    className="relative w-full max-w-md mx-4 bg-bg-elevated border border-border rounded-xl p-8 sm:p-10 shadow-xl overflow-hidden"
+                    className="relative w-full max-w-md mx-4 paper-card grain-panel p-8 sm:p-10 overflow-hidden"
                 >
-                    {/* Top Accent Line */}
-                    <div className="absolute top-0 left-0 w-full h-1 bg-accent" />
-
                     {status === 'searching' && (
                         <div className="flex flex-col items-center justify-between w-full min-h-[420px] gap-8 mt-2">
                             {/* Top Section: Icon & Text */}
@@ -68,17 +65,18 @@ export default function QueueOverlay() {
                                 <motion.div
                                     animate={{ scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] }}
                                     transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                                    className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center"
+                                    className="w-14 h-14 rounded-[18px_14px_16px_12px] bg-accent flex items-center justify-center shadow-[4px_4px_0_rgba(0,0,0,0.18)]"
                                 >
                                     <Swords size={32} className="text-white drop-shadow-md" />
                                 </motion.div>
 
                                 {/* Typography */}
                                 <div>
-                                    <h2 className="text-2xl font-bold text-white mb-2 text-center tracking-wide">
+                                    <p className="editorial-kicker mb-2 text-center">Live queue</p>
+                                    <h2 className="text-2xl font-bold text-text-primary mb-2 text-center tracking-[-0.04em]">
                                         Finding Opponent
                                     </h2>
-                                    <p className="text-sm text-gray-400 text-center max-w-[280px] mx-auto leading-relaxed">
+                                    <p className="text-sm text-text-secondary text-center max-w-[280px] mx-auto leading-relaxed">
                                         Matching you with a player near your skill level...
                                     </p>
                                 </div>
@@ -91,7 +89,7 @@ export default function QueueOverlay() {
                                     <p className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-3 drop-shadow-sm">
                                         Time in Queue
                                     </p>
-                                    <div className="bg-accent/10 border border-accent/20 rounded-full px-8 py-3 inline-block">
+                                    <div className="human-chip px-8 py-3 inline-block">
                                         <p className="text-3xl font-mono text-accent font-bold tracking-wider relative bottom-[1px]">
                                             {formatTime(waitSeconds)}
                                         </p>
@@ -118,7 +116,7 @@ export default function QueueOverlay() {
                             <div className="w-full flex flex-col gap-4 mt-2">
                                 {/* Error Message */}
                                 {error && (
-                                    <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-xl px-4 py-3 w-full text-center">
+                                    <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-[16px_12px_14px_10px] px-4 py-3 w-full text-center">
                                         {error}
                                     </div>
                                 )}
@@ -126,7 +124,7 @@ export default function QueueOverlay() {
                                 {/* Cancel Button */}
                                 <button
                                     onClick={leaveQueue}
-                                    className="w-full flex items-center justify-center gap-2 py-4 bg-loss/10 text-loss hover:bg-loss/20 border border-loss/20 transition-colors rounded-lg font-semibold text-base"
+                                    className="w-full flex items-center justify-center gap-2 py-4 bg-loss/10 text-loss hover:bg-loss/20 border border-loss/20 transition-colors rounded-[18px_14px_16px_12px] font-semibold text-base"
                                 >
                                     <X size={20} />
                                     Cancel Search
@@ -141,7 +139,7 @@ export default function QueueOverlay() {
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{ type: 'spring', damping: 10, stiffness: 200 }}
-                                className="w-20 h-20 mx-auto rounded-xl bg-win flex items-center justify-center mb-6"
+                                className="w-20 h-20 mx-auto rounded-[22px_18px_20px_14px] bg-win flex items-center justify-center mb-6 shadow-[4px_4px_0_rgba(0,0,0,0.18)]"
                             >
                                 <span className="text-3xl">🎯</span>
                             </motion.div>

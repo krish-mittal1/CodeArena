@@ -64,22 +64,23 @@ export default function Profile() {
             <div className="max-w-[1350px] mx-auto px-8 pt-10 pb-20 w-full flex flex-col gap-6">
                 {/* Profile Header */}
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-                    className="bg-bg-secondary border border-border rounded-xl p-6 md:p-8"
+                    className="paper-card grain-panel p-6 md:p-8"
                 >
                     <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                         {/* Avatar */}
                         <div className="relative group shrink-0">
-                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-accent flex items-center justify-center text-white text-3xl sm:text-4xl font-bold border-4 border-bg-secondary">
+                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-[24px_18px_22px_16px] bg-accent flex items-center justify-center text-white text-3xl sm:text-4xl font-bold border-4 border-bg-secondary shadow-[5px_5px_0_rgba(0,0,0,0.2)]">
                                 {user.username?.charAt(0).toUpperCase()}
                             </div>
-                            <button className="absolute inset-0 rounded-xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                            <button className="absolute inset-0 rounded-[24px_18px_22px_16px] bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
                                 <Camera size={20} className="text-white" />
                             </button>
                         </div>
 
                         {/* Info Header */}
                         <div className="flex-1 text-center sm:text-left pt-2">
-                            <h1 className="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">{user.username}</h1>
+                            <p className="editorial-kicker mb-2">Profile</p>
+                            <h1 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-[-0.05em]">{user.username}</h1>
                             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-3">
                                 <Badge color="purple" className="text-sm px-3 py-1 font-semibold">{formatElo(user.elo)} ELO</Badge>
                                 <span className="text-sm font-medium text-text-muted">{user.email}</span>
@@ -94,7 +95,7 @@ export default function Profile() {
                                             onChange={(e) => setTempBio(e.target.value)}
                                             maxLength={200}
                                             rows={2}
-                                            className="flex-1 bg-bg-surface border border-border rounded-lg px-4 py-3 text-sm text-text-primary resize-none focus:border-accent outline-none"
+                                            className="flex-1 human-input px-4 py-3 text-sm text-text-primary resize-none outline-none"
                                             placeholder="Tell us about yourself..."
                                         />
                                         <div className="flex flex-col gap-2">
@@ -105,7 +106,7 @@ export default function Profile() {
                                 ) : (
                                     <div className="flex items-center gap-3 group">
                                         <p className="text-sm text-text-secondary">{bio}</p>
-                                        <button onClick={() => setEditingBio(true)} className="p-1.5 rounded-lg text-text-muted hover:text-accent hover:bg-bg-hover opacity-0 group-hover:opacity-100 transition-all cursor-pointer">
+                                        <button onClick={() => setEditingBio(true)} className="p-1.5 rounded-[12px_9px_11px_8px] text-text-muted hover:text-accent hover:bg-bg-hover opacity-0 group-hover:opacity-100 transition-all cursor-pointer">
                                             <Edit3 size={14} />
                                         </button>
                                     </div>
@@ -121,8 +122,8 @@ export default function Profile() {
                         ? Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
                         : stats.map((stat) => (
                             <motion.div key={stat.label} variants={item}>
-                                <div className="bg-bg-secondary border border-border rounded-xl p-6 hover:border-border-hover transition-colors flex items-center gap-4">
-                                    <div className="w-11 h-11 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                                <div className="paper-card-soft p-6 hover:border-border-hover transition-colors flex items-center gap-4">
+                                    <div className="w-11 h-11 rounded-[14px_11px_13px_9px] bg-accent/10 flex items-center justify-center shrink-0 shadow-[2px_2px_0_rgba(0,0,0,0.12)]">
                                         <stat.icon size={20} className="text-accent" />
                                     </div>
                                     <div>
@@ -136,7 +137,7 @@ export default function Profile() {
                 </motion.div>
 
                 {/* Rating Chart */}
-                <div className="h-[400px] w-full bg-bg-secondary border border-border rounded-xl p-6 mt-2">
+                <div className="h-[400px] w-full paper-card grain-panel p-6 mt-2">
                     {isLoading ? <ChartSkeleton /> : <RatingChart history={history} currentElo={user.elo} />}
                 </div>
 
@@ -145,7 +146,7 @@ export default function Profile() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="bg-bg-secondary border border-border rounded-xl p-8 mt-2"
+                    className="paper-card grain-panel p-8 mt-2"
                 >
                     <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2 mb-6">
                         <Code2 size={18} className="text-accent" />
