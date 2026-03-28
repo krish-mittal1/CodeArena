@@ -5,8 +5,20 @@
 // Your Azure VM Public IP: 4.193.212.14
 const PROD_IP = '4.193.212.14';
 
-export const API_BASE = import.meta.env.VITE_API_URL || `http://${PROD_IP}:8000/api/v1`;
-export const WS_BASE = import.meta.env.VITE_WS_URL || `ws://${PROD_IP}:8000`;
+function stripTrailingSlash(value) {
+    return value.replace(/\/+$/, '');
+}
+
+function normalizeApiOrigin(value) {
+    const trimmed = stripTrailingSlash(value);
+    return trimmed.replace(/\/api\/v1$/i, '');
+}
+
+export const API_ORIGIN = normalizeApiOrigin(
+    import.meta.env.VITE_API_URL || `http://${PROD_IP}:8000`
+);
+export const API_BASE = `${API_ORIGIN}/api/v1`;
+export const WS_BASE = stripTrailingSlash(import.meta.env.VITE_WS_URL || `ws://${PROD_IP}:8000`);
 
 // ── WebSocket Events (mirrors WSEvent enum) ──────────
 export const WS_EVENTS = {

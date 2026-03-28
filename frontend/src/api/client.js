@@ -12,15 +12,14 @@ import { API_BASE } from '../utils/constants';
 import { storage } from '../utils/storage';
 
 const api = axios.create({
-    baseURL: `${API_BASE}/api/v1`,
+    baseURL: API_BASE,
     headers: { 'Content-Type': 'application/json' },
     timeout: 15000,
 });
 
 // ── Token injection ──────────────────────────────────
 
-// FIX: Initialize from storage so the token survives a page refresh
-let accessToken = storage.getAccessToken?.() || null;
+let accessToken = null;
 
 export function setAccessToken(token) {
     accessToken = token;
@@ -31,10 +30,8 @@ export function getAccessToken() {
 }
 
 api.interceptors.request.use((config) => {
-    // FIX: Pull from memory variable, but fallback to storage if memory is empty
-    const token = accessToken || storage.getAccessToken?.();
-    
-    if (token) {
+    if (accessToken) {
+        const token = accessToken;
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -85,7 +82,7 @@ api.interceptors.response.use(
             const refreshToken = storage.getRefreshToken();
             if (!refreshToken) throw new Error('No refresh token');
 
-            const { data } = await axios.post(`${API_BASE}/api/v1/auth/refresh`, {
+            const { data } = await axios.post(`${API_BASE}/auth/refresh`, {
                 refresh_token: refreshToken,
             });
 
@@ -93,8 +90,6 @@ api.interceptors.response.use(
             const newRefreshToken = data.refresh_token;
 
             setAccessToken(newAccessToken);
-            // Ensure storage is updated with both tokens
-            storage.setAccessToken?.(newAccessToken); 
             storage.setRefreshToken(newRefreshToken);
 
             // Notify auth store

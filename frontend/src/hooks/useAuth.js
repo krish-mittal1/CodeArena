@@ -40,15 +40,6 @@ export function useRegister() {
 }
 
 /**
- * Resend Verification mutation.
- */
-export function useResendVerification() {
-    return useMutation({
-        mutationFn: ({ email }) => authApi.resendVerification({ email }),
-    });
-}
-
-/**
  * Logout — clears state + cache, navigates to login.
  */
 export function useLogout() {

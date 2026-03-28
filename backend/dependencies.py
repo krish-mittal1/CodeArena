@@ -4,6 +4,7 @@ FastAPI dependency injection — DB sessions, Redis, current user.
 
 import uuid
 import asyncio
+import time
 from typing import Optional
 
 from fastapi import Depends, HTTPException, status
@@ -23,6 +24,7 @@ security_scheme = HTTPBearer()
 
 _redis: Optional[aioredis.Redis] = None
 _redis_initialized: bool = False
+_redis_retry_after: float = 0.0
 
 
 async def get_redis() -> Optional[aioredis.Redis]:
@@ -32,16 +34,13 @@ async def get_redis() -> Optional[aioredis.Redis]:
     PRODUCTION: Ensures connection is tested before returning to prevent
     deadlocks from lazy connection initialization.
     """
-    # HARD DEV OVERRIDE:
-    # For local development and to stabilize matchmaking/battle behavior,
-    # we force Redis to be disabled so the app always uses the in-memory
-    # matchmaking + dev workers. This avoids any stale Redis state or
-    # missing worker processes causing inconsistent behavior.
-    return None
-
-    global _redis, _redis_initialized
+    global _redis, _redis_initialized, _redis_retry_after
     
     if not settings.redis_enabled:
+        return None
+
+    # After a failed attempt, back off briefly instead of reconnecting on every request.
+    if _redis is None and _redis_retry_after and time.monotonic() < _redis_retry_after:
         return None
     
     if _redis is None:
@@ -58,12 +57,14 @@ async def get_redis() -> Optional[aioredis.Redis]:
             # Test connection immediately (fail fast)
             await asyncio.wait_for(_redis.ping(), timeout=3)
             _redis_initialized = True
+            _redis_retry_after = 0.0
         except Exception as e:
             import logging
             logger = logging.getLogger(__name__)
             logger.error(f"Redis connection failed: {e}")
             _redis = None
             _redis_initialized = False
+            _redis_retry_after = time.monotonic() + 15
             return None
     
     # Verify connection is still alive
@@ -78,6 +79,7 @@ async def get_redis() -> Optional[aioredis.Redis]:
                 pass
             _redis = None
             _redis_initialized = False
+            _redis_retry_after = time.monotonic() + 15
             return None
     
     return _redis
@@ -85,7 +87,7 @@ async def get_redis() -> Optional[aioredis.Redis]:
 
 async def close_redis():
     """Close Redis connection on shutdown."""
-    global _redis, _redis_initialized
+    global _redis, _redis_initialized, _redis_retry_after
     if _redis:
         try:
             await asyncio.wait_for(_redis.close(), timeout=5)
@@ -93,6 +95,7 @@ async def close_redis():
             pass
         _redis = None
         _redis_initialized = False
+    _redis_retry_after = 0.0
 
 
 # ── Auth Dependencies ─────────────────────────────────────────
