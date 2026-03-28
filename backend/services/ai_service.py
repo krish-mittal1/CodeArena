@@ -59,7 +59,7 @@ async def analyze_code(
         import google.generativeai as genai
         genai.configure(api_key=settings.gemini_api_key)
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
+            model_name="gemini-2.0-flash",
             system_instruction=_SYSTEM_PROMPT,
         )
 
@@ -94,8 +94,25 @@ Verdict: {verdict_status}
 
 Analyze the code and return the JSON object as instructed."""
 
-        response = model.generate_content(prompt)
-        raw = response.text.strip()
+        # Retry logic for 429 Errors
+        max_retries = 3
+        last_error = ""
+        for attempt in range(max_retries):
+            try:
+                response = model.generate_content(prompt)
+                raw = response.text.strip()
+                break
+            except Exception as e:
+                last_error = str(e)
+                if "429" in last_error or "quota" in last_error.lower():
+                    if attempt < max_retries - 1:
+                        wait_time = (attempt + 1) * 2  # 2s, 4s
+                        import asyncio
+                        await asyncio.sleep(wait_time)
+                        continue
+                raise e
+        else:
+             raise Exception(f"Failed after {max_retries} retries: {last_error}")
 
         # Strip any accidental markdown fences
         if raw.startswith("```"):
