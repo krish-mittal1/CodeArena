@@ -51,10 +51,10 @@ async def analyze_code(
     expected_output: Optional[str] = None,
     actual_output: Optional[str] = None,
     error_output: Optional[str] = None,
-    submission_id: Optional[str] = None,  # Added for caching
+    submission_id: Optional[str] = None,
 ) -> dict:
     """
-    Call Gemini to analyze the user's submitted code.
+    Call Groq (Llama 3) to analyze the user's submitted code.
     Returns a structured dict with analysis or a fallback on failure.
     """
     # 1. Check Cache first
@@ -62,20 +62,14 @@ async def analyze_code(
         logger.info(f"Returning cached AI analysis for submission {submission_id}")
         return AI_CACHE[submission_id]
 
-    if not settings.gemini_api_key:
-        logger.warning("GEMINI_API_KEY not set — returning placeholder analysis")
-        return _fallback_analysis(verdict_status)
+    if not settings.groq_api_key:
+        logger.warning("GROQ_API_KEY not set — returning placeholder analysis")
+        return _fallback_analysis(verdict_status, "Groq API Key missing")
 
     try:
-        import google.generativeai as genai
-        genai.configure(api_key=settings.gemini_api_key)
+        from groq import Groq
+        client = Groq(api_key=settings.groq_api_key)
         
-        # Standard model confirmed available
-        model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash",
-            system_instruction=_SYSTEM_PROMPT,
-        )
-
         # Build context message
         failed_section = ""
         if failed_input:
@@ -105,35 +99,36 @@ Submitted Code:
 Verdict: {verdict_status}
 {failed_section}
 
-Analyze the code and return the JSON object as instructed."""
+Analyze the code and return EXACTLY the JSON object as instructed."""
 
         # Retry logic for 429 Errors
         max_retries = 3
         last_error = ""
         for attempt in range(max_retries):
             try:
-                logger.info(f"Calling Gemini for {problem_title} (Attempt {attempt+1})...")
-                response = model.generate_content(prompt)
-                raw = response.text.strip()
+                logger.info(f"Calling Groq for {problem_title} (Attempt {attempt+1})...")
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {"role": "system", "content": _SYSTEM_PROMPT},
+                        {"role": "user", "content": prompt},
+                    ],
+                    model="llama-3.3-70b-versatile",
+                    response_format={"type": "json_object"},
+                    max_completion_tokens=4096,
+                )
+                raw = chat_completion.choices[0].message.content.strip()
                 break
             except Exception as e:
                 last_error = str(e)
-                if "429" in last_error or "quota" in last_error.lower():
-                    logger.warning(f"Gemini 429 hit. Waiting... {last_error}")
+                if "429" in last_error or "rate_limit" in last_error.lower():
+                    logger.warning(f"Groq 429 hit. Waiting... {last_error}")
                     if attempt < max_retries - 1:
-                        wait_time = (attempt + 1) * 3
                         import asyncio
-                        await asyncio.sleep(wait_time)
+                        await asyncio.sleep((attempt + 1) * 2)
                         continue
                 raise e
         else:
              raise Exception(f"Failed after {max_retries} retries: {last_error}")
-
-        # Strip any accidental markdown fences
-        if raw.startswith("```"):
-            raw = raw.split("\n", 1)[1]
-            if raw.endswith("```"):
-                raw = raw.rsplit("```", 1)[0]
 
         result = json.loads(raw)
         
@@ -144,17 +139,16 @@ Analyze the code and return the JSON object as instructed."""
         return result
 
     except json.JSONDecodeError as e:
-        logger.error(f"Gemini returned invalid JSON: {e}")
+        logger.error(f"Groq returned invalid JSON: {e}")
         return _fallback_analysis(verdict_status, "Invalid AI response format")
     except Exception as e:
         error_msg = str(e)
-        logger.error(f"Gemini API error: {error_msg}")
-        # Detect quota and key issues specifically
-        if "API_KEY_INVALID" in error_msg or "400" in error_msg:
-            return _fallback_analysis(verdict_status, "Invalid Gemini API Key in .env")
-        if "429" in error_msg or "quota" in error_msg.lower():
-            return _fallback_analysis(verdict_status, "AI Quota Exceeded (Free Tier limit). Please wait 1 minute and try again.")
-        return _fallback_analysis(verdict_status, f"AI Error: {error_msg[:50]}...")
+        logger.error(f"Groq API error: {error_msg}")
+        if "401" in error_msg or "authentication" in error_msg.lower():
+            return _fallback_analysis(verdict_status, "Invalid Groq API Key in .env")
+        if "429" in error_msg or "rate_limit" in error_msg.lower():
+            return _fallback_analysis(verdict_status, "Groq Rate Limit Exceeded. Please try again in 1 minute.")
+        return _fallback_analysis(verdict_status, f"AI Error: {error_msg[:60]}...")
 
 
 def _fallback_analysis(verdict_status: str, error_reason: str = "AI analysis is currently unavailable") -> dict:
