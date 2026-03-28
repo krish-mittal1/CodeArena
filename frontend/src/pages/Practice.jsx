@@ -11,7 +11,7 @@ import { problemApi, practiceApi } from '../api/auth';
 import { LANGUAGES, CODE_TEMPLATES, VERDICTS, generateBoilerplate } from '../utils/constants';
 import Badge from '../components/ui/Badge';
 import AIAnalysisPanel from '../components/ui/AIAnalysisPanel';
-import ReactMarkdown from 'react-markdown';
+
 
 const STATUS_ICONS = {
     accepted: CheckCircle2,
@@ -203,34 +203,28 @@ export default function Practice() {
                         {/* Description */}
                         <div>
                             <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-3">Description</h3>
-                            <div className="text-sm text-text-secondary leading-relaxed prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-bg-surface prose-pre:border prose-pre:border-border">
-                                <ReactMarkdown>{problem.description}</ReactMarkdown>
+                            <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
+                                {problem.description}
                             </div>
                         </div>
 
                         {/* Input Format */}
                         <div>
                             <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Input Format</h3>
-                            <div className="text-sm text-text-secondary prose prose-invert prose-sm max-w-none">
-                                <ReactMarkdown>{problem.input_format}</ReactMarkdown>
-                            </div>
+                            <p className="text-sm text-text-secondary">{problem.input_format}</p>
                         </div>
 
                         {/* Output Format */}
                         <div>
                             <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Output Format</h3>
-                            <div className="text-sm text-text-secondary prose prose-invert prose-sm max-w-none">
-                                <ReactMarkdown>{problem.output_format}</ReactMarkdown>
-                            </div>
+                            <p className="text-sm text-text-secondary">{problem.output_format}</p>
                         </div>
 
                         {/* Constraints */}
                         {problem.constraints && (
                             <div>
                                 <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Constraints</h3>
-                                <div className="text-sm text-text-secondary font-mono prose prose-invert prose-sm max-w-none prose-li:my-0.5">
-                                    <ReactMarkdown>{problem.constraints}</ReactMarkdown>
-                                </div>
+                                <p className="text-sm text-text-secondary font-mono whitespace-pre-wrap">{problem.constraints}</p>
                             </div>
                         )}
 

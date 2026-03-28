@@ -1,6 +1,5 @@
 import { useBattleStore } from '../../stores/battleStore';
 import { FileText, Clock, HardDrive, AlertCircle } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
 
 export default function ProblemPanel() {
     const problem = useBattleStore((s) => s.problem);
@@ -48,8 +47,8 @@ export default function ProblemPanel() {
                     <h2 className="text-xl font-bold tracking-tight text-text-primary">
                         {problem.title}
                     </h2>
-                    <div className="text-sm text-text-secondary leading-relaxed prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-bg-surface prose-pre:border prose-pre:border-border">
-                        <ReactMarkdown>{problem.description}</ReactMarkdown>
+                    <div className="text-sm text-text-secondary leading-relaxed">
+                        <p className="whitespace-pre-wrap">{problem.description}</p>
                     </div>
                 </div>
 
