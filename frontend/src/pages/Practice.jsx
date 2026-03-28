@@ -56,9 +56,12 @@ export default function Practice() {
 
     const monacoLang = LANGUAGES.find((l) => l.id === language)?.monacoId || 'python';
 
+    const aiAnalysisInProgress = useRef(false);
+
     // Auto-trigger AI analysis when verdict is finalized
     const triggerAIAnalysis = async (sub) => {
-        if (!sub?.id || !problemId || aiLoading) return;
+        if (!sub?.id || !problemId || aiLoading || aiAnalysisInProgress.current) return;
+        aiAnalysisInProgress.current = true;
         setAiLoading(true);
         setAiAnalysis(null);
         setShowAIPanel(true);
@@ -84,6 +87,7 @@ export default function Practice() {
             });
         } finally {
             setAiLoading(false);
+            aiAnalysisInProgress.current = false;
         }
     };
 
