@@ -199,31 +199,39 @@ export default function Practice() {
                 {/* Left: Problem Description */}
                 <div className="practice-problem-pane">
                     <div className="p-6 space-y-5">
+import ReactMarkdown from 'react-markdown';
+
                         {/* Description */}
                         <div>
                             <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-3">Description</h3>
-                            <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
-                                {problem.description}
+                            <div className="text-sm text-text-secondary leading-relaxed prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-bg-surface prose-pre:border prose-pre:border-border">
+                                <ReactMarkdown>{problem.description}</ReactMarkdown>
                             </div>
                         </div>
 
                         {/* Input Format */}
                         <div>
                             <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Input Format</h3>
-                            <p className="text-sm text-text-secondary">{problem.input_format}</p>
+                            <div className="text-sm text-text-secondary prose prose-invert prose-sm max-w-none">
+                                <ReactMarkdown>{problem.input_format}</ReactMarkdown>
+                            </div>
                         </div>
 
                         {/* Output Format */}
                         <div>
                             <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Output Format</h3>
-                            <p className="text-sm text-text-secondary">{problem.output_format}</p>
+                            <div className="text-sm text-text-secondary prose prose-invert prose-sm max-w-none">
+                                <ReactMarkdown>{problem.output_format}</ReactMarkdown>
+                            </div>
                         </div>
 
                         {/* Constraints */}
                         {problem.constraints && (
                             <div>
                                 <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">Constraints</h3>
-                                <p className="text-sm text-text-secondary font-mono">{problem.constraints}</p>
+                                <div className="text-sm text-text-secondary font-mono prose prose-invert prose-sm max-w-none prose-li:my-0.5">
+                                    <ReactMarkdown>{problem.constraints}</ReactMarkdown>
+                                </div>
                             </div>
                         )}
 
