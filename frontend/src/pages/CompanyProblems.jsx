@@ -43,6 +43,15 @@ export default function CompanyProblems() {
             "NVIDIA", "PwC", "Morgan Stanley", "KPMG", 
             "Google", "Microsoft", "Amazon", "Meta", 
             "Apple", "Netflix", "Adobe"
+        ],
+        "Find Minimum in Rotated Sorted Array": [
+            "Ernst & Young", "Nutanix", "Red Hat", "Optum", 
+            "HashiCorp", "Philips Healthcare", "DoorDash", "Target",
+            "Ubisoft", "Zomato", "Airbnb", "Reddit", "KPMG", 
+            "Morgan Stanley", "OYO Rooms", "Zynga", "Snowflake", 
+            "Databricks", "IBM", "Uber", "Siemens Healthineers", 
+            "Splunk", "Shopify", "American Express", "Twilio", "TCS", 
+            "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
         ]
     };
 
