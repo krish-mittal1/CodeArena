@@ -6,6 +6,7 @@ import uuid
 import secrets
 import hashlib
 from datetime import datetime, timezone, timedelta
+from typing import Optional, Tuple
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,7 +18,7 @@ from backend.models.user import User
 from backend.schemas.user import UserRegister, TokenResponse
 
 
-async def register_user(db: AsyncSession, data: UserRegister, bg_tasks: BackgroundTasks) -> tuple[User, TokenResponse]:
+async def register_user(db: AsyncSession, data: UserRegister, bg_tasks: BackgroundTasks) -> Tuple[User, TokenResponse]:
     """Register a new user and return tokens immediately."""
     existing = await db.execute(
         select(User).where((User.username == data.username) | (User.email == data.email))
@@ -38,7 +39,7 @@ async def register_user(db: AsyncSession, data: UserRegister, bg_tasks: Backgrou
     return user, tokens
 
 
-async def login_user(db: AsyncSession, username: str, password: str) -> tuple[User, TokenResponse]:
+async def login_user(db: AsyncSession, username: str, password: str) -> Tuple[User, TokenResponse]:
     """Authenticate user and return tokens."""
     result = await db.execute(select(User).where(User.username == username))
     user = result.scalar_one_or_none()
@@ -65,7 +66,7 @@ async def refresh_tokens(db: AsyncSession, refresh_token: str) -> TokenResponse:
     return _create_tokens(user)
 
 
-async def get_user_by_id(db: AsyncSession, user_id: uuid.UUID) -> User | None:
+async def get_user_by_id(db: AsyncSession, user_id: uuid.UUID) -> Optional[User]:
     """Fetch user by ID."""
     result = await db.execute(select(User).where(User.id == user_id))
     return result.scalar_one_or_none()

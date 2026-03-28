@@ -7,6 +7,8 @@ from sqlalchemy import String, Text, Integer, Boolean, DateTime, Index
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from typing import Optional, Dict
+
 from backend.db.base import Base
 from backend.core.constants import Difficulty
 
@@ -25,9 +27,9 @@ class Problem(Base):
     constraints: Mapped[str] = mapped_column(Text, nullable=True)
     
     # ── LeetCode Execution Architecture ──
-    method_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    parameters: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    return_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    method_name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    parameters: Mapped[Optional[Dict]] = mapped_column(JSONB, nullable=True)
+    return_type: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     
     time_limit_ms: Mapped[int] = mapped_column(Integer, default=2000, nullable=False)
     memory_limit_mb: Mapped[int] = mapped_column(Integer, default=256, nullable=False)

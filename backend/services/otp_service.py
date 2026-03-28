@@ -17,6 +17,7 @@ import logging
 import secrets
 import uuid
 from datetime import datetime, timezone
+from typing import Optional
 
 import redis.asyncio as aioredis
 import resend
@@ -46,7 +47,7 @@ _KEY_RATE_IP = "otp:rate:ip:{ip}"
 
 # ── Dedicated Redis connection for OTP ────────────────────────
 
-_otp_redis: aioredis.Redis | None = None
+_otp_redis: Optional[aioredis.Redis] = None
 
 
 async def _get_otp_redis() -> aioredis.Redis:

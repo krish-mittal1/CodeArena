@@ -6,6 +6,7 @@ Works in both Redis and dev (no-Redis) modes.
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
 from redis.asyncio import Redis
 
 from backend.db.session import get_db, AsyncSession
@@ -25,7 +26,7 @@ async def submit_code(
     data: SubmissionCreate,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    redis: Redis | None = Depends(get_redis),
+    redis: Optional[Redis] = Depends(get_redis),
 ):
     """
     Submit code for a match problem.

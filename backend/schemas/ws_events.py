@@ -3,6 +3,7 @@
 import uuid
 
 from pydantic import BaseModel
+from typing import Optional
 
 
 # ── Server → Client ──────────────────────────────────────────
@@ -33,8 +34,8 @@ class WSSubmissionResult(BaseModel):
     verdict: str
     passed: int
     total: int
-    runtime_ms: int | None = None
-    memory_kb: int | None = None
+    runtime_ms: Optional[int] = None
+    memory_kb: Optional[int] = None
 
 
 class WSOpponentSubmitted(BaseModel):
@@ -42,7 +43,7 @@ class WSOpponentSubmitted(BaseModel):
 
 
 class WSMatchEnded(BaseModel):
-    winner_id: uuid.UUID | None
+    winner_id: Optional[uuid.UUID]
     reason: str  # "solved" | "timeout" | "forfeit"
     your_elo_delta: int
     new_elo: int

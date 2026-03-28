@@ -52,5 +52,6 @@ export const problemApi = {
 export const practiceApi = {
     submit: (data) => api.post('/practice/submit', data).then((r) => r.data),
     getSubmissions: (problemId) => api.get(`/practice/submissions/${problemId}`).then((r) => r.data),
+    analyze: (data) => api.post('/practice/analyze', data).then((r) => r.data),
 };
 

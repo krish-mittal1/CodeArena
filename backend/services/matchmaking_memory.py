@@ -21,6 +21,7 @@ import asyncio
 from dataclasses import dataclass, field
 
 from sqlalchemy.ext.asyncio import async_sessionmaker
+from typing import Optional
 
 from backend.config import settings
 from backend.core.constants import MatchStatus
@@ -135,7 +136,7 @@ class InMemoryMatchmakingQueue:
 
         return True
 
-    async def get_queue_position(self, user_id: uuid.UUID) -> dict | None:
+    async def get_queue_position(self, user_id: uuid.UUID) -> Optional[dict]:
         uid = str(user_id)
         async with self._lock:
             # Already matched

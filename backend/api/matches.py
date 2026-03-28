@@ -6,6 +6,7 @@ import uuid
 import json
 
 from fastapi import APIRouter, Depends, Query
+from typing import Optional, List
 from redis.asyncio import Redis
 
 from backend.db.session import get_db, AsyncSession
@@ -28,7 +29,7 @@ async def get_match(
     return await match_service.get_match(db, match_id)
 
 
-@router.get("/history/me", response_model=list[MatchHistoryItem])
+@router.get("/history/me", response_model=List[MatchHistoryItem])
 async def get_match_history(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -72,7 +73,7 @@ async def forfeit_match(
     match_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    redis: Redis | None = Depends(get_redis),
+    redis: Optional[Redis] = Depends(get_redis),
 ):
     """
     Forfeit an active match.

@@ -12,6 +12,7 @@ import tempfile
 import logging
 import subprocess
 from dataclasses import dataclass
+from typing import Optional
 
 from backend.config import settings
 from backend.execution.languages import get_language_config
@@ -81,8 +82,8 @@ class Sandbox:
         language: str,
         code: str,
         stdin_data: str,
-        time_limit_ms: int | None = None,
-        memory_limit_mb: int | None = None,
+        time_limit_ms: Optional[int] = None,
+        memory_limit_mb: Optional[int] = None,
     ) -> ExecutionResult:
 
         exec_id = uuid.uuid4().hex[:8]
@@ -189,9 +190,9 @@ class Sandbox:
         language: str,
         code: str,
         test_inputs: list[str],
-        time_limit_ms: int | None = None,
-        memory_limit_mb: int | None = None,
-        problem_meta: dict | None = None,
+        time_limit_ms: Optional[int] = None,
+        memory_limit_mb: Optional[int] = None,
+        problem_meta: Optional[dict] = None,
     ) -> list[ExecutionResult]:
         """
         Execute code against multiple test inputs in a SINGLE Docker container.
@@ -479,7 +480,7 @@ done
         config,
         tmpdir: str,
         mem_mb: int,
-    ) -> ExecutionResult | None:
+    ) -> Optional[ExecutionResult]:
 
         container_name = f"codearena-compile-{exec_id}"
         compile_cmd = f"cd /sandbox && {config.compile_cmd}"
@@ -529,7 +530,7 @@ done
         tmpdir: str,
         mem_mb: int,
         compile_cmd: str = "",
-    ) -> ExecutionResult | None:
+    ) -> Optional[ExecutionResult]:
         """Compile with a custom command (used for driver-based compilation)."""
         container_name = f"codearena-compile-drv-{exec_id}"
         full_cmd = f"cd /sandbox && {compile_cmd}"

@@ -2,6 +2,7 @@
 Rating service — ELO calculation and atomic database updates.
 """
 
+from typing import Optional
 import uuid
 
 from sqlalchemy import select
@@ -43,7 +44,7 @@ async def update_ratings(
     db: AsyncSession,
     player1_id: uuid.UUID,
     player2_id: uuid.UUID,
-    winner_id: uuid.UUID | None,
+    winner_id: Optional[uuid.UUID],
 ) -> tuple[int, int, int, int]:
     """
     Atomically update both players' ELO ratings after a match.

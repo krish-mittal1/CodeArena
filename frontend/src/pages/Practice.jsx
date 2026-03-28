@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Editor from '@monaco-editor/react';
 import {
     ArrowLeft, Code2, Play, RotateCcw, Settings2,
-    CheckCircle2, XCircle, Clock, AlertTriangle,
+    CheckCircle2, XCircle, Clock, AlertTriangle, Sparkles,
 } from 'lucide-react';
 import { problemApi, practiceApi } from '../api/auth';
 import { LANGUAGES, CODE_TEMPLATES, VERDICTS, generateBoilerplate } from '../utils/constants';
 import Badge from '../components/ui/Badge';
+import AIAnalysisPanel from '../components/ui/AIAnalysisPanel';
 
 const STATUS_ICONS = {
     accepted: CheckCircle2,
@@ -28,6 +29,11 @@ export default function Practice() {
     const [verdict, setVerdict] = useState(null);
     const [polling, setPolling] = useState(false);
     const [submissionId, setSubmissionId] = useState(null);
+
+    // AI Analysis state
+    const [aiAnalysis, setAiAnalysis] = useState(null);
+    const [showAIPanel, setShowAIPanel] = useState(false);
+    const [aiLoading, setAiLoading] = useState(false);
 
     const { data: problem, isLoading } = useQuery({
         queryKey: ['problem', problemId],
@@ -49,6 +55,37 @@ export default function Practice() {
     });
 
     const monacoLang = LANGUAGES.find((l) => l.id === language)?.monacoId || 'python';
+
+    // Auto-trigger AI analysis when verdict is finalized
+    const triggerAIAnalysis = async (sub) => {
+        if (!sub?.id || !problemId) return;
+        setAiLoading(true);
+        setAiAnalysis(null);
+        setShowAIPanel(true);
+        try {
+            const result = await practiceApi.analyze({
+                submission_id: sub.id,
+                problem_id: problemId,
+            });
+            setAiAnalysis(result);
+        } catch (err) {
+            console.error('AI analysis failed:', err);
+            setAiAnalysis({
+                verdict_explanation: 'AI analysis could not be completed at this time.',
+                time_complexity: 'N/A',
+                space_complexity: 'N/A',
+                issues: [],
+                failed_test_explanation: '',
+                optimized_approach: 'Please try again later.',
+                optimized_time_complexity: 'N/A',
+                optimized_space_complexity: 'N/A',
+                improved_code: '',
+                tips: [],
+            });
+        } finally {
+            setAiLoading(false);
+        }
+    };
 
     const submitMutation = useMutation({
         mutationFn: (data) => practiceApi.submit(data),
@@ -74,6 +111,8 @@ export default function Practice() {
                     setVerdict(sub);
                     setPolling(false);
                     refetchHistory();
+                    // Auto-trigger AI analysis for any finalized verdict
+                    triggerAIAnalysis(sub);
                 } else if (sub) {
                     setVerdict(sub);
                 }
@@ -88,6 +127,8 @@ export default function Practice() {
     const handleSubmit = () => {
         if (submitMutation.isPending || !code.trim()) return;
         setVerdict(null);
+        setAiAnalysis(null);
+        setShowAIPanel(false);
         submitMutation.mutate({
             problem_id: problemId,
             language,
@@ -341,6 +382,13 @@ export default function Practice() {
                                     >
                                         {verdictInfo?.label || verdict.status || 'Running...'}
                                     </span>
+                                    {/* AI Loading indicator */}
+                                    {aiLoading && !polling && (
+                                        <div className="flex items-center gap-1.5 text-accent text-xs font-medium">
+                                            <Sparkles size={13} className="animate-pulse" />
+                                            Analyzing with AI...
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-4 text-xs text-text-secondary">
                                     <span className="font-mono">
@@ -352,6 +400,16 @@ export default function Practice() {
                                     {verdict.memory_used_kb != null && (
                                         <span className="font-mono">{(verdict.memory_used_kb / 1024).toFixed(1)}MB</span>
                                     )}
+                                    {/* Re-open AI panel button */}
+                                    {aiAnalysis && !showAIPanel && (
+                                        <button
+                                            onClick={() => setShowAIPanel(true)}
+                                            className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors text-xs font-semibold"
+                                        >
+                                            <Sparkles size={11} />
+                                            View AI Analysis
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                             {verdict.status === 'error' && verdict.message && (
@@ -359,9 +417,9 @@ export default function Practice() {
                             )}
 
                             {verdict.status !== 'accepted' && verdict.status !== 'running' && verdict.status !== 'queued' && verdict.failed_test_case && (
-                                <motion.div 
-                                    initial={{ opacity: 0, height: 0 }} 
-                                    animate={{ opacity: 1, height: 'auto' }} 
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
                                     className="mt-4 pt-4 border-t border-border"
                                 >
                                     <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-3 flex items-center gap-2">
@@ -395,6 +453,49 @@ export default function Practice() {
                     )}
                 </div>
             </div>
+
+            {/* AI Analysis Modal — auto-pops after every verdict */}
+            <AnimatePresence>
+                {showAIPanel && (
+                    aiLoading ? (
+                        <motion.div
+                            key="ai-loading"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-50 flex items-center justify-center"
+                            style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
+                        >
+                            <div className="flex flex-col items-center gap-5 text-center">
+                                <div className="w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center">
+                                    <Sparkles size={28} className="text-accent animate-pulse" />
+                                </div>
+                                <div>
+                                    <p className="text-text-primary font-bold text-base mb-1">Analyzing your code...</p>
+                                    <p className="text-text-muted text-sm">Gemini AI is reviewing your submission</p>
+                                </div>
+                                <div className="flex gap-1.5">
+                                    {[0, 1, 2].map((i) => (
+                                        <motion.span
+                                            key={i}
+                                            className="w-2 h-2 rounded-full bg-accent"
+                                            animate={{ opacity: [0.3, 1, 0.3] }}
+                                            transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </motion.div>
+                    ) : (
+                        <AIAnalysisPanel
+                            key="ai-panel"
+                            analysis={aiAnalysis}
+                            verdict={verdict}
+                            onClose={() => setShowAIPanel(false)}
+                        />
+                    )
+                )}
+            </AnimatePresence>
         </div>
     );
 }

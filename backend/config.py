@@ -117,6 +117,9 @@ class Settings(BaseSettings):
     otp_rate_limit_email: int = Field(default=3, description="Max OTP requests per email per hour")
     otp_rate_limit_ip: int = Field(default=5, description="Max OTP requests per IP per hour")
 
+    # ── Gemini AI ─────────────────────────────────────────────
+    gemini_api_key: Optional[str] = Field(default=None, description="Google Gemini API key for AI code analysis")
+
     @property
     def is_production(self) -> bool:
         return self.environment == "production"

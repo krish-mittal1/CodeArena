@@ -5,6 +5,7 @@ Language configuration — Docker images, compile/run commands, file extensions.
 """
 
 from dataclasses import dataclass
+from typing import Optional
 from backend.core.constants import Language
 
 
@@ -12,7 +13,7 @@ from backend.core.constants import Language
 class LanguageConfig:
     image: str
     file_extension: str
-    compile_cmd: str | None
+    compile_cmd: Optional[str]
     run_cmd: str
     needs_compilation: bool = False
 

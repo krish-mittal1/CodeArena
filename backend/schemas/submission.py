@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Union
 
 from backend.core.constants import Language
 
@@ -24,13 +24,13 @@ class SubmissionCreate(BaseModel):
 
 class SubmissionResponse(BaseModel):
     id: uuid.UUID
-    match_id: uuid.UUID | None = None
+    match_id: Optional[uuid.UUID] = None
     user_id: uuid.UUID
     language: str
     status: str
     passed_test_cases: int
     total_test_cases: int
-    execution_time_ms: int | None = None
+    execution_time_ms: Optional[int] = None
     memory_used_kb: Optional[int] = None
     submitted_at: datetime
     judged_at: Optional[datetime] = None

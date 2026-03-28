@@ -6,11 +6,13 @@ Supports both Redis queue (production) and in-process queue (dev mode).
 import uuid
 import json
 import logging
+from typing import Optional, List
 
 from redis.asyncio import Redis
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional, List
 
 from backend.core.constants import SubmissionStatus, RedisKey
 from backend.models.submission import Submission
@@ -27,7 +29,7 @@ async def create_submission(
     problem_id: uuid.UUID,
     code: str,
     language: str,
-    redis: Redis | None = None,
+    redis: Optional[Redis] = None,
 ) -> Submission:
     """
     Create a submission record and enqueue it for async processing.
@@ -68,7 +70,7 @@ async def create_submission(
     return submission
 
 
-async def get_submission(db: AsyncSession, submission_id: uuid.UUID) -> Submission | None:
+async def get_submission(db: AsyncSession, submission_id: uuid.UUID) -> Optional[Submission]:
     """Get a submission by ID."""
     result = await db.execute(
         select(Submission).where(Submission.id == submission_id)
@@ -82,7 +84,7 @@ async def create_practice_submission(
     problem_id: uuid.UUID,
     code: str,
     language: str,
-    redis: Redis | None = None,
+    redis: Optional[Redis] = None,
 ) -> Submission:
     """
     Create a practice submission (no match required).
@@ -123,7 +125,7 @@ async def create_practice_submission(
 
 async def get_practice_submissions(
     db: AsyncSession, user_id: uuid.UUID, problem_id: uuid.UUID
-) -> list[Submission]:
+) -> List[Submission]:
     """Get a user's practice submissions for a specific problem."""
     query = (
         select(Submission)
@@ -142,8 +144,8 @@ async def get_practice_submissions(
 
 
 async def get_match_submissions(
-    db: AsyncSession, match_id: uuid.UUID, user_id: uuid.UUID | None = None
-) -> list[Submission]:
+    db: AsyncSession, match_id: uuid.UUID, user_id: Optional[uuid.UUID] = None
+) -> List[Submission]:
     """Get submissions for a match, optionally filtered by user."""
     query = select(Submission).where(Submission.match_id == match_id)
     if user_id:

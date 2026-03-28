@@ -2,7 +2,7 @@
 
 import uuid
 
-from typing import Optional, Any
+from typing import Optional, Any, List
 
 from pydantic import BaseModel, Field
 
@@ -22,10 +22,10 @@ class ProblemCreate(BaseModel):
     difficulty: Difficulty = Difficulty.MEDIUM
     input_format: str
     output_format: str
-    constraints: str | None = None
+    constraints: Optional[str] = None
     time_limit_ms: int = Field(2000, ge=500, le=10000)
     memory_limit_mb: int = Field(256, ge=32, le=512)
-    test_cases: list[TestCaseCreate] = Field(..., min_length=1)
+    test_cases: List[TestCaseCreate] = Field(..., min_length=1)
 
 
 class TestCasePublic(BaseModel):
@@ -43,13 +43,13 @@ class ProblemPublic(BaseModel):
     difficulty: str
     input_format: str
     output_format: str
-    constraints: str | None
+    constraints: Optional[str]
     time_limit_ms: int
     memory_limit_mb: int
     method_name: Optional[str] = None
     parameters: Optional[Any] = None
     return_type: Optional[str] = None
-    sample_cases: list[TestCasePublic] = []
+    sample_cases: List[TestCasePublic] = []
 
     model_config = {"from_attributes": True}
 
@@ -57,6 +57,6 @@ class ProblemPublic(BaseModel):
 class ProblemAdmin(ProblemPublic):
     """Admin view includes all test cases and metadata."""
     is_active: bool
-    all_test_cases: list[TestCasePublic] = []
+    all_test_cases: List[TestCasePublic] = []
 
     model_config = {"from_attributes": True}

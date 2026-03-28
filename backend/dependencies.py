@@ -4,6 +4,7 @@ FastAPI dependency injection — DB sessions, Redis, current user.
 
 import uuid
 import asyncio
+from typing import Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -20,11 +21,11 @@ security_scheme = HTTPBearer()
 
 # ── Redis Dependency ──────────────────────────────────────────
 
-_redis: aioredis.Redis | None = None
+_redis: Optional[aioredis.Redis] = None
 _redis_initialized: bool = False
 
 
-async def get_redis() -> aioredis.Redis | None:
+async def get_redis() -> Optional[aioredis.Redis]:
     """
     Get the shared Redis connection. Returns None if Redis is disabled.
     
