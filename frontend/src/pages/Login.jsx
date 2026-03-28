@@ -17,16 +17,17 @@ export default function Login() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="w-full max-w-[480px]"
+                className="w-full max-w-[520px]"
             >
-                <div className="bg-bg-secondary border border-border rounded-xl p-8 sm:p-12">
+                <div className="paper-card grain-panel p-8 sm:p-12">
 
                     {/* Header */}
                     <div className="flex flex-col items-center text-center mb-8">
-                        <div className="w-14 h-14 bg-accent/10 text-accent rounded-xl flex items-center justify-center mb-5 border border-accent/20">
+                        <div className="w-14 h-14 bg-accent/10 text-accent rounded-[18px_14px_16px_12px] flex items-center justify-center mb-5 border border-accent/20 shadow-[3px_3px_0_rgba(0,0,0,0.16)]">
                             <LogIn size={26} strokeWidth={2.5} aria-hidden="true" />
                         </div>
-                        <h1 className="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">
+                        <p className="editorial-kicker mb-2">Member access</p>
+                        <h1 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-[-0.05em]">
                             Welcome Back
                         </h1>
                         <p className="text-sm sm:text-base text-text-secondary mt-3 font-medium">
@@ -35,10 +36,10 @@ export default function Login() {
                     </div>
 
                     {/* Tab Switcher */}
-                    <div className="flex bg-bg-root rounded-lg p-1 mb-8 border border-border">
+                    <div className="flex bg-bg-root rounded-[16px_12px_14px_10px] p-1 mb-8 border border-border">
                         <button
                             onClick={() => setTab('password')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-semibold transition-colors duration-200 ${tab === 'password'
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[12px_10px_11px_8px] text-sm font-semibold transition-colors duration-200 ${tab === 'password'
                                 ? 'bg-bg-secondary text-text-primary border border-border'
                                 : 'text-text-muted hover:text-text-secondary'
                                 }`}
@@ -48,7 +49,7 @@ export default function Login() {
                         </button>
                         <button
                             onClick={() => setTab('otp')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-semibold transition-colors duration-200 ${tab === 'otp'
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-[12px_10px_11px_8px] text-sm font-semibold transition-colors duration-200 ${tab === 'otp'
                                 ? 'bg-bg-secondary text-text-primary border border-border'
                                 : 'text-text-muted hover:text-text-secondary'
                                 }`}
@@ -122,7 +123,7 @@ function PasswordForm() {
                 <motion.div
                     initial={{ opacity: 0, height: 0, marginBottom: 0 }}
                     animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
-                    className="w-full flex items-center justify-center bg-loss/10 border border-loss/20 text-loss p-4 rounded-lg text-sm font-semibold text-center overflow-hidden"
+                    className="w-full flex items-center justify-center bg-loss/10 border border-loss/20 text-loss p-4 rounded-[14px_11px_13px_9px] text-sm font-semibold text-center overflow-hidden"
                 >
                     {errorMessage}
                 </motion.div>
@@ -134,7 +135,7 @@ function PasswordForm() {
                     <label htmlFor="login-username" className="text-sm font-semibold text-text-primary/80 ml-1">
                         Username
                     </label>
-                    <div className="flex items-center w-full h-12 bg-bg-root border border-border rounded-lg focus-within:border-accent transition-colors group overflow-hidden">
+                    <div className="human-input flex items-center w-full h-12 transition-colors group overflow-hidden">
                         <div className="pl-4 pr-3 flex items-center justify-center text-text-muted group-focus-within:text-accent transition-colors shrink-0">
                             <User size={18} strokeWidth={2.5} aria-hidden="true" />
                         </div>
@@ -156,7 +157,7 @@ function PasswordForm() {
                     <label htmlFor="login-password" className="text-sm font-semibold text-text-primary/80 ml-1">
                         Password
                     </label>
-                    <div className="flex items-center w-full h-12 bg-bg-root border border-border rounded-lg focus-within:border-accent transition-colors group overflow-hidden">
+                    <div className="human-input flex items-center w-full h-12 transition-colors group overflow-hidden">
                         <div className="pl-4 pr-3 flex items-center justify-center text-text-muted group-focus-within:text-accent transition-colors shrink-0">
                             <Lock size={18} strokeWidth={2.5} aria-hidden="true" />
                         </div>
@@ -177,7 +178,7 @@ function PasswordForm() {
                     <Button
                         variant="primary"
                         type="submit"
-                        className="w-full h-12 text-base font-bold rounded-lg bg-accent hover:bg-accent-hover text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full h-12 text-base font-bold rounded-[16px_12px_14px_10px] bg-accent hover:bg-accent-hover text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed border border-[#e29a6c] shadow-[4px_4px_0_rgba(0,0,0,0.18)]"
                         disabled={isPending || !username || !password}
                     >
                         {isPending ? 'Authenticating...' : 'Sign In'}
@@ -333,7 +334,7 @@ function OTPForm() {
                     <motion.div
                         initial={{ opacity: 0, height: 0, marginBottom: 0 }}
                         animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
-                        className="w-full flex items-center justify-center bg-loss/10 border border-loss/20 text-loss p-4 rounded-lg text-sm font-semibold text-center overflow-hidden"
+                        className="w-full flex items-center justify-center bg-loss/10 border border-loss/20 text-loss p-4 rounded-[14px_11px_13px_9px] text-sm font-semibold text-center overflow-hidden"
                     >
                         {error}
                     </motion.div>
@@ -344,7 +345,7 @@ function OTPForm() {
                         <label htmlFor="otp-email" className="text-sm font-semibold text-text-primary/80 ml-1">
                             Email Address
                         </label>
-                        <div className="flex items-center w-full h-12 bg-bg-root border border-border rounded-lg focus-within:border-accent transition-colors group overflow-hidden">
+                        <div className="human-input flex items-center w-full h-12 transition-colors group overflow-hidden">
                             <div className="pl-4 pr-3 flex items-center justify-center text-text-muted group-focus-within:text-accent transition-colors shrink-0">
                                 <Mail size={18} strokeWidth={2.5} aria-hidden="true" />
                             </div>
@@ -365,7 +366,7 @@ function OTPForm() {
                         <Button
                             variant="primary"
                             type="submit"
-                            className="w-full h-12 text-base font-bold rounded-lg bg-accent hover:bg-accent-hover text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full h-12 text-base font-bold rounded-[16px_12px_14px_10px] bg-accent hover:bg-accent-hover text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed border border-[#e29a6c] shadow-[4px_4px_0_rgba(0,0,0,0.18)]"
                             disabled={isLoading || !email}
                         >
                             {isLoading ? (
@@ -397,7 +398,7 @@ function OTPForm() {
                 <motion.div
                     initial={{ opacity: 0, height: 0, marginBottom: 0 }}
                     animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
-                    className="w-full flex items-center justify-center bg-loss/10 border border-loss/20 text-loss p-4 rounded-lg text-sm font-semibold text-center overflow-hidden"
+                    className="w-full flex items-center justify-center bg-loss/10 border border-loss/20 text-loss p-4 rounded-[14px_11px_13px_9px] text-sm font-semibold text-center overflow-hidden"
                 >
                     {error}
                 </motion.div>
@@ -407,14 +408,14 @@ function OTPForm() {
                 <motion.div
                     initial={{ opacity: 0, height: 0, marginBottom: 0 }}
                     animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
-                    className="w-full flex items-center justify-center bg-win/10 border border-win/20 text-win p-4 rounded-lg text-sm font-semibold text-center overflow-hidden"
+                    className="w-full flex items-center justify-center bg-win/10 border border-win/20 text-win p-4 rounded-[14px_11px_13px_9px] text-sm font-semibold text-center overflow-hidden"
                 >
                     {successMsg}
                 </motion.div>
             )}
 
             <div className="flex flex-col items-center gap-2 mb-6">
-                <div className="w-11 h-11 bg-accent/10 text-accent rounded-lg flex items-center justify-center border border-accent/20">
+                <div className="w-11 h-11 bg-accent/10 text-accent rounded-[14px_11px_13px_9px] flex items-center justify-center border border-accent/20 shadow-[2px_2px_0_rgba(0,0,0,0.14)]">
                     <KeyRound size={20} strokeWidth={2.5} />
                 </div>
                 <p className="text-sm text-text-secondary text-center">
@@ -435,7 +436,7 @@ function OTPForm() {
                         value={digit}
                         onChange={(e) => handleOtpChange(i, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                        className="w-11 h-13 bg-bg-root border border-border rounded-lg text-center text-xl font-bold text-text-primary outline-none focus:border-accent transition-colors"
+                        className="w-11 h-13 bg-bg-root border border-border rounded-[12px_9px_11px_8px] text-center text-xl font-bold text-text-primary outline-none focus:border-accent transition-colors"
                         autoFocus={i === 0}
                         disabled={isLoading}
                     />

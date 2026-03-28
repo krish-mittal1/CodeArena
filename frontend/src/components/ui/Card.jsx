@@ -8,10 +8,10 @@ export default function Card({ children, className = '', glow = false, hover = t
             transition={{ duration: 0.4 }}
             whileHover={hover ? { y: -2, transition: { duration: 0.2 } } : {}}
             className={`
-        bg-bg-elevated border border-border rounded-xl p-6
+        paper-card p-6 grain-panel
         transition-colors duration-200
         ${hover ? 'hover:border-border-hover' : ''}
-        ${glow ? 'border-accent/30' : ''}
+        ${glow ? 'border-accent/40' : ''}
         ${className}
       `}
             {...props}

@@ -2,16 +2,16 @@ import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 
 const variants = {
-    primary: 'bg-accent hover:bg-accent-hover text-white',
-    secondary: 'bg-bg-elevated hover:bg-bg-hover text-text-primary border border-border',
-    danger: 'bg-loss/20 hover:bg-loss/30 text-loss border border-loss/30',
-    ghost: 'hover:bg-bg-elevated text-text-secondary hover:text-text-primary',
+    primary: 'bg-accent hover:bg-accent-hover text-white border border-[#e29a6c] shadow-[0_8px_18px_rgba(0,0,0,0.2)]',
+    secondary: 'bg-bg-elevated hover:bg-bg-hover text-text-primary border border-border shadow-[0_6px_14px_rgba(0,0,0,0.14)]',
+    danger: 'bg-loss/15 hover:bg-loss/25 text-loss border border-loss/35',
+    ghost: 'hover:bg-bg-elevated text-text-secondary hover:text-text-primary border border-transparent',
 };
 
 const sizes = {
-    sm: 'px-3 py-1.5 text-sm rounded-lg',
-    md: 'px-5 py-2.5 text-sm rounded-xl',
-    lg: 'px-7 py-3 text-base rounded-xl',
+    sm: 'px-3 py-1.5 text-sm rounded-[12px_10px_11px_8px]',
+    md: 'px-5 py-2.5 text-sm rounded-[15px_12px_14px_10px]',
+    lg: 'px-7 py-3 text-base rounded-[18px_14px_16px_12px]',
 };
 
 const Button = forwardRef(({ variant = 'primary', size = 'md', children, className = '', disabled, loading, ...props }, ref) => {
@@ -21,7 +21,7 @@ const Button = forwardRef(({ variant = 'primary', size = 'md', children, classNa
             whileHover={{ scale: disabled ? 1 : 1.02 }}
             whileTap={{ scale: disabled ? 1 : 0.98 }}
             className={`
-        inline-flex items-center justify-center gap-2 font-semibold
+        inline-flex items-center justify-center gap-2 font-semibold tracking-[0.01em]
         transition-all duration-200 cursor-pointer
         disabled:opacity-50 disabled:cursor-not-allowed
         ${variants[variant]} ${sizes[size]} ${className}

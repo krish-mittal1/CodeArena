@@ -58,11 +58,11 @@ export default function Dashboard() {
 
             <div className="dashboard-container relative z-10">
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-                    <h1 className="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">
-                        Welcome back,{' '}
-                        <span className="text-accent">{user.username}</span>
+                    <p className="editorial-kicker mb-2">Player desk</p>
+                    <h1 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-[-0.05em]">
+                        {user.username}, your next match is waiting.
                     </h1>
-                    <p className="text-text-secondary mt-2 text-base">Your arena awaits. Let&apos;s climb the ranks.</p>
+                    <p className="text-text-secondary mt-2 text-base">Queue up, check the tape, and keep the rating moving.</p>
                 </motion.div>
 
                 <div className="stats-grid">
@@ -75,12 +75,12 @@ export default function Dashboard() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.4, delay: i * 0.1 }}
                             >
-                                <div className="stat-card bg-bg-secondary border border-border transition-colors duration-200 hover:border-border-hover">
-                                    <div className="w-11 h-11 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                                <div className="stat-card paper-card-soft grain-panel transition-colors duration-200 hover:border-border-hover">
+                                    <div className="w-11 h-11 rounded-[14px_11px_13px_9px] bg-accent/10 flex items-center justify-center shrink-0 shadow-[2px_2px_0_rgba(0,0,0,0.16)]">
                                         <stat.icon size={20} className="text-accent" />
                                     </div>
                                     <div className="flex flex-col text-right">
-                                        <p className="text-xs text-text-muted uppercase tracking-wider font-semibold mb-1">{stat.label}</p>
+                                        <p className="text-xs text-text-muted uppercase tracking-[0.18em] font-semibold mb-1">{stat.label}</p>
                                         <p className="text-2xl font-bold text-text-primary font-mono tracking-tight">{stat.value}</p>
                                     </div>
                                 </div>
@@ -98,13 +98,14 @@ export default function Dashboard() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="bg-bg-secondary border border-border rounded-xl flex flex-col overflow-hidden"
+                        className="paper-card grain-panel flex flex-col overflow-hidden"
                     >
                         <div className="flex-1 flex flex-col items-center justify-center text-center p-8 pb-10">
-                            <div className="w-14 h-14 mx-auto rounded-xl bg-accent flex items-center justify-center mb-5">
+                            <div className="w-14 h-14 mx-auto rounded-[18px_14px_16px_12px] bg-accent flex items-center justify-center mb-5 shadow-[4px_4px_0_rgba(0,0,0,0.2)]">
                                 <Swords size={26} className="text-white" />
                             </div>
-                            <h3 className="text-xl font-bold text-text-primary mb-1.5">Ready for Battle?</h3>
+                            <p className="editorial-kicker mb-2">Queue desk</p>
+                            <h3 className="text-xl font-bold tracking-[-0.03em] text-text-primary mb-1.5">Ready for Battle?</h3>
                             <p className="text-sm text-text-secondary max-w-60 mx-auto">
                                 Queue up and duel an opponent near your rank
                             </p>
@@ -114,7 +115,7 @@ export default function Dashboard() {
                             <button
                                 onClick={joinQueue}
                                 disabled={isSearching}
-                                className="w-full py-4 px-6 bg-accent hover:bg-accent-hover text-white font-bold text-lg transition-colors disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2 rounded-xl shadow-lg shadow-accent/20"
+                                className="w-full py-4 px-6 bg-accent hover:bg-accent-hover text-white font-bold text-lg transition-colors disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2 rounded-[18px_14px_16px_12px] border border-[#e29a6c] shadow-[4px_4px_0_rgba(0,0,0,0.2)]"
                             >
                                 {isSearching ? (
                                     <span className="animate-pulse flex items-center gap-2">
@@ -129,7 +130,7 @@ export default function Dashboard() {
                             </button>
                             <button
                                 onClick={() => setPrivateOverlayOpen(true)}
-                                className="w-full py-3.5 px-6 bg-bg-surface hover:bg-bg-hover border border-border text-text-primary font-semibold text-base transition-colors flex items-center justify-center gap-2 rounded-xl"
+                                className="w-full py-3.5 px-6 bg-bg-surface hover:bg-bg-hover border border-border text-text-primary font-semibold text-base transition-colors flex items-center justify-center gap-2 rounded-[18px_14px_16px_12px] shadow-[3px_3px_0_rgba(0,0,0,0.12)]"
                             >
                                 <Users size={18} className="text-accent" />
                                 Play with Friend
@@ -142,7 +143,7 @@ export default function Dashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="recent-section bg-bg-secondary border border-border rounded-xl overflow-hidden"
+                    className="recent-section paper-card grain-panel overflow-hidden"
                 >
                     <div className="flex items-center justify-between px-6 py-5 border-b border-border/60">
                         <h3 className="text-xl font-semibold text-text-primary flex items-center gap-2.5">

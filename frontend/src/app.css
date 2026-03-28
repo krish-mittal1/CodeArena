@@ -1,33 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
-    --color-bg-root: #0d1117;
-    --color-bg-primary: #161b22;
-    --color-bg-secondary: #21262d;
-    --color-bg-elevated: #30363d;
-    --color-bg-surface: #21262d;
-    --color-bg-hover: #30363d;
+    --color-bg-root: #171411;
+    --color-bg-primary: #211c18;
+    --color-bg-secondary: #2a241f;
+    --color-bg-elevated: #342c25;
+    --color-bg-surface: #241f1b;
+    --color-bg-hover: #3a3129;
 
-    --color-accent: #2f81f7;
-    --color-accent-hover: #58a6ff;
+    --color-accent: #c96d3a;
+    --color-accent-hover: #d97c48;
 
-    --color-win: #238636;
-    --color-loss: #da3633;
-    --color-draw: #d29922;
+    --color-win: #71945f;
+    --color-loss: #c65a49;
+    --color-draw: #c39a4f;
 
-    --color-text-primary: #c9d1d9;
-    --color-text-secondary: #8b949e;
-    --color-text-muted: #484f58;
+    --color-text-primary: #f1e6d4;
+    --color-text-secondary: #c6b49b;
+    --color-text-muted: #8d7965;
 
-    --color-border: #30363d;
-    --color-border-hover: #8b949e;
+    --color-border: #4b3f34;
+    --color-border-hover: #6c5a4b;
 
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --font-sans: 'Space Grotesk', 'Trebuchet MS', sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
 }
-
-/* ── Base styles ─── */
 
 html {
     -webkit-font-smoothing: antialiased;
@@ -38,6 +36,9 @@ body {
     font-family: var(--font-sans);
     color: var(--color-text-primary);
     background-color: var(--color-bg-root);
+    background-image:
+        radial-gradient(circle at 1px 1px, rgba(241, 230, 212, 0.06) 1px, transparent 0);
+    background-size: 22px 22px;
     line-height: 1.6;
     min-height: 100vh;
 }
@@ -48,10 +49,24 @@ body {
     flex-direction: column;
 }
 
-/* ── Scrollbar ─────────────────────── */
+a,
+button,
+input,
+textarea,
+select {
+    transition-property: background-color, border-color, color, box-shadow, transform, opacity;
+    transition-duration: 180ms;
+    transition-timing-function: ease;
+}
+
+::selection {
+    background: rgba(201, 109, 58, 0.35);
+    color: var(--color-text-primary);
+}
+
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -59,7 +74,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--color-border);
+    background: #5a4a3d;
     border-radius: 9999px;
 }
 
@@ -67,33 +82,31 @@ body {
     background: var(--color-border-hover);
 }
 
-/* ── Dashboard Layout ─────────────────────── */
 .dashboard-container {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 48px 24px;
+    padding: 42px 22px 72px;
     display: flex;
     flex-direction: column;
-    gap: 56px;
+    gap: 34px;
 }
 
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 28px 16px;
-        gap: 32px;
+        padding: 24px 14px 48px;
+        gap: 22px;
     }
 }
 
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
+    gap: 18px;
 }
 
 @media (max-width: 1024px) {
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
     }
 }
 
@@ -108,38 +121,30 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 24px;
-    border-radius: 16px;
-}
-
-@media (max-width: 480px) {
-    .stat-card {
-        padding: 16px;
-        border-radius: 12px;
-    }
+    gap: 16px;
+    padding: 22px 20px;
+    border-radius: 24px 18px 20px 16px;
 }
 
 .graph-section {
     display: grid;
     grid-template-columns: 2fr 1fr;
-    gap: 32px;
+    gap: 24px;
     align-items: stretch;
 }
 
 @media (max-width: 900px) {
     .graph-section {
         grid-template-columns: 1fr;
-        gap: 20px;
     }
 }
 
 .recent-section {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 0;
 }
 
-/* ── Practice Page: Mobile-first split ──── */
 .practice-split {
     display: flex;
     flex: 1;
@@ -179,4 +184,77 @@ body {
         min-height: 400px;
         height: 60vh;
     }
+}
+
+.grain-panel {
+    position: relative;
+    overflow: hidden;
+}
+
+.grain-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02)),
+        repeating-linear-gradient(
+            0deg,
+            transparent 0,
+            transparent 10px,
+            rgba(255, 255, 255, 0.015) 10px,
+            rgba(255, 255, 255, 0.015) 11px
+        );
+    opacity: 0.55;
+}
+
+.paper-card {
+    background: rgba(42, 36, 31, 0.94);
+    border: 1px solid rgba(108, 90, 75, 0.7);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.24);
+    border-radius: 24px 18px 22px 16px;
+}
+
+.paper-card-soft {
+    background: rgba(36, 31, 27, 0.96);
+    border: 1px solid rgba(75, 63, 52, 0.9);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+    border-radius: 20px 14px 18px 12px;
+}
+
+.editorial-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    font-weight: 700;
+}
+
+.human-input {
+    background: rgba(23, 20, 17, 0.88);
+    border: 1px solid rgba(75, 63, 52, 0.95);
+    border-radius: 14px 10px 12px 9px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.human-input:focus-within {
+    border-color: rgba(201, 109, 58, 0.95);
+    box-shadow: 0 0 0 3px rgba(201, 109, 58, 0.12);
+}
+
+.human-chip {
+    border: 1px solid rgba(108, 90, 75, 0.8);
+    background: rgba(52, 44, 37, 0.9);
+    border-radius: 9999px;
+}
+
+.human-divider {
+    height: 1px;
+    background: repeating-linear-gradient(
+        90deg,
+        rgba(108, 90, 75, 0.8) 0,
+        rgba(108, 90, 75, 0.8) 10px,
+        transparent 10px,
+        transparent 16px
+    );
 }
