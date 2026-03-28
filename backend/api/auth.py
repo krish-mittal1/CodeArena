@@ -2,10 +2,16 @@
 Auth routes — register, login, refresh tokens.
 """
 
-from fastapi import APIRouter, Depends, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks, Request
 from backend.db.session import get_db, AsyncSession
 from backend.schemas.user import UserRegister, UserLogin, TokenResponse, TokenRefresh
 from backend.services import auth_service
+from backend.core.auth_rate_limit import (
+    ensure_login_allowed,
+    record_login_failure,
+    clear_login_failures,
+)
+from backend.core.exceptions import InvalidCredentials
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -23,9 +29,16 @@ async def register(
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
+async def login(data: UserLogin, request: Request, db: AsyncSession = Depends(get_db)):
     """Login with username and password."""
-    _, tokens = await auth_service.login_user(db, data.username, data.password)
+    ip = request.client.host if request.client else "unknown"
+    ensure_login_allowed(data.username, ip)
+    try:
+        _, tokens = await auth_service.login_user(db, data.username, data.password)
+    except InvalidCredentials:
+        record_login_failure(data.username, ip)
+        raise
+    clear_login_failures(data.username, ip)
     return tokens
 
 

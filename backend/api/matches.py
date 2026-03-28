@@ -23,6 +23,7 @@ router = APIRouter(prefix="/matches", tags=["Matches"])
 @router.get("/{match_id}", response_model=MatchResponse)
 async def get_match(
     match_id: uuid.UUID,
+    _: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Get match details by ID."""

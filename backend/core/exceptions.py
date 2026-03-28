@@ -29,6 +29,11 @@ class UserAlreadyExists(AppException):
         super().__init__(status.HTTP_409_CONFLICT, "Username or email already registered")
 
 
+class LoginRateLimited(AppException):
+    def __init__(self):
+        super().__init__(status.HTTP_429_TOO_MANY_REQUESTS, "Too many failed login attempts. Try again later.")
+
+
 # ── Matchmaking ──────────────────────────────────────────────
 
 class AlreadyInQueue(AppException):
