@@ -58,7 +58,12 @@ export default function CompanyProblems() {
             "Splunk", "Shopify", "American Express", "Twilio", "TCS", 
             "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
         ],
-        "Maximum Points You Can Obtain from Cards": ALL_COMPANY_NAMES,
+        "Maximum Points You Can Obtain from Cards": [
+            "Salesforce", "JP Morgan", "NVIDIA", "Databricks", 
+            "Swiggy", "Deloitte", "Visa", "Mastercard", 
+            "Morgan Stanley", "Google", "Microsoft", "Amazon", 
+            "Meta", "Apple", "Netflix", "Adobe"
+        ],
     };
 
     const companyProblems = problems.filter((p) => {

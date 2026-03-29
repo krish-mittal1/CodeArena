@@ -115,25 +115,37 @@ async def seed() -> None:
         problem = result.scalar_one_or_none()
 
         description = (
-            "Given N cards arranged in a row, each card has an associated score denoted by "
-            "the cardScore array. Choose exactly k cards. In each step, a card can be chosen "
-            "either from the beginning or the end of the row.\n\n"
-            "Return the maximum score that can be obtained.\n\n"
+            "You are given an integer array cardScore where each element represents points on a card. "
+            "You must pick exactly k cards. In one move, you may pick only from the start or the end of the array.\n\n"
+            "Return the maximum total points possible.\n\n"
             "Example 1\n"
-            "Input : cardScore = [1, 2, 3, 4, 5, 6] , k = 3\n"
-            "Output : 15\n\n"
+            "Input: cardScore = [1, 2, 3, 4, 5, 6], k = 3\n"
+            "Output: 15\n"
+            "Explanation: Pick the last three cards -> 4 + 5 + 6 = 15.\n\n"
             "Example 2\n"
-            "Input : cardScore = [5, 4, 1, 8, 7, 1, 3 ] , k = 3\n"
-            "Output : 12"
+            "Input: cardScore = [5, 4, 1, 8, 7, 1, 3], k = 3\n"
+            "Output: 12\n"
+            "Explanation: Pick 5 (left), 4 (left), and 3 (right)."
+        )
+
+        input_format = (
+            "Line 1: JSON array cardScore (int[])\n"
+            "Line 2: integer k"
+        )
+
+        constraints = (
+            "1 <= cardScore.length <= 10^5\n"
+            "-10^4 <= cardScore[i] <= 10^4\n"
+            "0 <= k <= cardScore.length"
         )
 
         if problem:
             logger.info("Problem exists. Updating metadata and replacing test cases.")
             problem.description = description
             problem.difficulty = Difficulty.MEDIUM
-            problem.input_format = "Line 1: JSON array cardScore (int[])\\nLine 2: integer k"
+            problem.input_format = input_format
             problem.output_format = "Single integer: maximum obtainable score"
-            problem.constraints = "1 <= cardScore.length <= 10^5\\n-10^4 <= cardScore[i] <= 10^4\\n0 <= k <= cardScore.length"
+            problem.constraints = constraints
             problem.method_name = "maxScore"
             problem.parameters = [
                 {"name": "cardScore", "type": "int[]"},
@@ -153,9 +165,9 @@ async def seed() -> None:
                 title=TITLE,
                 description=description,
                 difficulty=Difficulty.MEDIUM,
-                input_format="Line 1: JSON array cardScore (int[])\\nLine 2: integer k",
+                input_format=input_format,
                 output_format="Single integer: maximum obtainable score",
-                constraints="1 <= cardScore.length <= 10^5\\n-10^4 <= cardScore[i] <= 10^4\\n0 <= k <= cardScore.length",
+                constraints=constraints,
                 method_name="maxScore",
                 parameters=[
                     {"name": "cardScore", "type": "int[]"},
