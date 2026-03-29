@@ -2,29 +2,29 @@
 @import "tailwindcss";
 
 @theme {
-    --color-bg-root: #0d1117;
-    --color-bg-primary: #161b22;
-    --color-bg-secondary: #21262d;
-    --color-bg-elevated: #30363d;
-    --color-bg-surface: #21262d;
-    --color-bg-hover: #30363d;
+    --color-bg-root: #171411;
+    --color-bg-primary: #211c18;
+    --color-bg-secondary: #2a241f;
+    --color-bg-elevated: #342c25;
+    --color-bg-surface: #241f1b;
+    --color-bg-hover: #3a3129;
 
-    --color-accent: #58a6ff;
-    --color-accent-hover: #79c0ff;
+    --color-accent: #c96d3a;
+    --color-accent-hover: #d97c48;
 
-    --color-win: #56d364;
-    --color-loss: #f85149;
-    --color-draw: #d29922;
+    --color-win: #71945f;
+    --color-loss: #c65a49;
+    --color-draw: #c39a4f;
 
-    --color-text-primary: #f0f6fc;
-    --color-text-secondary: #c9d1d9;
-    --color-text-muted: #8b949e;
+    --color-text-primary: #f1e6d4;
+    --color-text-secondary: #c6b49b;
+    --color-text-muted: #8d7965;
 
-    --color-border: #30363d;
-    --color-border-hover: #58a6ff;
+    --color-border: #4b3f34;
+    --color-border-hover: #6c5a4b;
 
-    --font-sans: 'Space Grotesk', 'Segoe UI', sans-serif;
-    --font-mono: 'JetBrains Mono', 'Fira Code', 'IBM Plex Mono', monospace;
+    --font-sans: 'Space Grotesk', 'Trebuchet MS', sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
 }
 
 html {
