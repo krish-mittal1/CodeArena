@@ -25,6 +25,8 @@ from typing import Optional
 
 from backend.config import settings
 from backend.core.constants import MatchStatus
+from backend.core.constants import BOT_WAIT_TIME_MAX
+from backend.services import bot_service
 
 
 logger = logging.getLogger(__name__)
@@ -65,6 +67,48 @@ class InMemoryMatchmakingQueue:
                 return {"status": "already_matched", "match_id": mid}
 
             # Currently being paired by poller → treat as in-queue
+        # ── Bot fallback: Check for solo players waiting too long ──
+        async with self._lock:
+            remaining_players = list(self._queue.values())
+        
+        for player in remaining_players:
+            wait_secs = time.time() - player.joined_at
+            if wait_secs >= BOT_WAIT_TIME_MAX:
+                try:
+                    async with session_factory() as db:
+                        bot = await bot_service.get_random_bot_for_elo(db, player.elo)
+                        if bot:
+                            # Remove player from queue and pending
+                            async with self._lock:
+                                self._queue.pop(player.user_id, None)
+                                self._pending_pair.discard(player.user_id)
+                            
+                            # Create match with bot
+                            match_id = await self._create_match(
+                                session_factory, 
+                                player.user_id, player.elo,
+                                str(bot.id), bot.elo,
+                            )
+                            created.append(match_id)
+                            
+                            # Mark both as matched
+                            async with self._lock:
+                                self._active_matches[player.user_id] = str(match_id)
+                                self._active_matches[str(bot.id)] = str(match_id)
+                            
+                            # Notify player
+                            await self._notify_match_found(session_factory, match_id, player.user_id, str(bot.id))
+                            
+                            logger.info(
+                                f"[MM-DEV] BOT FALLBACK: Paired {player.user_id} (ELO={player.elo}) "
+                                f"vs {bot.username} (ELO={bot.elo}) after {wait_secs:.1f}s wait | match={match_id}"
+                            )
+                except Exception as e:
+                    logger.error(f"[MM-DEV] Bot fallback failed for {player.user_id}: {e}", exc_info=True)
+                    # Re-queue player on error
+                    async with self._lock:
+                        if player.user_id not in self._queue:
+                            self._queue[player.user_id] = player
             if uid in self._pending_pair:
                 logger.info(f"[MM-DEV] Player {uid} is being paired, skipping re-add")
                 return {"status": "queued"}
