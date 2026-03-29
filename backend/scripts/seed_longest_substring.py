@@ -1,21 +1,17 @@
 import asyncio
 import json
 import logging
-from uuid import uuid4
+
 from sqlalchemy import select, delete
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from backend.db.base import Base
-from backend.models import Problem, TestCase, Difficulty
-from backend.core.logging_config import setup_logging
+from backend.config import settings
+from backend.core.constants import Difficulty
+from backend.models.problem import Problem
+from backend.models.test_case import TestCase
 
-setup_logging()
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-DATABASE_URL = "postgresql+asyncpg://postgres:password@postgres:5432/codearena"
-engine = create_async_engine(DATABASE_URL, echo=False)
-async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 TITLE = "Longest Substring Without Repeating Characters"
 
@@ -159,7 +155,10 @@ def build_test_cases() -> list:
 
 async def seed():
     """Seed or update the problem."""
-    async with async_session() as db:
+    engine = create_async_engine(settings.database_url, echo=False)
+    session_factory = async_sessionmaker(engine, expire_on_commit=False)
+
+    async with session_factory() as db:
         # Check if problem exists
         result = await db.execute(
             select(Problem).where(Problem.title == TITLE)
