@@ -157,13 +157,17 @@ async def seed() -> None:
             problem.rating = 1200
             problem.is_active = True
 
+            test_cases_deleted = False
             try:
                 await db.execute(delete(TestCase).where(TestCase.problem_id == problem.id))
                 await db.flush()
+                test_cases_deleted = True
             except Exception as e:
                 # If test cases are referenced by submissions, skip deletion to preserve data
-                logger.warning("Could not delete old test cases (referenced by submissions): %s. Keeping existing test cases.", str(e)[:100])
+                logger.warning("Could not delete old test cases (referenced by submissions). Keeping existing ones and updating metadata only.")
                 await db.rollback()
+                # Refresh the session to continue
+                await db.refresh(problem)
         else:
             logger.info("Creating new problem entry.")
             problem = Problem(
@@ -186,13 +190,19 @@ async def seed() -> None:
             )
             db.add(problem)
             await db.flush()
+            test_cases_deleted = True
 
-        test_cases = build_test_cases()
-        for tc in test_cases:
-            db.add(TestCase(problem_id=problem.id, **tc))
-
-        await db.commit()
-        logger.info("Seeded '%s' with %d test cases.", TITLE, len(test_cases))
+        # Only add new test cases if this is a new problem or we successfully deleted old ones
+        if test_cases_deleted:
+            test_cases = build_test_cases()
+            for tc in test_cases:
+                db.add(TestCase(problem_id=problem.id, **tc))
+            await db.commit()
+            logger.info("Seeded '%s' with %d test cases.", TITLE, len(test_cases))
+        else:
+            # Just commit the metadata update
+            await db.commit()
+            logger.info("Updated metadata for '%s'. Test cases kept from previous seeding.", TITLE)
 
     await engine.dispose()
 
