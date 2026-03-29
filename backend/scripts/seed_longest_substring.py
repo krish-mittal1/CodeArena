@@ -35,8 +35,8 @@ def make_case(s: str, order_index: int, is_sample: bool = False) -> dict:
     """Generate test case JSON."""
     output = length_of_longest_substring(s)
     return {
-        "input": json.dumps({"s": s}),
-        "output": json.dumps(output),
+        "input": json.dumps(s),
+        "expected_output": json.dumps(output),
         "order_index": order_index,
         "is_sample": is_sample,
     }
