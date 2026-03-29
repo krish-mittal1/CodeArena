@@ -64,6 +64,11 @@ export default function CompanyProblems() {
             "Morgan Stanley", "Google", "Microsoft", "Amazon", 
             "Meta", "Apple", "Netflix", "Adobe"
         ],
+        "Longest Substring Without Repeating Characters": [
+            "Google", "Microsoft", "Amazon", "Meta", "Apple", 
+            "Netflix", "Adobe", "NVIDIA", "Qualcomm", "Stripe",
+            "Shopify", "Snowflake", "Twilio", "HCL Technologies", "Swiggy"
+        ],
     };
 
     const companyProblems = problems.filter((p) => {
