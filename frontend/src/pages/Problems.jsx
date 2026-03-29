@@ -125,31 +125,11 @@ export default function Problems() {
                                                 <h3 className="text-sm font-bold text-text-primary group-hover:text-accent transition-colors truncate">
                                                     {company.name}
                                                 </h3>
-                                                <span
-                                                    className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider"
-                                                    style={{
-                                                        color: company.color,
-                                                        backgroundColor: `${company.color}12`,
-                                                    }}
-                                                >
-                                                    {company.category}
-                                                </span>
                                             </div>
                                         </div>
                                         <ChevronRight
                                             size={16}
                                             className="text-text-muted group-hover:text-accent transition-all group-hover:translate-x-0.5 shrink-0 mt-1"
-                                        />
-                                    </div>
-
-                                    {/* Footer */}
-                                    <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between">
-                                        <span className="text-[11px] text-text-muted font-medium">
-                                            Questions coming soon
-                                        </span>
-                                        <span
-                                            className="w-2 h-2 rounded-full opacity-50"
-                                            style={{ backgroundColor: company.color }}
                                         />
                                     </div>
                                 </motion.div>

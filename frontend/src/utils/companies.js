@@ -72,7 +72,6 @@ export const COMPANIES = [
     { id: 'cred',          name: 'CRED',            logo: '💳', category: 'Product (India)',   color: '#1E1E1E' },
     { id: 'phonepe',       name: 'PhonePe',         logo: '📞', category: 'Product (India)',   color: '#5F259F' },
     { id: 'meesho',        name: 'Meesho',          logo: '🛍️',  category: 'Product (India)',   color: '#F43397' },
-    { id: 'dream11',       name: 'Dream11',         logo: '🏏', category: 'Product (India)',   color: '#E50000' },
     { id: 'zerodha',       name: 'Zerodha',         logo: '📉', category: 'Product (India)',   color: '#387ED1' },
 
     // ── Product Companies (Global) ──────────────────────
