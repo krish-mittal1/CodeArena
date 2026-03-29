@@ -27,6 +27,77 @@
     --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
 }
 
+/* Theme presets */
+:root,
+[data-theme='default'] {
+    --color-bg-root: #171411;
+    --color-bg-primary: #211c18;
+    --color-bg-secondary: #2a241f;
+    --color-bg-elevated: #342c25;
+    --color-bg-surface: #241f1b;
+    --color-bg-hover: #3a3129;
+
+    --color-accent: #c96d3a;
+    --color-accent-hover: #d97c48;
+
+    --color-win: #71945f;
+    --color-loss: #c65a49;
+    --color-draw: #c39a4f;
+
+    --color-text-primary: #f1e6d4;
+    --color-text-secondary: #c6b49b;
+    --color-text-muted: #8d7965;
+
+    --color-border: #4b3f34;
+    --color-border-hover: #6c5a4b;
+}
+
+[data-theme='dark'] {
+    --color-bg-root: #0f1115;
+    --color-bg-primary: #161a22;
+    --color-bg-secondary: #1d2330;
+    --color-bg-elevated: #252d3d;
+    --color-bg-surface: #1b2130;
+    --color-bg-hover: #2c3650;
+
+    --color-accent: #6ea8ff;
+    --color-accent-hover: #90bcff;
+
+    --color-win: #5bb98b;
+    --color-loss: #ec6f66;
+    --color-draw: #f2c267;
+
+    --color-text-primary: #e7edf8;
+    --color-text-secondary: #b5c0d8;
+    --color-text-muted: #7d8aa6;
+
+    --color-border: #33405a;
+    --color-border-hover: #4b5d81;
+}
+
+[data-theme='light'] {
+    --color-bg-root: #f6f7fb;
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f3f5fa;
+    --color-bg-elevated: #eef1f8;
+    --color-bg-surface: #f8f9fd;
+    --color-bg-hover: #e9edf7;
+
+    --color-accent: #2864dc;
+    --color-accent-hover: #1f52b8;
+
+    --color-win: #1e8f60;
+    --color-loss: #d04545;
+    --color-draw: #a07316;
+
+    --color-text-primary: #131a29;
+    --color-text-secondary: #3f4b67;
+    --color-text-muted: #6c7894;
+
+    --color-border: #d8dfef;
+    --color-border-hover: #c2cbe3;
+}
+
 html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

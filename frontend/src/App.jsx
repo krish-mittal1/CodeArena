@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { useAuthStore } from './stores/authStore';
 import { useWebSocket } from './hooks/useWebSocket';
 import { useBattleStore } from './stores/battleStore';
+import { useThemeStore } from './stores/themeStore';
 import Navbar from './components/layout/Navbar';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import ErrorBoundary from './components/layout/ErrorBoundary';
@@ -34,12 +35,17 @@ const queryClient = new QueryClient({
 function AppRoutes() {
   const { isAuthenticated, isLoading, boot } = useAuthStore();
   const matchId = useBattleStore((s) => s.matchId);
+  const initTheme = useThemeStore((s) => s.initTheme);
 
   useWebSocket();
 
   useEffect(() => {
     boot();
   }, [boot]);
+
+  useEffect(() => {
+    initTheme();
+  }, [initTheme]);
 
   useEffect(() => {
     if (!matchId) return;
@@ -157,16 +163,16 @@ export default function App() {
             position="bottom-right"
             toastOptions={{
               style: {
-                background: '#1c2333',
-                color: '#e6edf3',
+                background: 'var(--color-bg-primary)',
+                color: 'var(--color-text-primary)',
                 borderRadius: '8px',
-                border: '1px solid #30363d',
+                border: '1px solid var(--color-border)',
               },
               success: {
-                iconTheme: { primary: '#22c55e', secondary: '#1c2333' },
+                iconTheme: { primary: '#22c55e', secondary: 'var(--color-bg-primary)' },
               },
               error: {
-                iconTheme: { primary: '#ef4444', secondary: '#1c2333' },
+                iconTheme: { primary: '#ef4444', secondary: 'var(--color-bg-primary)' },
               },
             }}
           />

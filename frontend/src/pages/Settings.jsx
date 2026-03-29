@@ -1,7 +1,17 @@
 import { motion } from 'framer-motion';
 import { Settings as SettingsIcon, User, Bell, Shield, Palette, ChevronRight } from 'lucide-react';
+import { useThemeStore } from '../stores/themeStore';
 
 export default function Settings() {
+    const theme = useThemeStore((s) => s.theme);
+    const setTheme = useThemeStore((s) => s.setTheme);
+
+    const themeOptions = [
+        { id: 'default', label: 'Default', description: 'Current app look and colors' },
+        { id: 'dark', label: 'Dark', description: 'High-contrast dark interface' },
+        { id: 'light', label: 'Light', description: 'Bright and clean light interface' },
+    ];
+
     const containerVariants = {
         hidden: { opacity: 0 },
         show: {
@@ -42,7 +52,39 @@ export default function Settings() {
                     <SettingsSection icon={User} title="Account" description="Manage your username, email, and password" />
                     <SettingsSection icon={Bell} title="Notifications" description="Configure notification preferences" />
                     <SettingsSection icon={Shield} title="Privacy & Security" description="Two-factor authentication and session management" />
-                    <SettingsSection icon={Palette} title="Appearance" description="Theme and display customization" />
+
+                    <motion.div variants={containerVariants} className="paper-card-soft grain-panel p-6 sm:p-7">
+                        <div className="flex items-start gap-4 mb-5">
+                            <div className="w-12 h-12 rounded-[14px_10px_12px_9px] bg-bg-root border border-border flex items-center justify-center shadow-[2px_2px_0_rgba(0,0,0,0.12)]">
+                                <Palette size={20} className="text-accent" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-text-primary tracking-wide">Appearance</h3>
+                                <p className="text-sm text-text-muted font-medium mt-1">Theme and display customization</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {themeOptions.map((option) => {
+                                const active = theme === option.id;
+                                return (
+                                    <button
+                                        key={option.id}
+                                        type="button"
+                                        onClick={() => setTheme(option.id)}
+                                        className={`text-left rounded-[14px_10px_12px_9px] border p-4 transition-colors ${
+                                            active
+                                                ? 'bg-accent/12 border-accent/40 text-text-primary'
+                                                : 'bg-bg-root border-border text-text-secondary hover:border-border-hover hover:bg-bg-hover'
+                                        }`}
+                                    >
+                                        <p className="text-sm font-bold">{option.label}</p>
+                                        <p className="text-xs mt-1 opacity-80">{option.description}</p>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </motion.div>
                 </motion.div>
             </div>
         </div>
