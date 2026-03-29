@@ -20,7 +20,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from backend.config import settings
 from backend.core.logging_config import setup_logging, set_correlation_id, get_correlation_id
 from backend.api.router import api_router
-from backend.dependencies import get_redis, close_redis
+from backend.dependencies import get_redis, close_redis, set_redis_forced_disabled
 from backend.websocket.manager import manager
 from backend.websocket.handlers import (
     handle_player_connection,
@@ -143,6 +143,11 @@ async def lifespan(app: FastAPI):
     # ── Start dev-mode background tasks ────────────────────
     if redis is None:
         try:
+            # Keep runtime behavior consistent with startup decision.
+            # If Redis failed at boot and we start dev workers, do not allow
+            # request-time Redis reconnect to switch endpoints into Redis mode.
+            set_redis_forced_disabled(True)
+
             # Background tasks inherit correlation ID from their creation context
             # Each task will use "-" for correlation ID unless set in their own context
             judge_task = asyncio.create_task(

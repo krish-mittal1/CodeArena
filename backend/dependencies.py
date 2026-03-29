@@ -25,6 +25,18 @@ security_scheme = HTTPBearer()
 _redis: Optional[aioredis.Redis] = None
 _redis_initialized: bool = False
 _redis_retry_after: float = 0.0
+_redis_forced_disabled: bool = False
+
+
+def set_redis_forced_disabled(disabled: bool) -> None:
+    """
+    Force Redis dependency to return None for process lifetime (or until reset).
+
+    Used when startup falls back to dev-mode matchmaking so request-time Redis
+    reconnection cannot switch the app into a mixed mode.
+    """
+    global _redis_forced_disabled
+    _redis_forced_disabled = disabled
 
 
 async def get_redis() -> Optional[aioredis.Redis]:
@@ -36,7 +48,7 @@ async def get_redis() -> Optional[aioredis.Redis]:
     """
     global _redis, _redis_initialized, _redis_retry_after
     
-    if not settings.redis_enabled:
+    if _redis_forced_disabled or not settings.redis_enabled:
         return None
 
     # After a failed attempt, back off briefly instead of reconnecting on every request.
