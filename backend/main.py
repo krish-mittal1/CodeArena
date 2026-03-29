@@ -94,6 +94,15 @@ async def lifespan(app: FastAPI):
     except Exception as exc:
         logger.error(f"Alembic migration failed: {exc}", exc_info=True)
     
+    # ── Seed bot users ────────────────────────────────────
+    try:
+        async with AsyncSessionLocal() as db:
+            from backend.scripts.seed_bots import get_or_create_bots
+            await get_or_create_bots(db, reset=False)
+            logger.info("Bot users initialized")
+    except Exception as exc:
+        logger.error(f"Failed to seed bot users: {exc}", exc_info=True)
+    
     redis = None
     judge_task = None
     matchmaking_task = None
