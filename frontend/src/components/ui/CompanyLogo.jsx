@@ -1,9 +1,14 @@
 import { useState } from 'react';
-import { getCompanyLogoUrl } from '../../utils/companies';
 
 export default function CompanyLogo({ company, size = 'md', roundedClassName = 'rounded-xl', className = '' }) {
-    const [hasError, setHasError] = useState(false);
-    const logoUrl = getCompanyLogoUrl(company.id);
+    const [sourceIndex, setSourceIndex] = useState(0);
+    const logoSources = [
+        `/company-logos/${company.id}.png`,
+        `/company-logos/${company.id}.svg`,
+        `/company-logos/${company.id}.jpg`,
+    ];
+    const activeSource = logoSources[sourceIndex];
+    const hasExhaustedSources = sourceIndex >= logoSources.length;
 
     const sizeClassName = size === 'lg'
         ? 'w-16 h-16'
@@ -16,14 +21,13 @@ export default function CompanyLogo({ company, size = 'md', roundedClassName = '
             className={`${sizeClassName} ${roundedClassName} flex items-center justify-center overflow-hidden shrink-0 ${className}`}
             style={{ backgroundColor: `${company.color}15` }}
         >
-            {logoUrl && !hasError ? (
+            {!hasExhaustedSources ? (
                 <img
-                    src={logoUrl}
+                    src={activeSource}
                     alt={`${company.name} logo`}
                     className="w-[78%] h-[78%] object-contain"
                     loading="lazy"
-                    referrerPolicy="no-referrer"
-                    onError={() => setHasError(true)}
+                    onError={() => setSourceIndex((prev) => prev + 1)}
                 />
             ) : (
                 <span className="text-lg leading-none" aria-hidden="true">{company.logo}</span>
