@@ -63,6 +63,9 @@ export default function Battle() {
                     constraints: data.constraints,
                     time_limit_ms: data.time_limit_ms,
                     memory_limit_mb: data.memory_limit_mb,
+                    method_name: data.method_name,
+                    parameters: data.parameters,
+                    return_type: data.return_type,
                     examples,
                 });
             } catch (e) {

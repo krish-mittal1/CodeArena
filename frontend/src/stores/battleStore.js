@@ -125,5 +125,22 @@ export const useBattleStore = create((set, get) => ({
         matchResult: null,
     }),
 
-    setProblem: (problem) => set({ problem }),
+    setProblem: (problem) => set((state) => {
+        const currentLang = state.language;
+        const currentCode = state.code || '';
+        const genericDefault = CODE_TEMPLATES[currentLang] || '';
+        const previousGenerated = generateBoilerplate(currentLang, state.problem) || genericDefault;
+        const nextGenerated = generateBoilerplate(currentLang, problem) || genericDefault;
+
+        const shouldReplaceCode = (
+            !currentCode ||
+            currentCode === genericDefault ||
+            currentCode === previousGenerated
+        );
+
+        return {
+            problem,
+            code: shouldReplaceCode ? nextGenerated : currentCode,
+        };
+    }),
 }));
