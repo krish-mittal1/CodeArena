@@ -99,6 +99,7 @@ class InMemoryMatchmakingQueue:
         maybe_match_id = None
         removed_from_queue = False
         removed_from_pending = False
+        queue_size = 0
 
         async with self._lock:
             if uid in self._queue:
@@ -108,7 +109,7 @@ class InMemoryMatchmakingQueue:
                 self._pending_pair.discard(uid)
                 removed_from_pending = True
             maybe_match_id = self._active_matches.get(uid)
-            size = len(self._queue)
+            queue_size = len(self._queue)
 
         # Phase 2: (optional) clear stale active match mapping if safe
         if maybe_match_id:
@@ -130,10 +131,13 @@ class InMemoryMatchmakingQueue:
             logger.info(
                 f"[MM-DEV] Player {uid} left matchmaking state "
                 f"(queue={removed_from_queue}, pending={removed_from_pending}). "
-                f"Queue size: {size}"
+                f"Queue size: {queue_size}"
             )
         else:
-            logger.info(f"[MM-DEV] Player {uid} not in queue (idempotent leave). Queue size: {size}")
+            logger.info(
+                f"[MM-DEV] Player {uid} not in queue (idempotent leave). "
+                f"Queue size: {queue_size}"
+            )
 
         return True
 
