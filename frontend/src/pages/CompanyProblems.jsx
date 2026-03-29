@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -10,6 +11,7 @@ import CompanyLogo from '../components/ui/CompanyLogo';
 export default function CompanyProblems() {
     const { companyId } = useParams();
     const navigate = useNavigate();
+    const [difficultyFilter, setDifficultyFilter] = useState('all');
 
     const company = COMPANIES.find((c) => c.id === companyId);
 
@@ -56,7 +58,7 @@ export default function CompanyProblems() {
         ]
     };
 
-    const companyProblems = problems.filter(p => {
+    const companyProblems = problems.filter((p) => {
         let title = p.title;
         // Normalization for the db title
         if (title.includes("Spiral")) title = "Print the matrix in spiral manner";
@@ -64,11 +66,34 @@ export default function CompanyProblems() {
         const mappedCompanies = PROBLEM_COMPANY_MAPPING[title];
         if (!mappedCompanies) return false;
         
-        return mappedCompanies.some(tc => 
+        return mappedCompanies.some((tc) =>
             tc.toLowerCase() === company.name.toLowerCase() || 
             company.name.toLowerCase().includes(tc.toLowerCase())
         );
     });
+
+    const difficultyCounts = useMemo(() => {
+        const counts = { all: companyProblems.length, easy: 0, medium: 0, hard: 0 };
+        companyProblems.forEach((problem) => {
+            const key = (problem.difficulty || '').toLowerCase();
+            if (counts[key] !== undefined) counts[key] += 1;
+        });
+        return counts;
+    }, [companyProblems]);
+
+    const filteredProblems = useMemo(() => {
+        if (difficultyFilter === 'all') return companyProblems;
+        return companyProblems.filter((problem) =>
+            (problem.difficulty || '').toLowerCase() === difficultyFilter
+        );
+    }, [companyProblems, difficultyFilter]);
+
+    const difficultyChips = [
+        { key: 'all', label: 'All' },
+        { key: 'easy', label: 'Easy' },
+        { key: 'medium', label: 'Medium' },
+        { key: 'hard', label: 'Hard' },
+    ];
 
     if (!company) {
         return (
@@ -106,29 +131,24 @@ export default function CompanyProblems() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.05 }}
-                    className="paper-card grain-panel p-8 relative overflow-hidden"
+                    className="paper-card p-6 sm:p-7 border-l-[4px]"
+                    style={{ borderLeftColor: company.color }}
                 >
-                    <div className="flex items-center gap-5">
+                    <div className="flex items-center gap-4 sm:gap-5">
                         <CompanyLogo
                             company={company}
                             size="lg"
-                            roundedClassName="rounded-[22px_18px_20px_14px]"
-                            className="shadow-[3px_3px_0_rgba(0,0,0,0.14)]"
+                            roundedClassName="rounded-xl"
+                            className="shadow-[0_6px_16px_rgba(0,0,0,0.2)]"
                         />
-                        <div>
-                            <p className="editorial-kicker mb-2">Company set</p>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-[-0.05em]">
+                        <div className="min-w-0">
+                            <p className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-semibold">Company</p>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary truncate">
                                 {company.name}
                             </h1>
-                            <span
-                                className="inline-block mt-1 px-3 py-1 rounded-md text-xs font-semibold uppercase tracking-wider"
-                                style={{
-                                    color: company.color,
-                                    backgroundColor: `${company.color}12`,
-                                }}
-                            >
-                                {company.category}
-                            </span>
+                            <p className="text-sm text-text-secondary mt-1">
+                                {companyProblems.length} question{companyProblems.length === 1 ? '' : 's'} mapped for this company
+                            </p>
                         </div>
                     </div>
                 </motion.div>
@@ -137,19 +157,48 @@ export default function CompanyProblems() {
                     <div className="mt-8 flex justify-center"><div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin"></div></div>
                 ) : companyProblems.length > 0 ? (
                     <div className="mt-8 grid gap-4">
-                        <h2 className="text-lg font-bold text-text-primary mb-2">Company Questions</h2>
-                        {companyProblems.map((prob, idx) => (
+                        <div className="paper-card-soft p-4 sm:p-5">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <h2 className="text-lg font-bold text-text-primary">
+                                    Company Questions
+                                </h2>
+                                <div className="flex flex-wrap gap-2">
+                                    {difficultyChips.map((chip) => (
+                                        <button
+                                            key={chip.key}
+                                            onClick={() => setDifficultyFilter(chip.key)}
+                                            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                                                difficultyFilter === chip.key
+                                                    ? 'bg-bg-hover text-text-primary border-border-hover'
+                                                    : 'bg-bg-secondary text-text-secondary border-border hover:text-text-primary'
+                                            }`}
+                                        >
+                                            {chip.label}
+                                            <span className="ml-1.5 opacity-70">{difficultyCounts[chip.key]}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {filteredProblems.length === 0 ? (
+                            <div className="paper-card-soft p-8 text-center">
+                                <p className="text-text-secondary text-sm">
+                                    No {difficultyFilter} questions available for {company.name}.
+                                </p>
+                            </div>
+                        ) : filteredProblems.map((prob, idx) => (
                             <motion.div
                                 key={prob.id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 + idx * 0.05 }}
                                 onClick={() => navigate(`/practice/${prob.id}`)}
-                                className="group relative paper-card-soft grain-panel hover:border-accent/50 p-5 cursor-pointer transition-all overflow-hidden"
+                                className="group relative paper-card-soft hover:border-accent/50 p-5 cursor-pointer transition-colors"
                             >
                                 <div className="flex items-center justify-between z-10 relative">
                                     <div>
-                                        <h3 className="text-base font-bold text-text-primary group-hover:text-accent transition-colors">
+                                        <h3 className="text-base font-bold text-text-primary group-hover:text-accent transition-colors pr-5">
                                             {prob.title}
                                         </h3>
                                         <div className="flex items-center gap-3 mt-2 text-xs text-text-muted">
@@ -158,7 +207,7 @@ export default function CompanyProblems() {
                                             </Badge>
                                         </div>
                                     </div>
-                                    <div className="w-10 h-10 rounded-[14px_11px_13px_9px] bg-accent/10 flex items-center justify-center translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all">
+                                    <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center translate-x-3 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all">
                                         <Play className="w-4 h-4 text-accent translate-x-0.5" />
                                     </div>
                                 </div>
@@ -170,9 +219,9 @@ export default function CompanyProblems() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.15 }}
-                        className="mt-8 paper-card grain-panel p-12 text-center"
+                        className="mt-8 paper-card p-12 text-center"
                     >
-                        <div className="w-16 h-16 mx-auto rounded-[22px_18px_20px_14px] bg-accent/10 flex items-center justify-center mb-5 shadow-[3px_3px_0_rgba(0,0,0,0.14)]">
+                        <div className="w-16 h-16 mx-auto rounded-xl bg-accent/10 flex items-center justify-center mb-5">
                             <Clock size={28} className="text-accent" />
                         </div>
                         <h2 className="text-xl font-bold text-text-primary mb-2">
