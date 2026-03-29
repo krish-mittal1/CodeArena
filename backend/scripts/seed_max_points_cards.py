@@ -157,8 +157,13 @@ async def seed() -> None:
             problem.rating = 1200
             problem.is_active = True
 
-            await db.execute(delete(TestCase).where(TestCase.problem_id == problem.id))
-            await db.flush()
+            try:
+                await db.execute(delete(TestCase).where(TestCase.problem_id == problem.id))
+                await db.flush()
+            except Exception as e:
+                # If test cases are referenced by submissions, skip deletion to preserve data
+                logger.warning("Could not delete old test cases (referenced by submissions): %s. Keeping existing test cases.", str(e)[:100])
+                await db.rollback()
         else:
             logger.info("Creating new problem entry.")
             problem = Problem(
