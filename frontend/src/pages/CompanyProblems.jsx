@@ -12,6 +12,7 @@ export default function CompanyProblems() {
     const { companyId } = useParams();
     const navigate = useNavigate();
     const [difficultyFilter, setDifficultyFilter] = useState('all');
+    const [topicFilter, setTopicFilter] = useState('all');
 
     const company = COMPANIES.find((c) => c.id === companyId);
 
@@ -20,10 +21,10 @@ export default function CompanyProblems() {
         queryFn: problemApi.getAll,
     });
 
-    const ALL_COMPANY_NAMES = COMPANIES.map((c) => c.name);
-
-    const PROBLEM_COMPANY_MAPPING = {
-        "Print the matrix in spiral manner": [
+    const PROBLEM_METADATA = {
+        "Print the matrix in spiral manner": {
+            topic: "Matrix",
+            companies: [
             "Visa", "Reddit", "Twilio", "Square", "Nutanix",
             "Flipkart", "Target", "AMD", "American Express",
             "Alibaba", "Unity Technologies", "Activision Blizzard",
@@ -32,8 +33,11 @@ export default function CompanyProblems() {
             "Philips Healthcare", "Oracle", "Ubisoft", "Uber",
             "JPMorgan Chase", "IBM", "TCS", "Cognizant",
             "Accenture", "Infosys", "Capgemini", "Wipro"
-        ],
-        "3 Sum": [
+            ],
+        },
+        "3 Sum": {
+            topic: "Two Pointers",
+            companies: [
             "Teladoc Health", "Oracle", "DoorDash", "Nutanix", 
             "Epic Games", "ARM", "Wayfair", "Robinhood", 
             "Cloudflare", "Mastercard", "Optum", "Stripe", 
@@ -42,14 +46,20 @@ export default function CompanyProblems() {
             "Johnson & Johnson", "Byju's", "Flipkart", "NVIDIA", 
             "Google", "Microsoft", "Amazon", "Meta", "Apple", 
             "Netflix", "Adobe"
-        ],
-        "Sort an array of 0's 1's and 2's": [
+            ],
+        },
+        "Sort an array of 0's 1's and 2's": {
+            topic: "Sorting",
+            companies: [
             "Flipkart", "JP Morgan", "Swiggy", "Qualcomm", 
             "NVIDIA", "PwC", "Morgan Stanley", "KPMG", 
             "Google", "Microsoft", "Amazon", "Meta", 
             "Apple", "Netflix", "Adobe"
-        ],
-        "Find Minimum in Rotated Sorted Array": [
+            ],
+        },
+        "Find Minimum in Rotated Sorted Array": {
+            topic: "Binary Search",
+            companies: [
             "Ernst & Young", "Nutanix", "Red Hat", "Optum", 
             "HashiCorp", "Philips Healthcare", "DoorDash", "Target",
             "Ubisoft", "Zomato", "Airbnb", "Reddit", "KPMG", 
@@ -57,33 +67,49 @@ export default function CompanyProblems() {
             "Databricks", "IBM", "Uber", "Siemens Healthineers", 
             "Splunk", "Shopify", "American Express", "Twilio", "TCS", 
             "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
-        ],
-        "Maximum Points You Can Obtain from Cards": [
+            ],
+        },
+        "Maximum Points You Can Obtain from Cards": {
+            topic: "Sliding Window",
+            companies: [
             "Salesforce", "JP Morgan", "NVIDIA", "Databricks", 
             "Swiggy", "Deloitte", "Visa", "Mastercard", 
             "Morgan Stanley", "Google", "Microsoft", "Amazon", 
             "Meta", "Apple", "Netflix", "Adobe"
-        ],
-        "Longest Substring Without Repeating Characters": [
+            ],
+        },
+        "Longest Substring Without Repeating Characters": {
+            topic: "Sliding Window",
+            companies: [
             "Google", "Microsoft", "Amazon", "Meta", "Apple", 
             "Netflix", "Adobe", "NVIDIA", "Qualcomm", "Stripe",
             "Shopify", "Snowflake", "Twilio", "HCL Technologies", "Swiggy"
-        ],
+            ],
+        },
     };
 
-    const companyProblems = problems.filter((p) => {
-        let title = p.title;
-        // Normalization for the db title
-        if (title.includes("Spiral")) title = "Print the matrix in spiral manner";
-        
-        const mappedCompanies = PROBLEM_COMPANY_MAPPING[title];
-        if (!mappedCompanies) return false;
-        
-        return mappedCompanies.some((tc) =>
-            tc.toLowerCase() === company.name.toLowerCase() || 
-            company.name.toLowerCase().includes(tc.toLowerCase())
-        );
-    });
+    const companyProblems = problems
+        .map((p) => {
+            let title = p.title;
+            // Normalization for the db title
+            if (title.includes("Spiral")) title = "Print the matrix in spiral manner";
+
+            const metadata = PROBLEM_METADATA[title];
+            if (!metadata) return null;
+
+            const isMappedToCompany = metadata.companies.some((tc) =>
+                tc.toLowerCase() === company.name.toLowerCase() ||
+                company.name.toLowerCase().includes(tc.toLowerCase())
+            );
+
+            if (!isMappedToCompany) return null;
+
+            return {
+                ...p,
+                topic: metadata.topic,
+            };
+        })
+        .filter(Boolean);
 
     const difficultyCounts = useMemo(() => {
         const counts = { all: companyProblems.length, easy: 0, medium: 0, hard: 0 };
@@ -95,11 +121,31 @@ export default function CompanyProblems() {
     }, [companyProblems]);
 
     const filteredProblems = useMemo(() => {
-        if (difficultyFilter === 'all') return companyProblems;
-        return companyProblems.filter((problem) =>
-            (problem.difficulty || '').toLowerCase() === difficultyFilter
-        );
-    }, [companyProblems, difficultyFilter]);
+        return companyProblems.filter((problem) => {
+            const matchesDifficulty =
+                difficultyFilter === 'all' ||
+                (problem.difficulty || '').toLowerCase() === difficultyFilter;
+            const matchesTopic =
+                topicFilter === 'all' ||
+                (problem.topic || '').toLowerCase() === topicFilter;
+            return matchesDifficulty && matchesTopic;
+        });
+    }, [companyProblems, difficultyFilter, topicFilter]);
+
+    const topicOptions = useMemo(() => {
+        const uniqueTopics = [...new Set(companyProblems.map((problem) => problem.topic).filter(Boolean))];
+        return ['all', ...uniqueTopics.map((topic) => topic.toLowerCase())];
+    }, [companyProblems]);
+
+    const topicCounts = useMemo(() => {
+        const counts = { all: companyProblems.length };
+        companyProblems.forEach((problem) => {
+            const key = (problem.topic || '').toLowerCase();
+            if (!key) return;
+            counts[key] = (counts[key] || 0) + 1;
+        });
+        return counts;
+    }, [companyProblems]);
 
     const difficultyChips = [
         { key: 'all', label: 'All' },
@@ -192,12 +238,29 @@ export default function CompanyProblems() {
                                     ))}
                                 </div>
                             </div>
+
+                            <div className="mt-3 flex flex-wrap gap-2">
+                                {topicOptions.map((topicKey) => (
+                                    <button
+                                        key={topicKey}
+                                        onClick={() => setTopicFilter(topicKey)}
+                                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                                            topicFilter === topicKey
+                                                ? 'bg-accent/15 text-accent border-accent/40'
+                                                : 'bg-bg-secondary text-text-secondary border-border hover:text-text-primary'
+                                        }`}
+                                    >
+                                        {topicKey === 'all' ? 'All Topics' : topicKey.split(' ').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ')}
+                                        <span className="ml-1.5 opacity-70">{topicCounts[topicKey] || 0}</span>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {filteredProblems.length === 0 ? (
                             <div className="paper-card-soft p-8 text-center">
                                 <p className="text-text-secondary text-sm">
-                                    No {difficultyFilter} questions available for {company.name}.
+                                    No problems found for the selected filters in {company.name}.
                                 </p>
                             </div>
                         ) : filteredProblems.map((prob, idx) => (
@@ -218,6 +281,11 @@ export default function CompanyProblems() {
                                             <Badge color={prob.difficulty === 'easy' ? 'green' : prob.difficulty === 'medium' ? 'yellow' : 'red'}>
                                                 {prob.difficulty}
                                             </Badge>
+                                            {prob.topic && (
+                                                <span className="px-2 py-1 rounded-full border border-border text-text-secondary">
+                                                    {prob.topic}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center translate-x-3 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all">
