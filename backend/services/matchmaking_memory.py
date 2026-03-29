@@ -24,8 +24,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from typing import Optional
 
 from backend.config import settings
-from backend.core.constants import MatchStatus
-from backend.core.constants import BOT_WAIT_TIME_MAX
+from backend.core.constants import MatchStatus, BOT_WAIT_TIME_MAX
 from backend.services import bot_service
 
 
@@ -67,48 +66,6 @@ class InMemoryMatchmakingQueue:
                 return {"status": "already_matched", "match_id": mid}
 
             # Currently being paired by poller → treat as in-queue
-        # ── Bot fallback: Check for solo players waiting too long ──
-        async with self._lock:
-            remaining_players = list(self._queue.values())
-        
-        for player in remaining_players:
-            wait_secs = time.time() - player.joined_at
-            if wait_secs >= BOT_WAIT_TIME_MAX:
-                try:
-                    async with session_factory() as db:
-                        bot = await bot_service.get_random_bot_for_elo(db, player.elo)
-                        if bot:
-                            # Remove player from queue and pending
-                            async with self._lock:
-                                self._queue.pop(player.user_id, None)
-                                self._pending_pair.discard(player.user_id)
-                            
-                            # Create match with bot
-                            match_id = await self._create_match(
-                                session_factory, 
-                                player.user_id, player.elo,
-                                str(bot.id), bot.elo,
-                            )
-                            created.append(match_id)
-                            
-                            # Mark both as matched
-                            async with self._lock:
-                                self._active_matches[player.user_id] = str(match_id)
-                                self._active_matches[str(bot.id)] = str(match_id)
-                            
-                            # Notify player
-                            await self._notify_match_found(session_factory, match_id, player.user_id, str(bot.id))
-                            
-                            logger.info(
-                                f"[MM-DEV] BOT FALLBACK: Paired {player.user_id} (ELO={player.elo}) "
-                                f"vs {bot.username} (ELO={bot.elo}) after {wait_secs:.1f}s wait | match={match_id}"
-                            )
-                except Exception as e:
-                    logger.error(f"[MM-DEV] Bot fallback failed for {player.user_id}: {e}", exc_info=True)
-                    # Re-queue player on error
-                    async with self._lock:
-                        if player.user_id not in self._queue:
-                            self._queue[player.user_id] = player
             if uid in self._pending_pair:
                 logger.info(f"[MM-DEV] Player {uid} is being paired, skipping re-add")
                 return {"status": "queued"}
@@ -225,7 +182,7 @@ class InMemoryMatchmakingQueue:
         """
         # ── Phase 1: find pairs atomically ────────────────
         async with self._lock:
-            if len(self._queue) < 2:
+            if len(self._queue) == 0:
                 return []
 
             players = sorted(self._queue.values(), key=lambda e: e.joined_at)
@@ -256,20 +213,18 @@ class InMemoryMatchmakingQueue:
                     matched_ids.add(player.user_id)
                     matched_ids.add(best.user_id)
 
-            if not pairs:
-                return []
+            # Atomically: remove pair candidates from queue, mark as pending
+            if pairs:
+                for p1, p2 in pairs:
+                    self._queue.pop(p1.user_id, None)
+                    self._queue.pop(p2.user_id, None)
+                    self._pending_pair.add(p1.user_id)
+                    self._pending_pair.add(p2.user_id)
 
-            # Atomically: remove from queue, mark as pending
-            for p1, p2 in pairs:
-                self._queue.pop(p1.user_id, None)
-                self._queue.pop(p2.user_id, None)
-                self._pending_pair.add(p1.user_id)
-                self._pending_pair.add(p2.user_id)
-
-            logger.info(
-                f"[MM-DEV] Found {len(pairs)} pair(s), "
-                f"removed from queue, marked pending"
-            )
+                logger.info(
+                    f"[MM-DEV] Found {len(pairs)} pair(s), "
+                    f"removed from queue, marked pending"
+                )
 
         # ── Phase 2: create matches in DB (outside lock) ──
         created: list[uuid.UUID] = []
@@ -301,6 +256,68 @@ class InMemoryMatchmakingQueue:
                     self._pending_pair.discard(p1.user_id)
                     self._pending_pair.discard(p2.user_id)
                 logger.error(f"[MM-DEV] Match creation failed: {e}", exc_info=True)
+
+        # ── Phase 4: bot fallback for long-wait solo players ──
+        async with self._lock:
+            bot_candidates = list(self._queue.values())
+
+        for player in bot_candidates:
+            wait_secs = time.time() - player.joined_at
+            if wait_secs < BOT_WAIT_TIME_MAX:
+                continue
+
+            # Reserve player atomically before DB work
+            async with self._lock:
+                current = self._queue.get(player.user_id)
+                if current is None:
+                    continue
+                if (time.time() - current.joined_at) < BOT_WAIT_TIME_MAX:
+                    continue
+                self._queue.pop(player.user_id, None)
+                self._pending_pair.add(player.user_id)
+
+            try:
+                async with session_factory() as db:
+                    bot = await bot_service.get_random_bot_for_elo(db, current.elo)
+
+                if bot is None:
+                    async with self._lock:
+                        self._pending_pair.discard(player.user_id)
+                        self._queue[player.user_id] = current
+                    logger.warning(f"[MM-DEV] No bot available for {player.user_id}; re-queued")
+                    continue
+
+                match_id = await self._create_match(
+                    session_factory,
+                    current.user_id,
+                    current.elo,
+                    str(bot.id),
+                    bot.elo,
+                )
+                created.append(match_id)
+
+                async with self._lock:
+                    self._pending_pair.discard(current.user_id)
+                    self._active_matches[current.user_id] = str(match_id)
+                    self._active_matches[str(bot.id)] = str(match_id)
+
+                await self._notify_match_found(
+                    session_factory,
+                    match_id,
+                    current.user_id,
+                    str(bot.id),
+                )
+
+                logger.info(
+                    f"[MM-DEV] BOT FALLBACK: Paired {current.user_id} (ELO={current.elo}) "
+                    f"vs {bot.username} (ELO={bot.elo}) after {wait_secs:.1f}s wait | match={match_id}"
+                )
+            except Exception as e:
+                async with self._lock:
+                    self._pending_pair.discard(player.user_id)
+                    if player.user_id not in self._queue:
+                        self._queue[player.user_id] = player
+                logger.error(f"[MM-DEV] Bot fallback failed for {player.user_id}: {e}", exc_info=True)
 
         return created
 
