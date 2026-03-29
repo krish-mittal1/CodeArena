@@ -86,6 +86,14 @@ export default function CompanyProblems() {
             "Shopify", "Snowflake", "Twilio", "HCL Technologies", "Swiggy"
             ],
         },
+        "Max Consecutive Ones III": {
+            topic: "Sliding Window",
+            companies: [
+                "HCL Technologies", "JP Morgan", "Zomato", "NVIDIA", "Morgan Stanley",
+                "Goldman Sachs", "KPMG", "IBM", "Google", "Microsoft",
+                "Amazon", "Meta", "Apple", "Netflix", "Adobe"
+            ],
+        },
     };
 
     const companyProblems = problems
