@@ -2,8 +2,8 @@ import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 
 const variants = {
-    primary: 'bg-accent hover:bg-accent-hover text-white border border-[#e29a6c] shadow-[0_8px_18px_rgba(0,0,0,0.2)]',
-    secondary: 'bg-bg-elevated hover:bg-bg-hover text-text-primary border border-border shadow-[0_6px_14px_rgba(0,0,0,0.14)]',
+    primary: 'bg-accent hover:bg-accent-hover text-white border border-accent-hover shadow-md',
+    secondary: 'bg-bg-elevated hover:bg-bg-hover text-text-primary border border-border',
     danger: 'bg-loss/15 hover:bg-loss/25 text-loss border border-loss/35',
     ghost: 'hover:bg-bg-elevated text-text-secondary hover:text-text-primary border border-transparent',
 };
@@ -16,10 +16,8 @@ const sizes = {
 
 const Button = forwardRef(({ variant = 'primary', size = 'md', children, className = '', disabled, loading, ...props }, ref) => {
     return (
-        <motion.button
+        <button
             ref={ref}
-            whileHover={{ scale: disabled ? 1 : 1.02 }}
-            whileTap={{ scale: disabled ? 1 : 0.98 }}
             className={`
         inline-flex items-center justify-center gap-2 font-semibold tracking-[0.01em]
         transition-all duration-200 cursor-pointer
@@ -36,7 +34,7 @@ const Button = forwardRef(({ variant = 'primary', size = 'md', children, classNa
                 </svg>
             )}
             {children}
-        </motion.button>
+        </button>
     );
 });
 
