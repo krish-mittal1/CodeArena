@@ -20,6 +20,8 @@ export default function CompanyProblems() {
         queryFn: problemApi.getAll,
     });
 
+    const ALL_COMPANY_NAMES = COMPANIES.map((c) => c.name);
+
     const PROBLEM_COMPANY_MAPPING = {
         "Print the matrix in spiral manner": [
             "Visa", "Reddit", "Twilio", "Square", "Nutanix",
@@ -55,7 +57,8 @@ export default function CompanyProblems() {
             "Databricks", "IBM", "Uber", "Siemens Healthineers", 
             "Splunk", "Shopify", "American Express", "Twilio", "TCS", 
             "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
-        ]
+        ],
+        "Maximum Points You Can Obtain from Cards": ALL_COMPANY_NAMES,
     };
 
     const companyProblems = problems.filter((p) => {
@@ -131,7 +134,7 @@ export default function CompanyProblems() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.05 }}
-                    className="paper-card p-6 sm:p-7 border-l-[4px]"
+                    className="paper-card p-6 sm:p-7 border-l-4"
                     style={{ borderLeftColor: company.color }}
                 >
                     <div className="flex items-center gap-4 sm:gap-5">
