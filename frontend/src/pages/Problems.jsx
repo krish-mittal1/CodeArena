@@ -5,6 +5,7 @@ import {
     Search, Building2, ChevronRight, Briefcase,
 } from 'lucide-react';
 import { COMPANIES, COMPANY_CATEGORIES } from '../utils/companies';
+import CompanyLogo from '../components/ui/CompanyLogo';
 
 export default function Problems() {
     const navigate = useNavigate();
@@ -114,13 +115,12 @@ export default function Problems() {
                                 >
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-3">
-                                            {/* Logo / Emoji */}
-                                            <div
-                                                className="w-11 h-11 rounded-[16px_12px_14px_10px] flex items-center justify-center text-xl shrink-0 transition-transform group-hover:scale-110 shadow-[2px_2px_0_rgba(0,0,0,0.12)]"
-                                                style={{ backgroundColor: `${company.color}15` }}
-                                            >
-                                                {company.logo}
-                                            </div>
+                                            <CompanyLogo
+                                                company={company}
+                                                size="md"
+                                                roundedClassName="rounded-[16px_12px_14px_10px]"
+                                                className="transition-transform group-hover:scale-110 shadow-[2px_2px_0_rgba(0,0,0,0.12)]"
+                                            />
                                             <div className="min-w-0">
                                                 <h3 className="text-sm font-bold text-text-primary group-hover:text-accent transition-colors truncate">
                                                     {company.name}

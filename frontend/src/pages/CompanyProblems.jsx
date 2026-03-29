@@ -5,6 +5,7 @@ import { ArrowLeft, Building2, Clock, Code2, Play } from 'lucide-react';
 import { COMPANIES } from '../utils/companies';
 import { problemApi } from '../api/auth';
 import Badge from '../components/ui/Badge';
+import CompanyLogo from '../components/ui/CompanyLogo';
 
 export default function CompanyProblems() {
     const { companyId } = useParams();
@@ -108,12 +109,12 @@ export default function CompanyProblems() {
                     className="paper-card grain-panel p-8 relative overflow-hidden"
                 >
                     <div className="flex items-center gap-5">
-                        <div
-                            className="w-16 h-16 rounded-[22px_18px_20px_14px] flex items-center justify-center text-3xl shrink-0 shadow-[3px_3px_0_rgba(0,0,0,0.14)]"
-                            style={{ backgroundColor: `${company.color}15` }}
-                        >
-                            {company.logo}
-                        </div>
+                        <CompanyLogo
+                            company={company}
+                            size="lg"
+                            roundedClassName="rounded-[22px_18px_20px_14px]"
+                            className="shadow-[3px_3px_0_rgba(0,0,0,0.14)]"
+                        />
                         <div>
                             <p className="editorial-kicker mb-2">Company set</p>
                             <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-[-0.05em]">
