@@ -48,6 +48,7 @@ export const problemApi = {
 };
 
 export const practiceApi = {
+    run: (data) => api.post('/practice/run', data).then((r) => r.data),
     submit: (data) => api.post('/practice/submit', data).then((r) => r.data),
     getSubmissions: (problemId) => api.get(`/practice/submissions/${problemId}`).then((r) => r.data),
     analyze: (data) => api.post('/practice/analyze', data).then((r) => r.data),

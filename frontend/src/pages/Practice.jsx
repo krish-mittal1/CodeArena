@@ -28,6 +28,7 @@ export default function Practice() {
     const [language, setLanguage] = useState('python');
     const [code, setCode] = useState(CODE_TEMPLATES['python'] || '');
     const [verdict, setVerdict] = useState(null);
+    const [runResult, setRunResult] = useState(null);
     const [polling, setPolling] = useState(false);
     const [submissionId, setSubmissionId] = useState(null);
 
@@ -104,6 +105,24 @@ export default function Practice() {
         },
     });
 
+    const runMutation = useMutation({
+        mutationFn: (data) => practiceApi.run(data),
+        onSuccess: (data) => {
+            setRunResult(data);
+        },
+        onError: (err) => {
+            setRunResult({
+                status: 'error',
+                passed_test_cases: 0,
+                total_test_cases: 0,
+                execution_time_ms: 0,
+                memory_used_kb: 0,
+                cases: [],
+                message: err.response?.data?.detail || 'Run failed',
+            });
+        },
+    });
+
     // Poll for results
     useEffect(() => {
         if (!polling || !submissionId) return;
@@ -132,9 +151,20 @@ export default function Practice() {
     const handleSubmit = () => {
         if (submitMutation.isPending || !code.trim()) return;
         setVerdict(null);
+        setRunResult(null);
         setAiAnalysis(null);
         setShowAIPanel(false);
         submitMutation.mutate({
+            problem_id: problemId,
+            language,
+            code,
+        });
+    };
+
+    const handleRun = () => {
+        if (runMutation.isPending || submitMutation.isPending || polling || !code.trim()) return;
+        setRunResult({ status: 'running', passed_test_cases: 0, total_test_cases: problem.sample_cases?.length || 0, cases: [] });
+        runMutation.mutate({
             problem_id: problemId,
             language,
             code,
@@ -313,27 +343,6 @@ export default function Practice() {
                                 <RotateCcw className="w-3.5 h-3.5" />
                                 Reset
                             </button>
-                            <button
-                                onClick={handleSubmit}
-                                disabled={submitMutation.isPending || polling || !code.trim()}
-                                className={`flex items-center gap-1.5 px-4 py-1 rounded-[12px_9px_11px_8px] text-xs font-bold transition-all ${
-                                    !submitMutation.isPending && !polling && code.trim()
-                                        ? 'bg-accent hover:bg-accent-hover text-white border border-[#e29a6c] shadow-[3px_3px_0_rgba(0,0,0,0.16)]'
-                                        : 'bg-bg-surface border border-border text-text-muted cursor-not-allowed'
-                                }`}
-                            >
-                                {submitMutation.isPending || polling ? (
-                                    <>
-                                        <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
-                                        Running
-                                    </>
-                                ) : (
-                                    <>
-                                        <Play className="w-3.5 h-3.5 fill-current" />
-                                        Submit
-                                    </>
-                                )}
-                            </button>
                         </div>
                     </div>
 
@@ -365,6 +374,118 @@ export default function Practice() {
                             }}
                         />
                     </div>
+
+                    {/* Bottom Action Bar (LeetCode-style) */}
+                    <div className="shrink-0 border-t border-border bg-bg-primary px-4 py-3">
+                        <div className="flex items-center justify-end gap-2">
+                            <button
+                                onClick={handleRun}
+                                disabled={runMutation.isPending || submitMutation.isPending || polling || !code.trim()}
+                                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[12px_9px_11px_8px] text-xs font-bold transition-all ${
+                                    !runMutation.isPending && !submitMutation.isPending && !polling && code.trim()
+                                        ? 'bg-bg-surface hover:bg-bg-hover text-text-primary border border-border-hover'
+                                        : 'bg-bg-surface border border-border text-text-muted cursor-not-allowed'
+                                }`}
+                            >
+                                {runMutation.isPending ? (
+                                    <>
+                                        <span className="w-3.5 h-3.5 border-2 border-text-muted/30 border-t-text-primary rounded-full animate-spin"></span>
+                                        Running Samples
+                                    </>
+                                ) : (
+                                    <>
+                                        <Play className="w-3.5 h-3.5" />
+                                        Run
+                                    </>
+                                )}
+                            </button>
+
+                            <button
+                                onClick={handleSubmit}
+                                disabled={submitMutation.isPending || polling || runMutation.isPending || !code.trim()}
+                                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[12px_9px_11px_8px] text-xs font-bold transition-all ${
+                                    !submitMutation.isPending && !polling && !runMutation.isPending && code.trim()
+                                        ? 'bg-accent hover:bg-accent-hover text-white border border-[#e29a6c] shadow-[3px_3px_0_rgba(0,0,0,0.16)]'
+                                        : 'bg-bg-surface border border-border text-text-muted cursor-not-allowed'
+                                }`}
+                            >
+                                {submitMutation.isPending || polling ? (
+                                    <>
+                                        <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                                        Submitting
+                                    </>
+                                ) : (
+                                    <>
+                                        <Play className="w-3.5 h-3.5 fill-current" />
+                                        Submit
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Run Result Panel (samples only) */}
+                    {runResult && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="shrink-0 border-t border-border bg-bg-primary px-4 py-3"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <span
+                                        className="text-sm font-bold"
+                                        style={{ color: VERDICTS[runResult.status]?.color || 'var(--text-primary)' }}
+                                    >
+                                        Run: {VERDICTS[runResult.status]?.label || runResult.status}
+                                    </span>
+                                    {runResult.message && (
+                                        <span className="text-xs text-loss">{runResult.message}</span>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-4 text-xs text-text-secondary">
+                                    <span className="font-mono">
+                                        {runResult.passed_test_cases ?? 0}/{runResult.total_test_cases ?? 0} sample cases passed
+                                    </span>
+                                    {runResult.execution_time_ms != null && (
+                                        <span className="font-mono">{runResult.execution_time_ms}ms</span>
+                                    )}
+                                    {runResult.memory_used_kb != null && (
+                                        <span className="font-mono">{(runResult.memory_used_kb / 1024).toFixed(1)}MB</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {runResult.cases?.length > 0 && (
+                                <div className="mt-3 space-y-2 max-h-56 overflow-auto pr-1">
+                                    {runResult.cases.map((tc, idx) => (
+                                        <div key={`${tc.order_index}-${idx}`} className="bg-bg-root rounded-[12px_9px_11px_8px] p-3 border border-border">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-text-muted">Sample #{idx + 1}</p>
+                                                <span className="text-xs font-semibold" style={{ color: VERDICTS[tc.verdict]?.color || 'var(--text-primary)' }}>
+                                                    {VERDICTS[tc.verdict]?.label || tc.verdict}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                <div>
+                                                    <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Input</p>
+                                                    <pre className="text-xs text-text-primary font-mono whitespace-pre-wrap">{tc.input}</pre>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Expected</p>
+                                                    <pre className="text-xs text-text-primary font-mono whitespace-pre-wrap">{tc.expected_output}</pre>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Actual</p>
+                                                    <pre className="text-xs font-mono whitespace-pre-wrap text-text-primary">{tc.error_output || tc.actual_output || 'No output'}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </motion.div>
+                    )}
 
                     {/* Verdict Panel */}
                     {verdict && (
