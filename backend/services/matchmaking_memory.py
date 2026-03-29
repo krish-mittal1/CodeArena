@@ -76,13 +76,13 @@ class InMemoryMatchmakingQueue:
                 return {"status": "queued"}
 
             self._queue[uid] = QueueEntry(user_id=uid, elo=elo)
-            size = len(self._queue)
+            queued_size = len(self._queue)
 
-        logger.info(
-            f"[MM-DEV] Player {uid} joined queue (ELO={elo}). "
-            f"Queue size: {size}"
-        )
-        return {"status": "queued"}
+            logger.info(
+                f"[MM-DEV] Player {uid} joined queue (ELO={elo}). "
+                f"Queue size: {queued_size}"
+            )
+            return {"status": "queued"}
 
     async def leave_queue(self, user_id: uuid.UUID) -> bool:
         """
