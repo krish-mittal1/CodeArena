@@ -101,6 +101,13 @@ export default function CompanyProblems() {
                 "Amazon", "Meta", "Apple", "Netflix", "Adobe"
             ],
         },
+        "Longest Substring With At Most K Distinct Characters": {
+            topic: "Sliding Window",
+            companies: [
+                "Morgan Stanley", "Swiggy", "Intel", "PwC", "Oracle", "Deloitte",
+                "Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix", "Adobe"
+            ],
+        },
     };
 
     const companyProblems = problems
