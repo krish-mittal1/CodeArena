@@ -26,7 +26,7 @@ TITLE = "Traversal in Linked List"
 
 
 def traverse_linked_list(values: list[int]) -> list[int]:
-    """Reference solver. Input is array representation of linked list values."""
+    """Reference solver using array form of the linked-list values."""
     return values
 
 
@@ -114,21 +114,24 @@ async def seed() -> None:
             "Given the head of a singly linked list, traverse the entire linked list and "
             "return its elements in an array in the same order.\n\n"
             "Example 1\n"
-            "Input: linkedList = [5, 4, 3, 1, 0]\n"
+            "Input: head = [5, 4, 3, 1, 0]\n"
             "Output: [5, 4, 3, 1, 0]\n\n"
             "Example 2\n"
-            "Input: linkedList = [1]\n"
+            "Input: head = [1]\n"
             "Output: [1]\n\n"
             "Example 3\n"
-            "Input: linkedList = [0, 2, 5]\n"
+            "Input: head = [0, 2, 5]\n"
             "Output: [0, 2, 5]"
         )
 
-        input_format = "Line 1: JSON array linkedList representing node values in order"
+        input_format = (
+            "Line 1: JSON array representing linked-list node values in order. "
+            "The runner converts this array into head: ListNode before calling your method."
+        )
         output_format = "JSON array containing all node values in traversal order"
         constraints = (
-            "1 <= linkedList.length <= 10^5\n"
-            "-10^9 <= linkedList[i] <= 10^9"
+            "1 <= number of nodes <= 10^5\n"
+            "-10^9 <= Node.val <= 10^9"
         )
 
         if problem:
@@ -139,7 +142,7 @@ async def seed() -> None:
             problem.output_format = output_format
             problem.constraints = constraints
             problem.method_name = "traverseLinkedList"
-            problem.parameters = [{"name": "linkedList", "type": "int[]"}]
+            problem.parameters = [{"name": "head", "type": "ListNode"}]
             problem.return_type = "int[]"
             problem.time_limit_ms = 1000
             problem.memory_limit_mb = 256
@@ -168,7 +171,7 @@ async def seed() -> None:
                 output_format=output_format,
                 constraints=constraints,
                 method_name="traverseLinkedList",
-                parameters=[{"name": "linkedList", "type": "int[]"}],
+                parameters=[{"name": "head", "type": "ListNode"}],
                 return_type="int[]",
                 time_limit_ms=1000,
                 memory_limit_mb=256,

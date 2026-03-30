@@ -74,22 +74,22 @@ const TYPE_MAPS = {
     python: {
         'int': 'int', 'int[]': 'List[int]', 'int[][]': 'List[List[int]]',
         'str': 'str', 'str[]': 'List[str]', 'bool': 'bool',
-        'float': 'float', 'float[]': 'List[float]',
+        'float': 'float', 'float[]': 'List[float]', 'ListNode': "Optional['ListNode']",
     },
     cpp: {
         'int': 'int', 'int[]': 'vector<int>', 'int[][]': 'vector<vector<int>>',
         'str': 'string', 'str[]': 'vector<string>', 'bool': 'bool',
-        'float': 'double', 'float[]': 'vector<double>',
+        'float': 'double', 'float[]': 'vector<double>', 'ListNode': 'ListNode*',
     },
     java: {
         'int': 'int', 'int[]': 'int[]', 'int[][]': 'int[][]',
         'str': 'String', 'str[]': 'String[]', 'bool': 'boolean',
-        'float': 'double', 'float[]': 'double[]',
+        'float': 'double', 'float[]': 'double[]', 'ListNode': 'ListNode',
     },
     javascript: {
         'int': 'number', 'int[]': 'number[]', 'int[][]': 'number[][]',
         'str': 'string', 'str[]': 'string[]', 'bool': 'boolean',
-        'float': 'number', 'float[]': 'number[]',
+        'float': 'number', 'float[]': 'number[]', 'ListNode': 'ListNode',
     },
 };
 
@@ -104,30 +104,62 @@ export function generateBoilerplate(language, problem) {
 
     const { method_name, parameters, return_type } = problem;
     const map = TYPE_MAPS[language] || TYPE_MAPS.python;
+    const usesListNode = parameters.some(p => p.type === 'ListNode') || return_type === 'ListNode';
+    const listNodeParamName = parameters.find(p => p.type === 'ListNode')?.name || 'head';
+    const isTraversalLinkedListProblem =
+        method_name === 'traverseLinkedList' &&
+        parameters.length === 1 &&
+        parameters[0].type === 'ListNode' &&
+        return_type === 'int[]';
 
     if (language === 'python') {
         const params = parameters.map(p => `${p.name}: ${map[p.type] || 'Any'}`).join(', ');
         const retType = map[return_type] || 'Any';
-        return `from typing import List, Optional\n\nclass Solution:\n    def ${method_name}(self, ${params}) -> ${retType}:\n        # Write your solution here\n        pass\n`;
+        const listNodeHint = usesListNode
+            ? `\n# ListNode is provided by the runner at execution time.\nclass ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n`
+            : '';
+        if (isTraversalLinkedListProblem) {
+            return `from typing import List, Optional${listNodeHint}\n\nclass Solution:\n    def ${method_name}(self, ${params}) -> ${retType}:\n        values: List[int] = []\n        cur = ${listNodeParamName}\n        while cur is not None:\n            values.append(cur.val)\n            cur = cur.next\n        return values\n`;
+        }
+        return `from typing import List, Optional${listNodeHint}\n\nclass Solution:\n    def ${method_name}(self, ${params}) -> ${retType}:\n        # Write your solution here\n        pass\n`;
     }
 
     if (language === 'cpp') {
-        const params = parameters.map(p => `${map[p.type] || 'int'}& ${p.name}`).join(', ');
+        const params = parameters.map(p => {
+            const typeName = map[p.type] || 'int';
+            return typeName.endsWith('*') ? `${typeName} ${p.name}` : `${typeName}& ${p.name}`;
+        }).join(', ');
         const retType = map[return_type] || 'int';
-        return `#include <bits/stdc++.h>\nusing namespace std;\n\nclass Solution {\npublic:\n    ${retType} ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n};\n`;
+        const listNodeHint = usesListNode
+            ? `\n// ListNode is provided by the platform:\n// struct ListNode { int val; ListNode *next; ... };\n`
+            : '';
+        if (isTraversalLinkedListProblem) {
+            return `#include <bits/stdc++.h>\nusing namespace std;${listNodeHint}\nclass Solution {\npublic:\n    ${retType} ${method_name}(${params}) {\n        vector<int> values;\n        ListNode* cur = ${listNodeParamName};\n        while (cur != nullptr) {\n            values.push_back(cur->val);\n            cur = cur->next;\n        }\n        return values;\n    }\n};\n`;
+        }
+        return `#include <bits/stdc++.h>\nusing namespace std;${listNodeHint}\nclass Solution {\npublic:\n    ${retType} ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n};\n`;
     }
 
     if (language === 'java') {
         const params = parameters.map(p => `${map[p.type] || 'int'} ${p.name}`).join(', ');
         const retType = map[return_type] || 'int';
-        return `import java.util.*;\n\nclass Solution {\n    public ${retType} ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n}\n`;
+        const listNodeHint = usesListNode ? `\n// ListNode is provided by the platform.\n` : '';
+        if (isTraversalLinkedListProblem) {
+            return `import java.util.*;${listNodeHint}\nclass Solution {\n    public ${retType} ${method_name}(${params}) {\n        List<Integer> out = new ArrayList<>();\n        ListNode cur = ${listNodeParamName};\n        while (cur != null) {\n            out.add(cur.val);\n            cur = cur.next;\n        }\n\n        int[] ans = new int[out.size()];\n        for (int i = 0; i < out.size(); i++) {\n            ans[i] = out.get(i);\n        }\n        return ans;\n    }\n}\n`;
+        }
+        return `import java.util.*;${listNodeHint}\nclass Solution {\n    public ${retType} ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n}\n`;
     }
 
     if (language === 'javascript') {
         const params = parameters.map(p => p.name).join(', ');
         const paramDocs = parameters.map(p => ` * @param {${map[p.type] || 'any'}} ${p.name}`).join('\n');
         const retDoc = map[return_type] || 'any';
-        return `/**\n${paramDocs}\n * @return {${retDoc}}\n */\nclass Solution {\n    ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n}\n\nmodule.exports = Solution;\n`;
+        const listNodeHint = usesListNode
+            ? `\n// ListNode is provided by the platform at runtime.\n`
+            : '';
+        if (isTraversalLinkedListProblem) {
+            return `/**\n${paramDocs}\n * @return {${retDoc}}\n */${listNodeHint}\nclass Solution {\n    ${method_name}(${params}) {\n        const values = [];\n        let cur = ${listNodeParamName};\n        while (cur !== null) {\n            values.push(cur.val);\n            cur = cur.next;\n        }\n        return values;\n    }\n}\n\nmodule.exports = Solution;\n`;
+        }
+        return `/**\n${paramDocs}\n * @return {${retDoc}}\n */${listNodeHint}\nclass Solution {\n    ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n}\n\nmodule.exports = Solution;\n`;
     }
 
     return CODE_TEMPLATES[language] || '';
