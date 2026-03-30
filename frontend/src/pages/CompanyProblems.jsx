@@ -115,6 +115,13 @@ export default function CompanyProblems() {
                 "Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix", "Adobe"
             ],
         },
+        "Number of Substrings Containing All Three Characters": {
+            topic: "Sliding Window",
+            companies: [
+                "Ernst & Young", "Flipkart", "Salesforce", "Goldman Sachs", "Zomato", "Intel",
+                "Snowflake", "NVIDIA", "Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix", "Adobe"
+            ],
+        },
     };
 
     const companyProblems = problems
