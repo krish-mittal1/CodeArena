@@ -80,6 +80,14 @@ class UnsupportedLanguage(AppException):
         super().__init__(status.HTTP_400_BAD_REQUEST, f"Unsupported language: {lang}")
 
 
+class SubmissionRateLimited(AppException):
+    def __init__(self):
+        super().__init__(
+            status.HTTP_429_TOO_MANY_REQUESTS,
+            "Too many submissions in a short time. Please wait a moment and try again.",
+        )
+
+
 # ── Problem ───────────────────────────────────────────────────
 
 class ProblemNotFound(AppException):
