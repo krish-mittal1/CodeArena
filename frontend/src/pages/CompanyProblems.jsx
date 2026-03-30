@@ -122,6 +122,27 @@ export default function CompanyProblems() {
                 "Snowflake", "NVIDIA", "Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix", "Adobe"
             ],
         },
+        "Binary Subarrays With Sum": {
+            topic: "Sliding Window",
+            companies: [
+                "Stripe", "Flipkart", "Morgan Stanley", "Shopify", "Deloitte", "HCL Technologies", "Databricks",
+                "Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix", "Adobe"
+            ],
+        },
+        "Count number of Nice subarrays": {
+            topic: "Prefix Sum",
+            companies: [
+                "Oracle", "Deloitte", "IBM", "AMD", "ARM", "Salesforce", "Flipkart", "HCL Technologies",
+                "Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix", "Adobe"
+            ],
+        },
+        "Traversal in Linked List": {
+            topic: "Linked List",
+            companies: [
+                "Splunk", "HCL Technologies", "Uber", "PwC", "Goldman Sachs",
+                "TCS", "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
+            ],
+        },
     };
 
     const companyProblems = problems
