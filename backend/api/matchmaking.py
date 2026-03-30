@@ -16,7 +16,7 @@ from backend.services import matchmaking_service
 from backend.services.matchmaking_memory import memory_queue, QueueEntry
 from backend.core.exceptions import AlreadyInMatch
 import uuid
-import random
+import secrets
 import string
 
 logger = logging.getLogger(__name__)
@@ -99,7 +99,8 @@ async def queue_status(
 
 
 def generate_room_code(length=6):
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
+    alphabet = string.ascii_uppercase + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 
 @router.post("/private/create")

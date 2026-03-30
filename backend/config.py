@@ -100,6 +100,10 @@ class Settings(BaseSettings):
     # ── Server ────────────────────────────────────────────────
     host: str = Field(default="0.0.0.0", description="Server host")
     port: int = Field(default=8000, description="Server port")
+    spectator_require_auth: bool = Field(
+        default=False,
+        description="Require valid JWT token for spectator WebSocket endpoint",
+    )
     
     # ── Email & Frontend ──────────────────────────────────────
     frontend_url: str = Field(default="http://localhost:5173", description="Frontend base URL for links")

@@ -20,6 +20,7 @@ from typing import Optional
 from fastapi import WebSocket, WebSocketDisconnect
 from redis.asyncio import Redis
 
+from backend.config import settings
 from backend.core.constants import WSEvent, RedisKey
 from backend.core.security import decode_token
 from backend.websocket.manager import manager
@@ -270,7 +271,12 @@ async def _player_receive_loop(user_id: str, websocket: WebSocket, redis: Option
 #  Spectator WebSocket Handler
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-async def handle_spectator_connection(websocket: WebSocket, match_id: str, redis: Optional[Redis]):
+async def handle_spectator_connection(
+    websocket: WebSocket,
+    match_id: str,
+    redis: Optional[Redis],
+    token: Optional[str] = None,
+):
     """
     Handle a spectator's read-only WebSocket connection.
 
@@ -284,7 +290,19 @@ async def handle_spectator_connection(websocket: WebSocket, match_id: str, redis
         websocket: The FastAPI WebSocket object
         match_id: Match UUID from the URL path
         redis: Redis connection for match state lookup
+        token: Optional JWT token for spectator auth
     """
+    # Optional auth gate (disabled by default for backward compatibility)
+    if settings.spectator_require_auth:
+        if not token:
+            await websocket.close(code=4001, reason="Authentication required")
+            return
+        try:
+            decode_token(token)
+        except Exception:
+            await websocket.close(code=4001, reason="Invalid or expired token")
+            return
+
     # ── 1. Validate match exists ──────────────────────────
     if redis is None:
         await websocket.close(code=4003, reason="Spectating unavailable (Redis disabled)")

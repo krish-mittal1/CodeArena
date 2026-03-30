@@ -10,6 +10,7 @@ import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 from fastapi import FastAPI, WebSocket, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -440,7 +441,7 @@ async def general_exception_handler(request: Request, exc: Exception):
         content={
             "error": detail,
             "correlation_id": correlation_id,
-            "type": type(exc).__name__,
+            "type": type(exc).__name__ if settings.debug else "internal_error",
         }
     )
 
@@ -488,7 +489,11 @@ async def websocket_player(websocket: WebSocket, token: str = Query(...)):
 
 
 @app.websocket("/ws/spectate/{match_id}")
-async def websocket_spectator(websocket: WebSocket, match_id: str):
+async def websocket_spectator(
+    websocket: WebSocket,
+    match_id: str,
+    token: Optional[str] = Query(None),
+):
     """
     WebSocket endpoint for match spectators (read-only).
     
@@ -500,7 +505,7 @@ async def websocket_spectator(websocket: WebSocket, match_id: str):
     
     try:
         redis = await get_redis()
-        await handle_spectator_connection(websocket, match_id, redis)
+        await handle_spectator_connection(websocket, match_id, redis, token)
     finally:
         set_correlation_id("-")
 
