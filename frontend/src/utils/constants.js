@@ -105,12 +105,6 @@ export function generateBoilerplate(language, problem) {
     const { method_name, parameters, return_type } = problem;
     const map = TYPE_MAPS[language] || TYPE_MAPS.python;
     const usesListNode = parameters.some(p => p.type === 'ListNode') || return_type === 'ListNode';
-    const listNodeParamName = parameters.find(p => p.type === 'ListNode')?.name || 'head';
-    const isTraversalLinkedListProblem =
-        method_name === 'traverseLinkedList' &&
-        parameters.length === 1 &&
-        parameters[0].type === 'ListNode' &&
-        return_type === 'int[]';
 
     if (language === 'python') {
         const params = parameters.map(p => `${p.name}: ${map[p.type] || 'Any'}`).join(', ');
@@ -118,9 +112,6 @@ export function generateBoilerplate(language, problem) {
         const listNodeHint = usesListNode
             ? `\n# ListNode is provided by the runner at execution time.\nclass ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n`
             : '';
-        if (isTraversalLinkedListProblem) {
-            return `from typing import List, Optional${listNodeHint}\n\nclass Solution:\n    def ${method_name}(self, ${params}) -> ${retType}:\n        values: List[int] = []\n        cur = ${listNodeParamName}\n        while cur is not None:\n            values.append(cur.val)\n            cur = cur.next\n        return values\n`;
-        }
         return `from typing import List, Optional${listNodeHint}\n\nclass Solution:\n    def ${method_name}(self, ${params}) -> ${retType}:\n        # Write your solution here\n        pass\n`;
     }
 
@@ -133,9 +124,6 @@ export function generateBoilerplate(language, problem) {
         const listNodeHint = usesListNode
             ? `\n// ListNode is provided by the platform:\n// struct ListNode { int val; ListNode *next; ... };\n`
             : '';
-        if (isTraversalLinkedListProblem) {
-            return `#include <bits/stdc++.h>\nusing namespace std;${listNodeHint}\nclass Solution {\npublic:\n    ${retType} ${method_name}(${params}) {\n        vector<int> values;\n        ListNode* cur = ${listNodeParamName};\n        while (cur != nullptr) {\n            values.push_back(cur->val);\n            cur = cur->next;\n        }\n        return values;\n    }\n};\n`;
-        }
         return `#include <bits/stdc++.h>\nusing namespace std;${listNodeHint}\nclass Solution {\npublic:\n    ${retType} ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n};\n`;
     }
 
@@ -143,9 +131,6 @@ export function generateBoilerplate(language, problem) {
         const params = parameters.map(p => `${map[p.type] || 'int'} ${p.name}`).join(', ');
         const retType = map[return_type] || 'int';
         const listNodeHint = usesListNode ? `\n// ListNode is provided by the platform.\n` : '';
-        if (isTraversalLinkedListProblem) {
-            return `import java.util.*;${listNodeHint}\nclass Solution {\n    public ${retType} ${method_name}(${params}) {\n        List<Integer> out = new ArrayList<>();\n        ListNode cur = ${listNodeParamName};\n        while (cur != null) {\n            out.add(cur.val);\n            cur = cur.next;\n        }\n\n        int[] ans = new int[out.size()];\n        for (int i = 0; i < out.size(); i++) {\n            ans[i] = out.get(i);\n        }\n        return ans;\n    }\n}\n`;
-        }
         return `import java.util.*;${listNodeHint}\nclass Solution {\n    public ${retType} ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n}\n`;
     }
 
@@ -156,9 +141,6 @@ export function generateBoilerplate(language, problem) {
         const listNodeHint = usesListNode
             ? `\n// ListNode is provided by the platform at runtime.\n`
             : '';
-        if (isTraversalLinkedListProblem) {
-            return `/**\n${paramDocs}\n * @return {${retDoc}}\n */${listNodeHint}\nclass Solution {\n    ${method_name}(${params}) {\n        const values = [];\n        let cur = ${listNodeParamName};\n        while (cur !== null) {\n            values.push(cur.val);\n            cur = cur.next;\n        }\n        return values;\n    }\n}\n\nmodule.exports = Solution;\n`;
-        }
         return `/**\n${paramDocs}\n * @return {${retDoc}}\n */${listNodeHint}\nclass Solution {\n    ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n}\n\nmodule.exports = Solution;\n`;
     }
 
