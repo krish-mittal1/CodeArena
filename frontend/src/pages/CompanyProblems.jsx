@@ -143,6 +143,13 @@ export default function CompanyProblems() {
                 "TCS", "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
             ],
         },
+        "Deletion of the head of LL": {
+            topic: "Linked List",
+            companies: [
+                "Oracle", "IBM", "Morgan Stanley", "PwC", "Shopify", "Stripe",
+                "Flipkart", "TCS", "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
+            ],
+        },
     };
 
     const companyProblems = problems
