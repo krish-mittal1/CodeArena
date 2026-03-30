@@ -108,6 +108,13 @@ export default function CompanyProblems() {
                 "Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix", "Adobe"
             ],
         },
+        "Longest Repeating Character Replacement": {
+            topic: "Sliding Window",
+            companies: [
+                "Databricks", "Shopify", "Oracle", "PwC", "NVIDIA", "Flipkart", "Uber",
+                "Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix", "Adobe"
+            ],
+        },
     };
 
     const companyProblems = problems
