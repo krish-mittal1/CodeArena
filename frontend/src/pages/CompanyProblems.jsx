@@ -78,6 +78,13 @@ export default function CompanyProblems() {
             "Meta", "Apple", "Netflix", "Adobe"
             ],
         },
+        "Fruit Into Baskets": {
+            topic: "Sliding Window",
+            companies: [
+                "Morgan Stanley", "Swiggy", "Intel", "PwC", "Oracle", "Deloitte",
+                "Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix", "Adobe"
+            ],
+        },
         "Longest Substring Without Repeating Characters": {
             topic: "Sliding Window",
             companies: [
