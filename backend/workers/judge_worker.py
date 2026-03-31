@@ -412,7 +412,7 @@ async def _process_submission_inner(
         )
 
         # ── If ACCEPTED, trigger match completion ─────────
-        if submission.status == SubmissionStatus.ACCEPTED:
+        if submission.status == SubmissionStatus.ACCEPTED and submission.match_id is not None:
             try:
                 from backend.services import match_service
 
