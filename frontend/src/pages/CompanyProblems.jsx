@@ -310,6 +310,73 @@ export default function CompanyProblems() {
                 "TCS", "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
             ],
         },
+        "Reverse Linked List": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Netflix", "Adobe", "Uber",
+                "Airbnb", "Stripe", "Salesforce", "Oracle", "NVIDIA", "Intel", "IBM",
+                "LinkedIn", "Snap", "Spotify", "Qualcomm", "ServiceNow", "Atlassian",
+                "Goldman Sachs", "Morgan Stanley", "JP Morgan", "Visa", "Mastercard",
+                "Infosys", "TCS", "Wipro", "HCL Technologies", "Cognizant", "Tech Mahindra",
+                "LTIMindtree", "Mphasis", "Persistent Systems", "Flipkart", "Swiggy", "Zomato",
+                "Shopify", "Databricks", "Snowflake", "Twilio", "Deloitte", "Accenture",
+                "Capgemini", "PwC", "KPMG", "Ernst & Young"
+            ],
+        },
+        "Merge Two Sorted Lists": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Uber", "Airbnb",
+                "Oracle", "NVIDIA", "IBM", "LinkedIn", "Snap", "Samsung", "VMware",
+                "Goldman Sachs", "Morgan Stanley", "JP Morgan", "DE Shaw", "Jane Street",
+                "Citadel", "Tower Research", "Visa", "Mastercard", "Infosys", "TCS",
+                "Wipro", "Cognizant", "HCL Technologies", "Flipkart", "Razorpay", "PhonePe",
+                "Meesho", "Zerodha", "Palantir", "Shopify", "Databricks", "Twilio",
+                "Deloitte", "PwC"
+            ],
+        },
+        "Middle of the Linked List": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Netflix", "Adobe", "Stripe",
+                "Salesforce", "Intel", "Qualcomm", "X (Twitter)", "Spotify", "ServiceNow",
+                "Atlassian", "JP Morgan", "Visa", "Mastercard", "Accenture", "Capgemini",
+                "Paytm", "CRED", "Snowflake", "Ernst & Young"
+            ],
+        },
+        "Remove Nth Node From End of List": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Uber", "Airbnb",
+                "Stripe", "Oracle", "NVIDIA", "LinkedIn", "Snap", "Samsung", "Goldman Sachs",
+                "Morgan Stanley", "JP Morgan", "DE Shaw", "Jane Street", "Citadel",
+                "Tower Research", "Visa", "Infosys", "TCS", "Wipro", "HCL Technologies",
+                "Tech Mahindra", "LTIMindtree", "Mphasis", "Persistent Systems", "Flipkart",
+                "Razorpay", "Swiggy", "Zomato", "Paytm", "PhonePe", "Shopify", "Databricks",
+                "Twilio", "Deloitte", "KPMG"
+            ],
+        },
+        "Palindrome Linked List": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Netflix", "Adobe", "IBM",
+                "LinkedIn", "Snap", "Spotify", "Qualcomm", "VMware", "ServiceNow",
+                "Goldman Sachs", "Morgan Stanley", "Visa", "Mastercard", "Infosys", "Cognizant",
+                "Capgemini", "PhonePe", "CRED", "Meesho", "Palantir", "PwC", "Ernst & Young"
+            ],
+        },
+        "Reverse Linked List II": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Uber", "Airbnb",
+                "Stripe", "Salesforce", "Oracle", "NVIDIA", "Intel", "X (Twitter)", "Spotify",
+                "Samsung", "Atlassian", "Goldman Sachs", "JP Morgan", "DE Shaw", "Jane Street",
+                "Citadel", "Tower Research", "Mastercard", "Infosys", "TCS", "Wipro",
+                "HCL Technologies", "Tech Mahindra", "LTIMindtree", "Mphasis", "Persistent Systems",
+                "Flipkart", "Razorpay", "Swiggy", "Zomato", "Paytm", "Zerodha", "Shopify",
+                "Databricks", "Snowflake", "Twilio", "Deloitte", "Accenture", "KPMG"
+            ],
+        },
         "Deletion of the head of LL": {
             topic: "Linked List",
             companies: [
