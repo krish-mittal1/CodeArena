@@ -8,6 +8,18 @@ import { problemApi } from '../api/auth';
 import Badge from '../components/ui/Badge';
 import CompanyLogo from '../components/ui/CompanyLogo';
 
+function normalizeCompanyName(value) {
+    return (value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function companyNameMatches(datasetName, mappedName) {
+    const dataset = normalizeCompanyName(datasetName);
+    const mapped = normalizeCompanyName(mappedName);
+
+    if (!dataset || !mapped) return false;
+    return dataset === mapped || dataset.includes(mapped) || mapped.includes(dataset);
+}
+
 export default function CompanyProblems() {
     const { companyId } = useParams();
     const navigate = useNavigate();
@@ -130,7 +142,7 @@ export default function CompanyProblems() {
             ],
         },
         "Count number of Nice subarrays": {
-            topic: "Prefix Sum",
+            topic: "Sliding Window",
             companies: [
                 "Oracle", "Deloitte", "IBM", "AMD", "ARM", "Salesforce", "Flipkart", "HCL Technologies",
                 "Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix", "Adobe"
@@ -189,9 +201,8 @@ export default function CompanyProblems() {
             const metadata = PROBLEM_METADATA[title];
             if (!metadata) return null;
 
-            const isMappedToCompany = metadata.companies.some((tc) =>
-                tc.toLowerCase() === company.name.toLowerCase() ||
-                company.name.toLowerCase().includes(tc.toLowerCase())
+            const isMappedToCompany = metadata.companies.some((mappedCompany) =>
+                companyNameMatches(company.name, mappedCompany)
             );
 
             if (!isMappedToCompany) return null;
