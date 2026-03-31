@@ -133,7 +133,6 @@ class ConnectionManager:
             self._redis = redis
             self._pubsub = redis.pubsub()
             logger.info("[WS] ConnectionManager initialized with Redis pub/sub")
-            asyncio.get_running_loop().call_soon(self._start_listener_task)
         except asyncio.TimeoutError:
             logger.error("[WS] Redis connection timeout during init")
             raise
@@ -561,6 +560,7 @@ class ConnectionManager:
         """Subscribe to a room's Redis channel (idempotent)."""
         if not self._pubsub:
             return
+        self._start_listener_task()
         channel = RedisKey.ws_channel(room_id)
         try:
             await self._pubsub.subscribe(channel)
