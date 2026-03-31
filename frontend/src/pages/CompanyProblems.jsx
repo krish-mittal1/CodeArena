@@ -171,6 +171,13 @@ export default function CompanyProblems() {
                 "TCS", "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
             ],
         },
+        "Insertion at the head of Linked List": {
+            topic: "Linked List",
+            companies: [
+                "Oracle", "Twilio", "Shopify", "Qualcomm", "Databricks", "Goldman Sachs",
+                "Flipkart", "ARM", "TCS", "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
+            ],
+        },
     };
 
     const companyProblems = problems
