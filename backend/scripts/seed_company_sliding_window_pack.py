@@ -19,7 +19,10 @@ from backend.scripts import seed_longest_substring
 from backend.scripts import seed_longest_substring_k_distinct
 from backend.scripts import seed_max_consecutive_ones_iii
 from backend.scripts import seed_max_points_cards
+from backend.scripts import seed_minimum_window_substring
 from backend.scripts import seed_number_of_substrings_containing_all_three_characters
+from backend.scripts import seed_permutation_in_string
+from backend.scripts import seed_sliding_window_maximum
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -35,6 +38,9 @@ SEEDERS = [
     ("Count number of Nice subarrays", seed_count_number_of_nice_subarrays.seed),
     ("Number of Substrings Containing All Three Characters", seed_number_of_substrings_containing_all_three_characters.seed),
     ("Maximum Points You Can Obtain from Cards", seed_max_points_cards.seed),
+    ("Sliding Window Maximum", seed_sliding_window_maximum.seed),
+    ("Minimum Window Substring", seed_minimum_window_substring.seed),
+    ("Permutation in String", seed_permutation_in_string.seed),
 ]
 
 

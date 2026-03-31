@@ -102,7 +102,8 @@ export default function CompanyProblems() {
             companies: [
             "Google", "Microsoft", "Amazon", "Meta", "Apple", 
             "Netflix", "Adobe", "NVIDIA", "Qualcomm", "Stripe",
-            "Shopify", "Snowflake", "Twilio", "HCL Technologies", "Swiggy"
+            "Shopify", "Snowflake", "Twilio", "HCL Technologies", "Swiggy",
+            "Airbnb", "LinkedIn", "Accenture"
             ],
         },
         "Max Consecutive Ones III": {
@@ -146,6 +147,33 @@ export default function CompanyProblems() {
             companies: [
                 "Oracle", "Deloitte", "IBM", "AMD", "ARM", "Salesforce", "Flipkart", "HCL Technologies",
                 "Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix", "Adobe"
+            ],
+        },
+        "Sliding Window Maximum": {
+            topic: "Sliding Window",
+            companies: [
+                "Google", "Amazon", "Apple", "Adobe", "IBM", "Oracle", "NVIDIA", "Qualcomm",
+                "ServiceNow", "Atlassian", "VMware", "Samsung", "Goldman Sachs", "JP Morgan",
+                "Morgan Stanley", "DE Shaw", "Citadel", "Tower Research", "Visa", "Infosys",
+                "TCS", "Cognizant", "Capgemini", "Razorpay", "Paytm", "PhonePe", "CRED",
+                "Zerodha", "Palantir"
+            ],
+        },
+        "Minimum Window Substring": {
+            topic: "Sliding Window",
+            companies: [
+                "Google", "Microsoft", "Amazon", "Meta", "Apple", "Adobe", "Oracle", "IBM",
+                "Airbnb", "LinkedIn", "Snap", "Spotify", "X (Twitter)", "Goldman Sachs", "Infosys", "Meesho",
+                "Databricks", "Snowflake", "Twilio", "Flipkart", "Zomato", "Ernst & Young"
+            ],
+        },
+        "Permutation in String": {
+            topic: "Sliding Window",
+            companies: [
+                "Google", "Amazon", "Meta", "Microsoft", "Stripe", "Mastercard", "Intel",
+                "Samsung", "Visa", "Jane Street", "Wipro", "Tech Mahindra", "LTIMindtree", "Mphasis",
+                "Persistent Systems", "Razorpay", "Paytm", "PhonePe", "CRED", "Shopify",
+                "Palantir", "Deloitte", "PwC", "KPMG"
             ],
         },
         "Traversal in Linked List": {
