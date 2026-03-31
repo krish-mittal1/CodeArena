@@ -1,0 +1,98 @@
+﻿
+> frontend@0.0.0 build
+> vite build
+
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 2933 modules transformed.
+node.exe : [33m[plugin 
+vite:reporter] 
+At C:\Program 
+Files\nodejs\npm.ps1:29 
+char:3
++   & $NODE_EXE 
+$NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo      
+        : NotSpecified  
+  : ([33m[plugin vit   
+ e:reporter] :String    
+) [], RemoteExcepti    
+on
+    + FullyQualifiedErr 
+   orId : NativeComman  
+  dError
+ 
+(!) C:/Users/Dell/Deskto
+p/CodeArena/frontend/src
+/stores/authStore.js is 
+dynamically imported by 
+C:/Users/Dell/Desktop/Co
+deArena/frontend/src/api
+/client.js, C:/Users/Del
+l/Desktop/CodeArena/fron
+tend/src/api/client.js 
+but also statically 
+imported by C:/Users/Del
+l/Desktop/CodeArena/fron
+tend/src/App.jsx, C:/Use
+rs/Dell/Desktop/CodeAren
+a/frontend/src/component
+s/battle/TimerBar.jsx, C
+:/Users/Dell/Desktop/Cod
+eArena/frontend/src/comp
+onents/layout/Navbar.jsx
+, C:/Users/Dell/Desktop/
+CodeArena/frontend/src/c
+omponents/layout/Protect
+edRoute.jsx, C:/Users/De
+ll/Desktop/CodeArena/fro
+ntend/src/hooks/useAuth.
+js, C:/Users/Dell/Deskto
+p/CodeArena/frontend/src
+/hooks/useWebSocket.js, 
+C:/Users/Dell/Desktop/Co
+deArena/frontend/src/pag
+es/Dashboard.jsx, C:/Use
+rs/Dell/Desktop/CodeAren
+a/frontend/src/pages/His
+tory.jsx, C:/Users/Dell/
+Desktop/CodeArena/fronte
+nd/src/pages/Landing.jsx
+, C:/Users/Dell/Desktop/
+CodeArena/frontend/src/p
+ages/Login.jsx, C:/Users
+/Dell/Desktop/CodeArena/
+frontend/src/pages/Profi
+le.jsx, C:/Users/Dell/De
+sktop/CodeArena/frontend
+/src/ws/eventHandlers.js
+, dynamic import will 
+not move module into 
+another chunk.
+[39m
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                 [39m[1m[2m  0.60 kB[22m[1m[22m[2m Γöé gzip:   0.37 kB[22m
+[2mdist/[22m[35massets/index-B5EhuVCi.css  [39m[1m[2m 76.52 kB[22m[1m[22m[2m Γöé gzip:  12.35 kB[22m
+[2mdist/[22m[36massets/index-DBqOAdYh.js   [39m[1m[33m972.53 kB[39m[22m[2m Γöé gzip: 297.69 kB[22m
+[33m
+(!) Some chunks are 
+larger than 500 kB 
+after minification. 
+Consider:
+- Using dynamic 
+import() to code-split 
+the application
+- Use build.rollupOption
+s.output.manualChunks 
+to improve chunking: htt
+ps://rollupjs.org/config
+uration-options/#output-
+manualchunks
+- Adjust chunk size 
+limit for this warning 
+via build.chunkSizeWarni
+ngLimit.[39m
+[32mΓ£ô built in 29.13s[39m

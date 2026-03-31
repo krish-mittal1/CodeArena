@@ -1,7 +1,9 @@
 import Editor from '@monaco-editor/react';
+import { useCallback } from 'react';
 import { useBattleStore } from '../../stores/battleStore';
 import { submissionApi } from '../../api/auth';
 import { LANGUAGES, CODE_TEMPLATES, generateBoilerplate } from '../../utils/constants';
+import { defineCodeArenaTheme, CODEARENA_THEME_NAME } from '../../utils/editorTheme';
 import { Code2, Play, RotateCcw, Settings2 } from 'lucide-react';
 
 export default function CodeEditor() {
@@ -17,6 +19,11 @@ export default function CodeEditor() {
     const setSubmissionStatus = useBattleStore((s) => s.setSubmissionStatus);
 
     const monacoLang = LANGUAGES.find((l) => l.id === language)?.monacoId || 'python';
+
+    // Monaco custom theme
+    const handleEditorWillMount = useCallback((monaco) => {
+        defineCodeArenaTheme(monaco);
+    }, []);
 
     // Derived states
     const isSubmitting = submissionStatus === 'submitting' || submissionStatus === 'running';
@@ -113,7 +120,8 @@ export default function CodeEditor() {
                     language={monacoLang}
                     value={code}
                     onChange={(value) => setCode(value || '')}
-                    theme="vs-dark"
+                    theme={CODEARENA_THEME_NAME}
+                    beforeMount={handleEditorWillMount}
                     options={{
                         fontSize: 13,
                         fontFamily: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",

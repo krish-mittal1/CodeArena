@@ -1,16 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import Editor from '@monaco-editor/react';
+import confetti from 'canvas-confetti';
 import {
     ArrowLeft, Code2, Play, RotateCcw, Settings2,
     CheckCircle2, XCircle, Clock, AlertTriangle, Sparkles,
 } from 'lucide-react';
 import { problemApi, practiceApi } from '../api/auth';
 import { LANGUAGES, CODE_TEMPLATES, VERDICTS, generateBoilerplate } from '../utils/constants';
+import { defineCodeArenaTheme, CODEARENA_THEME_NAME } from '../utils/editorTheme';
 import Badge from '../components/ui/Badge';
 import AIAnalysisPanel from '../components/ui/AIAnalysisPanel';
+import ResizableSplit from '../components/ui/ResizableSplit';
 
 
 const STATUS_ICONS = {
@@ -36,6 +39,26 @@ export default function Practice() {
     const [aiAnalysis, setAiAnalysis] = useState(null);
     const [showAIPanel, setShowAIPanel] = useState(false);
     const [aiLoading, setAiLoading] = useState(false);
+
+    // Monaco custom theme
+    const handleEditorWillMount = useCallback((monaco) => {
+        defineCodeArenaTheme(monaco);
+    }, []);
+
+    // Confetti on accepted
+    const prevVerdictRef = useRef(null);
+    useEffect(() => {
+        if (verdict?.status === 'accepted' && prevVerdictRef.current !== 'accepted') {
+            confetti({
+                particleCount: 80,
+                spread: 70,
+                origin: { y: 0.7 },
+                colors: ['#c96d3a', '#dcc080', '#a3c47a', '#7ec4cf', '#f1e6d4'],
+                disableForReducedMotion: true,
+            });
+        }
+        prevVerdictRef.current = verdict?.status || null;
+    }, [verdict?.status]);
 
     const { data: problem, isLoading } = useQuery({
         queryKey: ['problem', problemId],
@@ -229,9 +252,11 @@ export default function Practice() {
             </div>
 
             {/* Main Split */}
-            <div className="practice-split">
-                {/* Left: Problem Description */}
-                <div className="practice-problem-pane">
+            <ResizableSplit
+                defaultLeft={45}
+                minLeft={25}
+                maxLeft={65}
+                left={
                     <div className="p-6 space-y-5">
                         {/* Description */}
                         <div>
@@ -308,9 +333,8 @@ export default function Practice() {
                             </div>
                         )}
                     </div>
-                </div>
-
-                {/* Right: Editor + Verdict */}
+                }
+                right={
                 <div className="practice-editor-pane">
                     {/* Editor Toolbar */}
                     <div className="flex items-center justify-between px-4 py-2 bg-bg-primary border-b border-border shrink-0">
@@ -353,7 +377,8 @@ export default function Practice() {
                             language={monacoLang}
                             value={code}
                             onChange={(value) => setCode(value || '')}
-                            theme="vs-dark"
+                            theme={CODEARENA_THEME_NAME}
+                            beforeMount={handleEditorWillMount}
                             options={{
                                 fontSize: 13,
                                 fontFamily: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
@@ -581,7 +606,8 @@ export default function Practice() {
                         </motion.div>
                     )}
                 </div>
-            </div>
+                }
+            />
 
             {/* AI Analysis Modal — auto-pops after every verdict */}
             <AnimatePresence>
