@@ -28,7 +28,7 @@ from backend.websocket.handlers import (
     handle_spectator_connection,
 )
 from backend.db.session import AsyncSessionLocal, engine
-from backend.workers.judge_worker import run_dev_worker
+from backend.workers.judge_worker import run_dev_worker, run_redis_worker
 from backend.services.matchmaking_memory import run_matchmaking_poller
 from backend.core.exceptions import AppException
 from backend.websocket.manager import manager
@@ -146,6 +146,21 @@ async def lifespan(app: FastAPI):
         raise RuntimeError("Redis is required in production")
 
     # ── Start dev-mode background tasks ────────────────────
+    if redis is not None:
+        try:
+            judge_task = asyncio.create_task(
+                run_redis_worker(),
+                name="redis-judge-worker",
+            )
+            logger.info("Production judge worker started")
+        except Exception as exc:
+            logger.error(
+                f"Failed to start production judge worker: {exc}",
+                exc_info=True,
+            )
+            if settings.is_production:
+                raise
+
     if redis is None:
         try:
             # Keep runtime behavior consistent with startup decision.
