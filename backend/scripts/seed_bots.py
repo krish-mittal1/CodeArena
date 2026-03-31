@@ -12,17 +12,16 @@ Examples:
     python -m backend.scripts.seed_bots --reset
 """
 
+import argparse
 import asyncio
 import logging
-import argparse
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.db.session import AsyncSessionLocal
 from backend.models.user import User
-from backend.services.bot_service import BOT_USERNAMES
-from backend.core.constants import ELO_DEFAULT
+from backend.services.bot_service import BOT_PROFILES
 
 logging.basicConfig(
     level=logging.INFO,
@@ -32,48 +31,65 @@ logger = logging.getLogger(__name__)
 
 
 async def get_or_create_bots(db: AsyncSession, reset: bool = False):
-    """Create or update bot users with varying ELOs."""
-    
+    """Create or update bot users with stable profile identities."""
+
     if reset:
-        # Delete existing bots
         result = await db.execute(select(User).where(User.is_bot == True))
         bots_to_delete = result.scalars().all()
         for bot in bots_to_delete:
             await db.delete(bot)
         await db.commit()
         logger.info(f"Deleted {len(bots_to_delete)} existing bot users")
-    
-    # Create bots with varying ELOs for realistic matchmaking
-    elo_values = [100, 200, 300, 400, 500, 600, 700, 800]
-    
-    for i, username in enumerate(BOT_USERNAMES):
-        # Check if bot already exists
-        result = await db.execute(
-            select(User).where(User.username == username)
-        )
-        existing_bot = result.scalar_one_or_none()
-        
-        if existing_bot and not reset:
-            logger.info(f"Bot {username} already exists (ELO={existing_bot.elo})")
+
+    result = await db.execute(
+        select(User)
+        .where(User.is_bot == True)
+        .order_by(User.created_at.asc(), User.id.asc())
+    )
+    existing_bots = list(result.scalars().all())
+
+    for index, profile in enumerate(BOT_PROFILES):
+        if index < len(existing_bots):
+            bot = existing_bots[index]
+            changed = False
+
+            if bot.username != profile.username:
+                bot.username = profile.username
+                changed = True
+            expected_email = f"{profile.username.lower()}@bot.local"
+            if bot.email != expected_email:
+                bot.email = expected_email
+                changed = True
+            if bot.elo != profile.elo:
+                bot.elo = profile.elo
+                changed = True
+            if not bot.is_bot:
+                bot.is_bot = True
+                changed = True
+            if bot.password_hash != "":
+                bot.password_hash = ""
+                changed = True
+
+            if changed:
+                logger.info("Updated bot profile: %s (ELO=%s)", profile.username, profile.elo)
+            else:
+                logger.info("Bot %s already exists (ELO=%s)", profile.username, bot.elo)
             continue
-        
-        # Assign rotating ELO values
-        elo = elo_values[i % len(elo_values)]
-        
+
         bot = User(
-            username=username,
-            email=f"{username}@bot.local",
-            password_hash="",  # Bots don't authenticate
+            username=profile.username,
+            email=f"{profile.username.lower()}@bot.local",
+            password_hash="",
             is_bot=True,
-            elo=elo,
+            elo=profile.elo,
             matches_played=0,
             matches_won=0,
         )
         db.add(bot)
-        logger.info(f"Created bot: {username} with ELO {elo}")
-    
+        logger.info("Created bot: %s with ELO %s", profile.username, profile.elo)
+
     await db.commit()
-    logger.info(f"Total of {len(BOT_USERNAMES)} bots seeded successfully")
+    logger.info(f"Total of {len(BOT_PROFILES)} bots seeded successfully")
 
 
 async def main():

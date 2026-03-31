@@ -20,6 +20,7 @@ import logging
 import asyncio
 from dataclasses import dataclass, field
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from typing import Optional
 
@@ -282,7 +283,16 @@ class InMemoryMatchmakingQueue:
 
             try:
                 async with session_factory() as db:
-                    bot = await bot_service.get_random_bot_for_elo(db, current.elo)
+                    from backend.models.user import User
+                    player_result = await db.execute(
+                        select(User).where(User.id == uuid.UUID(current.user_id))
+                    )
+                    human_player = player_result.scalar_one_or_none()
+                    bot = await bot_service.get_random_bot_for_elo(
+                        db,
+                        current.elo,
+                        player_hint=(human_player.username if human_player else current.user_id),
+                    )
 
                 if bot is None:
                     async with self._lock:

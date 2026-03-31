@@ -21,6 +21,7 @@ import uuid
 import logging
 
 from redis.asyncio import Redis
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
@@ -28,6 +29,7 @@ from backend.config import settings
 from backend.core.constants import RedisKey, MatchStatus, BOT_WAIT_TIME_MIN, BOT_WAIT_TIME_MAX
 from backend.core.exceptions import AlreadyInMatch
 from backend.models.match import Match
+from backend.models.user import User
 from backend.services import problem_service, bot_service
 
 logger = logging.getLogger(__name__)
@@ -350,7 +352,15 @@ async def process_queue(redis: Redis, db: AsyncSession) -> list[uuid.UUID]:
             wait_secs = time.time() - player["joined_at"]
             if wait_secs >= BOT_WAIT_TIME_MAX:
                 # Player has waited max time, find them a bot
-                bot = await bot_service.get_random_bot_for_elo(db, player["elo"])
+                player_result = await db.execute(
+                    select(User).where(User.id == uuid.UUID(player["user_id"]))
+                )
+                human_player = player_result.scalar_one_or_none()
+                bot = await bot_service.get_random_bot_for_elo(
+                    db,
+                    player["elo"],
+                    player_hint=(human_player.username if human_player else player["user_id"]),
+                )
                 if bot:
                     # Remove player from queue
                     ok = await redis.eval(
