@@ -4,7 +4,8 @@ OTP auth routes — request and verify email OTP.
 
 import logging
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, status
+from fastapi import HTTPException
 
 from backend.db.session import get_db, AsyncSession
 from backend.schemas.otp import OTPRequest, OTPVerify, OTPResponse
@@ -20,20 +21,25 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 async def request_otp(data: OTPRequest, request: Request):
     """
     Send a 6-digit OTP to the given email.
-    Rate limited: 3/email/hour, 5/IP/hour.
-    Always returns success to prevent user enumeration.
+    Rate limited: 1/email/5min and 2/IP/5min.
+    Returns 503 when OTP infrastructure (Redis/Email provider) is unavailable.
     """
     ip = request.client.host if request.client else "unknown"
 
     try:
         await otp_service.request_otp(data.email, ip)
     except Exception as e:
-        # Re-raise structured exceptions (rate limit, disposable email)
+        # Re-raise structured app exceptions (rate limit, disposable email, etc.)
         from backend.core.exceptions import AppException
         if isinstance(e, AppException):
             raise
-        # Swallow other errors to prevent user enumeration
-        logger.error(f"OTP request failed for {data.email}: {e}", exc_info=True)
+
+        # Infra failure should not look like success to clients.
+        logger.error(f"OTP infrastructure failure for {data.email}: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="OTP service temporarily unavailable. Please try again shortly.",
+        )
 
     return OTPResponse(message="If this email is valid, you will receive a verification code shortly.")
 
