@@ -60,6 +60,42 @@ export default function CompanyProblems() {
             "Netflix", "Adobe"
             ],
         },
+        "Container With Most Water": {
+            topic: "Two Pointers",
+            companies: [
+                "Google", "Amazon", "Meta", "Microsoft", "Apple", "Netflix", "Adobe", "Uber",
+                "Airbnb", "Stripe", "LinkedIn", "Snap", "Goldman Sachs", "JP Morgan",
+                "Visa", "Mastercard", "NVIDIA", "Oracle", "Salesforce", "Shopify",
+                "Databricks", "Twilio", "Deloitte", "PwC", "Flipkart", "Swiggy"
+            ],
+        },
+        "Trapping Rain Water": {
+            topic: "Two Pointers",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Uber", "Airbnb",
+                "Oracle", "NVIDIA", "Qualcomm", "X (Twitter)", "Spotify", "Samsung",
+                "Goldman Sachs", "Morgan Stanley", "DE Shaw", "Citadel", "Razorpay",
+                "Zomato", "PhonePe", "Shopify", "Palantir", "Accenture"
+            ],
+        },
+        "Two Sum II - Input Array Is Sorted": {
+            topic: "Two Pointers",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Apple", "Meta", "Netflix", "Adobe", "IBM",
+                "Intel", "VMware", "ServiceNow", "Atlassian", "Visa", "Mastercard",
+                "Infosys", "TCS", "Wipro", "Cognizant", "Capgemini", "Tech Mahindra", "Tower Research",
+                "Paytm", "Meesho", "Snowflake", "Ernst & Young"
+            ],
+        },
+        "Valid Palindrome": {
+            topic: "Two Pointers",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Stripe",
+                "LinkedIn", "Snap", "Spotify", "Jane Street", "KPMG", "HCL Technologies",
+                "LTIMindtree", "Mphasis", "Persistent Systems", "CRED", "Zerodha",
+                "Shopify", "Twilio"
+            ],
+        },
         "Sort an array of 0's 1's and 2's": {
             topic: "Sorting",
             companies: [
@@ -79,6 +115,41 @@ export default function CompanyProblems() {
             "Databricks", "IBM", "Uber", "Siemens Healthineers", 
             "Splunk", "Shopify", "American Express", "Twilio", "TCS", 
             "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
+            ],
+        },
+        "Search in Rotated Sorted Array": {
+            topic: "Binary Search",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Oracle", "Uber",
+                "Airbnb", "Goldman Sachs", "Morgan Stanley", "JP Morgan", "Visa", "Intel",
+                "NVIDIA", "Qualcomm", "ServiceNow", "Atlassian", "Samsung", "Databricks",
+                "Twilio", "Deloitte", "Infosys", "TCS", "Wipro", "Cognizant"
+            ],
+        },
+        "Search Insert Position": {
+            topic: "Binary Search",
+            companies: [
+                "Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix", "Adobe", "IBM",
+                "LinkedIn", "X (Twitter)", "Spotify", "VMware", "PwC", "KPMG", "Tech Mahindra",
+                "LTIMindtree", "Mphasis", "Persistent Systems", "Paytm", "PhonePe", "Meesho",
+                "Palantir", "Capgemini", "Accenture"
+            ],
+        },
+        "Koko Eating Bananas": {
+            topic: "Binary Search",
+            companies: [
+                "Google", "Uber", "Amazon", "Apple", "Meta", "Adobe", "NVIDIA", "Salesforce",
+                "Goldman Sachs", "Jane Street", "DE Shaw", "Citadel", "Tower Research",
+                "Razorpay", "CRED", "Zerodha", "Shopify", "Snowflake", "Ernst & Young",
+                "HCL Technologies", "Zomato"
+            ],
+        },
+        "Median of Two Sorted Arrays": {
+            topic: "Binary Search",
+            companies: [
+                "Google", "Amazon", "Apple", "Meta", "Microsoft", "Adobe", "Oracle", "IBM",
+                "Airbnb", "Stripe", "Snap", "Samsung", "Visa", "Mastercard", "JP Morgan",
+                "Morgan Stanley", "Palantir", "Databricks", "Swiggy", "Flipkart"
             ],
         },
         "Maximum Points You Can Obtain from Cards": {
