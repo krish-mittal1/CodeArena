@@ -164,6 +164,13 @@ export default function CompanyProblems() {
                 "KPMG", "Red Hat", "Cloudflare", "eBay", "TCS", "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
             ],
         },
+        "Delete the element with value X": {
+            topic: "Linked List",
+            companies: [
+                "Goldman Sachs", "Salesforce", "Qualcomm", "Swiggy", "Zomato", "PwC",
+                "TCS", "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
+            ],
+        },
     };
 
     const companyProblems = problems
