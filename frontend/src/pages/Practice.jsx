@@ -609,7 +609,7 @@ export default function Practice() {
                 }
             />
 
-            {/* AI Analysis Modal — auto-pops after every verdict */}
+            {/* AI Analysis Modal - auto-pops after every verdict */}
             <AnimatePresence>
                 {showAIPanel && (
                     aiLoading ? (
@@ -627,7 +627,7 @@ export default function Practice() {
                                 </div>
                                 <div>
                                     <p className="text-text-primary font-bold text-base mb-1">Analyzing your code...</p>
-                                    <p className="text-text-muted text-sm">Gemini AI is reviewing your submission</p>
+                                    <p className="text-text-muted text-sm">AI is preparing a clearer explanation for your submission</p>
                                 </div>
                                 <div className="flex gap-1.5">
                                     {[0, 1, 2].map((i) => (

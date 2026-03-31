@@ -228,7 +228,7 @@ async def analyze_submission(
     db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
-    Analyze a completed submission using Gemini AI.
+    Analyze a completed submission using AI.
     Returns structured feedback: verdict explanation, TC/SC, issues,
     optimized approach, improved code, and tips.
     """
