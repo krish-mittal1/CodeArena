@@ -116,48 +116,83 @@ def build_test_cases() -> list[dict]:
 
 
 async def seed() -> None:
-    """Create or update the 'Deletion of the tail of LL' problem."""
     engine = create_async_engine(settings.database_url, echo=False)
-    async_session = async_sessionmaker(engine, expire_on_commit=False)
+    session_factory = async_sessionmaker(engine, expire_on_commit=False)
 
-    async with async_session() as session:
-        # Delete old if exists.
-        result = await session.execute(select(Problem).filter_by(title=TITLE))
-        old_problem = result.scalars().first()
-        if old_problem:
-            await session.delete(old_problem)
-            logger.info(f"Deleted old problem: {TITLE}")
+    async with session_factory() as db:
+        result = await db.execute(select(Problem).where(Problem.title == TITLE))
+        problem = result.scalar_one_or_none()
 
-        # Create problem.
-        problem = Problem(
-            title=TITLE,
-            description=(
-                "Given the head of a singly linked list, delete the tail of the linked list "
-                "and return the head of the modified list.\n\n"
-                "The tail is the last node of the linked list."
-            ),
-            difficulty=Difficulty.EASY,
-            input_format="Array representation of linked list (e.g., [1, 2, 3])",
-            output_format="Array representation of the list with tail deleted (e.g., [1, 2])",
-            constraints="0 <= list length <= 10^5, -10^9 <= node values <= 10^9",
+        description = (
+            "Given the head of a singly linked list, delete the tail of the linked list "
+            "and return the head of the modified list."
         )
+        input_format = (
+            "Line 1: JSON array representing linked-list node values in order. "
+            "The runner converts this array into head: ListNode before calling your method."
+        )
+        output_format = "JSON array representing the list after deleting the tail node"
+        constraints = "0 <= number of nodes <= 10^5\n-10^9 <= Node.val <= 10^9"
 
-        # Add test cases.
-        test_cases = build_test_cases()
-        for idx, tc in enumerate(test_cases):
-            problem.test_cases.append(
-                TestCase(
-                    input=tc["input"],
-                    expected_output=tc["expected_output"],
-                    is_sample=tc["is_sample"],
-                    order_index=idx,
+        if problem:
+            logger.info("Problem exists. Updating metadata and replacing test cases.")
+            problem.description = description
+            problem.difficulty = Difficulty.EASY
+            problem.input_format = input_format
+            problem.output_format = output_format
+            problem.constraints = constraints
+            problem.method_name = "deleteTail"
+            problem.parameters = [{"name": "head", "type": "ListNode"}]
+            problem.return_type = "ListNode"
+            problem.time_limit_ms = 1000
+            problem.memory_limit_mb = 256
+            problem.rating = 800
+            problem.is_active = True
+
+            test_cases_deleted = False
+            try:
+                await db.execute(delete(TestCase).where(TestCase.problem_id == problem.id))
+                await db.flush()
+                test_cases_deleted = True
+            except Exception:
+                logger.warning(
+                    "Could not delete old test cases (referenced by submissions). "
+                    "Keeping existing ones and updating metadata only."
                 )
+                await db.rollback()
+                await db.refresh(problem)
+        else:
+            logger.info("Creating new problem entry.")
+            problem = Problem(
+                title=TITLE,
+                description=description,
+                difficulty=Difficulty.EASY,
+                input_format=input_format,
+                output_format=output_format,
+                constraints=constraints,
+                method_name="deleteTail",
+                parameters=[{"name": "head", "type": "ListNode"}],
+                return_type="ListNode",
+                time_limit_ms=1000,
+                memory_limit_mb=256,
+                rating=800,
+                is_active=True,
             )
+            db.add(problem)
+            await db.flush()
+            test_cases_deleted = True
 
-        session.add(problem)
-        await session.commit()
+        if test_cases_deleted:
+            test_cases = build_test_cases()
+            for tc in test_cases:
+                db.add(TestCase(problem_id=problem.id, **tc))
+            await db.commit()
+            logger.info("Seeded '%s' with %d test cases.", TITLE, len(test_cases))
+        else:
+            await db.commit()
+            logger.info("Updated metadata for '%s'. Test cases kept from previous seeding.", TITLE)
 
-        logger.info(f"✓ Seeded: {TITLE} with {len(test_cases)} test cases")
+    await engine.dispose()
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ import json
 import logging
 import random
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from backend.config import settings
@@ -124,43 +124,89 @@ def build_test_cases() -> list[dict]:
 
 
 async def seed() -> None:
-    """Create or update the 'Delete the element with value X' problem."""
     engine = create_async_engine(settings.database_url, echo=False)
-    async_session = async_sessionmaker(engine, expire_on_commit=False)
+    session_factory = async_sessionmaker(engine, expire_on_commit=False)
 
-    async with async_session() as session:
-        result = await session.execute(select(Problem).filter_by(title=TITLE))
-        old_problem = result.scalars().first()
-        if old_problem:
-            await session.delete(old_problem)
-            logger.info(f"Deleted old problem: {TITLE}")
+    async with session_factory() as db:
+        result = await db.execute(select(Problem).where(Problem.title == TITLE))
+        problem = result.scalar_one_or_none()
 
-        problem = Problem(
-            title=TITLE,
-            description=(
-                "Given the head of a singly linked list and an integer X, delete the node "
-                "with value X and return the head of the modified list."
-            ),
-            difficulty=Difficulty.EASY,
-            input_format="Object format: {linkedList: array, X: integer}",
-            output_format="Array representation after deleting first node with value X",
-            constraints="0 <= list length <= 10^5, -10^9 <= node values <= 10^9",
+        description = (
+            "Given the head of a singly linked list and an integer X, delete the node "
+            "with value X and return the head of the modified list."
         )
+        input_format = (
+            "JSON object: {linkedList: [...], X: int}. "
+            "The runner converts linkedList into head: ListNode and passes X as int."
+        )
+        output_format = "JSON array representing the list after deleting first node with value X"
+        constraints = "0 <= number of nodes <= 10^5\n-10^9 <= Node.val, X <= 10^9"
 
-        test_cases = build_test_cases()
-        for order, tc in enumerate(test_cases):
-            problem.test_cases.append(
-                TestCase(
-                    input=tc["input"],
-                    expected_output=tc["expected_output"],
-                    is_sample=tc["is_sample"],
-                    order_index=order,
+        if problem:
+            logger.info("Problem exists. Updating metadata and replacing test cases.")
+            problem.description = description
+            problem.difficulty = Difficulty.EASY
+            problem.input_format = input_format
+            problem.output_format = output_format
+            problem.constraints = constraints
+            problem.method_name = "deleteNodeWithValue"
+            problem.parameters = [
+                {"name": "head", "type": "ListNode"},
+                {"name": "X", "type": "int"},
+            ]
+            problem.return_type = "ListNode"
+            problem.time_limit_ms = 1000
+            problem.memory_limit_mb = 256
+            problem.rating = 800
+            problem.is_active = True
+
+            test_cases_deleted = False
+            try:
+                await db.execute(delete(TestCase).where(TestCase.problem_id == problem.id))
+                await db.flush()
+                test_cases_deleted = True
+            except Exception:
+                logger.warning(
+                    "Could not delete old test cases (referenced by submissions). "
+                    "Keeping existing ones and updating metadata only."
                 )
+                await db.rollback()
+                await db.refresh(problem)
+        else:
+            logger.info("Creating new problem entry.")
+            problem = Problem(
+                title=TITLE,
+                description=description,
+                difficulty=Difficulty.EASY,
+                input_format=input_format,
+                output_format=output_format,
+                constraints=constraints,
+                method_name="deleteNodeWithValue",
+                parameters=[
+                    {"name": "head", "type": "ListNode"},
+                    {"name": "X", "type": "int"},
+                ],
+                return_type="ListNode",
+                time_limit_ms=1000,
+                memory_limit_mb=256,
+                rating=800,
+                is_active=True,
             )
+            db.add(problem)
+            await db.flush()
+            test_cases_deleted = True
 
-        session.add(problem)
-        await session.commit()
-        logger.info(f"✓ Seeded: {TITLE} with {len(test_cases)} test cases")
+        if test_cases_deleted:
+            test_cases = build_test_cases()
+            for tc in test_cases:
+                db.add(TestCase(problem_id=problem.id, **tc))
+            await db.commit()
+            logger.info("Seeded '%s' with %d test cases.", TITLE, len(test_cases))
+        else:
+            await db.commit()
+            logger.info("Updated metadata for '%s'. Test cases kept from previous seeding.", TITLE)
+
+    await engine.dispose()
 
 
 if __name__ == "__main__":
