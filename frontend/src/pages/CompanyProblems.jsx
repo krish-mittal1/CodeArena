@@ -152,6 +152,62 @@ export default function CompanyProblems() {
                 "Morgan Stanley", "Palantir", "Databricks", "Swiggy", "Flipkart"
             ],
         },
+        "Jump Game": {
+            topic: "Greedy",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Uber", "Airbnb",
+                "Stripe", "Oracle", "NVIDIA", "Intel", "Qualcomm", "VMware", "Atlassian",
+                "Goldman Sachs", "Morgan Stanley", "JP Morgan", "Visa", "Infosys", "TCS",
+                "Wipro", "Cognizant", "Flipkart", "Swiggy", "Zomato", "Shopify", "Databricks",
+                "Deloitte", "Accenture"
+            ],
+        },
+        "Jump Game II": {
+            topic: "Greedy",
+            companies: [
+                "Google", "Amazon", "Meta", "Microsoft", "Apple", "Netflix", "Adobe", "Uber",
+                "Salesforce", "IBM", "LinkedIn", "Snap", "Samsung", "ServiceNow", "Goldman Sachs",
+                "DE Shaw", "Citadel", "Tower Research", "Mastercard", "HCL Technologies",
+                "Tech Mahindra", "LTIMindtree", "Paytm", "PhonePe", "CRED", "Palantir", "Twilio"
+            ],
+        },
+        "Gas Station": {
+            topic: "Greedy",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Uber", "Oracle",
+                "NVIDIA", "Intel", "X (Twitter)", "Spotify", "JP Morgan", "Jane Street", "Visa",
+                "Infosys", "Capgemini", "Mphasis", "Persistent Systems", "Razorpay", "Meesho",
+                "Zerodha", "Snowflake", "PwC", "Ernst & Young"
+            ],
+        },
+        "Partition Labels": {
+            topic: "Greedy",
+            companies: [
+                "Google", "Amazon", "Meta", "Microsoft", "Apple", "Adobe", "Stripe", "Airbnb",
+                "LinkedIn", "Snap", "Spotify", "ServiceNow", "Atlassian", "Morgan Stanley",
+                "KPMG", "Wipro", "TCS", "Flipkart", "Swiggy", "Zomato", "Shopify", "Databricks",
+                "Twilio", "Deloitte", "Capgemini"
+            ],
+        },
+        "Non-overlapping Intervals": {
+            topic: "Greedy",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Salesforce", "Oracle",
+                "IBM", "Qualcomm", "VMware", "Goldman Sachs", "Morgan Stanley", "JP Morgan",
+                "DE Shaw", "Citadel", "Visa", "Mastercard", "Infosys", "Cognizant", "Tech Mahindra",
+                "Razorpay", "PhonePe", "CRED", "Palantir", "Accenture", "PwC"
+            ],
+        },
+        "Candy": {
+            topic: "Greedy",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Netflix", "Adobe", "Uber",
+                "Airbnb", "Stripe", "NVIDIA", "Samsung", "Jane Street", "Tower Research",
+                "Intel", "LinkedIn", "X (Twitter)", "Spotify", "Visa", "Mastercard",
+                "HCL Technologies", "LTIMindtree", "Mphasis", "Persistent Systems", "Paytm",
+                "Meesho", "Zerodha", "Snowflake", "Ernst & Young", "KPMG"
+            ],
+        },
         "Maximum Points You Can Obtain from Cards": {
             topic: "Sliding Window",
             companies: [
