@@ -132,16 +132,21 @@ class ConnectionManager:
             await asyncio.wait_for(redis.ping(), timeout=2)
             self._redis = redis
             self._pubsub = redis.pubsub()
-            self._listener_task = asyncio.create_task(
-                self._redis_listener(), name="ws-pubsub-listener"
-            )
             logger.info("[WS] ConnectionManager initialized with Redis pub/sub")
+            asyncio.get_running_loop().call_soon(self._start_listener_task)
         except asyncio.TimeoutError:
             logger.error("[WS] Redis connection timeout during init")
             raise
         except Exception as e:
             logger.error(f"[WS] Redis init failed: {e}")
             raise
+
+    def _start_listener_task(self) -> None:
+        """Start the Redis listener after startup returns control to the event loop."""
+        if self._listener_task is None or self._listener_task.done():
+            self._listener_task = asyncio.create_task(
+                self._redis_listener(), name="ws-pubsub-listener"
+            )
 
     async def shutdown(self):
         """Graceful shutdown — close all connections and cancel listener."""
