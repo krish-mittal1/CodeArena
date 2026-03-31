@@ -137,23 +137,9 @@ async def seed() -> None:
                 "The tail is the last node of the linked list."
             ),
             difficulty=Difficulty.EASY,
-            companies=[
-                "McKinsey & Company",
-                "Goldman Sachs",
-                "IBM",
-                "Stripe",
-                "Oracle",
-                "Texas Instruments",
-                "ARM",
-                "TCS",
-                "Cognizant",
-                "Accenture",
-                "Infosys",
-                "Capgemini",
-                "Wipro",
-            ],
-            topics=["Linked List", "Pointer Manipulation", "Basic"],
-            similar_problem_ids=[],
+            input_format="Array representation of linked list (e.g., [1, 2, 3])",
+            output_format="Array representation of the list with tail deleted (e.g., [1, 2])",
+            constraints="0 <= list length <= 10^5, -10^9 <= node values <= 10^9",
         )
 
         # Add test cases.
