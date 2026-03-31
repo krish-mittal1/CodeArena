@@ -13,6 +13,7 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [clientError, setClientError] = useState('');
+    const [debugOtp, setDebugOtp] = useState('');
     const [otpLoading, setOtpLoading] = useState(false);
     const [cooldown, setCooldown] = useState(0);
 
@@ -36,6 +37,7 @@ export default function Register() {
     const handleSendOTP = async (e) => {
         e.preventDefault();
         setClientError('');
+        setDebugOtp('');
 
         if (password !== confirmPassword) {
             setClientError('Passwords do not match');
@@ -48,7 +50,8 @@ export default function Register() {
 
         setOtpLoading(true);
         try {
-            await authApi.requestOTP(email);
+            const response = await authApi.requestOTP(email);
+            setDebugOtp(response?.debug_otp || '');
             setStep('verify');
             setCooldown(60);
         } catch (err) {
@@ -86,9 +89,11 @@ export default function Register() {
     const handleResend = async () => {
         if (cooldown > 0) return;
         setClientError('');
+        setDebugOtp('');
         setOtpLoading(true);
         try {
-            await authApi.requestOTP(email);
+            const response = await authApi.requestOTP(email);
+            setDebugOtp(response?.debug_otp || '');
             setCooldown(60);
         } catch (err) {
             setClientError(
@@ -134,6 +139,16 @@ export default function Register() {
                             className="w-full flex items-center justify-center bg-loss/10 border border-loss/20 text-loss p-4 rounded-[14px_11px_13px_9px] text-sm font-semibold text-center overflow-hidden"
                         >
                             {errorMessage}
+                        </motion.div>
+                    )}
+
+                    {debugOtp && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
+                            className="w-full flex items-center justify-center bg-accent/10 border border-accent/20 text-text-primary p-4 rounded-[14px_11px_13px_9px] text-sm font-semibold text-center overflow-hidden"
+                        >
+                            Development OTP: {debugOtp}
                         </motion.div>
                     )}
 

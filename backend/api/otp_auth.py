@@ -26,7 +26,7 @@ async def request_otp(data: OTPRequest, request: Request):
     ip = request.client.host if request.client else "unknown"
 
     try:
-        await otp_service.request_otp(data.email, ip)
+        debug_otp = await otp_service.request_otp(data.email, ip)
     except Exception as e:
         # Re-raise structured exceptions (rate limit, disposable email)
         from backend.core.exceptions import AppException
@@ -34,8 +34,12 @@ async def request_otp(data: OTPRequest, request: Request):
             raise
         # Swallow other errors to prevent user enumeration
         logger.error(f"OTP request failed for {data.email}: {e}", exc_info=True)
+        debug_otp = None
 
-    return OTPResponse(message="If this email is valid, you will receive a verification code shortly.")
+    return OTPResponse(
+        message="If this email is valid, you will receive a verification code shortly.",
+        debug_otp=debug_otp,
+    )
 
 
 @router.post("/verify-otp", response_model=TokenResponse)

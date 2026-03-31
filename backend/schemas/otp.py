@@ -14,3 +14,4 @@ class OTPVerify(BaseModel):
 
 class OTPResponse(BaseModel):
     message: str
+    debug_otp: str | None = None
