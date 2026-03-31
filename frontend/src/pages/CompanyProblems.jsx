@@ -150,6 +150,13 @@ export default function CompanyProblems() {
                 "Flipkart", "TCS", "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
             ],
         },
+        "Deletion of the tail of LL": {
+            topic: "Linked List",
+            companies: [
+                "McKinsey & Company", "Goldman Sachs", "IBM", "Stripe", "Oracle", "Texas Instruments",
+                "ARM", "TCS", "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
+            ],
+        },
     };
 
     const companyProblems = problems
