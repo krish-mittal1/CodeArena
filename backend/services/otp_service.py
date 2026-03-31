@@ -98,7 +98,9 @@ async def _get_otp_redis() -> Optional[aioredis.Redis]:
     global _otp_redis
 
     if not settings.redis_enabled:
-        return None
+        if settings.is_development:
+            return None
+        raise RuntimeError("Redis must be enabled for OTP flows outside development")
 
     if _otp_redis is None:
         try:

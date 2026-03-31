@@ -141,6 +141,10 @@ async def lifespan(app: FastAPI):
         logger.error(f"Startup error: {exc}", exc_info=True)
         redis = None
 
+    if redis is None and settings.is_production:
+        logger.critical("Redis is required in production startup")
+        raise RuntimeError("Redis is required in production")
+
     # ── Start dev-mode background tasks ────────────────────
     if redis is None:
         try:
