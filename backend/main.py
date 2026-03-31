@@ -7,6 +7,7 @@ import logging
 import asyncio
 import uuid
 import os
+import json
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -30,9 +31,10 @@ from backend.websocket.handlers import (
 from backend.db.session import AsyncSessionLocal, engine
 from backend.workers.judge_worker import run_dev_worker, run_redis_worker
 from backend.services.matchmaking_memory import run_matchmaking_poller
+from backend.services import matchmaking_service, match_service, bot_submission_service
 from backend.core.exceptions import AppException
 from backend.websocket.manager import manager
-from backend.core.constants import WSEvent, MatchStatus
+from backend.core.constants import WSEvent, MatchStatus, RedisKey
 from backend.models.match import Match
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -152,10 +154,15 @@ async def lifespan(app: FastAPI):
                 run_redis_worker(),
                 name="redis-judge-worker",
             )
+            matchmaking_task = asyncio.create_task(
+                _run_redis_matchmaking_poller(redis),
+                name="redis-matchmaking-poller",
+            )
             logger.info("Production judge worker started")
+            logger.info("Production matchmaking worker started")
         except Exception as exc:
             logger.error(
-                f"Failed to start production judge worker: {exc}",
+                f"Failed to start production workers: {exc}",
                 exc_info=True,
             )
             if settings.is_production:
@@ -292,6 +299,66 @@ async def _run_timer_sync_poller() -> None:
             logger.error(f"[MM-DEV] match_timer_sync poller error: {e}", exc_info=True)
 
         await asyncio.sleep(5)
+
+
+async def _run_redis_matchmaking_poller(redis) -> None:
+    """
+    Production Redis matchmaking loop:
+      - Processes the queue so players/bots actually get paired.
+      - Completes expired matches.
+      - Triggers bot submissions for active matches.
+    """
+    logger = logging.getLogger(__name__)
+    poll_interval = settings.matchmaking_poll_interval_ms / 1000.0
+    logger.info("Redis matchmaking poller started")
+
+    while True:
+        try:
+            async with AsyncSessionLocal() as db:
+                new_matches = await matchmaking_service.process_queue(redis, db)
+
+                for match_id in new_matches:
+                    match = await match_service.get_match(db, match_id)
+                    if not match:
+                        continue
+
+                    await redis.publish(
+                        RedisKey.ws_channel(str(match_id)),
+                        json.dumps({
+                            "event": WSEvent.MATCH_FOUND,
+                            "data": {
+                                "match_id": str(match.id),
+                                "problem_id": str(match.problem_id),
+                                "problem_title": match.problem.title,
+                                "duration_seconds": match.duration_seconds,
+                                "player1": {
+                                    "user_id": str(match.player1.id),
+                                    "username": match.player1.username,
+                                    "elo": match.player1.elo,
+                                },
+                                "player2": {
+                                    "user_id": str(match.player2.id),
+                                    "username": match.player2.username,
+                                    "elo": match.player2.elo,
+                                },
+                            },
+                        }),
+                    )
+
+                completed = await match_service.check_and_complete_expired_matches(db, redis)
+                for match_id in completed:
+                    logger.info(f"Match {match_id} expired and completed")
+
+                bot_processed = await bot_submission_service.process_bot_submissions_for_active_matches(db, redis)
+                if bot_processed > 0:
+                    logger.debug(f"Processed bot submissions for {bot_processed} matches")
+
+        except asyncio.CancelledError:
+            break
+        except Exception as exc:
+            logger.error(f"Redis matchmaking poller error: {exc}", exc_info=True)
+
+        await asyncio.sleep(poll_interval)
 
 
 async def _run_match_recovery_poller() -> None:
