@@ -157,6 +157,13 @@ export default function CompanyProblems() {
                 "ARM", "TCS", "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
             ],
         },
+        "Deletion of the Kth element of LL": {
+            topic: "Linked List",
+            companies: [
+                "McKinsey & Company", "JPMorgan Chase", "Uber", "Reddit", "Morgan Stanley", "Salesforce",
+                "KPMG", "Red Hat", "Cloudflare", "eBay", "TCS", "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
+            ],
+        },
     };
 
     const companyProblems = problems
