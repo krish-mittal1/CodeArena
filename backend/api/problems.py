@@ -7,7 +7,8 @@ import uuid
 from fastapi import APIRouter, Depends
 
 from backend.db.session import get_db, AsyncSession
-from backend.dependencies import get_current_user
+from backend.dependencies import get_current_user, get_admin_user
+from backend.models.user import User
 from backend.schemas.problem import ProblemCreate, ProblemPublic, ProblemAdmin, TestCasePublic
 from backend.services import problem_service
 
@@ -18,9 +19,9 @@ router = APIRouter(prefix="/problems", tags=["Problems"])
 async def create_problem(
     data: ProblemCreate,
     db: AsyncSession = Depends(get_db),
-    _=Depends(get_current_user),  # Auth required (admin check can be added)
+    _=Depends(get_admin_user),  # ✓ FIXED: Admin-only access
 ):
-    """Create a new problem with test cases."""
+    """Create a new problem with test cases. Admin only."""
     problem = await problem_service.create_problem(db, data)
     return _to_public(problem)
 

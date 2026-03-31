@@ -5,7 +5,7 @@ Routes handle both Redis-backed and in-memory (dev-mode) matchmaking.
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, Dict
@@ -15,6 +15,7 @@ from backend.models.user import User
 from backend.services import matchmaking_service
 from backend.services.matchmaking_memory import memory_queue, QueueEntry
 from backend.core.exceptions import AlreadyInMatch
+from backend.core.room_code_rate_limit import ensure_room_code_allowed, record_room_code_attempt
 import uuid
 import secrets
 import string
@@ -139,10 +140,16 @@ class JoinRoomRequest(BaseModel):
 async def join_private_room(
     payload: JoinRoomRequest,
     current_user: User = Depends(get_current_user),
+    request: Request = None,
     redis: Optional[Redis] = Depends(get_redis),
     db: AsyncSession = Depends(get_db),
 ):
     """Join a private room by code."""
+    # Rate limit: prevent brute force room code enumeration
+    ip = request.client.host if request and request.client else "unknown"
+    ensure_room_code_allowed(ip)
+    record_room_code_attempt(ip)
+    
     code = payload.code.upper().strip()
     if not code:
         raise HTTPException(status_code=400, detail="Room code required")
@@ -224,9 +231,15 @@ async def join_private_room(
 async def private_room_status(
     code: str,
     current_user: User = Depends(get_current_user),
+    request: Request = None,
     redis: Optional[Redis] = Depends(get_redis),
 ):
     """Poll if a private room has been joined by an opponent."""
+    # Rate limit: prevent brute force room code enumeration
+    ip = request.client.host if request and request.client else "unknown"
+    ensure_room_code_allowed(ip)
+    record_room_code_attempt(ip)
+    
     code = code.upper().strip()
     
     if redis is not None:

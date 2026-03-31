@@ -280,19 +280,24 @@ async def handle_spectator_connection(
     """
     Handle a spectator's read-only WebSocket connection.
 
-      1. Validate the match exists and is active
-      2. Join the room as a spectator
-      3. Send initial room state (players, remaining time)
-      4. Receive loop (heartbeats only, reject anything else)
-      5. Clean up on disconnect
+      1. Validate authentication (if required by config)
+      2. Validate the match exists and is active
+      3. Join the room as a spectator
+      4. Send initial room state (players, remaining time)
+      5. Receive loop (heartbeats only, reject anything else)
+      6. Clean up on disconnect
 
     Args:
         websocket: The FastAPI WebSocket object
         match_id: Match UUID from the URL path
         redis: Redis connection for match state lookup
         token: Optional JWT token for spectator auth
+        
+    SECURITY: Spectator authentication is enforced by default (config: spectator_require_auth=True)
     """
-    # Optional auth gate (disabled by default for backward compatibility)
+    from backend.config import settings
+    
+    # ✓ FIXED: Enforce spectator authentication by default
     if settings.spectator_require_auth:
         if not token:
             await websocket.close(code=4001, reason="Authentication required")

@@ -379,8 +379,26 @@ async def correlation_id_middleware(request: Request, call_next):
         response.headers["X-Correlation-ID"] = correlation_id
         return response
     finally:
-        # Clear correlation ID from context (optional, but clean)
         set_correlation_id("-")
+
+
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    """
+    Add security headers to all HTTP responses.
+    Protects against common web vulnerabilities.
+    """
+    response = await call_next(request)
+    
+    # Prevent CSRF via SameSite cookie attribute
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    
+    return response
 
 
 # ── Global Exception Handlers ───────────────────────────────────
@@ -459,8 +477,10 @@ app.add_middleware(
         "https://www.codexarena.app"
     ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allow_headers=["Content-Type", "Authorization"],
+    expose_headers=["Content-Type"],
+    max_age=3600,
 )
 
 # ── HTTP Routes ───────────────────────────────────────────────

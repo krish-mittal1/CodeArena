@@ -25,6 +25,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     is_bot: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     
     elo: Mapped[int] = mapped_column(Integer, default=ELO_DEFAULT, nullable=False)
     matches_played: Mapped[int] = mapped_column(Integer, default=0, nullable=False)

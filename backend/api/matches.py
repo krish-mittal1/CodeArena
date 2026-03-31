@@ -23,11 +23,20 @@ router = APIRouter(prefix="/matches", tags=["Matches"])
 @router.get("/{match_id}", response_model=MatchResponse)
 async def get_match(
     match_id: uuid.UUID,
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Get match details by ID."""
-    return await match_service.get_match(db, match_id)
+    """Get match details by ID. Only participants can view match details."""
+    match = await match_service.get_match(db, match_id)
+    
+    # ✓ FIXED: Strict access control - only participants
+    if current_user.id not in (match.player1_id, match.player2_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this match",
+        )
+    
+    return match
 
 
 @router.get("/history/me", response_model=List[MatchHistoryItem])

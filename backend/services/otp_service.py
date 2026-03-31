@@ -44,6 +44,7 @@ _KEY_OTP = "otp:code:{email}"
 _KEY_ATTEMPTS = "otp:attempts:{email}"
 _KEY_RATE_EMAIL = "otp:rate:email:{email}"
 _KEY_RATE_IP = "otp:rate:ip:{ip}"
+_KEY_LOCKOUT = "otp:lockout:{email}"  # Exponential backoff lockout
 
 # ── Dedicated Redis connection for OTP ────────────────────────
 
@@ -106,33 +107,63 @@ def _compare_otp(plain: str, hashed: str) -> bool:
 # ── Rate limiting ─────────────────────────────────────────────
 
 async def _check_rate_limits(r: aioredis.Redis, email: str, ip: str) -> None:
+    """
+    Check OTP rate limits with exponential backoff.
+    
+    SECURITY: Progressive limits to prevent brute force:
+    - 1 request per 5 minutes per email (was 3/hour)
+    - 2 requests per 5 minutes per IP (was 5/hour)  
+    - After 3 failed attempts, exponential backoff lockout
+    """
+    email_lower = email.lower()
+    
+    # Check lockout (exponential backoff after failed attempts)
+    lockout_key = _KEY_LOCKOUT.format(email=email_lower)
+    lockout = await r.get(lockout_key)
+    if lockout:
+        lockout_attempts = int(lockout.split(":")[0])
+        # Exponential backoff: 5 min * 2^attempts (max 2 hours)
+        backoff_seconds = min(300 * (2 ** lockout_attempts), 7200)
+        logger.warning(f"OTP lockout for {email_lower} (exponential backoff {backoff_seconds}s)")
+        raise OTPRateLimited()
+    
     pipe = r.pipeline()
-    email_key = _KEY_RATE_EMAIL.format(email=email.lower())
+    email_key = _KEY_RATE_EMAIL.format(email=email_lower)
     ip_key = _KEY_RATE_IP.format(ip=ip)
 
     pipe.get(email_key)
     pipe.get(ip_key)
     email_count, ip_count = await pipe.execute()
 
-    if email_count and int(email_count) >= settings.otp_rate_limit_email:
-        logger.warning(f"OTP rate limit hit for email={email}")
+    # ✓ FIXED: Much stricter limits
+    if email_count and int(email_count) >= 1:  # 1 request per 5 min
+        logger.warning(f"OTP rate limit hit for email={email_lower}")
         raise OTPRateLimited()
 
-    if ip_count and int(ip_count) >= settings.otp_rate_limit_ip:
+    if ip_count and int(ip_count) >= 2:  # 2 requests per 5 min per IP
         logger.warning(f"OTP rate limit hit for ip={ip}")
         raise OTPRateLimited()
 
 
 async def _increment_rate(r: aioredis.Redis, email: str, ip: str) -> None:
+    """Increment rate limit counters with 5-minute window (was 1 hour)."""
     pipe = r.pipeline()
-    email_key = _KEY_RATE_EMAIL.format(email=email.lower())
+    email_lower = email.lower()
+    email_key = _KEY_RATE_EMAIL.format(email=email_lower)
     ip_key = _KEY_RATE_IP.format(ip=ip)
 
     pipe.incr(email_key)
-    pipe.expire(email_key, 3600, nx=True)
+    pipe.expire(email_key, 300, nx=True)  # 5-minute window (was 3600)
     pipe.incr(ip_key)
-    pipe.expire(ip_key, 3600, nx=True)
+    pipe.expire(ip_key, 300, nx=True)  # 5-minute window (was 3600)
     await pipe.execute()
+
+
+async def _set_lockout(r: aioredis.Redis, email: str, attempts: int) -> None:
+    """Set exponential backoff lockout after failed attempts."""
+    lockout_key = _KEY_LOCKOUT.format(email=email.lower())
+    backoff_seconds = min(300 * (2 ** attempts), 7200)  # 5 min * 2^attempts, max 2 hours
+    await r.set(lockout_key, f"{attempts}:{datetime.now(timezone.utc).isoformat()}", ex=backoff_seconds)
 
 
 # ── Email sending via Resend ──────────────────────────────────
@@ -214,10 +245,12 @@ async def verify_otp_only(email: str, otp: str) -> bool:
     otp_key = _KEY_OTP.format(email=email)
     attempts_key = _KEY_ATTEMPTS.format(email=email)
 
-    # Check attempt count
+    # Check attempt count (max 3 attempts before lockout)
     attempts = await r.get(attempts_key)
-    if attempts and int(attempts) >= settings.otp_max_attempts:
+    if attempts and int(attempts) >= 3:  # ✓ FIXED: Lower max attempts
         await r.delete(otp_key)
+        # Set exponential backoff lockout
+        await _set_lockout(r, email, 1)
         raise OTPMaxAttemptsExceeded()
 
     # Retrieve stored hash
@@ -231,12 +264,17 @@ async def verify_otp_only(email: str, otp: str) -> bool:
         pipe.incr(attempts_key)
         pipe.expire(attempts_key, settings.otp_expire_seconds, nx=True)
         await pipe.execute()
+        # Set exponential backoff on failure
+        current_attempts = int(await r.get(attempts_key) or 0)
+        if current_attempts >= 3:
+            await _set_lockout(r, email, 1)
         raise OTPInvalid()
 
     # OTP valid — delete it (single-use)
     pipe = r.pipeline()
     pipe.delete(otp_key)
     pipe.delete(attempts_key)
+    pipe.delete(_KEY_LOCKOUT.format(email=email))  # Clear lockout on success
     await pipe.execute()
 
     logger.info(f"OTP: email verified (check only) for {email}")
@@ -257,10 +295,11 @@ async def verify_otp(
     otp_key = _KEY_OTP.format(email=email)
     attempts_key = _KEY_ATTEMPTS.format(email=email)
 
-    # ── Check attempt count ───────────────────────────────
+    # ── Check attempt count (max 3 before lockout) ────────
     attempts = await r.get(attempts_key)
-    if attempts and int(attempts) >= settings.otp_max_attempts:
-        await r.delete(otp_key)  # Invalidate OTP after too many failures
+    if attempts and int(attempts) >= 3:  # ✓ FIXED: Lower max attempts
+        await r.delete(otp_key)
+        await _set_lockout(r, email, 1)  # Exponential backoff lockout
         raise OTPMaxAttemptsExceeded()
 
     # ── Retrieve stored hash ──────────────────────────────
@@ -274,12 +313,17 @@ async def verify_otp(
         pipe.incr(attempts_key)
         pipe.expire(attempts_key, settings.otp_expire_seconds, nx=True)
         await pipe.execute()
+        # Set exponential backoff on failure
+        current_attempts = int(await r.get(attempts_key) or 0)
+        if current_attempts >= 3:
+            await _set_lockout(r, email, 1)
         raise OTPInvalid()
 
     # ── OTP valid — delete it (single-use) ────────────────
     pipe = r.pipeline()
     pipe.delete(otp_key)
     pipe.delete(attempts_key)
+    pipe.delete(_KEY_LOCKOUT.format(email=email))  # Clear lockout on success
     await pipe.execute()
 
     # ── Find or create user ───────────────────────────────

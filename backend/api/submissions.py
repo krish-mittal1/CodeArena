@@ -44,7 +44,7 @@ async def submit_code(
     # Guard: reject submissions for completed matches
     if match.status == MatchStatus.COMPLETED:
         logger.warning(
-            f"[API] Rejected submission for completed match {data.match_id} "
+            f"[SECURITY] Rejected submission for completed match {data.match_id} "
             f"from user {current_user.id}"
         )
         raise HTTPException(
@@ -61,6 +61,10 @@ async def submit_code(
 
     # Guard: user must be a participant
     if current_user.id not in (match.player1_id, match.player2_id):
+        logger.error(
+            f"[API] Unauthorized submission attempt from {current_user.id} "
+            f"for match {data.match_id} (not a participant)"
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You are not a participant in this match.",

@@ -34,6 +34,21 @@ class LoginRateLimited(AppException):
         super().__init__(status.HTTP_429_TOO_MANY_REQUESTS, "Too many failed login attempts. Try again later.")
 
 
+class AdminAccessRequired(AppException):
+    def __init__(self):
+        super().__init__(status.HTTP_403_FORBIDDEN, "Admin access required")
+
+
+class SpectatorAuthRequired(AppException):
+    def __init__(self):
+        super().__init__(status.HTTP_401_UNAUTHORIZED, "Authentication required")
+
+
+class RoomCodeRateLimited(AppException):
+    def __init__(self):
+        super().__init__(status.HTTP_429_TOO_MANY_REQUESTS, "Too many room code attempts. Try again later.")
+
+
 # ── Matchmaking ──────────────────────────────────────────────
 
 class AlreadyInQueue(AppException):

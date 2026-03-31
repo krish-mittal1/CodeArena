@@ -133,3 +133,11 @@ async def get_current_user(
         )
 
     return user
+
+
+async def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
+    """Enforce admin access control."""
+    from backend.core.exceptions import AdminAccessRequired
+    if not current_user.is_admin:
+        raise AdminAccessRequired()
+    return current_user
