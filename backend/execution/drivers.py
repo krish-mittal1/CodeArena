@@ -34,14 +34,20 @@ def _python_type_hint(param_type: str) -> str:
     """Convert our type string to Python type hint."""
     mapping = {
         "int": "int",
+        "long": "int",
         "int[]": "List[int]",
+        "long[]": "List[int]",
         "int[][]": "List[List[int]]",
         "str": "str",
+        "string": "str",
         "str[]": "List[str]",
+        "string[]": "List[str]",
         "float": "float",
         "float[]": "List[float]",
         "bool": "bool",
+        "boolean": "bool",
         "bool[]": "List[bool]",
+        "boolean[]": "List[bool]",
         "ListNode": "Optional['ListNode']",
     }
     return mapping.get(param_type, "Any")
@@ -51,14 +57,20 @@ def _cpp_type(param_type: str) -> str:
     """Convert our type string to C++ type."""
     mapping = {
         "int": "int",
+        "long": "long long",
         "int[]": "vector<int>",
+        "long[]": "vector<long long>",
         "int[][]": "vector<vector<int>>",
         "str": "string",
+        "string": "string",
         "str[]": "vector<string>",
+        "string[]": "vector<string>",
         "float": "double",
         "float[]": "vector<double>",
         "bool": "bool",
+        "boolean": "bool",
         "bool[]": "vector<bool>",
+        "boolean[]": "vector<bool>",
         "ListNode": "ListNode*",
     }
     return mapping.get(param_type, "int")
@@ -68,14 +80,20 @@ def _java_type(param_type: str) -> str:
     """Convert our type string to Java type."""
     mapping = {
         "int": "int",
+        "long": "long",
         "int[]": "int[]",
+        "long[]": "long[]",
         "int[][]": "int[][]",
         "str": "String",
+        "string": "String",
         "str[]": "String[]",
+        "string[]": "String[]",
         "float": "double",
         "float[]": "double[]",
         "bool": "boolean",
+        "boolean": "boolean",
         "bool[]": "boolean[]",
+        "boolean[]": "boolean[]",
         "ListNode": "ListNode",
     }
     return mapping.get(param_type, "int")
@@ -262,17 +280,27 @@ def _cpp_json_parser(param_type: str, var_name: str) -> str:
     """Generate C++ code to parse a JSON line into the given type."""
     if param_type == "int":
         return f"    int {var_name} = stoi(line);"
+    if param_type == "long":
+        return f"    long long {var_name} = stoll(line);"
     if param_type == "str":
+        return f'    string {var_name} = parseJsonString(line);'
+    if param_type == "string":
         return f'    string {var_name} = parseJsonString(line);'
     if param_type == "int[]":
         return f"    vector<int> {var_name} = parseJsonIntArray(line);"
+    if param_type == "long[]":
+        return f"    vector<long long> {var_name} = parseJsonLongArray(line);"
     if param_type == "int[][]":
         return f"    vector<vector<int>> {var_name} = parseJson2DIntArray(line);"
     if param_type == "str[]":
         return f"    vector<string> {var_name} = parseJsonStringArray(line);"
+    if param_type == "string[]":
+        return f"    vector<string> {var_name} = parseJsonStringArray(line);"
     if param_type == "float":
         return f"    double {var_name} = stod(line);"
     if param_type == "bool":
+        return f'    bool {var_name} = (line == "true");'
+    if param_type == "boolean":
         return f'    bool {var_name} = (line == "true");'
     if param_type == "ListNode":
         return (
@@ -286,13 +314,26 @@ def _cpp_json_serializer(return_type: str) -> str:
     """Generate C++ code to serialize result to JSON stdout."""
     if return_type == "int":
         return '    cout << result << endl;'
+    if return_type == "long":
+        return '    cout << result << endl;'
     if return_type == "str":
         return '    cout << "\\"" << result << "\\"" << endl;'
+    if return_type == "string":
+        return '    cout << "\\"" << result << "\\"" << endl;'
     if return_type == "bool":
+        return '    cout << (result ? "true" : "false") << endl;'
+    if return_type == "boolean":
         return '    cout << (result ? "true" : "false") << endl;'
     if return_type == "float":
         return '    cout << fixed << setprecision(5) << result << endl;'
     if return_type == "int[]":
+        return '''    cout << "[";
+    for (size_t i = 0; i < result.size(); i++) {
+        if (i > 0) cout << ",";
+        cout << result[i];
+    }
+        cout << "]" << endl;'''
+    if return_type == "long[]":
         return '''    cout << "[";
     for (size_t i = 0; i < result.size(); i++) {
         if (i > 0) cout << ",";
@@ -407,6 +448,24 @@ vector<int> parseJsonIntArray(const string& s) {{
     return res;
 }}
 
+vector<long long> parseJsonLongArray(const string& s) {{
+    vector<long long> res;
+    string num;
+    bool inNum = false;
+    for (char c : s) {{
+        if (c == '-' || isdigit(c)) {{
+            num += c;
+            inNum = true;
+        }} else if (inNum) {{
+            res.push_back(stoll(num));
+            num.clear();
+            inNum = false;
+        }}
+    }}
+    if (inNum) res.push_back(stoll(num));
+    return res;
+}}
+
 vector<vector<int>> parseJson2DIntArray(const string& s) {{
     vector<vector<int>> res;
     int depth = 0;
@@ -473,15 +532,25 @@ def _java_json_parser(param_type: str, var_name: str) -> str:
     """Generate Java code to parse a JSON line into the given type."""
     if param_type == "int":
         return f"        int {var_name} = Integer.parseInt(lines[idx++].trim());"
+    if param_type == "long":
+        return f"        long {var_name} = Long.parseLong(lines[idx++].trim());"
     if param_type == "str":
+        return f'        String {var_name} = parseJsonString(lines[idx++].trim());'
+    if param_type == "string":
         return f'        String {var_name} = parseJsonString(lines[idx++].trim());'
     if param_type == "int[]":
         return f"        int[] {var_name} = parseJsonIntArray(lines[idx++].trim());"
+    if param_type == "long[]":
+        return f"        long[] {var_name} = parseJsonLongArray(lines[idx++].trim());"
     if param_type == "int[][]":
         return f"        int[][] {var_name} = parseJson2DIntArray(lines[idx++].trim());"
     if param_type == "str[]":
         return f"        String[] {var_name} = parseJsonStringArray(lines[idx++].trim());"
+    if param_type == "string[]":
+        return f"        String[] {var_name} = parseJsonStringArray(lines[idx++].trim());"
     if param_type == "bool":
+        return f'        boolean {var_name} = lines[idx++].trim().equals("true");'
+    if param_type == "boolean":
         return f'        boolean {var_name} = lines[idx++].trim().equals("true");'
     if param_type == "ListNode":
         return f"        ListNode {var_name} = buildLinkedList(parseJsonIntArray(lines[idx++].trim()));"
@@ -492,11 +561,25 @@ def _java_json_serializer(return_type: str) -> str:
     """Generate Java code to serialize result to JSON stdout."""
     if return_type == "int":
         return '        System.out.println(result);'
+    if return_type == "long":
+        return '        System.out.println(result);'
     if return_type == "str":
+        return '        System.out.println("\\"" + result + "\\"");'
+    if return_type == "string":
         return '        System.out.println("\\"" + result + "\\"");'
     if return_type == "bool":
         return '        System.out.println(result ? "true" : "false");'
+    if return_type == "boolean":
+        return '        System.out.println(result ? "true" : "false");'
     if return_type == "int[]":
+        return '''        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < result.length; i++) {
+            if (i > 0) sb.append(",");
+            sb.append(result[i]);
+        }
+        sb.append("]");
+        System.out.println(sb.toString());'''
+    if return_type == "long[]":
         return '''        StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < result.length; i++) {
             if (i > 0) sb.append(",");
@@ -592,6 +675,18 @@ public class Main {{
         int[] res = new int[parts.length];
         for (int i = 0; i < parts.length; i++)
             res[i] = Integer.parseInt(parts[i].trim());
+        return res;
+    }}
+
+    static long[] parseJsonLongArray(String s) {{
+        s = s.trim();
+        if (s.equals("[]") || s.equals("null") || s.isEmpty()) return new long[0];
+        s = s.substring(1, s.length() - 1);
+        if (s.isEmpty()) return new long[0];
+        String[] parts = s.split(",");
+        long[] res = new long[parts.length];
+        for (int i = 0; i < parts.length; i++)
+            res[i] = Long.parseLong(parts[i].trim());
         return res;
     }}
 
