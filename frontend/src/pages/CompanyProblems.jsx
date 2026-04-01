@@ -28,6 +28,10 @@ const ARRAY_CORE_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Tr
 const ARRAY_BROAD_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Indian IT', 'Product (India)', 'Product (Global)', 'Consulting');
 const ARRAY_PRODUCT_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Product (India)', 'Product (Global)', 'Finance & Trading');
 const ARRAY_FOUNDATION_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Indian IT', 'Product (India)', 'Consulting');
+const BINARY_CORE_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Product (Global)');
+const BINARY_BROAD_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Indian IT', 'Product (India)', 'Product (Global)', 'Consulting');
+const BINARY_PRODUCT_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Product (India)', 'Product (Global)');
+const BINARY_ADVANCED_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Product (Global)');
 
 export default function CompanyProblems() {
     const { companyId } = useParams();
@@ -160,6 +164,42 @@ export default function CompanyProblems() {
                 "Airbnb", "Stripe", "Snap", "Samsung", "Visa", "Mastercard", "JP Morgan",
                 "Morgan Stanley", "Palantir", "Databricks", "Swiggy", "Flipkart"
             ],
+        },
+        "Find First and Last Position of Element in Sorted Array": {
+            topic: "Binary Search",
+            companies: BINARY_BROAD_COMPANIES,
+        },
+        "Search a 2D Matrix": {
+            topic: "Binary Search",
+            companies: BINARY_CORE_COMPANIES,
+        },
+        "Peak Index in a Mountain Array": {
+            topic: "Binary Search",
+            companies: BINARY_PRODUCT_COMPANIES,
+        },
+        "Single Element in a Sorted Array": {
+            topic: "Binary Search",
+            companies: BINARY_CORE_COMPANIES,
+        },
+        "Capacity To Ship Packages Within D Days": {
+            topic: "Binary Search",
+            companies: BINARY_PRODUCT_COMPANIES,
+        },
+        "Minimum Number of Days to Make m Bouquets": {
+            topic: "Binary Search",
+            companies: BINARY_BROAD_COMPANIES,
+        },
+        "H-Index II": {
+            topic: "Binary Search",
+            companies: companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Consulting'),
+        },
+        "Successful Pairs of Spells and Potions": {
+            topic: "Binary Search",
+            companies: BINARY_CORE_COMPANIES,
+        },
+        "Split Array Largest Sum": {
+            topic: "Binary Search",
+            companies: BINARY_ADVANCED_COMPANIES,
         },
         "Jump Game": {
             topic: "Greedy",
