@@ -377,6 +377,85 @@ export default function CompanyProblems() {
                 "Databricks", "Snowflake", "Twilio", "Deloitte", "Accenture", "KPMG"
             ],
         },
+        "Add Two Numbers": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Uber", "Airbnb",
+                "Stripe", "Salesforce", "Oracle", "NVIDIA", "Intel", "IBM", "LinkedIn",
+                "Snap", "Qualcomm", "Samsung", "Goldman Sachs", "Morgan Stanley", "JP Morgan",
+                "Visa", "Mastercard", "Infosys", "TCS", "Wipro", "Cognizant", "HCL Technologies",
+                "Tech Mahindra", "Flipkart", "Razorpay", "PhonePe", "Meesho", "Shopify",
+                "Databricks", "Twilio", "Deloitte"
+            ],
+        },
+        "Swap Nodes in Pairs": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Uber", "Airbnb",
+                "Oracle", "NVIDIA", "Intel", "ServiceNow", "Atlassian", "Goldman Sachs",
+                "Morgan Stanley", "JP Morgan", "DE Shaw", "Visa", "Infosys", "TCS",
+                "Wipro", "Tech Mahindra", "Flipkart", "Swiggy", "Zomato", "Shopify",
+                "Databricks", "Snowflake", "PwC", "KPMG"
+            ],
+        },
+        "Odd Even Linked List": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Netflix", "Adobe", "Stripe",
+                "LinkedIn", "Snap", "Spotify", "X (Twitter)", "Oracle", "IBM", "Visa",
+                "Mastercard", "Infosys", "Cognizant", "Accenture", "Capgemini", "Razorpay",
+                "Paytm", "PhonePe", "CRED", "Twilio", "Deloitte"
+            ],
+        },
+        "Partition List": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Uber", "Airbnb",
+                "Stripe", "Salesforce", "Oracle", "NVIDIA", "Intel", "LinkedIn", "Snap",
+                "Goldman Sachs", "Morgan Stanley", "JP Morgan", "Visa", "Mastercard",
+                "Infosys", "TCS", "Wipro", "HCL Technologies", "Flipkart", "Swiggy",
+                "Razorpay", "PhonePe", "Meesho", "Shopify", "Databricks", "Twilio"
+            ],
+        },
+        "Rotate List": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Uber", "Oracle",
+                "NVIDIA", "Intel", "Qualcomm", "Samsung", "VMware", "ServiceNow",
+                "Goldman Sachs", "JP Morgan", "Jane Street", "Visa", "Infosys", "TCS",
+                "Wipro", "Cognizant", "Tech Mahindra", "Flipkart", "Zomato", "Paytm",
+                "Zerodha", "Palantir", "PwC"
+            ],
+        },
+        "Delete the Middle Node of a Linked List": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Uber", "Stripe",
+                "Oracle", "NVIDIA", "IBM", "LinkedIn", "Snap", "Spotify", "Goldman Sachs",
+                "Morgan Stanley", "JP Morgan", "Visa", "Infosys", "TCS", "Wipro",
+                "HCL Technologies", "PhonePe", "CRED", "Shopify", "Snowflake", "Deloitte"
+            ],
+        },
+        "Maximum Twin Sum of a Linked List": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Uber", "Airbnb",
+                "Stripe", "NVIDIA", "Intel", "Oracle", "LinkedIn", "Snap", "Goldman Sachs",
+                "DE Shaw", "Citadel", "Tower Research", "Visa", "Mastercard", "Infosys",
+                "TCS", "Wipro", "Razorpay", "Paytm", "PhonePe", "Databricks", "Twilio"
+            ],
+        },
+        "Reverse Nodes in k-Group": {
+            topic: "Linked List",
+            companies: [
+                "Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Uber", "Airbnb",
+                "Stripe", "Salesforce", "Oracle", "NVIDIA", "Intel", "LinkedIn", "Snap",
+                "Spotify", "Goldman Sachs", "Morgan Stanley", "JP Morgan", "DE Shaw",
+                "Jane Street", "Citadel", "Tower Research", "Visa", "Infosys", "TCS",
+                "Wipro", "HCL Technologies", "Tech Mahindra", "Flipkart", "Swiggy",
+                "PhonePe", "Shopify", "Databricks", "Snowflake", "Twilio", "Deloitte"
+            ],
+        },
         "Deletion of the head of LL": {
             topic: "Linked List",
             companies: [
