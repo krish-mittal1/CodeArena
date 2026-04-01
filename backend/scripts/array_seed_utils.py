@@ -39,16 +39,17 @@ async def upsert_problem(db: AsyncSession, title: str, kwargs: dict, cases: Iter
         await db.flush()
 
     if problem:
+        problem_id = problem.id
         for key, value in kwargs.items():
             setattr(problem, key, value)
         await db.flush()
         replace_cases = True
         try:
-            await db.execute(delete(TestCase).where(TestCase.problem_id == problem.id))
+            await db.execute(delete(TestCase).where(TestCase.problem_id == problem_id))
             await db.flush()
         except Exception:
             await db.rollback()
-            result = await db.execute(select(Problem).where(Problem.id == problem.id))
+            result = await db.execute(select(Problem).where(Problem.id == problem_id))
             problem = result.scalar_one()
             for key, value in kwargs.items():
                 setattr(problem, key, value)
