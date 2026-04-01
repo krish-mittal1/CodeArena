@@ -20,6 +20,15 @@ function companyNameMatches(datasetName, mappedName) {
     return dataset === mapped || dataset.includes(mapped) || mapped.includes(dataset);
 }
 
+function companyNamesFor(...categories) {
+    return COMPANIES.filter((company) => categories.includes(company.category)).map((company) => company.name);
+}
+
+const ARRAY_CORE_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Product (Global)');
+const ARRAY_BROAD_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Indian IT', 'Product (India)', 'Product (Global)', 'Consulting');
+const ARRAY_PRODUCT_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Product (India)', 'Product (Global)', 'Finance & Trading');
+const ARRAY_FOUNDATION_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Indian IT', 'Product (India)', 'Consulting');
+
 export default function CompanyProblems() {
     const { companyId } = useParams();
     const navigate = useNavigate();
@@ -490,6 +499,58 @@ export default function CompanyProblems() {
                 "Oracle", "Twilio", "Shopify", "Qualcomm", "Databricks", "Goldman Sachs",
                 "Flipkart", "ARM", "TCS", "Cognizant", "Accenture", "Infosys", "Capgemini", "Wipro"
             ],
+        },
+        "Two Sum": {
+            topic: "Array",
+            companies: ARRAY_BROAD_COMPANIES,
+        },
+        "Best Time to Buy and Sell Stock": {
+            topic: "Array",
+            companies: ARRAY_FOUNDATION_COMPANIES,
+        },
+        "Maximum Subarray": {
+            topic: "Array",
+            companies: ARRAY_BROAD_COMPANIES,
+        },
+        "Merge Sorted Array": {
+            topic: "Array",
+            companies: ARRAY_FOUNDATION_COMPANIES,
+        },
+        "Majority Element": {
+            topic: "Array",
+            companies: ARRAY_FOUNDATION_COMPANIES,
+        },
+        "Pascal's Triangle": {
+            topic: "Array",
+            companies: companyNamesFor('FAANG+', 'Big Tech', 'Indian IT', 'Consulting'),
+        },
+        "Product of Array Except Self": {
+            topic: "Array",
+            companies: ARRAY_CORE_COMPANIES,
+        },
+        "Rotate Array": {
+            topic: "Array",
+            companies: ARRAY_PRODUCT_COMPANIES,
+        },
+        "Set Matrix Zeroes": {
+            topic: "Array",
+            companies: ARRAY_CORE_COMPANIES,
+        },
+        "Merge Intervals": {
+            topic: "Array",
+            companies: ARRAY_BROAD_COMPANIES,
+        },
+        "Next Permutation": {
+            topic: "Array",
+            companies: ARRAY_CORE_COMPANIES,
+        },
+        "Game of Life": {
+            topic: "Array",
+            companies: companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Product (Global)'),
+        },
+        "First Missing Positive": {
+            topic: "Array",
+            companies: ARRAY_CORE_COMPANIES,
         },
     };
 
