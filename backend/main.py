@@ -31,7 +31,7 @@ from backend.websocket.handlers import (
 from backend.db.session import AsyncSessionLocal, engine
 from backend.workers.judge_worker import run_dev_worker, run_redis_worker
 from backend.services.matchmaking_memory import run_matchmaking_poller
-from backend.services import matchmaking_service, match_service, bot_submission_service
+from backend.services import matchmaking_service, match_service
 from backend.core.exceptions import AppException
 from backend.websocket.manager import manager
 from backend.core.constants import WSEvent, MatchStatus, RedisKey
@@ -98,14 +98,6 @@ async def lifespan(app: FastAPI):
         logger.error(f"Alembic migration failed: {exc}", exc_info=True)
     
     # ── Seed bot users ────────────────────────────────────
-    try:
-        async with AsyncSessionLocal() as db:
-            from backend.scripts.seed_bots import get_or_create_bots
-            await get_or_create_bots(db, reset=False)
-            logger.info("Bot users initialized")
-    except Exception as exc:
-        logger.error(f"Failed to seed bot users: {exc}", exc_info=True)
-    
     redis = None
     judge_task = None
     matchmaking_task = None
@@ -304,9 +296,8 @@ async def _run_timer_sync_poller() -> None:
 async def _run_redis_matchmaking_poller(redis) -> None:
     """
     Production Redis matchmaking loop:
-      - Processes the queue so players/bots actually get paired.
+      - Processes the queue so players get paired.
       - Completes expired matches.
-      - Triggers bot submissions for active matches.
     """
     logger = logging.getLogger(__name__)
     poll_interval = settings.matchmaking_poll_interval_ms / 1000.0
@@ -348,10 +339,6 @@ async def _run_redis_matchmaking_poller(redis) -> None:
                 completed = await match_service.check_and_complete_expired_matches(db, redis)
                 for match_id in completed:
                     logger.info(f"Match {match_id} expired and completed")
-
-                bot_processed = await bot_submission_service.process_bot_submissions_for_active_matches(db, redis)
-                if bot_processed > 0:
-                    logger.debug(f"Processed bot submissions for {bot_processed} matches")
 
         except asyncio.CancelledError:
             break

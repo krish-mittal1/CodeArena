@@ -95,7 +95,7 @@ export default function QueueOverlay() {
                                         </p>
                                     </div>
                                     <p className="text-xs text-text-muted mt-4 font-medium tracking-wide">
-                                        Estimated wait: ~{Math.max(10, 30 - waitSeconds)}s
+                                        Matchmaking time depends on who is online right now
                                     </p>
                                 </div>
 

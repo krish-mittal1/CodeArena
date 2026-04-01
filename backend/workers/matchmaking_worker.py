@@ -1,6 +1,5 @@
 """
 Matchmaking worker — periodic queue processing and expired match scanning.
-Also handles bot auto-submissions for active matches.
 Run separately: python -m workers.matchmaking_worker
 """
 
@@ -13,7 +12,7 @@ import redis.asyncio as aioredis
 from backend.config import settings
 from backend.db.session import AsyncSessionLocal
 from backend.core.constants import WSEvent, RedisKey
-from backend.services import matchmaking_service, match_service, bot_submission_service
+from backend.services import matchmaking_service, match_service
 
 logger = logging.getLogger(__name__)
 
@@ -63,11 +62,6 @@ async def run_worker():
                 for match_id in completed:
                     logger.info(f"Match {match_id} expired and completed")
                 
-                # Process bot submissions for active matches
-                bot_processed = await bot_submission_service.process_bot_submissions_for_active_matches(db, redis)
-                if bot_processed > 0:
-                    logger.debug(f"Processed bot submissions for {bot_processed} matches")
-
         except Exception as e:
             logger.error(f"Matchmaking worker error: {e}", exc_info=True)
 

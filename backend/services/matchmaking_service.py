@@ -7,13 +7,11 @@ Architecture:
   - Global SETNX lock ensures one matchmaker processes at a time (multi-instance safe)
   - Lua script for atomic pair removal (no race between two matchmakers)
   - Expanding ELO window prevents player starvation
-  - Bot fallback: if no match found after timeout, pair with bot player
 
 Config (from settings):
   - Initial window: ±100 ELO
   - Expands by ±100 every 30 seconds of wait time
   - Max window: ±500 ELO
-  - Bot fallback: 10-20 seconds wait time
 """
 
 import time
@@ -26,11 +24,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
 from backend.config import settings
-from backend.core.constants import RedisKey, MatchStatus, BOT_WAIT_TIME_MIN, BOT_WAIT_TIME_MAX
+from backend.core.constants import RedisKey, MatchStatus
 from backend.core.exceptions import AlreadyInMatch
 from backend.models.match import Match
-from backend.models.user import User
-from backend.services import problem_service, bot_service
+from backend.services import problem_service
 
 logger = logging.getLogger(__name__)
 
@@ -344,53 +341,6 @@ async def process_queue(redis: Redis, db: AsyncSession) -> list[uuid.UUID]:
                 f"| window=±{window} | match={match_id}"
             )
         
-        # ── Bot Fallback: Check for players waiting too long ─────
-        for player in players:
-            if player["user_id"] in matched_user_ids:
-                continue  # Already matched
-
-            wait_secs = time.time() - player["joined_at"]
-            if wait_secs >= BOT_WAIT_TIME_MAX:
-                # Player has waited max time, find them a bot
-                player_result = await db.execute(
-                    select(User).where(User.id == uuid.UUID(player["user_id"]))
-                )
-                human_player = player_result.scalar_one_or_none()
-                bot = await bot_service.get_random_bot_for_elo(
-                    db,
-                    player["elo"],
-                    player_hint=(human_player.username if human_player else player["user_id"]),
-                )
-                if bot:
-                    # Remove player from queue
-                    ok = await redis.eval(
-                        ATOMIC_PAIR_REMOVE,
-                        1,
-                        RedisKey.MATCHMAKING_QUEUE,
-                        player["member"],
-                        "0",  # dummy (will be rolled back anyway)
-                        str(player["elo"]),
-                        "0",
-                    )
-                    if ok:
-                        # Create bot match
-                        match_id = await _create_match(
-                            db, redis,
-                            player["user_id"], player["elo"],
-                            str(bot.id), bot.elo,
-                        )
-                        matched_user_ids.add(player["user_id"])
-                        created_matches.append(match_id)
-                        
-                        # Release per-user lock
-                        await redis.delete(RedisKey.matchmaking_lock(player["user_id"]))
-                        
-                        logger.info(
-                            f"[MATCHMAKING] BOT FALLBACK: Paired {player['user_id']} (ELO={player['elo']}) "
-                            f"vs {bot.username} (ELO={bot.elo}) "
-                            f"after {wait_secs:.1f}s wait | match={match_id}"
-                        )
-
     finally:
         # Always release global lock
         await redis.delete(RedisKey.MATCHMAKING_GLOBAL_LOCK)
