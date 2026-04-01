@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import Editor from '@monaco-editor/react';
 import confetti from 'canvas-confetti';
@@ -28,6 +28,7 @@ const STATUS_ICONS = {
 export default function Practice() {
     const { problemId } = useParams();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const [language, setLanguage] = useState('python');
     const [code, setCode] = useState(CODE_TEMPLATES['python'] || '');
     const [verdict, setVerdict] = useState(null);
@@ -158,6 +159,12 @@ export default function Practice() {
                     setVerdict(sub);
                     setPolling(false);
                     refetchHistory();
+                    if (sub.status === 'accepted') {
+                        queryClient.setQueryData(['problem', problemId], (current) =>
+                            current ? { ...current, solved: true } : current
+                        );
+                        queryClient.invalidateQueries({ queryKey: ['problems'] });
+                    }
                     // Auto-trigger AI analysis for any finalized verdict
                     triggerAIAnalysis(sub);
                 } else if (sub) {
@@ -169,7 +176,7 @@ export default function Practice() {
         }, 1500);
 
         return () => clearInterval(interval);
-    }, [polling, submissionId, problemId, refetchHistory]);
+    }, [polling, submissionId, problemId, queryClient, refetchHistory]);
 
     const handleSubmit = () => {
         if (submitMutation.isPending || !code.trim()) return;
@@ -244,6 +251,16 @@ export default function Practice() {
                         <h2 className="text-sm font-bold text-text-primary truncate max-w-[200px] sm:max-w-[300px]">
                         {problem.title}
                         </h2>
+                    </div>
+                    <div
+                        className={`h-6 w-6 rounded-md border flex items-center justify-center ${
+                            problem.solved
+                                ? 'border-[#6fbf73] bg-[#6fbf73]/15 text-[#6fbf73]'
+                                : 'border-border bg-bg-surface text-transparent'
+                        }`}
+                        title={problem.solved ? 'Solved' : 'Not solved yet'}
+                    >
+                        <CheckCircle2 size={14} />
                     </div>
                     <Badge color={problem.difficulty === 'easy' ? 'green' : problem.difficulty === 'medium' ? 'yellow' : 'red'}>
                         {problem.difficulty}

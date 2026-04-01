@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Building2, Clock, Code2, Play } from 'lucide-react';
+import { ArrowLeft, Building2, Check, Clock, Code2, Play } from 'lucide-react';
 import { COMPANIES } from '../utils/companies';
 import { problemApi } from '../api/auth';
 import Badge from '../components/ui/Badge';
@@ -598,7 +598,18 @@ export default function CompanyProblems() {
                                 className="group relative paper-card-soft hover:border-accent/50 p-5 cursor-pointer transition-colors"
                             >
                                 <div className="flex items-center justify-between z-10 relative">
-                                    <div>
+                                    <div className="flex items-start gap-3 min-w-0">
+                                        <div
+                                            className={`mt-0.5 h-5 w-5 shrink-0 rounded-md border flex items-center justify-center transition-colors ${
+                                                prob.solved
+                                                    ? 'border-[#6fbf73] bg-[#6fbf73]/15 text-[#6fbf73]'
+                                                    : 'border-border text-transparent bg-bg-secondary'
+                                            }`}
+                                            title={prob.solved ? 'Solved' : 'Not solved yet'}
+                                        >
+                                            <Check className="w-3.5 h-3.5" />
+                                        </div>
+                                        <div className="min-w-0">
                                         <h3 className="text-base font-bold text-text-primary group-hover:text-accent transition-colors pr-5">
                                             {prob.title}
                                         </h3>
@@ -612,6 +623,7 @@ export default function CompanyProblems() {
                                                 </span>
                                             )}
                                         </div>
+                                    </div>
                                     </div>
                                     <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center translate-x-3 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all">
                                         <Play className="w-4 h-4 text-accent translate-x-0.5" />

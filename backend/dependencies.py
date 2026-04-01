@@ -19,6 +19,7 @@ from backend.models.user import User
 from backend.services.auth_service import get_user_by_id
 
 security_scheme = HTTPBearer()
+optional_security_scheme = HTTPBearer(auto_error=False)
 
 # ── Redis Dependency ──────────────────────────────────────────
 
@@ -133,6 +134,32 @@ async def get_current_user(
         )
 
     return user
+
+
+async def get_optional_current_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_security_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> Optional[User]:
+    """Best-effort user extraction for endpoints that can work anonymously."""
+    if credentials is None:
+        return None
+
+    token = credentials.credentials
+
+    try:
+        payload = decode_token(token)
+    except Exception:
+        return None
+
+    if payload.get("type") != "access":
+        return None
+
+    try:
+        user_id = uuid.UUID(payload["sub"])
+    except Exception:
+        return None
+
+    return await get_user_by_id(db, user_id)
 
 
 async def get_admin_user(current_user: User = Depends(get_current_user)) -> User:

@@ -49,6 +49,7 @@ class ProblemPublic(BaseModel):
     method_name: Optional[str] = None
     parameters: Optional[Any] = None
     return_type: Optional[str] = None
+    solved: bool = False
     sample_cases: List[TestCasePublic] = []
 
     model_config = {"from_attributes": True}
