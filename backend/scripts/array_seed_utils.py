@@ -24,8 +24,19 @@ def make_case(*inputs, expected_output, idx: int, is_sample: bool = False) -> di
 
 
 async def upsert_problem(db: AsyncSession, title: str, kwargs: dict, cases: Iterable[dict]) -> None:
-    result = await db.execute(select(Problem).where(Problem.title == title))
-    problem = result.scalar_one_or_none()
+    result = await db.execute(
+        select(Problem)
+        .where(Problem.title == title)
+        .order_by(Problem.created_at.asc(), Problem.id.asc())
+    )
+    problems = list(result.scalars().all())
+    problem = problems[0] if problems else None
+
+    if len(problems) > 1:
+        for duplicate in problems[1:]:
+            duplicate.title = f"{title} [Legacy Duplicate {str(duplicate.id)[:8]}]"
+            duplicate.is_active = False
+        await db.flush()
 
     if problem:
         for key, value in kwargs.items():
@@ -37,7 +48,7 @@ async def upsert_problem(db: AsyncSession, title: str, kwargs: dict, cases: Iter
             await db.flush()
         except Exception:
             await db.rollback()
-            result = await db.execute(select(Problem).where(Problem.title == title))
+            result = await db.execute(select(Problem).where(Problem.id == problem.id))
             problem = result.scalar_one()
             for key, value in kwargs.items():
                 setattr(problem, key, value)
