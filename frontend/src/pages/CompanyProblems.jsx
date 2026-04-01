@@ -32,6 +32,10 @@ const BINARY_CORE_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & T
 const BINARY_BROAD_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Indian IT', 'Product (India)', 'Product (Global)', 'Consulting');
 const BINARY_PRODUCT_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Product (India)', 'Product (Global)');
 const BINARY_ADVANCED_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Product (Global)');
+const STRING_CORE_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Product (India)', 'Product (Global)');
+const STRING_BROAD_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Indian IT', 'Product (India)', 'Product (Global)', 'Consulting');
+const STRING_FOUNDATION_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Indian IT', 'Product (India)', 'Consulting');
+const STRING_ADVANCED_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Product (Global)');
 
 export default function CompanyProblems() {
     const { companyId } = useParams();
@@ -591,6 +595,86 @@ export default function CompanyProblems() {
         "First Missing Positive": {
             topic: "Array",
             companies: ARRAY_CORE_COMPANIES,
+        },
+        "Longest Common Prefix": {
+            topic: "String",
+            companies: STRING_FOUNDATION_COMPANIES,
+        },
+        "Valid Anagram": {
+            topic: "String",
+            companies: STRING_FOUNDATION_COMPANIES,
+        },
+        "Isomorphic Strings": {
+            topic: "String",
+            companies: STRING_BROAD_COMPANIES,
+        },
+        "Roman to Integer": {
+            topic: "String",
+            companies: STRING_FOUNDATION_COMPANIES,
+        },
+        "Integer to Roman": {
+            topic: "String",
+            companies: STRING_CORE_COMPANIES,
+        },
+        "Find the Index of the First Occurrence in a String": {
+            topic: "String",
+            companies: STRING_FOUNDATION_COMPANIES,
+        },
+        "Zigzag Conversion": {
+            topic: "String",
+            companies: STRING_CORE_COMPANIES,
+        },
+        "String to Integer (atoi)": {
+            topic: "String",
+            companies: STRING_CORE_COMPANIES,
+        },
+        "Group Anagrams": {
+            topic: "String",
+            companies: STRING_CORE_COMPANIES,
+        },
+        "Decode String": {
+            topic: "String",
+            companies: STRING_CORE_COMPANIES,
+        },
+        "Longest Palindromic Substring": {
+            topic: "String",
+            companies: STRING_ADVANCED_COMPANIES,
+        },
+        "Palindromic Substrings": {
+            topic: "String",
+            companies: STRING_CORE_COMPANIES,
+        },
+        "Multiply Strings": {
+            topic: "String",
+            companies: STRING_CORE_COMPANIES,
+        },
+        "Minimum Remove to Make Valid Parentheses": {
+            topic: "String",
+            companies: STRING_BROAD_COMPANIES,
+        },
+        "Custom Sort String": {
+            topic: "String",
+            companies: STRING_BROAD_COMPANIES,
+        },
+        "Simplify Path": {
+            topic: "String",
+            companies: STRING_CORE_COMPANIES,
+        },
+        "Count and Say": {
+            topic: "String",
+            companies: STRING_FOUNDATION_COMPANIES,
+        },
+        "Word Break": {
+            topic: "String",
+            companies: STRING_CORE_COMPANIES,
+        },
+        "Valid Number": {
+            topic: "String",
+            companies: STRING_ADVANCED_COMPANIES,
+        },
+        "Regular Expression Matching": {
+            topic: "String",
+            companies: STRING_ADVANCED_COMPANIES,
         },
     };
 
