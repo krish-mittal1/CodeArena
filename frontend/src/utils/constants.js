@@ -4,6 +4,7 @@
 
 // Your Azure VM Public IP: 4.193.212.14
 const PROD_IP = '4.193.212.14';
+const isBrowser = typeof window !== 'undefined';
 
 function stripTrailingSlash(value) {
     return value.replace(/\/+$/, '');
@@ -14,11 +15,16 @@ function normalizeApiOrigin(value) {
     return trimmed.replace(/\/api\/v1$/i, '');
 }
 
+const inferredApiOrigin = isBrowser ? window.location.origin : `http://${PROD_IP}:8000`;
+const inferredWsBase = isBrowser
+    ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`
+    : `ws://${PROD_IP}:8000`;
+
 export const API_ORIGIN = normalizeApiOrigin(
-    process.env.NEXT_PUBLIC_API_URL || `http://${PROD_IP}:8000`
+    process.env.NEXT_PUBLIC_API_URL || inferredApiOrigin
 );
 export const API_BASE = `${API_ORIGIN}/api/v1`;
-export const WS_BASE = stripTrailingSlash(process.env.NEXT_PUBLIC_WS_URL || `ws://${PROD_IP}:8000`);
+export const WS_BASE = stripTrailingSlash(process.env.NEXT_PUBLIC_WS_URL || inferredWsBase);
 
 // ── WebSocket Events (mirrors WSEvent enum) ──────────
 export const WS_EVENTS = {
