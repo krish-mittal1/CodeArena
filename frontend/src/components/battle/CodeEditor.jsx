@@ -1,10 +1,12 @@
-import Editor from '@monaco-editor/react';
 import { useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useBattleStore } from '../../stores/battleStore';
 import { submissionApi } from '../../api/auth';
 import { LANGUAGES, CODE_TEMPLATES, generateBoilerplate } from '../../utils/constants';
 import { defineCodeArenaTheme, CODEARENA_THEME_NAME } from '../../utils/editorTheme';
 import { Code2, Play, RotateCcw, Settings2 } from 'lucide-react';
+
+const Editor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
 
 export default function CodeEditor() {
     const language = useBattleStore((s) => s.language);

@@ -17,7 +17,8 @@ export function useLogin() {
     const login = useAuthStore((s) => s.login);
     const navigate = useNavigate();
     const location = useLocation();
-    const from = location.state?.from?.pathname || '/dashboard';
+    const params = new URLSearchParams(location.search || '');
+    const from = location.state?.from?.pathname || params.get('next') || '/dashboard';
 
     return useMutation({
         mutationFn: ({ username, password }) => login(username, password),

@@ -15,10 +15,10 @@ function normalizeApiOrigin(value) {
 }
 
 export const API_ORIGIN = normalizeApiOrigin(
-    import.meta.env.VITE_API_URL || `http://${PROD_IP}:8000`
+    process.env.NEXT_PUBLIC_API_URL || `http://${PROD_IP}:8000`
 );
 export const API_BASE = `${API_ORIGIN}/api/v1`;
-export const WS_BASE = stripTrailingSlash(import.meta.env.VITE_WS_URL || `ws://${PROD_IP}:8000`);
+export const WS_BASE = stripTrailingSlash(process.env.NEXT_PUBLIC_WS_URL || `ws://${PROD_IP}:8000`);
 
 // ── WebSocket Events (mirrors WSEvent enum) ──────────
 export const WS_EVENTS = {

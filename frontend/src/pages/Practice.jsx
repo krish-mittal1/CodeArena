@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import Editor from '@monaco-editor/react';
 import confetti from 'canvas-confetti';
 import {
     ArrowLeft, Code2, Play, RotateCcw, Settings2,
@@ -14,6 +14,8 @@ import { defineCodeArenaTheme, CODEARENA_THEME_NAME } from '../utils/editorTheme
 import Badge from '../components/ui/Badge';
 import AIAnalysisPanel from '../components/ui/AIAnalysisPanel';
 import ResizableSplit from '../components/ui/ResizableSplit';
+
+const Editor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
 
 
 const STATUS_ICONS = {

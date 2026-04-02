@@ -22,7 +22,7 @@ function safeHandler(handlerName, handler) {
         } catch (error) {
             console.error(`[WS] Error in ${handlerName} handler:`, error);
             // Log error details in development
-            if (import.meta.env.DEV) {
+            if (process.env.NODE_ENV !== 'production') {
                 console.error('Event data:', data);
                 console.error('Error stack:', error.stack);
             }
@@ -190,7 +190,7 @@ export function registerEventHandlers() {
     );
 
     // ── Debug: log all events in development ────────────
-    if (import.meta.env.DEV) {
+    if (process.env.NODE_ENV !== 'production') {
         unsubscribers.push(
             wsManager.on('*', safeHandler('DEBUG_ALL', ({ event, data }) => {
                 console.log(`[WS] ← ${event}`, data);
