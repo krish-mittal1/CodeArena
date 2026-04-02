@@ -267,19 +267,23 @@ export default function Practice() {
     const formatCodeforcesExamples = (sampleCases) => (
         <div className="space-y-4">
             {sampleCases.map((tc, i) => (
-                <div key={i} className="border border-border bg-bg-primary overflow-hidden rounded-[10px]">
-                    <p className="text-sm font-bold text-text-primary mb-3">{`Example ${i + 1}`}</p>
-                    <div className="border-t border-border">
-                        <div className="px-3 py-1.5 bg-bg-surface border-b border-border">
-                            <p className="text-sm font-bold lowercase text-text-primary font-mono">input</p>
+                <div key={i} className="border border-border bg-bg-primary overflow-hidden rounded-[6px]">
+                    {sampleCases.length > 1 && (
+                        <div className="px-3 py-2 border-b border-border bg-bg-surface/60">
+                            <p className="text-sm font-semibold text-text-primary">{`Example ${i + 1}`}</p>
                         </div>
-                        <pre className="px-3 py-2.5 text-sm text-text-primary font-mono whitespace-pre-wrap">{tc.input}</pre>
+                    )}
+                    <div className="border-t border-border">
+                        <div className="px-2.5 py-1 bg-bg-surface border-b border-border">
+                            <p className="text-[13px] font-bold lowercase text-text-primary font-mono">input</p>
+                        </div>
+                        <pre className="px-2.5 py-2 text-sm text-text-primary font-mono whitespace-pre-wrap">{tc.input}</pre>
                     </div>
                     <div className="border-t border-border">
-                        <div className="px-3 py-1.5 bg-bg-surface border-b border-border">
-                            <p className="text-sm font-bold lowercase text-text-primary font-mono">output</p>
+                        <div className="px-2.5 py-1 bg-bg-surface border-b border-border">
+                            <p className="text-[13px] font-bold lowercase text-text-primary font-mono">output</p>
                         </div>
-                        <pre className="px-3 py-2.5 text-sm text-text-primary font-mono whitespace-pre-wrap">{tc.expected_output}</pre>
+                        <pre className="px-2.5 py-2 text-sm text-text-primary font-mono whitespace-pre-wrap">{tc.expected_output}</pre>
                     </div>
                 </div>
             ))}
@@ -342,12 +346,16 @@ export default function Practice() {
 
                                 <div>
                                     <h3 className="text-base font-bold text-text-primary mb-3">Input</h3>
-                                    {renderCodeforcesTextBlock(problem.input_format)}
+                                    <div className="max-w-none">
+                                        {renderCodeforcesTextBlock(problem.input_format)}
+                                    </div>
                                 </div>
 
                                 <div>
                                     <h3 className="text-base font-bold text-text-primary mb-3">Output</h3>
-                                    {renderCodeforcesTextBlock(problem.output_format)}
+                                    <div className="max-w-none">
+                                        {renderCodeforcesTextBlock(problem.output_format)}
+                                    </div>
                                 </div>
 
                                 {problem.constraints && (
