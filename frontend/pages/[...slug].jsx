@@ -16,6 +16,7 @@ import CompetitiveProblems from '../src/pages/CompetitiveProblems';
 import { useAuthStore } from '../src/stores/authStore';
 import { useBattleStore } from '../src/stores/battleStore';
 import { RouterCompatProvider } from '../src/next/routerCompat';
+import { SEOHead } from '../src/next/seo';
 
 function LoadingScreen() {
     return (
@@ -38,11 +39,11 @@ function resolveRoute(slug) {
     if (slug.length === 1 && slug[0] === 'history') return { kind: 'protected', component: History, params: {} };
     if (slug.length === 1 && slug[0] === 'profile') return { kind: 'protected', component: Profile, params: {} };
     if (slug.length === 1 && slug[0] === 'settings') return { kind: 'protected', component: Settings, params: {} };
-    if (slug.length === 1 && slug[0] === 'problems') return { kind: 'protected', component: Problems, params: {} };
-    if (slug.length === 2 && slug[0] === 'practice' && slug[1] === 'dsa') return { kind: 'protected', component: DsaPracticeHub, params: {} };
-    if (slug.length === 2 && slug[0] === 'practice' && slug[1] === 'competitive') return { kind: 'protected', component: CompetitiveProblems, params: {} };
+    if (slug.length === 1 && slug[0] === 'problems') return { kind: 'public', component: Problems, params: {} };
+    if (slug.length === 2 && slug[0] === 'practice' && slug[1] === 'dsa') return { kind: 'public', component: DsaPracticeHub, params: {} };
+    if (slug.length === 2 && slug[0] === 'practice' && slug[1] === 'competitive') return { kind: 'public', component: CompetitiveProblems, params: {} };
     if (slug.length === 2 && slug[0] === 'practice') return { kind: 'protected', component: Practice, params: { problemId: slug[1] } };
-    if (slug.length === 2 && slug[0] === 'company') return { kind: 'protected', component: CompanyProblems, params: { companyId: slug[1] } };
+    if (slug.length === 2 && slug[0] === 'company') return { kind: 'public', component: CompanyProblems, params: { companyId: slug[1] } };
     if (slug.length === 2 && slug[0] === 'battle') return { kind: 'protected', component: Battle, params: { matchId: slug[1] } };
     return null;
 }
@@ -105,8 +106,25 @@ export default function CatchAllPage() {
 
     const Component = route.component;
     return (
-        <RouterCompatProvider params={route.params}>
-            <Component />
-        </RouterCompatProvider>
+        <>
+            <SEOHead
+                title={
+                    slug[0] === 'login' ? 'Login' :
+                        slug[0] === 'register' ? 'Register' :
+                            slug[0] === 'dashboard' ? 'Dashboard' :
+                                slug[0] === 'history' ? 'History' :
+                                    slug[0] === 'profile' ? 'Profile' :
+                                        slug[0] === 'settings' ? 'Settings' :
+                                            slug[0] === 'battle' ? 'Live Battle' :
+                                                slug[0] === 'practice' ? 'Practice Problem' :
+                                                    'CodeArena'
+                }
+                path={currentPath}
+                noindex={route.kind !== 'public'}
+            />
+            <RouterCompatProvider params={route.params}>
+                <Component />
+            </RouterCompatProvider>
+        </>
     );
 }
