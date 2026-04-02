@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,6 +40,7 @@ export default function Practice() {
     const [aiAnalysis, setAiAnalysis] = useState(null);
     const [showAIPanel, setShowAIPanel] = useState(false);
     const [aiLoading, setAiLoading] = useState(false);
+    const codeLoadedRef = useRef('');
 
     // Monaco custom theme
     const handleEditorWillMount = useCallback((monaco) => {
@@ -68,13 +69,29 @@ export default function Practice() {
     });
     const isCompetitiveProblem = problem?.problem_type === 'cp';
     const practiceBackPath = isCompetitiveProblem ? '/practice/competitive' : '/practice/dsa';
+    const generatedBoilerplate = useMemo(
+        () => (problem ? (generateBoilerplate(language, problem) || CODE_TEMPLATES[language] || '') : (CODE_TEMPLATES[language] || '')),
+        [language, problemId, problem?.method_name, problem?.return_type, problem?.problem_type, JSON.stringify(problem?.parameters || null)]
+    );
+    const draftKey = useMemo(
+        () => (problemId ? `codearena:draft:${problemId}:${language}` : ''),
+        [problemId, language]
+    );
 
-    // Set boilerplate when problem loads
+    // Load saved draft or boilerplate when problem/language changes
     useEffect(() => {
-        if (problem) {
-            setCode(generateBoilerplate(language, problem) || CODE_TEMPLATES[language] || '');
-        }
-    }, [problem]);
+        if (!problem || !draftKey) return;
+        const savedDraft = window.localStorage.getItem(draftKey);
+        const nextCode = savedDraft ?? generatedBoilerplate;
+        codeLoadedRef.current = nextCode;
+        setCode(nextCode);
+    }, [problemId, language, draftKey, generatedBoilerplate, problem]);
+
+    useEffect(() => {
+        if (!draftKey) return;
+        if (code === codeLoadedRef.current) return;
+        window.localStorage.setItem(draftKey, code);
+    }, [code, draftKey]);
 
     const { data: history = [], refetch: refetchHistory } = useQuery({
         queryKey: ['practiceHistory', problemId],
@@ -205,13 +222,17 @@ export default function Practice() {
     };
 
     const handleReset = () => {
-        setCode(generateBoilerplate(language, problem) || CODE_TEMPLATES[language] || '');
+        const nextCode = generatedBoilerplate;
+        if (draftKey) {
+            window.localStorage.removeItem(draftKey);
+        }
+        codeLoadedRef.current = nextCode;
+        setCode(nextCode);
         setVerdict(null);
     };
 
     const handleLanguageChange = (newLang) => {
         setLanguage(newLang);
-        setCode(generateBoilerplate(newLang, problem) || CODE_TEMPLATES[newLang] || '');
     };
 
     if (isLoading) {
@@ -237,6 +258,25 @@ export default function Practice() {
 
     const verdictInfo = verdict ? VERDICTS[verdict.status] : null;
     const StatusIcon = verdict ? STATUS_ICONS[verdict.status] : null;
+    const formatCodeforcesExamples = (sampleCases) => (
+        <div className="space-y-4">
+            {sampleCases.map((tc, i) => (
+                <div key={i} className="paper-card-soft p-4">
+                    <p className="text-sm font-bold text-text-primary mb-3">{`Example ${i + 1}`}</p>
+                    <div className="space-y-3">
+                        <div>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted mb-1.5">Input</p>
+                            <pre className="text-sm text-text-primary font-mono whitespace-pre-wrap bg-bg-root border border-border rounded-[12px_9px_11px_8px] p-3">{tc.input}</pre>
+                        </div>
+                        <div>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted mb-1.5">Output</p>
+                            <pre className="text-sm text-text-primary font-mono whitespace-pre-wrap bg-bg-root border border-border rounded-[12px_9px_11px_8px] p-3">{tc.expected_output}</pre>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 
     return (
         <div className="h-[calc(100vh-64px)] bg-bg-root flex flex-col overflow-hidden">
@@ -283,55 +323,93 @@ export default function Practice() {
                 maxLeft={65}
                 left={
                     <div className="p-6 space-y-5">
-                        {/* Description */}
-                        <div>
-                            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-3">Description</h3>
-                            <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
-                                {problem.description}
-                            </div>
-                        </div>
-
-                        {/* Input Format */}
-                        <div>
-                            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-2">Input Format</h3>
-                            <p className="text-sm text-text-secondary">{problem.input_format}</p>
-                        </div>
-
-                        {/* Output Format */}
-                        <div>
-                            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-2">Output Format</h3>
-                            <p className="text-sm text-text-secondary">{problem.output_format}</p>
-                        </div>
-
-                        {/* Constraints */}
-                        {problem.constraints && (
-                            <div>
-                                <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-2">Constraints</h3>
-                                <p className="text-sm text-text-secondary font-mono whitespace-pre-wrap">{problem.constraints}</p>
-                            </div>
-                        )}
-
-                        {/* Sample Cases */}
-                        {problem.sample_cases?.length > 0 && (
-                            <div>
-                                <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-3">Examples</h3>
-                                <div className="space-y-3">
-                                    {problem.sample_cases.map((tc, i) => (
-                                        <div key={i} className="paper-card-soft overflow-hidden">
-                                            <div className="grid grid-cols-2 divide-x divide-border">
-                                                <div className="p-3">
-                                                    <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Input</p>
-                                                    <pre className="text-xs text-text-primary font-mono whitespace-pre-wrap">{tc.input}</pre>
-                                                </div>
-                                                <div className="p-3">
-                                                    <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Output</p>
-                                                    <pre className="text-xs text-text-primary font-mono whitespace-pre-wrap">{tc.expected_output}</pre>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                        {isCompetitiveProblem ? (
+                            <>
+                                <div>
+                                    <h3 className="text-base font-bold text-text-primary mb-3">Problem statement</h3>
+                                    <div className="text-sm text-text-secondary leading-7 whitespace-pre-wrap">
+                                        {problem.description}
+                                    </div>
                                 </div>
-                            </div>
+
+                                <div>
+                                    <h3 className="text-base font-bold text-text-primary mb-3">Input</h3>
+                                    <div className="paper-card-soft p-4">
+                                        <pre className="text-sm text-text-secondary whitespace-pre-wrap leading-7">{problem.input_format}</pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-base font-bold text-text-primary mb-3">Output</h3>
+                                    <div className="paper-card-soft p-4">
+                                        <pre className="text-sm text-text-secondary whitespace-pre-wrap leading-7">{problem.output_format}</pre>
+                                    </div>
+                                </div>
+
+                                {problem.constraints && (
+                                    <div>
+                                        <h3 className="text-base font-bold text-text-primary mb-3">Constraints</h3>
+                                        <div className="paper-card-soft p-4">
+                                            <pre className="text-sm text-text-secondary font-mono whitespace-pre-wrap leading-7">{problem.constraints}</pre>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {problem.sample_cases?.length > 0 && (
+                                    <div>
+                                        <h3 className="text-base font-bold text-text-primary mb-3">Examples</h3>
+                                        {formatCodeforcesExamples(problem.sample_cases)}
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <div>
+                                    <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-3">Description</h3>
+                                    <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
+                                        {problem.description}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-2">Input Format</h3>
+                                    <p className="text-sm text-text-secondary">{problem.input_format}</p>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-2">Output Format</h3>
+                                    <p className="text-sm text-text-secondary">{problem.output_format}</p>
+                                </div>
+
+                                {problem.constraints && (
+                                    <div>
+                                        <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-2">Constraints</h3>
+                                        <p className="text-sm text-text-secondary font-mono whitespace-pre-wrap">{problem.constraints}</p>
+                                    </div>
+                                )}
+
+                                {problem.sample_cases?.length > 0 && (
+                                    <div>
+                                        <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-3">Examples</h3>
+                                        <div className="space-y-3">
+                                            {problem.sample_cases.map((tc, i) => (
+                                                <div key={i} className="paper-card-soft overflow-hidden">
+                                                    <div className="grid grid-cols-2 divide-x divide-border">
+                                                        <div className="p-3">
+                                                            <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Input</p>
+                                                            <pre className="text-xs text-text-primary font-mono whitespace-pre-wrap">{tc.input}</pre>
+                                                        </div>
+                                                        <div className="p-3">
+                                                            <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Output</p>
+                                                            <pre className="text-xs text-text-primary font-mono whitespace-pre-wrap">{tc.expected_output}</pre>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
 
                         {/* Submission History */}
