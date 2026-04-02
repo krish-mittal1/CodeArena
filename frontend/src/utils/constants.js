@@ -2,8 +2,8 @@
    Frontend Constants — mirrors backend's core/constants.py
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-// Your Azure VM Public IP: 4.193.212.14
-const PROD_IP = '4.193.212.14';
+// Current Azure VM Public IP
+const PROD_IP = '20.197.31.143';
 const isBrowser = typeof window !== 'undefined';
 
 function stripTrailingSlash(value) {
@@ -15,7 +15,7 @@ function normalizeApiOrigin(value) {
     return trimmed.replace(/\/api\/v1$/i, '');
 }
 
-const inferredApiOrigin = isBrowser ? window.location.origin : `http://${PROD_IP}:8000`;
+const inferredApiOrigin = isBrowser ? '' : `http://${PROD_IP}:8000`;
 const inferredWsBase = isBrowser
     ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`
     : `ws://${PROD_IP}:8000`;
