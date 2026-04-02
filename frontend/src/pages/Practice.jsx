@@ -66,6 +66,8 @@ export default function Practice() {
         queryFn: () => problemApi.getById(problemId),
         enabled: !!problemId,
     });
+    const isCompetitiveProblem = problem?.problem_type === 'cp';
+    const practiceBackPath = isCompetitiveProblem ? '/practice/competitive' : '/practice/dsa';
 
     // Set boilerplate when problem loads
     useEffect(() => {
@@ -165,8 +167,9 @@ export default function Practice() {
                         );
                         queryClient.invalidateQueries({ queryKey: ['problems'] });
                     }
-                    // Auto-trigger AI analysis for any finalized verdict
-                    triggerAIAnalysis(sub);
+                    if (!isCompetitiveProblem) {
+                        triggerAIAnalysis(sub);
+                    }
                 } else if (sub) {
                     setVerdict(sub);
                 }
@@ -176,7 +179,7 @@ export default function Practice() {
         }, 1500);
 
         return () => clearInterval(interval);
-    }, [polling, submissionId, problemId, queryClient, refetchHistory]);
+    }, [polling, submissionId, problemId, queryClient, refetchHistory, isCompetitiveProblem]);
 
     const handleSubmit = () => {
         if (submitMutation.isPending || !code.trim()) return;
@@ -241,7 +244,7 @@ export default function Practice() {
             <div className="flex items-center justify-between px-4 py-3 bg-bg-primary border-b border-border shrink-0 shadow-[0_8px_16px_rgba(0,0,0,0.12)]">
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={() => navigate('/problems')}
+                        onClick={() => navigate(practiceBackPath)}
                         className="p-1.5 rounded-[12px_9px_11px_8px] hover:bg-bg-hover text-text-secondary hover:text-text-primary transition-colors"
                     >
                         <ArrowLeft size={18} />
@@ -265,6 +268,11 @@ export default function Practice() {
                     <Badge color={problem.difficulty === 'easy' ? 'green' : problem.difficulty === 'medium' ? 'yellow' : 'red'}>
                         {problem.difficulty}
                     </Badge>
+                    {isCompetitiveProblem && (
+                        <span className="px-2.5 py-1 rounded-full border border-[#7ec4cf]/30 bg-[#7ec4cf]/10 text-[#7ec4cf] text-xs font-semibold">
+                            {problem.rating}
+                        </span>
+                    )}
                 </div>
             </div>
 
@@ -554,7 +562,7 @@ export default function Practice() {
                                         {verdictInfo?.label || verdict.status || 'Running...'}
                                     </span>
                                     {/* AI Loading indicator */}
-                                    {aiLoading && !polling && (
+                                    {!isCompetitiveProblem && aiLoading && !polling && (
                                         <div className="flex items-center gap-1.5 text-accent text-xs font-medium">
                                             <Sparkles size={13} className="animate-pulse" />
                                             Analyzing with AI...
@@ -572,7 +580,7 @@ export default function Practice() {
                                         <span className="font-mono">{(verdict.memory_used_kb / 1024).toFixed(1)}MB</span>
                                     )}
                                     {/* Re-open AI panel button */}
-                                    {aiAnalysis && !showAIPanel && (
+                                    {!isCompetitiveProblem && aiAnalysis && !showAIPanel && (
                                         <button
                                             onClick={() => setShowAIPanel(true)}
                                             className="flex items-center gap-1 px-2.5 py-1 rounded-[12px_9px_11px_8px] bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors text-xs font-semibold"
@@ -628,7 +636,7 @@ export default function Practice() {
 
             {/* AI Analysis Modal - auto-pops after every verdict */}
             <AnimatePresence>
-                {showAIPanel && (
+                {!isCompetitiveProblem && showAIPanel && (
                     aiLoading ? (
                         <motion.div
                             key="ai-loading"

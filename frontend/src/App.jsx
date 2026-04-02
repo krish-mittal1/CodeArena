@@ -21,6 +21,8 @@ import Settings from './pages/Settings';
 import Problems from './pages/Problems';
 import Practice from './pages/Practice';
 import CompanyProblems from './pages/CompanyProblems';
+import DsaPracticeHub from './pages/DsaPracticeHub';
+import CompetitiveProblems from './pages/CompetitiveProblems';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -125,6 +127,22 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 {matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <Problems />}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/practice/dsa"
+            element={
+              <ProtectedRoute>
+                {matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <DsaPracticeHub />}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/practice/competitive"
+            element={
+              <ProtectedRoute>
+                {matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <CompetitiveProblems />}
               </ProtectedRoute>
             }
           />

@@ -679,6 +679,7 @@ export default function CompanyProblems() {
     };
 
     const companyProblems = problems
+        .filter((p) => p.problem_type !== 'cp')
         .map((p) => {
             let title = p.title;
             // Normalization for the db title
@@ -750,7 +751,7 @@ export default function CompanyProblems() {
                     <Building2 size={40} className="mx-auto text-text-muted/40 mb-3" />
                     <p className="text-text-secondary text-sm font-medium">Company not found</p>
                     <button
-                        onClick={() => navigate('/problems')}
+                        onClick={() => navigate('/practice/dsa')}
                         className="mt-4 px-4 py-2 rounded-[14px_11px_13px_9px] bg-accent/10 text-accent text-sm font-medium hover:bg-accent/20 transition-colors"
                     >
                         ← Back to Companies
@@ -766,7 +767,7 @@ export default function CompanyProblems() {
                 {/* Back button */}
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
                     <button
-                        onClick={() => navigate('/problems')}
+                        onClick={() => navigate('/practice/dsa')}
                         className="flex items-center gap-2 text-text-secondary hover:text-text-primary text-sm font-medium mb-6 transition-colors group"
                     >
                         <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />

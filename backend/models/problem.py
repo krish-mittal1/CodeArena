@@ -25,6 +25,9 @@ class Problem(Base):
     input_format: Mapped[str] = mapped_column(Text, nullable=False)
     output_format: Mapped[str] = mapped_column(Text, nullable=False)
     constraints: Mapped[str] = mapped_column(Text, nullable=True)
+    problem_type: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="dsa", server_default="dsa"
+    )
     
     # ── LeetCode Execution Architecture ──
     method_name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
