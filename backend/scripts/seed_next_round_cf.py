@@ -8,7 +8,7 @@ from backend.core.constants import Difficulty
 from backend.scripts.cp_seed_utils import make_case, upsert_problem
 
 TITLE = "Next Round"
-TARGET_CASES = 541
+TARGET_CASES = 559
 
 
 def solve(scores: list[int], k: int) -> str:
@@ -35,11 +35,23 @@ def build_cases() -> list[dict]:
 
     fixed = [
         ([1], 1),
+        ([0], 1),
         ([5, 4, 3, 2, 1], 1),
         ([5, 4, 3, 2, 1], 5),
         ([9, 9, 9, 9], 4),
         ([3, 3, 0, 0, 0], 2),
         ([8, 7, 7, 7, 6, 0], 4),
+        ([10, 0, 0, 0, 0], 1),
+        ([10, 9, 8, 7, 6], 5),
+        ([1, 1, 1, 1, 1], 3),
+        ([0, 0, 0, 0, 0, 0], 6),
+        ([1000, 999, 998, 0, 0, 0], 3),
+        ([5, 5, 5, 5, 5, 5, 5], 7),
+        ([7, 6, 5, 4, 3, 2, 1], 4),
+        ([2, 2, 1, 1, 1, 0], 2),
+        ([9, 8, 8, 8, 8, 8, 8, 1], 3),
+        ([1, 0], 1),
+        ([1, 0], 2),
     ]
     for scores, k in fixed:
         cases.append(make_case(make_input(scores, k), solve(scores, k), idx))

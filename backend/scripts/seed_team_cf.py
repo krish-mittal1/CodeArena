@@ -8,7 +8,7 @@ from backend.core.constants import Difficulty
 from backend.scripts.cp_seed_utils import make_case, upsert_problem
 
 TITLE = "Team"
-TARGET_CASES = 523
+TARGET_CASES = 547
 
 
 def solve(rows: list[tuple[int, int, int]]) -> str:
@@ -34,10 +34,20 @@ def build_cases() -> list[dict]:
 
     fixed = [
         [(1, 0, 1)],
+        [(0, 0, 0)],
+        [(1, 1, 0)],
+        [(1, 1, 1)],
         [(0, 1, 0), (0, 1, 1)],
         [(1, 1, 0)] * 10,
         [(0, 0, 1)] * 8,
         [(1, 1, 1), (1, 1, 1), (1, 1, 1)],
+        [(0, 0, 0)] * 25,
+        [(1, 0, 1)] * 25,
+        [(1, 1, 0), (1, 0, 0), (0, 1, 1), (0, 0, 1)],
+        [(1, 0, 0), (0, 1, 0), (0, 0, 1)],
+        [(1, 1, 0), (1, 1, 0), (0, 0, 0), (1, 1, 1)],
+        [(1, 0, 1), (1, 0, 1), (0, 1, 0), (0, 1, 1)],
+        [(1, 1, 1)] * 150,
     ]
     for rows in fixed:
         cases.append(make_case(make_input(rows), solve(rows), idx))

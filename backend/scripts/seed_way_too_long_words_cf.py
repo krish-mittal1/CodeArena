@@ -9,7 +9,7 @@ from backend.core.constants import Difficulty
 from backend.scripts.cp_seed_utils import make_case, upsert_problem
 
 TITLE = "Way Too Long Words"
-TARGET_CASES = 517
+TARGET_CASES = 538
 
 
 def shorten(word: str) -> str:
@@ -41,10 +41,20 @@ def build_cases() -> list[dict]:
 
     fixed = [
         ["x"],
+        ["z" * 10],
         ["abcdefghijklmno"],
+        ["a" * 11],
+        ["b" * 12],
         ["hi", "helloworld", "helloworlds"],
         ["a" * 100],
+        ["b" * 119, "c" * 120],
         ["edgecase", "tiny", "massivelylongwordtest"],
+        ["programming", "contest", "rating", "ladder"],
+        ["short", "small", "mini", "micro", "supercalifragilistic"],
+        ["a", "ab", "abc", "abcd", "abcde", "abcdef", "abcdefg", "abcdefgh", "abcdefghi", "abcdefghij", "abcdefghijk"],
+        ["localization", "internationalization", "accessibility", "automatically"],
+        ["qwertyuiopasdfghjkl", "bbbbbbbbbbb", "cccccccccccccccccccc"],
+        ["single", "word"],
     ]
     for words in fixed:
         cases.append(make_case(make_input(words), solve(words), idx))

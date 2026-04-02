@@ -8,7 +8,7 @@ from backend.core.constants import Difficulty
 from backend.scripts.cp_seed_utils import make_case, upsert_problem
 
 TITLE = "Watermelon"
-TARGET_CASES = 528
+TARGET_CASES = 544
 
 
 def solve(weight: int) -> str:
@@ -24,7 +24,14 @@ def build_cases() -> list[dict]:
         cases.append(make_case(str(weight), solve(weight), idx, is_sample=True))
         idx += 1
 
-    for weight in [1, 3, 4, 6, 98, 99, 100, 17]:
+    edge_cases = [
+        1, 2, 3, 4, 5, 6,
+        7, 8, 9, 10,
+        17, 18, 19, 20,
+        97, 98, 99, 100,
+        999999, 1000000,
+    ]
+    for weight in edge_cases:
         cases.append(make_case(str(weight), solve(weight), idx))
         idx += 1
 

@@ -8,7 +8,7 @@ from backend.core.constants import Difficulty
 from backend.scripts.cp_seed_utils import make_case, upsert_problem
 
 TITLE = "Helpful Maths"
-TARGET_CASES = 509
+TARGET_CASES = 533
 
 
 def solve(expression: str) -> str:
@@ -33,6 +33,19 @@ def build_cases() -> list[dict]:
         "1",
         "+".join(["3"] * 20),
         "+".join(["2", "1", "2", "3", "1", "3", "2"]),
+        "3+2+3+2+1+1",
+        "1+1+1+1+1+1+1+1+1+1",
+        "2+2+2+2+2+2+2+2",
+        "3+1",
+        "3+1+2",
+        "+".join(["1", "3"] * 30),
+        "+".join(["2", "3"] * 25),
+        "+".join(["1", "2", "3"] * 20),
+        "3",
+        "2",
+        "+".join(["1"] * 120),
+        "+".join(["3"] * 120),
+        "+".join(["2"] * 120),
     ]
     for expression in fixed:
         cases.append(make_case(expression, solve(expression), idx))
