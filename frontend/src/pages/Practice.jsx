@@ -258,20 +258,28 @@ export default function Practice() {
 
     const verdictInfo = verdict ? VERDICTS[verdict.status] : null;
     const StatusIcon = verdict ? STATUS_ICONS[verdict.status] : null;
+    const renderCodeforcesTextBlock = (content) => (
+        <div className="text-sm text-text-secondary leading-7 whitespace-pre-wrap">
+            {content}
+        </div>
+    );
+
     const formatCodeforcesExamples = (sampleCases) => (
         <div className="space-y-4">
             {sampleCases.map((tc, i) => (
-                <div key={i} className="paper-card-soft p-4">
+                <div key={i} className="border border-border bg-bg-primary overflow-hidden rounded-[10px]">
                     <p className="text-sm font-bold text-text-primary mb-3">{`Example ${i + 1}`}</p>
-                    <div className="space-y-3">
-                        <div>
-                            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted mb-1.5">Input</p>
-                            <pre className="text-sm text-text-primary font-mono whitespace-pre-wrap bg-bg-root border border-border rounded-[12px_9px_11px_8px] p-3">{tc.input}</pre>
+                    <div className="border-t border-border">
+                        <div className="px-3 py-1.5 bg-bg-surface border-b border-border">
+                            <p className="text-sm font-bold lowercase text-text-primary font-mono">input</p>
                         </div>
-                        <div>
-                            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-text-muted mb-1.5">Output</p>
-                            <pre className="text-sm text-text-primary font-mono whitespace-pre-wrap bg-bg-root border border-border rounded-[12px_9px_11px_8px] p-3">{tc.expected_output}</pre>
+                        <pre className="px-3 py-2.5 text-sm text-text-primary font-mono whitespace-pre-wrap">{tc.input}</pre>
+                    </div>
+                    <div className="border-t border-border">
+                        <div className="px-3 py-1.5 bg-bg-surface border-b border-border">
+                            <p className="text-sm font-bold lowercase text-text-primary font-mono">output</p>
                         </div>
+                        <pre className="px-3 py-2.5 text-sm text-text-primary font-mono whitespace-pre-wrap">{tc.expected_output}</pre>
                     </div>
                 </div>
             ))}
@@ -334,23 +342,19 @@ export default function Practice() {
 
                                 <div>
                                     <h3 className="text-base font-bold text-text-primary mb-3">Input</h3>
-                                    <div className="paper-card-soft p-4">
-                                        <pre className="text-sm text-text-secondary whitespace-pre-wrap leading-7">{problem.input_format}</pre>
-                                    </div>
+                                    {renderCodeforcesTextBlock(problem.input_format)}
                                 </div>
 
                                 <div>
                                     <h3 className="text-base font-bold text-text-primary mb-3">Output</h3>
-                                    <div className="paper-card-soft p-4">
-                                        <pre className="text-sm text-text-secondary whitespace-pre-wrap leading-7">{problem.output_format}</pre>
-                                    </div>
+                                    {renderCodeforcesTextBlock(problem.output_format)}
                                 </div>
 
                                 {problem.constraints && (
                                     <div>
                                         <h3 className="text-base font-bold text-text-primary mb-3">Constraints</h3>
-                                        <div className="paper-card-soft p-4">
-                                            <pre className="text-sm text-text-secondary font-mono whitespace-pre-wrap leading-7">{problem.constraints}</pre>
+                                        <div className="text-sm text-text-secondary font-mono whitespace-pre-wrap leading-7">
+                                            {problem.constraints}
                                         </div>
                                     </div>
                                 )}
