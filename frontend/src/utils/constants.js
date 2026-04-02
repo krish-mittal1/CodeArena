@@ -5,6 +5,8 @@
 // Current Azure VM Public IP
 const PROD_IP = '20.197.31.143';
 const isBrowser = typeof window !== 'undefined';
+const hostname = isBrowser ? window.location.hostname : '';
+const IS_PROD_HOST = hostname === 'codexarena.app' || hostname === 'www.codexarena.app';
 
 function stripTrailingSlash(value) {
     return value.replace(/\/+$/, '');
@@ -15,9 +17,11 @@ function normalizeApiOrigin(value) {
     return trimmed.replace(/\/api\/v1$/i, '');
 }
 
-const inferredApiOrigin = isBrowser ? '' : `http://${PROD_IP}:8000`;
+const inferredApiOrigin = isBrowser
+    ? (IS_PROD_HOST ? 'https://api.codexarena.app' : '')
+    : `http://${PROD_IP}:8000`;
 const inferredWsBase = isBrowser
-    ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`
+    ? (IS_PROD_HOST ? 'wss://api.codexarena.app' : `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`)
     : `ws://${PROD_IP}:8000`;
 
 export const API_ORIGIN = normalizeApiOrigin(
