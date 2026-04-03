@@ -35,6 +35,10 @@ const STRING_CORE_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & T
 const STRING_BROAD_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Indian IT', 'Product (India)', 'Product (Global)', 'Consulting');
 const STRING_FOUNDATION_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Indian IT', 'Product (India)', 'Consulting');
 const STRING_ADVANCED_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Product (Global)');
+const GREEDY_CORE_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Product (India)', 'Product (Global)');
+const GREEDY_BROAD_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Indian IT', 'Product (India)', 'Product (Global)', 'Consulting');
+const GREEDY_FOUNDATION_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Indian IT', 'Product (India)', 'Consulting');
+const GREEDY_ADVANCED_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Product (Global)');
 
 export default function CompanyProblems() {
     const { companyId } = useParams();
@@ -260,6 +264,46 @@ export default function CompanyProblems() {
                 "HCL Technologies", "LTIMindtree", "Mphasis", "Persistent Systems", "Paytm",
                 "Meesho", "Zerodha", "Snowflake", "Ernst & Young", "KPMG"
             ],
+        },
+        "Assign Cookies": {
+            topic: "Greedy",
+            companies: GREEDY_FOUNDATION_COMPANIES,
+        },
+        "Lemonade Change": {
+            topic: "Greedy",
+            companies: GREEDY_FOUNDATION_COMPANIES,
+        },
+        "Can Place Flowers": {
+            topic: "Greedy",
+            companies: GREEDY_FOUNDATION_COMPANIES,
+        },
+        "Task Scheduler": {
+            topic: "Greedy",
+            companies: GREEDY_CORE_COMPANIES,
+        },
+        "Minimum Number of Arrows to Burst Balloons": {
+            topic: "Greedy",
+            companies: GREEDY_BROAD_COMPANIES,
+        },
+        "Bag of Tokens": {
+            topic: "Greedy",
+            companies: GREEDY_CORE_COMPANIES,
+        },
+        "Course Schedule III": {
+            topic: "Greedy",
+            companies: GREEDY_ADVANCED_COMPANIES,
+        },
+        "Minimum Number of Refueling Stops": {
+            topic: "Greedy",
+            companies: GREEDY_ADVANCED_COMPANIES,
+        },
+        "Maximum Performance of a Team": {
+            topic: "Greedy",
+            companies: GREEDY_ADVANCED_COMPANIES,
+        },
+        "IPO": {
+            topic: "Greedy",
+            companies: GREEDY_ADVANCED_COMPANIES,
         },
         "Maximum Points You Can Obtain from Cards": {
             topic: "Sliding Window",

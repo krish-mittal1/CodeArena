@@ -9,6 +9,7 @@ from backend.scripts import seed_candy
 from backend.scripts import seed_gas_station
 from backend.scripts import seed_jump_game
 from backend.scripts import seed_jump_game_ii
+from backend.scripts import seed_more_greedy_problems
 from backend.scripts import seed_non_overlapping_intervals
 from backend.scripts import seed_partition_labels
 
@@ -22,6 +23,7 @@ SEEDERS = [
     ("Partition Labels", seed_partition_labels.seed),
     ("Non-overlapping Intervals", seed_non_overlapping_intervals.seed),
     ("Candy", seed_candy.seed),
+    ("Extended Greedy Ladder", seed_more_greedy_problems.seed),
 ]
 
 
