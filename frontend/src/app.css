@@ -370,3 +370,496 @@ select {
         transparent 16px
     );
 }
+
+/* ══════════════════════════════════════════════════
+   DSA Practice Hub – Terminal Foundry Design
+   ══════════════════════════════════════════════════ */
+
+.dsa-hub {
+    min-height: 100vh;
+    background: var(--color-bg-root);
+    padding-bottom: 4rem;
+}
+
+.dsa-hub__inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+/* ── Header ───────────────────────────────────────── */
+
+.dsa-hub__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.dsa-hub__header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.dsa-hub__kicker {
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    background: rgba(201, 109, 58, 0.12);
+    padding: 3px 10px;
+    border-radius: 4px;
+    width: fit-content;
+    margin-bottom: 0.35rem;
+}
+
+.dsa-hub__title {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+}
+
+.dsa-hub__title-meta {
+    font-size: 0.42em;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-left: 0.5em;
+    vertical-align: baseline;
+}
+
+.dsa-hub__search-wrap {
+    position: relative;
+    width: 320px;
+    flex-shrink: 0;
+}
+
+.dsa-hub__search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-muted);
+    pointer-events: none;
+}
+
+.dsa-hub__search-input {
+    width: 100%;
+    padding: 10px 16px 10px 40px;
+    font-size: 0.82rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-primary);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.dsa-hub__search-input::placeholder {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+}
+
+.dsa-hub__search-input:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(201, 109, 58, 0.12);
+}
+
+/* ── Body Layout ──────────────────────────────────── */
+
+.dsa-hub__body {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+/* ── Sidebar ──────────────────────────────────────── */
+
+.dsa-hub__sidebar {
+    position: sticky;
+    top: 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dsa-hub__sidebar-title {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    margin-bottom: 0.75rem;
+    padding-left: 2px;
+}
+
+.dsa-hub__cat-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-align: left;
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.dsa-hub__cat-btn:hover {
+    color: var(--color-text-primary);
+    background: var(--color-bg-secondary);
+    border-color: var(--color-border);
+}
+
+.dsa-hub__cat-btn--active {
+    color: var(--color-accent);
+    background: rgba(201, 109, 58, 0.08);
+    border-color: var(--color-accent);
+}
+
+.dsa-hub__cat-btn--active:hover {
+    color: var(--color-accent-hover);
+    background: rgba(201, 109, 58, 0.12);
+    border-color: var(--color-accent-hover);
+}
+
+.dsa-hub__cat-count {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    min-width: 28px;
+    text-align: right;
+}
+
+.dsa-hub__cat-btn--active .dsa-hub__cat-count {
+    color: var(--color-accent);
+}
+
+/* ── Forge Intel Panel ────────────────────────────── */
+
+.dsa-hub__intel {
+    margin-top: 2rem;
+    padding: 16px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+
+.dsa-hub__intel-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-text-muted);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.dsa-hub__intel-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 0.78rem;
+}
+
+.dsa-hub__intel-label {
+    color: var(--color-text-secondary);
+}
+
+.dsa-hub__intel-value {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+}
+
+.dsa-hub__intel-value--accent {
+    color: var(--color-accent);
+}
+
+/* ── Main Grid ────────────────────────────────────── */
+
+.dsa-hub__main {
+    min-width: 0;
+}
+
+.dsa-hub__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+/* ── Company Card ─────────────────────────────────── */
+
+.dsa-hub__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 16px 22px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    overflow: hidden;
+}
+
+.dsa-hub__card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(201, 109, 58, 0.06) 0%,
+        transparent 60%
+    );
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.dsa-hub__card:hover {
+    border-color: var(--color-border-hover);
+    background: var(--color-bg-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25),
+                0 0 0 1px rgba(201, 109, 58, 0.08);
+}
+
+.dsa-hub__card:hover::before {
+    opacity: 1;
+}
+
+.dsa-hub__card-logo-wrap {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    border-radius: 14px;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    overflow: hidden;
+}
+
+.dsa-hub__card:hover .dsa-hub__card-logo-wrap {
+    transform: scale(1.08);
+    border-color: var(--color-border-hover);
+}
+
+.dsa-hub__card-logo {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.dsa-hub__card-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    text-align: center;
+    margin-bottom: 6px;
+    transition: color 0.2s;
+    line-height: 1.2;
+}
+
+.dsa-hub__card:hover .dsa-hub__card-name {
+    color: var(--color-accent);
+}
+
+.dsa-hub__card-category {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+}
+
+.dsa-hub__card-chevron {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    color: var(--color-text-muted);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: all 0.25s ease;
+}
+
+.dsa-hub__card:hover .dsa-hub__card-chevron {
+    opacity: 1;
+    transform: translateX(0);
+    color: var(--color-accent);
+}
+
+/* ── Load More ────────────────────────────────────── */
+
+.dsa-hub__load-more-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+}
+
+.dsa-hub__load-more-btn {
+    padding: 12px 48px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-family: var(--font-mono);
+    color: var(--color-text-secondary);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dsa-hub__load-more-btn:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    background: rgba(201, 109, 58, 0.06);
+    box-shadow: 0 0 16px rgba(201, 109, 58, 0.08);
+}
+
+/* ── Empty State ──────────────────────────────────── */
+
+.dsa-hub__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 2rem;
+    text-align: center;
+}
+
+.dsa-hub__empty-icon {
+    color: var(--color-text-muted);
+    opacity: 0.35;
+    margin-bottom: 1rem;
+}
+
+.dsa-hub__empty-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.dsa-hub__empty-sub {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+/* ── Responsive ───────────────────────────────────── */
+
+@media (max-width: 1100px) {
+    .dsa-hub__grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .dsa-hub__body {
+        grid-template-columns: 1fr;
+    }
+
+    .dsa-hub__sidebar {
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .dsa-hub__sidebar-title {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .dsa-hub__cat-btn {
+        width: auto;
+        padding: 6px 12px;
+        font-size: 0.72rem;
+        border-radius: 9999px;
+        border: 1px solid var(--color-border);
+    }
+
+    .dsa-hub__cat-count {
+        margin-left: 6px;
+        min-width: unset;
+    }
+
+    .dsa-hub__intel {
+        display: none;
+    }
+
+    .dsa-hub__grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .dsa-hub__inner {
+        padding: 1.25rem 1rem;
+    }
+
+    .dsa-hub__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .dsa-hub__search-wrap {
+        width: 100%;
+    }
+
+    .dsa-hub__grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .dsa-hub__card {
+        padding: 20px 12px 16px;
+    }
+
+    .dsa-hub__card-logo-wrap {
+        width: 46px;
+        height: 46px;
+        margin-bottom: 10px;
+    }
+
+    .dsa-hub__card-name {
+        font-size: 0.78rem;
+    }
+}

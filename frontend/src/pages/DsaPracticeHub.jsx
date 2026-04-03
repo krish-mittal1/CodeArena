@@ -1,24 +1,19 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Search, Building2, ChevronRight, Briefcase,
+    Search, Building2, ChevronRight, Briefcase, Terminal, Activity
 } from 'lucide-react';
 import { COMPANIES, COMPANY_CATEGORIES } from '../utils/companies';
 import CompanyLogo from '../components/ui/CompanyLogo';
+
+const ITEMS_PER_PAGE = 12;
 
 export default function DsaPracticeHub() {
     const navigate = useNavigate();
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
-
-    const filtered = useMemo(() => {
-        return COMPANIES.filter((c) => {
-            const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
-            const matchesCategory = selectedCategory === 'All' || c.category === selectedCategory;
-            return matchesSearch && matchesCategory;
-        });
-    }, [search, selectedCategory]);
+    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
     const categoryCounts = useMemo(() => {
         const counts = {};
@@ -29,108 +24,195 @@ export default function DsaPracticeHub() {
         return counts;
     }, []);
 
-    return (
-        <div className="min-h-screen bg-bg-root pb-20">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-                    <div className="flex items-center gap-3 mb-1">
-                        <div className="w-10 h-10 rounded-[14px_11px_13px_9px] bg-accent/10 flex items-center justify-center shadow-[2px_2px_0_rgba(0,0,0,0.14)]">
-                            <Building2 size={20} className="text-accent" />
-                        </div>
-                        <div>
-                            <p className="editorial-kicker mb-2">Practice map</p>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-[-0.05em]">
-                                Company Hub
-                            </h1>
-                            <p className="text-text-secondary text-sm">
-                                {COMPANIES.length} companies &middot; Practice company-wise questions
-                            </p>
-                        </div>
-                    </div>
-                </motion.div>
+    const filtered = useMemo(() => {
+        return COMPANIES.filter((c) => {
+            const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
+            const matchesCategory = selectedCategory === 'All' || c.category === selectedCategory;
+            return matchesSearch && matchesCategory;
+        });
+    }, [search, selectedCategory]);
 
+    const visibleCompanies = filtered.slice(0, visibleCount);
+    const hasMore = visibleCount < filtered.length;
+
+    const handleLoadMore = () => {
+        setVisibleCount((prev) => prev + ITEMS_PER_PAGE);
+    };
+
+    const handleCategoryChange = (cat) => {
+        setSelectedCategory(cat);
+        setVisibleCount(ITEMS_PER_PAGE);
+    };
+
+    // Map category to short display label for cards
+    const categoryShortLabel = (cat) => {
+        const map = {
+            'FAANG+': 'FAANG+',
+            'Big Tech': 'BIG TECH',
+            'Finance & Trading': 'FINANCE',
+            'Indian IT': 'INDIAN IT',
+            'Product (India)': 'PRODUCT (IN)',
+            'Product (Global)': 'PRODUCT (GLB)',
+            'Consulting': 'CONSULTING',
+        };
+        return map[cat] || cat.toUpperCase();
+    };
+
+    // Sidebar category items (skip 'All', show it separately)
+    const sidebarCategories = COMPANY_CATEGORIES.filter((c) => c !== 'All');
+
+    return (
+        <div className="dsa-hub">
+            <div className="dsa-hub__inner">
+                {/* ── Header ──────────────────────────────── */}
                 <motion.div
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: -12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="mt-6 space-y-4"
+                    className="dsa-hub__header"
                 >
-                    <div className="relative max-w-md">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+                    <div className="dsa-hub__header-left">
+                        <span className="dsa-hub__kicker">Practice map</span>
+                        <h1 className="dsa-hub__title">
+                            Company Hub
+                            <span className="dsa-hub__title-meta">
+                                / {filtered.length} active systems
+                            </span>
+                        </h1>
+                    </div>
+                    <div className="dsa-hub__search-wrap">
+                        <Search size={15} className="dsa-hub__search-icon" />
                         <input
                             type="text"
-                            placeholder="Search companies..."
+                            placeholder="Query system identifier..."
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 human-input text-sm text-text-primary placeholder-text-muted focus:outline-none transition-colors"
+                            onChange={(e) => {
+                                setSearch(e.target.value);
+                                setVisibleCount(ITEMS_PER_PAGE);
+                            }}
+                            className="dsa-hub__search-input"
                         />
                     </div>
+                </motion.div>
 
-                    <div className="flex flex-wrap gap-2">
-                        {COMPANY_CATEGORIES.map((cat) => (
+                {/* ── Body: Sidebar + Grid ─────────────────── */}
+                <div className="dsa-hub__body">
+                    {/* Sidebar */}
+                    <motion.aside
+                        initial={{ opacity: 0, x: -16 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.08 }}
+                        className="dsa-hub__sidebar"
+                    >
+                        <p className="dsa-hub__sidebar-title">Sector Classification</p>
+
+                        {/* All Systems */}
+                        <button
+                            onClick={() => handleCategoryChange('All')}
+                            className={`dsa-hub__cat-btn ${selectedCategory === 'All' ? 'dsa-hub__cat-btn--active' : ''}`}
+                        >
+                            <span>All Systems</span>
+                            <span className="dsa-hub__cat-count">{categoryCounts.All}</span>
+                        </button>
+
+                        {sidebarCategories.map((cat) => (
                             <button
                                 key={cat}
-                                onClick={() => setSelectedCategory(cat)}
-                                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all border ${
-                                    selectedCategory === cat
-                                        ? 'bg-bg-hover border-border text-text-primary'
-                                        : 'bg-bg-secondary border-border text-text-secondary hover:border-border-hover hover:text-text-primary'
-                                }`}
+                                onClick={() => handleCategoryChange(cat)}
+                                className={`dsa-hub__cat-btn ${selectedCategory === cat ? 'dsa-hub__cat-btn--active' : ''}`}
                             >
-                                {cat}
-                                <span className="ml-1.5 opacity-60">{categoryCounts[cat] || 0}</span>
+                                <span>{cat}</span>
+                                <span className="dsa-hub__cat-count">{categoryCounts[cat] || 0}</span>
                             </button>
                         ))}
-                    </div>
-                </motion.div>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="mt-8"
-                >
-                    {filtered.length === 0 ? (
-                        <div className="py-16 text-center">
-                            <Briefcase size={40} className="mx-auto text-text-muted/40 mb-3" />
-                            <p className="text-text-secondary text-sm font-medium">No companies found</p>
-                            <p className="text-text-muted text-xs mt-1">Try adjusting your search or filters</p>
+                        {/* Forge Intel panel */}
+                        <div className="dsa-hub__intel">
+                            <div className="dsa-hub__intel-header">
+                                <Terminal size={12} />
+                                <span>Forge Intel</span>
+                            </div>
+                            <div className="dsa-hub__intel-row">
+                                <span className="dsa-hub__intel-label">Companies</span>
+                                <span className="dsa-hub__intel-value dsa-hub__intel-value--accent">
+                                    {COMPANIES.length} Total
+                                </span>
+                            </div>
+                            <div className="dsa-hub__intel-row">
+                                <span className="dsa-hub__intel-label">Categories</span>
+                                <span className="dsa-hub__intel-value">
+                                    {sidebarCategories.length} Sectors
+                                </span>
+                            </div>
                         </div>
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {filtered.map((company, idx) => (
-                                <motion.div
-                                    key={company.id}
-                                    initial={{ opacity: 0, y: 15 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: Math.min(idx * 0.02, 0.6) }}
-                                    onClick={() => navigate(`/company/${company.id}`)}
-                                    className="group relative paper-card-soft grain-panel p-5 cursor-pointer transition-all duration-300 hover:border-border-hover hover:bg-bg-hover/40 hover:-translate-y-0.5"
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <CompanyLogo
-                                                company={company}
-                                                size="md"
-                                                roundedClassName="rounded-[16px_12px_14px_10px]"
-                                                className="transition-transform group-hover:scale-110 shadow-[2px_2px_0_rgba(0,0,0,0.12)]"
-                                            />
-                                            <div className="min-w-0">
-                                                <h3 className="text-sm font-bold text-text-primary group-hover:text-accent transition-colors truncate">
-                                                    {company.name}
-                                                </h3>
-                                            </div>
-                                        </div>
-                                        <ChevronRight
-                                            size={16}
-                                            className="text-text-muted group-hover:text-accent transition-all group-hover:translate-x-0.5 shrink-0 mt-1"
-                                        />
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    )}
-                </motion.div>
+                    </motion.aside>
+
+                    {/* Main Grid */}
+                    <motion.main
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.12 }}
+                        className="dsa-hub__main"
+                    >
+                        {filtered.length === 0 ? (
+                            <div className="dsa-hub__empty">
+                                <Briefcase size={40} className="dsa-hub__empty-icon" />
+                                <p className="dsa-hub__empty-title">No systems found</p>
+                                <p className="dsa-hub__empty-sub">Adjust search query or sector filters</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="dsa-hub__grid">
+                                    <AnimatePresence mode="popLayout">
+                                        {visibleCompanies.map((company, idx) => (
+                                            <motion.div
+                                                key={company.id}
+                                                layout
+                                                initial={{ opacity: 0, y: 20, scale: 0.97 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.95 }}
+                                                transition={{ delay: Math.min(idx * 0.025, 0.4), duration: 0.35 }}
+                                                onClick={() => navigate(`/company/${company.id}`)}
+                                                className="dsa-hub__card"
+                                            >
+                                                <div className="dsa-hub__card-logo-wrap">
+                                                    <CompanyLogo
+                                                        company={company}
+                                                        size="lg"
+                                                        roundedClassName="rounded-xl"
+                                                        className="dsa-hub__card-logo"
+                                                    />
+                                                </div>
+                                                <h3 className="dsa-hub__card-name">{company.name}</h3>
+                                                <span className="dsa-hub__card-category">
+                                                    {categoryShortLabel(company.category)}
+                                                </span>
+                                                {/* Hover chevron */}
+                                                <div className="dsa-hub__card-chevron">
+                                                    <ChevronRight size={16} />
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </AnimatePresence>
+                                </div>
+
+                                {hasMore && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="dsa-hub__load-more-wrap"
+                                    >
+                                        <button
+                                            onClick={handleLoadMore}
+                                            className="dsa-hub__load-more-btn"
+                                        >
+                                            Initialize Additional Nodes
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </>
+                        )}
+                    </motion.main>
+                </div>
             </div>
         </div>
     );
