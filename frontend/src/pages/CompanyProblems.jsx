@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Building2, Check, Clock, Code2, Play } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Building2, Check, Clock, Code2, Play, Search, Terminal, ChevronRight, Zap } from 'lucide-react';
 import { COMPANIES } from '../utils/companies';
 import { problemApi } from '../api/auth';
-import Badge from '../components/ui/Badge';
 import CompanyLogo from '../components/ui/CompanyLogo';
 
 function normalizeCompanyName(value) {
@@ -42,6 +41,7 @@ export default function CompanyProblems() {
     const navigate = useNavigate();
     const [difficultyFilter, setDifficultyFilter] = useState('all');
     const [topicFilter, setTopicFilter] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
 
     const company = COMPANIES.find((c) => c.id === companyId);
 
@@ -682,14 +682,13 @@ export default function CompanyProblems() {
         .filter((p) => p.problem_type !== 'cp')
         .map((p) => {
             let title = p.title;
-            // Normalization for the db title
             if (title.includes("Spiral")) title = "Print the matrix in spiral manner";
 
             const metadata = PROBLEM_METADATA[title];
             if (!metadata) return null;
 
             const isMappedToCompany = metadata.companies.some((mappedCompany) =>
-                companyNameMatches(company.name, mappedCompany)
+                companyNameMatches(company?.name, mappedCompany)
             );
 
             if (!isMappedToCompany) return null;
@@ -718,9 +717,12 @@ export default function CompanyProblems() {
             const matchesTopic =
                 topicFilter === 'all' ||
                 (problem.topic || '').toLowerCase() === topicFilter;
-            return matchesDifficulty && matchesTopic;
+            const matchesSearch =
+                !searchQuery ||
+                problem.title.toLowerCase().includes(searchQuery.toLowerCase());
+            return matchesDifficulty && matchesTopic && matchesSearch;
         });
-    }, [companyProblems, difficultyFilter, topicFilter]);
+    }, [companyProblems, difficultyFilter, topicFilter, searchQuery]);
 
     const topicOptions = useMemo(() => {
         const uniqueTopics = [...new Set(companyProblems.map((problem) => problem.topic).filter(Boolean))];
@@ -737,195 +739,260 @@ export default function CompanyProblems() {
         return counts;
     }, [companyProblems]);
 
-    const difficultyChips = [
-        { key: 'all', label: 'All' },
-        { key: 'easy', label: 'Easy' },
-        { key: 'medium', label: 'Medium' },
-        { key: 'hard', label: 'Hard' },
-    ];
+    const difficultyColor = (d) => {
+        const dl = (d || '').toLowerCase();
+        if (dl === 'easy') return '#6fbf73';
+        if (dl === 'medium') return '#c39a4f';
+        return '#c65a49';
+    };
 
     if (!company) {
         return (
-            <div className="min-h-screen bg-bg-root flex items-center justify-center">
-                <div className="text-center">
-                    <Building2 size={40} className="mx-auto text-text-muted/40 mb-3" />
-                    <p className="text-text-secondary text-sm font-medium">Company not found</p>
-                    <button
-                        onClick={() => navigate('/practice/dsa')}
-                        className="mt-4 px-4 py-2 rounded-[14px_11px_13px_9px] bg-accent/10 text-accent text-sm font-medium hover:bg-accent/20 transition-colors"
-                    >
-                        ← Back to Companies
-                    </button>
+            <div className="cprob">
+                <div className="cprob__inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+                    <div style={{ textAlign: 'center' }}>
+                        <Building2 size={40} style={{ margin: '0 auto 12px', opacity: 0.3, color: 'var(--color-text-muted)' }} />
+                        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', fontWeight: 600 }}>System not found</p>
+                        <button
+                            onClick={() => navigate('/practice/dsa')}
+                            className="cprob__back-btn"
+                            style={{ marginTop: '1rem' }}
+                        >
+                            <ArrowLeft size={14} />
+                            Return to Company Hub
+                        </button>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-bg-root pb-20">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-                {/* Back button */}
-                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
+        <div className="cprob">
+            <div className="cprob__inner">
+                {/* ── Header ──────────────────────────────── */}
+                <motion.div
+                    initial={{ opacity: 0, y: -12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="cprob__header"
+                >
                     <button
                         onClick={() => navigate('/practice/dsa')}
-                        className="flex items-center gap-2 text-text-secondary hover:text-text-primary text-sm font-medium mb-6 transition-colors group"
+                        className="cprob__back-btn"
                     >
-                        <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-                        Back to Companies
+                        <ArrowLeft size={14} />
+                        Company Hub
                     </button>
-                </motion.div>
 
-                {/* Company Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.05 }}
-                    className="paper-card p-6 sm:p-7 border-l-4"
-                    style={{ borderLeftColor: company.color }}
-                >
-                    <div className="flex items-center gap-4 sm:gap-5">
-                        <CompanyLogo
-                            company={company}
-                            size="lg"
-                            roundedClassName="rounded-xl"
-                            className="shadow-[0_6px_16px_rgba(0,0,0,0.2)]"
-                        />
-                        <div className="min-w-0">
-                            <p className="text-[11px] uppercase tracking-[0.18em] text-text-muted font-semibold">Company</p>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary truncate">
-                                {company.name}
-                            </h1>
-                            <p className="text-sm text-text-secondary mt-1">
-                                {companyProblems.length} question{companyProblems.length === 1 ? '' : 's'} mapped for this company
-                            </p>
+                    <div className="cprob__header-main">
+                        <div className="cprob__header-left">
+                            <CompanyLogo
+                                company={company}
+                                size="lg"
+                                roundedClassName="rounded-xl"
+                                className="cprob__company-logo"
+                            />
+                            <div>
+                                <span className="cprob__kicker">System Profile</span>
+                                <h1 className="cprob__title">{company.name}</h1>
+                                <p className="cprob__subtitle">
+                                    {companyProblems.length} challenge{companyProblems.length === 1 ? '' : 's'} mapped
+                                    <span className="cprob__subtitle-sep">·</span>
+                                    {topicOptions.length - 1} topic{topicOptions.length - 1 === 1 ? '' : 's'}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="cprob__search-wrap">
+                            <Search size={15} className="cprob__search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Search challenges..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="cprob__search-input"
+                            />
                         </div>
                     </div>
                 </motion.div>
 
+                {/* ── Body ────────────────────────────────── */}
                 {isLoading ? (
-                    <div className="mt-8 flex justify-center"><div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin"></div></div>
+                    <div className="cprob__loading">
+                        <div className="cprob__spinner" />
+                    </div>
                 ) : companyProblems.length > 0 ? (
-                    <div className="mt-8 grid gap-4">
-                        <div className="paper-card-soft p-4 sm:p-5">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                <h2 className="text-lg font-bold text-text-primary">
-                                    Company Questions
-                                </h2>
-                                <div className="flex flex-wrap gap-2">
-                                    {difficultyChips.map((chip) => (
-                                        <button
-                                            key={chip.key}
-                                            onClick={() => setDifficultyFilter(chip.key)}
-                                            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                                                difficultyFilter === chip.key
-                                                    ? 'bg-bg-hover text-text-primary border-border-hover'
-                                                    : 'bg-bg-secondary text-text-secondary border-border hover:text-text-primary'
-                                            }`}
-                                        >
-                                            {chip.label}
-                                            <span className="ml-1.5 opacity-70">{difficultyCounts[chip.key]}</span>
-                                        </button>
-                                    ))}
+                    <div className="cprob__body">
+                        {/* Sidebar */}
+                        <motion.aside
+                            initial={{ opacity: 0, x: -16 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.08 }}
+                            className="cprob__sidebar"
+                        >
+                            {/* Difficulty */}
+                            <p className="cprob__sidebar-title">Threat Level</p>
+                            {[
+                                { key: 'all', label: 'All Levels' },
+                                { key: 'easy', label: 'Easy' },
+                                { key: 'medium', label: 'Medium' },
+                                { key: 'hard', label: 'Hard' },
+                            ].map((chip) => (
+                                <button
+                                    key={chip.key}
+                                    onClick={() => setDifficultyFilter(chip.key)}
+                                    className={`cprob__filter-btn ${difficultyFilter === chip.key ? 'cprob__filter-btn--active' : ''}`}
+                                >
+                                    {chip.key !== 'all' && (
+                                        <span
+                                            className="cprob__diff-dot"
+                                            style={{ background: difficultyColor(chip.key) }}
+                                        />
+                                    )}
+                                    <span>{chip.label}</span>
+                                    <span className="cprob__filter-count">{difficultyCounts[chip.key]}</span>
+                                </button>
+                            ))}
+
+                            {/* Topics */}
+                            <p className="cprob__sidebar-title" style={{ marginTop: '1.5rem' }}>
+                                Algorithm Class
+                            </p>
+                            {topicOptions.map((topicKey) => (
+                                <button
+                                    key={topicKey}
+                                    onClick={() => setTopicFilter(topicKey)}
+                                    className={`cprob__filter-btn ${topicFilter === topicKey ? 'cprob__filter-btn--active' : ''}`}
+                                >
+                                    <span>
+                                        {topicKey === 'all'
+                                            ? 'All Topics'
+                                            : topicKey.split(' ').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ')}
+                                    </span>
+                                    <span className="cprob__filter-count">{topicCounts[topicKey] || 0}</span>
+                                </button>
+                            ))}
+
+                            {/* Stats */}
+                            <div className="cprob__stats-panel">
+                                <div className="cprob__stats-header">
+                                    <Terminal size={12} />
+                                    <span>Intel Summary</span>
+                                </div>
+                                <div className="cprob__stats-row">
+                                    <span className="cprob__stats-label">Total</span>
+                                    <span className="cprob__stats-value cprob__stats-value--accent">{companyProblems.length}</span>
+                                </div>
+                                <div className="cprob__stats-row">
+                                    <span className="cprob__stats-label">Showing</span>
+                                    <span className="cprob__stats-value">{filteredProblems.length}</span>
+                                </div>
+                                <div className="cprob__stats-row">
+                                    <span className="cprob__stats-label">Topics</span>
+                                    <span className="cprob__stats-value">{topicOptions.length - 1}</span>
                                 </div>
                             </div>
+                        </motion.aside>
 
-                            <div className="mt-3 flex flex-wrap gap-2">
-                                {topicOptions.map((topicKey) => (
-                                    <button
-                                        key={topicKey}
-                                        onClick={() => setTopicFilter(topicKey)}
-                                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                                            topicFilter === topicKey
-                                                ? 'bg-accent/15 text-accent border-accent/40'
-                                                : 'bg-bg-secondary text-text-secondary border-border hover:text-text-primary'
-                                        }`}
-                                    >
-                                        {topicKey === 'all' ? 'All Topics' : topicKey.split(' ').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ')}
-                                        <span className="ml-1.5 opacity-70">{topicCounts[topicKey] || 0}</span>
-                                    </button>
-                                ))}
+                        {/* Problem List */}
+                        <motion.main
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.12 }}
+                            className="cprob__main"
+                        >
+                            {/* Column headers */}
+                            <div className="cprob__list-header">
+                                <span className="cprob__list-header-status">Status</span>
+                                <span className="cprob__list-header-title">Challenge</span>
+                                <span className="cprob__list-header-diff">Level</span>
+                                <span className="cprob__list-header-topic">Topic</span>
                             </div>
-                        </div>
 
-                        {filteredProblems.length === 0 ? (
-                            <div className="paper-card-soft p-8 text-center">
-                                <p className="text-text-secondary text-sm">
-                                    No problems found for the selected filters in {company.name}.
-                                </p>
-                            </div>
-                        ) : filteredProblems.map((prob, idx) => (
-                            <motion.div
-                                key={prob.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 + idx * 0.05 }}
-                                onClick={() => navigate(`/practice/${prob.id}`)}
-                                className="group relative paper-card-soft hover:border-accent/50 p-5 cursor-pointer transition-colors"
-                            >
-                                <div className="flex items-center justify-between z-10 relative">
-                                    <div className="flex items-start gap-3 min-w-0">
-                                        <div
-                                            className={`mt-0.5 h-5 w-5 shrink-0 rounded-md border flex items-center justify-center transition-colors ${
-                                                prob.solved
-                                                    ? 'border-[#6fbf73] bg-[#6fbf73]/15 text-[#6fbf73]'
-                                                    : 'border-border text-transparent bg-bg-secondary'
-                                            }`}
-                                            title={prob.solved ? 'Solved' : 'Not solved yet'}
-                                        >
-                                            <Check className="w-3.5 h-3.5" />
-                                        </div>
-                                        <div className="min-w-0">
-                                        <h3 className="text-base font-bold text-text-primary group-hover:text-accent transition-colors pr-5">
-                                            {prob.title}
-                                        </h3>
-                                        <div className="flex items-center gap-3 mt-2 text-xs text-text-muted">
-                                            <Badge color={prob.difficulty === 'easy' ? 'green' : prob.difficulty === 'medium' ? 'yellow' : 'red'}>
-                                                {prob.difficulty}
-                                            </Badge>
-                                            {prob.topic && (
-                                                <span className="px-2 py-1 rounded-full border border-border text-text-secondary">
-                                                    {prob.topic}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    </div>
-                                    <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center translate-x-3 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all">
-                                        <Play className="w-4 h-4 text-accent translate-x-0.5" />
-                                    </div>
+                            {filteredProblems.length === 0 ? (
+                                <div className="cprob__empty">
+                                    <p>No challenges match current filters</p>
                                 </div>
-                            </motion.div>
-                        ))}
+                            ) : (
+                                <div className="cprob__list">
+                                    <AnimatePresence mode="popLayout">
+                                        {filteredProblems.map((prob, idx) => (
+                                            <motion.div
+                                                key={prob.id}
+                                                layout
+                                                initial={{ opacity: 0, y: 8 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -8 }}
+                                                transition={{ delay: Math.min(idx * 0.03, 0.5), duration: 0.3 }}
+                                                onClick={() => navigate(`/practice/${prob.id}`)}
+                                                className="cprob__row"
+                                            >
+                                                {/* Status */}
+                                                <div className="cprob__row-status">
+                                                    <div className={`cprob__check ${prob.solved ? 'cprob__check--solved' : ''}`}>
+                                                        <Check className="cprob__check-icon" />
+                                                    </div>
+                                                </div>
+
+                                                {/* Title */}
+                                                <div className="cprob__row-title">
+                                                    <h3 className="cprob__row-name">{prob.title}</h3>
+                                                </div>
+
+                                                {/* Difficulty */}
+                                                <div className="cprob__row-diff">
+                                                    <span
+                                                        className="cprob__diff-badge"
+                                                        style={{
+                                                            color: difficultyColor(prob.difficulty),
+                                                            background: `${difficultyColor(prob.difficulty)}15`,
+                                                            borderColor: `${difficultyColor(prob.difficulty)}30`,
+                                                        }}
+                                                    >
+                                                        {prob.difficulty}
+                                                    </span>
+                                                </div>
+
+                                                {/* Topic */}
+                                                <div className="cprob__row-topic">
+                                                    {prob.topic && (
+                                                        <span className="cprob__topic-badge">
+                                                            {prob.topic}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* Hover arrow */}
+                                                <div className="cprob__row-arrow">
+                                                    <ChevronRight size={16} />
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </AnimatePresence>
+                                </div>
+                            )}
+                        </motion.main>
                     </div>
                 ) : (
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.15 }}
-                        className="mt-8 paper-card p-12 text-center"
+                        className="cprob__coming-soon"
                     >
-                        <div className="w-16 h-16 mx-auto rounded-xl bg-accent/10 flex items-center justify-center mb-5">
-                            <Clock size={28} className="text-accent" />
+                        <div className="cprob__coming-soon-icon">
+                            <Clock size={28} />
                         </div>
-                        <h2 className="text-xl font-bold text-text-primary mb-2">
-                            Questions Coming Soon
-                        </h2>
-                        <p className="text-text-secondary text-sm max-w-md mx-auto leading-relaxed">
+                        <h2 className="cprob__coming-soon-title">Challenges Incoming</h2>
+                        <p className="cprob__coming-soon-desc">
                             We're curating the most frequently asked coding questions from{' '}
-                            <span className="font-semibold text-text-primary">{company.name}</span> interviews and online assessments.
+                            <strong>{company.name}</strong> interviews and online assessments.
                             Check back soon!
                         </p>
-
-                        <div className="mt-8 flex items-center justify-center gap-6">
-                            <div className="flex items-center gap-2 text-text-muted text-xs">
-                                <Code2 size={14} />
-                                <span>OA Questions</span>
-                            </div>
-                            <div className="w-px h-4 bg-border" />
-                            <div className="flex items-center gap-2 text-text-muted text-xs">
-                                <Building2 size={14} />
-                                <span>Interview Rounds</span>
-                            </div>
+                        <div className="cprob__coming-soon-meta">
+                            <span><Code2 size={14} /> OA Questions</span>
+                            <span className="cprob__coming-soon-sep" />
+                            <span><Building2 size={14} /> Interview Rounds</span>
                         </div>
                     </motion.div>
                 )}
