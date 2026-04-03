@@ -84,22 +84,22 @@ const TYPE_MAPS = {
     python: {
         'int': 'int', 'int[]': 'List[int]', 'int[][]': 'List[List[int]]',
         'str': 'str', 'str[]': 'List[str]', 'bool': 'bool',
-        'float': 'float', 'float[]': 'List[float]', 'ListNode': "Optional['ListNode']",
+        'float': 'float', 'float[]': 'List[float]', 'ListNode': "Optional['ListNode']", 'TreeNode': "Optional['TreeNode']",
     },
     cpp: {
         'int': 'int', 'int[]': 'vector<int>', 'int[][]': 'vector<vector<int>>',
         'str': 'string', 'str[]': 'vector<string>', 'bool': 'bool',
-        'float': 'double', 'float[]': 'vector<double>', 'ListNode': 'ListNode*',
+        'float': 'double', 'float[]': 'vector<double>', 'ListNode': 'ListNode*', 'TreeNode': 'TreeNode*',
     },
     java: {
         'int': 'int', 'int[]': 'int[]', 'int[][]': 'int[][]',
         'str': 'String', 'str[]': 'String[]', 'bool': 'boolean',
-        'float': 'double', 'float[]': 'double[]', 'ListNode': 'ListNode',
+        'float': 'double', 'float[]': 'double[]', 'ListNode': 'ListNode', 'TreeNode': 'TreeNode',
     },
     javascript: {
         'int': 'number', 'int[]': 'number[]', 'int[][]': 'number[][]',
         'str': 'string', 'str[]': 'string[]', 'bool': 'boolean',
-        'float': 'number', 'float[]': 'number[]', 'ListNode': 'ListNode',
+        'float': 'number', 'float[]': 'number[]', 'ListNode': 'ListNode', 'TreeNode': 'TreeNode',
     },
 };
 
@@ -115,6 +115,7 @@ export function generateBoilerplate(language, problem) {
     const { method_name, parameters, return_type } = problem;
     const map = TYPE_MAPS[language] || TYPE_MAPS.python;
     const usesListNode = parameters.some(p => p.type === 'ListNode') || return_type === 'ListNode';
+    const usesTreeNode = parameters.some(p => p.type === 'TreeNode') || return_type === 'TreeNode';
 
     if (language === 'python') {
         const params = parameters.map(p => `${p.name}: ${map[p.type] || 'Any'}`).join(', ');
@@ -122,7 +123,10 @@ export function generateBoilerplate(language, problem) {
         const listNodeHint = usesListNode
             ? `\n# ListNode is provided by the runner at execution time.\nclass ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n`
             : '';
-        return `from typing import List, Optional${listNodeHint}\n\nclass Solution:\n    def ${method_name}(self, ${params}) -> ${retType}:\n        # Write your solution here\n        pass\n`;
+        const treeNodeHint = usesTreeNode
+            ? `\n# TreeNode is provided by the runner at execution time.\nclass TreeNode:\n    def __init__(self, val=0, left=None, right=None):\n        self.val = val\n        self.left = left\n        self.right = right\n`
+            : '';
+        return `from typing import List, Optional${listNodeHint}${treeNodeHint}\n\nclass Solution:\n    def ${method_name}(self, ${params}) -> ${retType}:\n        # Write your solution here\n        pass\n`;
     }
 
     if (language === 'cpp') {
@@ -134,14 +138,18 @@ export function generateBoilerplate(language, problem) {
         const listNodeHint = usesListNode
             ? `\n// ListNode is provided by the platform:\n// struct ListNode { int val; ListNode *next; ... };\n`
             : '';
-        return `#include <bits/stdc++.h>\nusing namespace std;${listNodeHint}\nclass Solution {\npublic:\n    ${retType} ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n};\n`;
+        const treeNodeHint = usesTreeNode
+            ? `\n// TreeNode is provided by the platform:\n// struct TreeNode { int val; TreeNode *left; TreeNode *right; ... };\n`
+            : '';
+        return `#include <bits/stdc++.h>\nusing namespace std;${listNodeHint}${treeNodeHint}\nclass Solution {\npublic:\n    ${retType} ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n};\n`;
     }
 
     if (language === 'java') {
         const params = parameters.map(p => `${map[p.type] || 'int'} ${p.name}`).join(', ');
         const retType = map[return_type] || 'int';
         const listNodeHint = usesListNode ? `\n// ListNode is provided by the platform.\n` : '';
-        return `import java.util.*;${listNodeHint}\nclass Solution {\n    public ${retType} ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n}\n`;
+        const treeNodeHint = usesTreeNode ? `\n// TreeNode is provided by the platform.\n` : '';
+        return `import java.util.*;${listNodeHint}${treeNodeHint}\nclass Solution {\n    public ${retType} ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n}\n`;
     }
 
     if (language === 'javascript') {
@@ -151,7 +159,10 @@ export function generateBoilerplate(language, problem) {
         const listNodeHint = usesListNode
             ? `\n// ListNode is provided by the platform at runtime.\n`
             : '';
-        return `/**\n${paramDocs}\n * @return {${retDoc}}\n */${listNodeHint}\nclass Solution {\n    ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n}\n\nmodule.exports = Solution;\n`;
+        const treeNodeHint = usesTreeNode
+            ? `\n// TreeNode is provided by the platform at runtime.\n`
+            : '';
+        return `/**\n${paramDocs}\n * @return {${retDoc}}\n */${listNodeHint}${treeNodeHint}\nclass Solution {\n    ${method_name}(${params}) {\n        // Write your solution here\n        \n    }\n}\n\nmodule.exports = Solution;\n`;
     }
 
     return CODE_TEMPLATES[language] || '';

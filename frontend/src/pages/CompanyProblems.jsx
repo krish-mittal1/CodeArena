@@ -39,6 +39,12 @@ const GREEDY_CORE_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & T
 const GREEDY_BROAD_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Indian IT', 'Product (India)', 'Product (Global)', 'Consulting');
 const GREEDY_FOUNDATION_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Indian IT', 'Product (India)', 'Consulting');
 const GREEDY_ADVANCED_COMPANIES = companyNamesFor('FAANG+', 'Big Tech', 'Finance & Trading', 'Product (Global)');
+const TREE_DEPTH_COMPANIES = ["Google", "Amazon", "Microsoft"];
+const TREE_COMPARE_COMPANIES = ["Google", "Amazon", "Microsoft"];
+const TREE_INVERT_COMPANIES = ["Google", "Amazon", "Microsoft"];
+const TREE_LEVEL_COMPANIES = ["Amazon", "Google", "Microsoft"];
+const TREE_BST_COMPANIES = ["Google", "Amazon", "Microsoft"];
+const TREE_ADVANCED_COMPANIES = ["Google", "Amazon", "Microsoft"];
 
 export default function CompanyProblems() {
     const { companyId } = useParams();
@@ -208,6 +214,30 @@ export default function CompanyProblems() {
         "Split Array Largest Sum": {
             topic: "Binary Search",
             companies: BINARY_ADVANCED_COMPANIES,
+        },
+        "Maximum Depth of Binary Tree": {
+            topic: "Binary Tree",
+            companies: TREE_DEPTH_COMPANIES,
+        },
+        "Same Tree": {
+            topic: "Binary Tree",
+            companies: TREE_COMPARE_COMPANIES,
+        },
+        "Invert Binary Tree": {
+            topic: "Binary Tree",
+            companies: TREE_INVERT_COMPANIES,
+        },
+        "Binary Tree Level Order Traversal": {
+            topic: "Binary Tree",
+            companies: TREE_LEVEL_COMPANIES,
+        },
+        "Validate Binary Search Tree": {
+            topic: "Binary Tree",
+            companies: TREE_BST_COMPANIES,
+        },
+        "Binary Tree Maximum Path Sum": {
+            topic: "Binary Tree",
+            companies: TREE_ADVANCED_COMPANIES,
         },
         "Jump Game": {
             topic: "Greedy",
