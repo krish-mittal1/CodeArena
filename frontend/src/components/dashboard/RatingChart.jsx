@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from 'recharts';
 import { TrendingUp, Swords as SwordsIcon } from 'lucide-react';
 import dayjs from 'dayjs';
 
@@ -7,12 +7,12 @@ export default function RatingChart({ history = [], currentElo = 0 }) {
     const data = useMemo(() => {
         if (!history.length) return [];
 
-        // Sort oldest → newest by started_at
         const sorted = [...history].sort(
             (a, b) => new Date(a.started_at) - new Date(b.started_at)
         );
 
-        return sorted.map((match) => ({
+        return sorted.map((match, i) => ({
+            label: `MATCH ${i + 1}`,
             date: dayjs(match.started_at).format('D MMM'),
             fullDate: dayjs(match.started_at).format('D MMM YYYY, HH:mm'),
             elo: match.your_elo_after ?? match.your_elo_before,
@@ -25,14 +25,11 @@ export default function RatingChart({ history = [], currentElo = 0 }) {
 
     if (data.length === 0) {
         return (
-            <div className="bg-bg-secondary border border-border rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2 mb-6">
-                    <TrendingUp size={18} className="text-accent" />
-                    Rating Progression
-                </h3>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <SwordsIcon size={32} className="text-text-muted mb-3" />
-                    <p className="text-sm text-text-secondary">No rating data yet</p>
+            <div className="db-chart paper-card grain-panel">
+                <h3 className="db-section-title mb-6">RATING PROGRESSION</h3>
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <SwordsIcon size={32} className="text-text-muted/30 mb-3" />
+                    <p className="text-sm text-text-secondary font-medium">No rating data yet</p>
                     <p className="text-xs text-text-muted mt-1">Play matches to see your ELO graph</p>
                 </div>
             </div>
@@ -40,53 +37,72 @@ export default function RatingChart({ history = [], currentElo = 0 }) {
     }
 
     const allElos = data.map((d) => d.elo);
-    const minElo = Math.min(...allElos) - 50;
-    const maxElo = Math.max(...allElos) + 50;
+    const minElo = Math.min(...allElos) - 40;
+    const maxElo = Math.max(...allElos) + 40;
+    const baselineElo = data[0]?.eloBefore ?? 0;
+
+    /* Show ~4 tick labels using interval */
+    const tickInterval = data.length <= 6 ? 0 : Math.floor(data.length / 4);
 
     return (
-        <div className="bg-bg-secondary border border-border rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                    <TrendingUp size={18} className="text-accent" />
-                    Rating Progression
-                </h3>
-                <div className="flex items-center gap-2">
-                    <span className="text-xs text-text-muted">{data.length} matches</span>
-                    <span className="text-sm font-mono text-accent font-bold">{currentElo} ELO</span>
+        <div className="db-chart paper-card grain-panel">
+            <div className="db-chart__header">
+                <h3 className="db-section-title">RATING PROGRESSION</h3>
+                <div className="db-chart__legend">
+                    <span className="db-chart__dot" />
+                    <span className="text-xs text-text-muted font-mono tracking-wider">CURRENT ELO</span>
                 </div>
             </div>
 
-            <ResponsiveContainer width="100%" height={260}>
-                <AreaChart data={data} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
+            <ResponsiveContainer width="100%" height={280}>
+                <AreaChart data={data} margin={{ top: 10, right: 12, left: -18, bottom: 5 }}>
                     <defs>
-                        <linearGradient id="eloGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
-                            <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                        <linearGradient id="eloGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.3} />
+                            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0} />
                         </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#30363d" vertical={false} />
+                    <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="var(--color-border)"
+                        strokeOpacity={0.4}
+                        vertical={false}
+                    />
                     <XAxis
-                        dataKey="date"
+                        dataKey="label"
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fill: '#484f58', fontSize: 11 }}
-                        interval="preserveStartEnd"
+                        tick={{ fill: 'var(--color-text-muted)', fontSize: 10, fontFamily: 'var(--font-mono)' }}
+                        interval={tickInterval}
                     />
                     <YAxis
                         domain={[minElo, maxElo]}
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fill: '#484f58', fontSize: 11 }}
+                        tick={{ fill: 'var(--color-text-muted)', fontSize: 10, fontFamily: 'var(--font-mono)' }}
                     />
-                    <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                    {baselineElo > 0 && (
+                        <ReferenceLine
+                            y={baselineElo}
+                            stroke="var(--color-text-muted)"
+                            strokeDasharray="6 4"
+                            strokeOpacity={0.3}
+                        />
+                    )}
+                    <Tooltip content={<ChartTooltip />} cursor={{ stroke: 'var(--color-accent)', strokeWidth: 1, strokeDasharray: '4 4' }} />
                     <Area
                         type="monotone"
                         dataKey="elo"
-                        stroke="#3b82f6"
+                        stroke="var(--color-accent)"
                         strokeWidth={2.5}
-                        fill="url(#eloGradient)"
+                        fill="url(#eloGrad)"
                         dot={false}
-                        activeDot={{ r: 5, fill: '#3b82f6', stroke: '#1c2333', strokeWidth: 3 }}
+                        activeDot={{
+                            r: 5,
+                            fill: 'var(--color-accent)',
+                            stroke: 'var(--color-bg-primary)',
+                            strokeWidth: 3,
+                        }}
                         isAnimationActive={true}
                         animationDuration={1200}
                         animationEasing="ease-out"
@@ -102,13 +118,12 @@ function ChartTooltip({ active, payload }) {
     const d = payload[0].payload;
     const change = d.change;
     return (
-        <div className="bg-bg-surface/95 backdrop-blur-md border border-border rounded-xl px-4 py-3 shadow-2xl min-w-[180px]">
-            <p className="text-xs text-text-muted mb-1.5">{d.fullDate}</p>
+        <div className="db-tooltip">
+            <p className="text-[10px] text-text-muted font-mono tracking-wider mb-1">{d.fullDate}</p>
             <p className="text-base font-bold text-text-primary mb-1">{d.elo} ELO</p>
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center justify-between text-xs gap-4">
                 <span className="text-text-secondary">vs {d.opponent}</span>
-                <span className={`font-mono font-bold ${change > 0 ? 'text-win' : change < 0 ? 'text-loss' : 'text-text-muted'
-                    }`}>
+                <span className={`font-mono font-bold ${change > 0 ? 'text-win' : change < 0 ? 'text-loss' : 'text-text-muted'}`}>
                     {change > 0 ? `+${change}` : change}
                 </span>
             </div>
