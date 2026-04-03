@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 from backend.scripts.seed_helpful_maths_cf import seed as seed_helpful_maths
+from backend.scripts.seed_more_competitive_programming_problems import seed as seed_more_competitive_programming_problems
 from backend.scripts.seed_next_round_cf import seed as seed_next_round
 from backend.scripts.seed_team_cf import seed as seed_team
 from backend.scripts.seed_watermelon_cf import seed as seed_watermelon
@@ -23,6 +24,9 @@ async def seed() -> None:
     for title, seeder in seeders:
         logger.info("Seeding competitive programming problem: %s", title)
         await seeder()
+
+    logger.info("Seeding extended competitive programming ladder")
+    await seed_more_competitive_programming_problems()
 
 
 if __name__ == "__main__":
