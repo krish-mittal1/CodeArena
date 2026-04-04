@@ -3,6 +3,7 @@ import logging
 
 from backend.scripts import (
     seed_even_more_binary_tree_problems,
+    seed_hard_binary_tree_problems,
     seed_more_binary_tree_problems,
     seed_yet_more_binary_tree_problems,
 )
@@ -14,6 +15,7 @@ SEEDERS = [
     ("Binary Tree Ladder", seed_more_binary_tree_problems.seed),
     ("Extended Binary Tree Ladder", seed_even_more_binary_tree_problems.seed),
     ("Further Binary Tree Ladder", seed_yet_more_binary_tree_problems.seed),
+    ("Hard Binary Tree Ladder", seed_hard_binary_tree_problems.seed),
 ]
 
 

@@ -64,6 +64,9 @@ const TREE_PATH_SUM_THREE_COMPANIES = ["Amazon", "Google", "Microsoft"];
 const TREE_LEFT_LEAVES_COMPANIES = ["Amazon", "Google", "Microsoft"];
 const TREE_LARGEST_ROW_COMPANIES = ["Amazon", "Google", "Microsoft"];
 const TREE_COMPLETE_CHECK_COMPANIES = ["Amazon", "Google", "Microsoft"];
+const TREE_HARD_CORE_COMPANIES = ["Google", "Amazon", "Microsoft", "Adobe"];
+const TREE_HARD_BROAD_COMPANIES = ["Google", "Amazon", "Microsoft", "Meta", "Apple", "Adobe", "Oracle"];
+const TREE_HARD_FINANCE_COMPANIES = ["Google", "Amazon", "Microsoft", "Adobe", "Goldman Sachs"];
 
 export default function CompanyProblems() {
     const { companyId } = useParams();
@@ -337,6 +340,46 @@ export default function CompanyProblems() {
         "Check Completeness of a Binary Tree": {
             topic: "Binary Tree",
             companies: TREE_COMPLETE_CHECK_COMPANIES,
+        },
+        "Recover Binary Search Tree": {
+            topic: "Binary Tree",
+            companies: TREE_HARD_CORE_COMPANIES,
+        },
+        "Binary Tree Cameras": {
+            topic: "Binary Tree",
+            companies: TREE_HARD_CORE_COMPANIES,
+        },
+        "House Robber III": {
+            topic: "Binary Tree",
+            companies: ["Amazon", "Google", "Meta"],
+        },
+        "All Nodes Distance K in Binary Tree": {
+            topic: "Binary Tree",
+            companies: TREE_HARD_BROAD_COMPANIES,
+        },
+        "Maximum Sum BST in Binary Tree": {
+            topic: "Binary Tree",
+            companies: TREE_HARD_FINANCE_COMPANIES,
+        },
+        "Distribute Coins in Binary Tree": {
+            topic: "Binary Tree",
+            companies: TREE_HARD_CORE_COMPANIES,
+        },
+        "Maximum Product of Splitted Binary Tree": {
+            topic: "Binary Tree",
+            companies: TREE_HARD_BROAD_COMPANIES,
+        },
+        "Smallest String Starting From Leaf": {
+            topic: "Binary Tree",
+            companies: TREE_HARD_CORE_COMPANIES,
+        },
+        "Vertical Order Traversal of a Binary Tree": {
+            topic: "Binary Tree",
+            companies: TREE_HARD_BROAD_COMPANIES,
+        },
+        "Boundary of Binary Tree": {
+            topic: "Binary Tree",
+            companies: TREE_HARD_CORE_COMPANIES,
         },
         "Jump Game": {
             topic: "Greedy",
