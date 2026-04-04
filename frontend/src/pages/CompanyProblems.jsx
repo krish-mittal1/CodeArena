@@ -45,6 +45,15 @@ const TREE_INVERT_COMPANIES = ["Google", "Amazon", "Microsoft"];
 const TREE_LEVEL_COMPANIES = ["Amazon", "Google", "Microsoft"];
 const TREE_BST_COMPANIES = ["Google", "Amazon", "Microsoft"];
 const TREE_ADVANCED_COMPANIES = ["Google", "Amazon", "Microsoft"];
+const TREE_BALANCE_COMPANIES = ["Google", "Amazon", "Microsoft"];
+const TREE_PATH_COMPANIES = ["Amazon", "Microsoft", "Oracle", "Adobe", "Goldman Sachs", "Samsung", "Atlassian"];
+const TREE_SYMMETRY_COMPANIES = ["Amazon", "Microsoft"];
+const TREE_MIN_DEPTH_COMPANIES = ["Amazon"];
+const TREE_VIEW_COMPANIES = ["Google", "Amazon", "Microsoft", "Adobe"];
+const TREE_ZIGZAG_COMPANIES = ["Amazon", "Microsoft", "Flipkart", "Walmart", "Cisco"];
+const TREE_KTH_COMPANIES = ["Accolite", "Amazon", "Google"];
+const TREE_BUILD_COMPANIES = ["Google", "Amazon", "Microsoft"];
+const TREE_SUMTREE_COMPANIES = ["Amazon", "Microsoft", "Samsung", "Walmart"];
 
 export default function CompanyProblems() {
     const { companyId } = useParams();
@@ -238,6 +247,46 @@ export default function CompanyProblems() {
         "Binary Tree Maximum Path Sum": {
             topic: "Binary Tree",
             companies: TREE_ADVANCED_COMPANIES,
+        },
+        "Balanced Binary Tree": {
+            topic: "Binary Tree",
+            companies: TREE_BALANCE_COMPANIES,
+        },
+        "Diameter of Binary Tree": {
+            topic: "Binary Tree",
+            companies: TREE_BALANCE_COMPANIES,
+        },
+        "Path Sum": {
+            topic: "Binary Tree",
+            companies: TREE_PATH_COMPANIES,
+        },
+        "Symmetric Tree": {
+            topic: "Binary Tree",
+            companies: TREE_SYMMETRY_COMPANIES,
+        },
+        "Minimum Depth of Binary Tree": {
+            topic: "Binary Tree",
+            companies: TREE_MIN_DEPTH_COMPANIES,
+        },
+        "Binary Tree Right Side View": {
+            topic: "Binary Tree",
+            companies: TREE_VIEW_COMPANIES,
+        },
+        "Binary Tree Zigzag Level Order Traversal": {
+            topic: "Binary Tree",
+            companies: TREE_ZIGZAG_COMPANIES,
+        },
+        "Kth Smallest Element in a BST": {
+            topic: "Binary Tree",
+            companies: TREE_KTH_COMPANIES,
+        },
+        "Construct Binary Tree from Preorder and Inorder Traversal": {
+            topic: "Binary Tree",
+            companies: TREE_BUILD_COMPANIES,
+        },
+        "Transform to Sum Tree": {
+            topic: "Binary Tree",
+            companies: TREE_SUMTREE_COMPANIES,
         },
         "Jump Game": {
             topic: "Greedy",
