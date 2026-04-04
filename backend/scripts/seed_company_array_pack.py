@@ -12,6 +12,7 @@ from backend.scripts import seed_majority_element
 from backend.scripts import seed_maximum_subarray
 from backend.scripts import seed_merge_intervals
 from backend.scripts import seed_merge_sorted_array
+from backend.scripts import seed_more_array_problems
 from backend.scripts import seed_next_permutation
 from backend.scripts import seed_pascals_triangle
 from backend.scripts import seed_product_of_array_except_self
@@ -36,6 +37,7 @@ SEEDERS = [
     ("Next Permutation", seed_next_permutation.seed),
     ("Game of Life", seed_game_of_life.seed),
     ("First Missing Positive", seed_first_missing_positive.seed),
+    ("Extended Array Ladder", seed_more_array_problems.seed),
 ]
 
 
