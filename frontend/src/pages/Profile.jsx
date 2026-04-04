@@ -87,7 +87,7 @@ export default function Profile() {
             <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20 flex flex-col gap-6">
 
                 {/* ═══ PROFILE HEADER + SIDEBAR ═══ */}
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
 
                     {/* Left: Profile card */}
                     <Fade>
