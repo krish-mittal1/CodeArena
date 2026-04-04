@@ -54,6 +54,16 @@ const TREE_ZIGZAG_COMPANIES = ["Amazon", "Microsoft", "Flipkart", "Walmart", "Ci
 const TREE_KTH_COMPANIES = ["Accolite", "Amazon", "Google"];
 const TREE_BUILD_COMPANIES = ["Google", "Amazon", "Microsoft"];
 const TREE_SUMTREE_COMPANIES = ["Amazon", "Microsoft", "Samsung", "Walmart"];
+const TREE_LCA_COMPANIES = ["Google", "Amazon", "Microsoft", "Adobe"];
+const TREE_FLATTEN_COMPANIES = ["Google", "Amazon", "Microsoft", "Adobe"];
+const TREE_PATH_SUM_TWO_COMPANIES = ["Amazon", "Google", "Microsoft", "Oracle"];
+const TREE_SUM_NUMBERS_COMPANIES = ["Google", "Amazon", "Microsoft"];
+const TREE_PATHS_COMPANIES = ["Google", "Amazon", "Microsoft"];
+const TREE_COMPLETE_COUNT_COMPANIES = ["Google", "Amazon", "Microsoft"];
+const TREE_PATH_SUM_THREE_COMPANIES = ["Amazon", "Google", "Microsoft"];
+const TREE_LEFT_LEAVES_COMPANIES = ["Amazon", "Google", "Microsoft"];
+const TREE_LARGEST_ROW_COMPANIES = ["Amazon", "Google", "Microsoft"];
+const TREE_COMPLETE_CHECK_COMPANIES = ["Amazon", "Google", "Microsoft"];
 
 export default function CompanyProblems() {
     const { companyId } = useParams();
@@ -287,6 +297,46 @@ export default function CompanyProblems() {
         "Transform to Sum Tree": {
             topic: "Binary Tree",
             companies: TREE_SUMTREE_COMPANIES,
+        },
+        "Lowest Common Ancestor of a Binary Tree": {
+            topic: "Binary Tree",
+            companies: TREE_LCA_COMPANIES,
+        },
+        "Flatten Binary Tree to Linked List": {
+            topic: "Binary Tree",
+            companies: TREE_FLATTEN_COMPANIES,
+        },
+        "Path Sum II": {
+            topic: "Binary Tree",
+            companies: TREE_PATH_SUM_TWO_COMPANIES,
+        },
+        "Sum Root to Leaf Numbers": {
+            topic: "Binary Tree",
+            companies: TREE_SUM_NUMBERS_COMPANIES,
+        },
+        "Binary Tree Paths": {
+            topic: "Binary Tree",
+            companies: TREE_PATHS_COMPANIES,
+        },
+        "Count Complete Tree Nodes": {
+            topic: "Binary Tree",
+            companies: TREE_COMPLETE_COUNT_COMPANIES,
+        },
+        "Path Sum III": {
+            topic: "Binary Tree",
+            companies: TREE_PATH_SUM_THREE_COMPANIES,
+        },
+        "Sum of Left Leaves": {
+            topic: "Binary Tree",
+            companies: TREE_LEFT_LEAVES_COMPANIES,
+        },
+        "Find Largest Value in Each Tree Row": {
+            topic: "Binary Tree",
+            companies: TREE_LARGEST_ROW_COMPANIES,
+        },
+        "Check Completeness of a Binary Tree": {
+            topic: "Binary Tree",
+            companies: TREE_COMPLETE_CHECK_COMPANIES,
         },
         "Jump Game": {
             topic: "Greedy",
