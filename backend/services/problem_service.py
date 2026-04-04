@@ -74,6 +74,24 @@ async def get_active_problems(db: AsyncSession) -> Sequence[Problem]:
     return result.scalars().all()
 
 
+async def get_active_problem_catalog(
+    db: AsyncSession,
+    problem_type: str | None = None,
+) -> Sequence[Problem]:
+    """List active problems without loading heavy test-case/sample data."""
+    query = (
+        select(Problem)
+        .where(Problem.is_active == True)
+        .order_by(Problem.created_at.desc())
+    )
+
+    if problem_type:
+        query = query.where(Problem.problem_type == problem_type)
+
+    result = await db.execute(query)
+    return result.scalars().all()
+
+
 async def get_random_problem(db: AsyncSession) -> Problem:
     """Select a random active problem for a match (fallback, no ELO filtering)."""
     result = await db.execute(

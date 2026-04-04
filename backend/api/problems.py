@@ -4,14 +4,20 @@ Problem routes — CRUD (admin) and listing.
 
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 
 from backend.db.session import get_db, AsyncSession
 from backend.dependencies import get_current_user, get_admin_user, get_optional_current_user
 from backend.models.user import User
 from backend.models.submission import Submission
-from backend.schemas.problem import ProblemCreate, ProblemPublic, ProblemAdmin, TestCasePublic
+from backend.schemas.problem import (
+    ProblemCreate,
+    ProblemPublic,
+    ProblemAdmin,
+    ProblemCatalogPublic,
+    TestCasePublic,
+)
 from backend.services import problem_service
 from backend.core.constants import SubmissionStatus
 
@@ -38,6 +44,28 @@ async def list_problems(
     problems = await problem_service.get_active_problems(db)
     solved_ids = await _get_solved_problem_ids(db, current_user.id) if current_user else set()
     return [_to_public(p, solved=(p.id in solved_ids)) for p in problems]
+
+
+@router.get("/catalog", response_model=list[ProblemCatalogPublic])
+async def list_problem_catalog(
+    problem_type: str | None = Query(default=None),
+    db: AsyncSession = Depends(get_db),
+    current_user: User | None = Depends(get_optional_current_user),
+):
+    """List active problems with a lightweight payload for catalogs and filters."""
+    problems = await problem_service.get_active_problem_catalog(db, problem_type=problem_type)
+    solved_ids = await _get_solved_problem_ids(db, current_user.id) if current_user else set()
+    return [
+        ProblemCatalogPublic(
+            id=problem.id,
+            title=problem.title,
+            difficulty=problem.difficulty,
+            problem_type=getattr(problem, "problem_type", "dsa"),
+            rating=getattr(problem, "rating", 800),
+            solved=(problem.id in solved_ids),
+        )
+        for problem in problems
+    ]
 
 
 @router.get("/{problem_id}", response_model=ProblemPublic)

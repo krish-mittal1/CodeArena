@@ -59,6 +59,17 @@ class ProblemPublic(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ProblemCatalogPublic(BaseModel):
+    id: uuid.UUID
+    title: str
+    difficulty: str
+    problem_type: str = "dsa"
+    rating: int = 800
+    solved: bool = False
+
+    model_config = {"from_attributes": True}
+
+
 class ProblemAdmin(ProblemPublic):
     """Admin view includes all test cases and metadata."""
     is_active: bool

@@ -78,8 +78,9 @@ export default function CompanyProblems() {
     const company = COMPANIES.find((c) => c.id === companyId);
 
     const { data: problems = [], isLoading } = useQuery({
-        queryKey: ['problems'],
-        queryFn: problemApi.getAll,
+        queryKey: ['problem-catalog', 'dsa'],
+        queryFn: () => problemApi.getCatalog({ problem_type: 'dsa' }),
+        staleTime: 5 * 60 * 1000,
     });
 
     const PROBLEM_METADATA = {

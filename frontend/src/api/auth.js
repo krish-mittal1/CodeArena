@@ -44,6 +44,7 @@ export const submissionApi = {
 
 export const problemApi = {
     getAll: () => api.get('/problems/').then((r) => r.data),
+    getCatalog: (params = {}) => api.get('/problems/catalog', { params }).then((r) => r.data),
     getById: (id) => api.get(`/problems/${id}`).then((r) => r.data),
 };
 
