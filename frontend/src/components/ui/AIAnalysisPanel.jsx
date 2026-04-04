@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Sparkles, Clock, AlertTriangle, CheckCircle2,
-    Lightbulb, Code2, TrendingDown, X, ChevronRight
+    Lightbulb, Code2, TrendingDown, X, ChevronRight, GitBranch, BookOpen
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -66,6 +66,33 @@ const buildApproachSteps = (analysis) => {
     if (sentences.length <= 1) return sentences;
 
     return sentences.map((sentence, index) => `${index + 1}. ${sentence}`);
+};
+
+const normalizeAlternatives = (analysis) => {
+    if (!Array.isArray(analysis?.alternative_approaches)) return [];
+
+    return analysis.alternative_approaches
+        .map((item, index) => {
+            if (!item) return null;
+            if (typeof item === 'string') {
+                return {
+                    name: `Alternative ${index + 1}`,
+                    summary: item,
+                    time_complexity: 'N/A',
+                    space_complexity: 'N/A',
+                    when_to_use: '',
+                };
+            }
+
+            return {
+                name: item.name || `Alternative ${index + 1}`,
+                summary: item.summary || '',
+                time_complexity: item.time_complexity || 'N/A',
+                space_complexity: item.space_complexity || 'N/A',
+                when_to_use: item.when_to_use || '',
+            };
+        })
+        .filter(Boolean);
 };
 
 const ComplexityBadge = ({ label, value, variant = 'neutral' }) => {
@@ -161,12 +188,44 @@ const getComplexityVariant = (complexity) => {
     return 'warn';
 };
 
+const ApproachCard = ({ title, description, time, space, icon: Icon, tone = 'neutral' }) => {
+    const tones = {
+        neutral: 'border-white/8 bg-white/[0.03]',
+        bad: 'border-red-500/20 bg-red-500/[0.05]',
+        good: 'border-emerald-500/20 bg-emerald-500/[0.05]',
+        accent: 'border-accent/20 bg-accent/[0.06]',
+    };
+
+    return (
+        <div className={`rounded-2xl border p-5 ${tones[tone]}`}>
+            <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex items-center gap-3">
+                    <div className={`rounded-xl p-2 ${tone === 'good' ? 'bg-emerald-500/15 text-emerald-400' : tone === 'bad' ? 'bg-red-500/15 text-red-400' : tone === 'accent' ? 'bg-accent/15 text-accent' : 'bg-bg-hover text-text-secondary'}`}>
+                        <Icon size={16} />
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-bold uppercase tracking-[0.18em] text-text-primary">{title}</h4>
+                    </div>
+                </div>
+            </div>
+            <p className="text-sm leading-7 text-text-primary mb-4 whitespace-pre-wrap">{description || 'Not available yet.'}</p>
+            <div className="grid grid-cols-2 gap-3">
+                <ComplexityBadge label="Time" value={time || 'N/A'} variant={getComplexityVariant(time)} />
+                <ComplexityBadge label="Space" value={space || 'N/A'} variant={getComplexityVariant(space)} />
+            </div>
+        </div>
+    );
+};
+
 export default function AIAnalysisPanel({ analysis, verdict, onClose }) {
     const isAccepted = verdict?.status === 'accepted';
 
     const quickSummary = useMemo(() => buildQuickSummary(analysis, isAccepted), [analysis, isAccepted]);
     const verdictParagraphs = useMemo(() => splitParagraphs(analysis?.verdict_explanation), [analysis?.verdict_explanation]);
     const approachSteps = useMemo(() => buildApproachSteps(analysis), [analysis]);
+    const conceptParagraphs = useMemo(() => splitParagraphs(analysis?.problem_concept), [analysis?.problem_concept]);
+    const currentApproachParagraphs = useMemo(() => splitParagraphs(analysis?.submitted_approach), [analysis?.submitted_approach]);
+    const alternativeApproaches = useMemo(() => normalizeAlternatives(analysis), [analysis]);
     const learnings = useMemo(
         () => (analysis?.tips?.length ? analysis.tips : splitSentences(analysis?.optimized_approach).slice(0, 3)),
         [analysis?.optimized_approach, analysis?.tips]
@@ -243,6 +302,24 @@ export default function AIAnalysisPanel({ analysis, verdict, onClose }) {
                         </div>
 
                         <Section
+                            icon={BookOpen}
+                            title="Core concept of the problem"
+                            subtitle="What the problem is really asking and what pattern usually solves it"
+                            accent
+                        >
+                            <div className="space-y-3">
+                                {conceptParagraphs.map((paragraph, index) => (
+                                    <div
+                                        key={`${paragraph}-${index}`}
+                                        className="rounded-xl border border-white/6 bg-white/[0.03] px-4 py-3"
+                                    >
+                                        <p className="text-sm leading-7 text-text-primary">{paragraph}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </Section>
+
+                        <Section
                             icon={Lightbulb}
                             title="Simple Explanation"
                             subtitle="A cleaner, easier-to-read breakdown of the AI verdict"
@@ -257,6 +334,40 @@ export default function AIAnalysisPanel({ analysis, verdict, onClose }) {
                                         <p className="text-sm leading-7 text-text-primary">{paragraph}</p>
                                     </div>
                                 ))}
+                            </div>
+                        </Section>
+
+                        <Section
+                            icon={GitBranch}
+                            title="Approach ladder"
+                            subtitle="Compare the slower idea, your current idea, and the strongest common solution"
+                            accent
+                        >
+                            <div className="grid grid-cols-1 gap-4">
+                                <ApproachCard
+                                    title="Worst reasonable approach"
+                                    description={analysis?.worst_approach}
+                                    time={analysis?.worst_time_complexity}
+                                    space={analysis?.worst_space_complexity}
+                                    icon={TrendingDown}
+                                    tone="bad"
+                                />
+                                <ApproachCard
+                                    title="Your current approach"
+                                    description={currentApproachParagraphs.join('\n\n')}
+                                    time={analysis?.time_complexity}
+                                    space={analysis?.space_complexity}
+                                    icon={Code2}
+                                    tone="neutral"
+                                />
+                                <ApproachCard
+                                    title="Optimal approach"
+                                    description={analysis?.optimized_approach}
+                                    time={analysis?.optimized_time_complexity}
+                                    space={analysis?.optimized_space_complexity}
+                                    icon={Sparkles}
+                                    tone="good"
+                                />
                             </div>
                         </Section>
 
@@ -291,6 +402,48 @@ export default function AIAnalysisPanel({ analysis, verdict, onClose }) {
                                 </div>
                             </Section>
                         </div>
+
+                        {alternativeApproaches.length > 0 && (
+                            <Section
+                                icon={GitBranch}
+                                title="Other possible approaches"
+                                subtitle="Useful alternatives so the user can compare trade-offs and patterns"
+                            >
+                                <div className="space-y-4">
+                                    {alternativeApproaches.map((approach, index) => (
+                                        <div key={`${approach.name}-${index}`} className="rounded-2xl border border-white/8 bg-white/[0.03] p-5">
+                                            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-bold uppercase tracking-[0.18em] text-text-primary mb-3">
+                                                        {approach.name}
+                                                    </p>
+                                                    <p className="text-sm leading-7 text-text-primary whitespace-pre-wrap">
+                                                        {approach.summary}
+                                                    </p>
+                                                    {approach.when_to_use && (
+                                                        <p className="mt-3 text-sm leading-7 text-text-secondary">
+                                                            <span className="font-semibold text-text-primary">When to use:</span> {approach.when_to_use}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-3 lg:w-[250px]">
+                                                    <ComplexityBadge
+                                                        label="Time"
+                                                        value={approach.time_complexity}
+                                                        variant={getComplexityVariant(approach.time_complexity)}
+                                                    />
+                                                    <ComplexityBadge
+                                                        label="Space"
+                                                        value={approach.space_complexity}
+                                                        variant={getComplexityVariant(approach.space_complexity)}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </Section>
+                        )}
 
                         {analysis.issues && analysis.issues.length > 0 && (
                             <Section

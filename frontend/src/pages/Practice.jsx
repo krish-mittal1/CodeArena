@@ -121,14 +121,20 @@ export default function Practice() {
         } catch (err) {
             console.error('AI analysis failed:', err);
             setAiAnalysis({
+                problem_concept: 'The core idea could not be generated right now.',
                 verdict_explanation: 'AI analysis could not be completed at this time.',
+                submitted_approach: 'Your approach summary is not available right now.',
                 time_complexity: 'N/A',
                 space_complexity: 'N/A',
+                worst_approach: 'Try starting from the brute-force version first, then improve it.',
+                worst_time_complexity: 'N/A',
+                worst_space_complexity: 'N/A',
                 issues: [],
                 failed_test_explanation: '',
                 optimized_approach: 'Please try again later.',
                 optimized_time_complexity: 'N/A',
                 optimized_space_complexity: 'N/A',
+                alternative_approaches: [],
                 improved_code: '',
                 tips: [],
             });

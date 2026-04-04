@@ -21,14 +21,28 @@ Teach like a strong mentor, not like a research paper.
 Analyze the submitted code and return a JSON object with EXACTLY these keys:
 
 {
+  "problem_concept": "string - 2 to 4 short paragraphs. Explain the core concept of the problem, what the problem is really asking, and what pattern or data structure is usually used.",
   "verdict_explanation": "string - 2 to 4 short paragraphs. Explain why the code passed or failed in plain language. Mention the key idea, important edge cases, and the main reason behind the verdict.",
+  "submitted_approach": "string - Explain the user's current approach in simple language. Mention the pattern if recognizable.",
   "time_complexity": "string - Big-O time complexity of submitted code, e.g. O(N log N)",
   "space_complexity": "string - Big-O space complexity of submitted code, e.g. O(N)",
+  "worst_approach": "string - Explain a slower but still reasonable brute-force or weaker approach. Mention when someone might think of it first.",
+  "worst_time_complexity": "string - Big-O time of the slower or brute-force approach",
+  "worst_space_complexity": "string - Big-O space of the slower or brute-force approach",
   "issues": ["list of strings - each item should be one specific issue in plain language. Keep each item short and concrete. Empty list [] if code is correct and clean"],
   "failed_test_explanation": "string - If the code failed, explain the failing test case step by step in simple language. If the code passed, return an empty string.",
   "optimized_approach": "string - Explain the best approach like a mini editorial. Use short paragraphs or short numbered steps. Cover: the idea, how it works, why it is correct, and what to watch out for.",
   "optimized_time_complexity": "string - Big-O time of the optimal approach",
   "optimized_space_complexity": "string - Big-O space of the optimal approach",
+  "alternative_approaches": [
+    {
+      "name": "string - short label for the approach",
+      "summary": "string - 1 to 3 short paragraphs on how the approach works",
+      "time_complexity": "string - Big-O time complexity",
+      "space_complexity": "string - Big-O space complexity",
+      "when_to_use": "string - when this approach is useful or why someone may choose it"
+    }
+  ],
   "improved_code": "string - Clean, correct, idiomatic code in the SAME language as the submission. It must be fully working and easy to read.",
   "tips": ["list of strings - 2 to 4 short, practical takeaways. Each tip should be something the user can remember for similar problems."]
 }
@@ -41,6 +55,9 @@ Rules:
 - Do not sound robotic.
 - If the code is accepted, still explain why it works and what pattern it is using.
 - If the problem uses a classic pattern like sliding window, two pointers, binary search, prefix sum, linked list reversal, etc., name the pattern clearly.
+- Always fill in the worst_approach and optimized_approach fields.
+- If there are other realistic approaches, include 1 to 3 items in alternative_approaches. If there are no meaningful alternatives, return [].
+- Make the analysis teach the user the whole problem, not only the submitted code.
 """
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
@@ -175,14 +192,20 @@ Return EXACTLY the JSON object as instructed."""
 def _fallback_analysis(verdict_status: str, error_reason: str = "AI analysis is currently unavailable") -> dict:
     """Return a minimal analysis object when AI is unavailable."""
     return {
+        "problem_concept": "This problem still has a core pattern behind it, but the AI explanation is not available right now. Try identifying the main data structure, the key state you need to track, and the simplest brute-force version first.",
         "verdict_explanation": f"Your submission received verdict: {verdict_status}. A full AI explanation is not available right now.",
+        "submitted_approach": "The system could not generate a reliable explanation of your exact approach right now.",
         "time_complexity": "N/A",
         "space_complexity": "N/A",
+        "worst_approach": "Start from the most direct brute-force idea, then look for repeated work you can remove.",
+        "worst_time_complexity": "N/A",
+        "worst_space_complexity": "N/A",
         "issues": [],
         "failed_test_explanation": "",
         "optimized_approach": f"{error_reason}. Please check your server configuration and API key.",
         "optimized_time_complexity": "N/A",
         "optimized_space_complexity": "N/A",
+        "alternative_approaches": [],
         "improved_code": "",
         "tips": [
             "Test small edge cases first.",
