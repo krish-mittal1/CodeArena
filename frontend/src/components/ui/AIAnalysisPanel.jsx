@@ -95,6 +95,11 @@ const normalizeAlternatives = (analysis) => {
         .filter(Boolean);
 };
 
+const hasMeaningfulText = (value) => {
+    const text = String(value || '').trim().toLowerCase();
+    return !!text && text !== 'not available yet.' && text !== 'n/a';
+};
+
 const ComplexityBadge = ({ label, value, variant = 'neutral' }) => {
     const colors = {
         good: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
@@ -226,6 +231,15 @@ export default function AIAnalysisPanel({ analysis, verdict, onClose }) {
     const conceptParagraphs = useMemo(() => splitParagraphs(analysis?.problem_concept), [analysis?.problem_concept]);
     const currentApproachParagraphs = useMemo(() => splitParagraphs(analysis?.submitted_approach), [analysis?.submitted_approach]);
     const alternativeApproaches = useMemo(() => normalizeAlternatives(analysis), [analysis]);
+    const showConceptSection = useMemo(() => conceptParagraphs.some(hasMeaningfulText), [conceptParagraphs]);
+    const showCurrentApproach = useMemo(
+        () => currentApproachParagraphs.some(hasMeaningfulText) || hasMeaningfulText(analysis?.time_complexity) || hasMeaningfulText(analysis?.space_complexity),
+        [currentApproachParagraphs, analysis?.time_complexity, analysis?.space_complexity]
+    );
+    const showWorstApproach = useMemo(
+        () => hasMeaningfulText(analysis?.worst_approach) || hasMeaningfulText(analysis?.worst_time_complexity) || hasMeaningfulText(analysis?.worst_space_complexity),
+        [analysis?.worst_approach, analysis?.worst_time_complexity, analysis?.worst_space_complexity]
+    );
     const learnings = useMemo(
         () => (analysis?.tips?.length ? analysis.tips : splitSentences(analysis?.optimized_approach).slice(0, 3)),
         [analysis?.optimized_approach, analysis?.tips]
@@ -301,23 +315,25 @@ export default function AIAnalysisPanel({ analysis, verdict, onClose }) {
                             </div>
                         </div>
 
-                        <Section
-                            icon={BookOpen}
-                            title="Core concept of the problem"
-                            subtitle="What the problem is really asking and what pattern usually solves it"
-                            accent
-                        >
-                            <div className="space-y-3">
-                                {conceptParagraphs.map((paragraph, index) => (
-                                    <div
-                                        key={`${paragraph}-${index}`}
-                                        className="rounded-xl border border-white/6 bg-white/[0.03] px-4 py-3"
-                                    >
-                                        <p className="text-sm leading-7 text-text-primary">{paragraph}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </Section>
+                        {showConceptSection && (
+                            <Section
+                                icon={BookOpen}
+                                title="Core concept of the problem"
+                                subtitle="What the problem is really asking and what pattern usually solves it"
+                                accent
+                            >
+                                <div className="space-y-3">
+                                    {conceptParagraphs.filter(hasMeaningfulText).map((paragraph, index) => (
+                                        <div
+                                            key={`${paragraph}-${index}`}
+                                            className="rounded-xl border border-white/6 bg-white/[0.03] px-4 py-3"
+                                        >
+                                            <p className="text-sm leading-7 text-text-primary">{paragraph}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </Section>
+                        )}
 
                         <Section
                             icon={Lightbulb}
@@ -344,22 +360,26 @@ export default function AIAnalysisPanel({ analysis, verdict, onClose }) {
                             accent
                         >
                             <div className="grid grid-cols-1 gap-4">
-                                <ApproachCard
-                                    title="Worst reasonable approach"
-                                    description={analysis?.worst_approach}
-                                    time={analysis?.worst_time_complexity}
-                                    space={analysis?.worst_space_complexity}
-                                    icon={TrendingDown}
-                                    tone="bad"
-                                />
-                                <ApproachCard
-                                    title="Your current approach"
-                                    description={currentApproachParagraphs.join('\n\n')}
-                                    time={analysis?.time_complexity}
-                                    space={analysis?.space_complexity}
-                                    icon={Code2}
-                                    tone="neutral"
-                                />
+                                {showWorstApproach && (
+                                    <ApproachCard
+                                        title="Worst reasonable approach"
+                                        description={analysis?.worst_approach}
+                                        time={analysis?.worst_time_complexity}
+                                        space={analysis?.worst_space_complexity}
+                                        icon={TrendingDown}
+                                        tone="bad"
+                                    />
+                                )}
+                                {showCurrentApproach && (
+                                    <ApproachCard
+                                        title="Your current approach"
+                                        description={currentApproachParagraphs.filter(hasMeaningfulText).join('\n\n')}
+                                        time={analysis?.time_complexity}
+                                        space={analysis?.space_complexity}
+                                        icon={Code2}
+                                        tone="neutral"
+                                    />
+                                )}
                                 <ApproachCard
                                     title="Optimal approach"
                                     description={analysis?.optimized_approach}

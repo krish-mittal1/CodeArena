@@ -66,6 +66,68 @@ GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 AI_CACHE = {}
 
 
+def _normalize_analysis_result(result: dict, verdict_status: str) -> dict:
+    """Backfill missing fields so the UI never receives half-shaped analysis."""
+    if not isinstance(result, dict):
+        return _fallback_analysis(verdict_status, "Invalid AI response format")
+
+    verdict_explanation = result.get("verdict_explanation") or "The AI review did not explain the verdict clearly."
+    optimized_approach = result.get("optimized_approach") or "The best-known approach explanation is not available yet."
+    submitted_approach = result.get("submitted_approach") or verdict_explanation
+
+    if not result.get("problem_concept"):
+        first_line = submitted_approach or optimized_approach
+        result["problem_concept"] = first_line
+
+    result["verdict_explanation"] = verdict_explanation
+    result["submitted_approach"] = submitted_approach
+    result["time_complexity"] = result.get("time_complexity") or "N/A"
+    result["space_complexity"] = result.get("space_complexity") or "N/A"
+
+    if not result.get("worst_approach"):
+        result["worst_approach"] = (
+            "Start from the direct brute-force idea first, then remove repeated work until you reach the stronger pattern."
+        )
+    result["worst_time_complexity"] = result.get("worst_time_complexity") or "N/A"
+    result["worst_space_complexity"] = result.get("worst_space_complexity") or "N/A"
+
+    result["issues"] = result.get("issues") or []
+    result["failed_test_explanation"] = result.get("failed_test_explanation") or ""
+    result["optimized_approach"] = optimized_approach
+    result["optimized_time_complexity"] = result.get("optimized_time_complexity") or "N/A"
+    result["optimized_space_complexity"] = result.get("optimized_space_complexity") or "N/A"
+
+    alternatives = result.get("alternative_approaches")
+    if not isinstance(alternatives, list):
+        alternatives = []
+    normalized_alternatives = []
+    for index, item in enumerate(alternatives):
+        if isinstance(item, str):
+            normalized_alternatives.append(
+                {
+                    "name": f"Alternative {index + 1}",
+                    "summary": item,
+                    "time_complexity": "N/A",
+                    "space_complexity": "N/A",
+                    "when_to_use": "",
+                }
+            )
+        elif isinstance(item, dict):
+            normalized_alternatives.append(
+                {
+                    "name": item.get("name") or f"Alternative {index + 1}",
+                    "summary": item.get("summary") or "",
+                    "time_complexity": item.get("time_complexity") or "N/A",
+                    "space_complexity": item.get("space_complexity") or "N/A",
+                    "when_to_use": item.get("when_to_use") or "",
+                }
+            )
+    result["alternative_approaches"] = normalized_alternatives
+    result["improved_code"] = result.get("improved_code") or ""
+    result["tips"] = result.get("tips") or []
+    return result
+
+
 async def analyze_code(
     problem_title: str,
     problem_description: str,
@@ -85,7 +147,7 @@ async def analyze_code(
     """
     if submission_id and submission_id in AI_CACHE:
         logger.info("Returning cached AI analysis for submission %s", submission_id)
-        return AI_CACHE[submission_id]
+        return _normalize_analysis_result(AI_CACHE[submission_id], verdict_status)
 
     if not settings.groq_api_key:
         logger.warning("GROQ_API_KEY not set - returning placeholder analysis")
@@ -166,7 +228,7 @@ Return EXACTLY the JSON object as instructed."""
 
             data = response.json()
             raw = data["choices"][0]["message"]["content"].strip()
-            result = json.loads(raw)
+            result = _normalize_analysis_result(json.loads(raw), verdict_status)
 
             if submission_id:
                 AI_CACHE[submission_id] = result
