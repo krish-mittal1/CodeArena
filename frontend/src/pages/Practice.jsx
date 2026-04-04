@@ -266,6 +266,39 @@ export default function Practice() {
         </div>
     );
 
+    const normalizeLeetCodeText = (content) => {
+        if (!content) return '';
+        return String(content)
+            .replace(/JSON array/gi, 'array')
+            .replace(/\bint\[\]\[\]\b/g, '2D integer array')
+            .replace(/\bint\[\]\b/g, 'integer array')
+            .replace(/\bstring\[\]\[\]\b/g, '2D string array')
+            .replace(/\bstring\[\]\b/g, 'string array')
+            .replace(/\bstr\[\]\b/g, 'string array')
+            .replace(/\bstr\b/g, 'string')
+            .replace(/\bbool\b/gi, 'boolean')
+            .replace(/\s+\((?:int|string|boolean|bool|float|double|long)(?:\[\])?(?:\[\])?\)/g, '')
+            .trim();
+    };
+
+    const formatDsaSampleInput = (sampleCase) => {
+        const lines = (sampleCase?.input || '').split('\n').filter((line) => line.trim().length > 0);
+        if (!problem?.parameters?.length) return sampleCase?.input || '';
+        return lines.map((line, index) => {
+            const param = problem.parameters[index];
+            if (!param) return line;
+            return `${param.name} = ${line}`;
+        }).join('\n');
+    };
+
+    const formatDsaSampleOutput = (sampleCase) => {
+        if (!sampleCase) return '';
+        if (problem?.return_type === 'boolean' || problem?.return_type === 'bool') {
+            return String(sampleCase.expected_output).toLowerCase();
+        }
+        return sampleCase.expected_output || '';
+    };
+
     const formatCodeforcesExamples = (sampleCases) => (
         <div className="space-y-4">
             {sampleCases.map((tc, i) => (
@@ -379,44 +412,57 @@ export default function Practice() {
                         ) : (
                             <>
                                 <div>
-                                    <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-3">Description</h3>
-                                    <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
-                                        {problem.description}
+                                    <h3 className="text-base font-bold text-text-primary mb-3">Problem statement</h3>
+                                    <div className="text-sm text-text-secondary leading-7 whitespace-pre-wrap">
+                                        {normalizeLeetCodeText(problem.description)}
                                     </div>
                                 </div>
 
                                 <div>
-                                    <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-2">Input Format</h3>
-                                    <p className="text-sm text-text-secondary">{problem.input_format}</p>
+                                    <h3 className="text-base font-bold text-text-primary mb-3">Input</h3>
+                                    <div className="text-sm text-text-secondary leading-7 whitespace-pre-wrap">
+                                        {normalizeLeetCodeText(problem.input_format)}
+                                    </div>
                                 </div>
 
                                 <div>
-                                    <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-2">Output Format</h3>
-                                    <p className="text-sm text-text-secondary">{problem.output_format}</p>
+                                    <h3 className="text-base font-bold text-text-primary mb-3">Output</h3>
+                                    <div className="text-sm text-text-secondary leading-7 whitespace-pre-wrap">
+                                        {normalizeLeetCodeText(problem.output_format)}
+                                    </div>
                                 </div>
 
                                 {problem.constraints && (
                                     <div>
-                                        <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-2">Constraints</h3>
-                                        <p className="text-sm text-text-secondary font-mono whitespace-pre-wrap">{problem.constraints}</p>
+                                        <h3 className="text-base font-bold text-text-primary mb-3">Constraints</h3>
+                                        <div className="text-sm text-text-secondary font-mono whitespace-pre-wrap leading-7">
+                                            {normalizeLeetCodeText(problem.constraints)}
+                                        </div>
                                     </div>
                                 )}
 
                                 {problem.sample_cases?.length > 0 && (
                                     <div>
-                                        <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-text-muted mb-3">Examples</h3>
-                                        <div className="space-y-3">
+                                        <h3 className="text-base font-bold text-text-primary mb-3">Examples</h3>
+                                        <div className="space-y-4">
                                             {problem.sample_cases.map((tc, i) => (
-                                                <div key={i} className="paper-card-soft overflow-hidden">
-                                                    <div className="grid grid-cols-2 divide-x divide-border">
-                                                        <div className="p-3">
-                                                            <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Input</p>
-                                                            <pre className="text-xs text-text-primary font-mono whitespace-pre-wrap">{tc.input}</pre>
+                                                <div key={i} className="border border-border bg-bg-primary overflow-hidden rounded-[6px]">
+                                                    {problem.sample_cases.length > 1 && (
+                                                        <div className="px-3 py-2 border-b border-border bg-bg-surface/60">
+                                                            <p className="text-sm font-semibold text-text-primary">{`Example ${i + 1}`}</p>
                                                         </div>
-                                                        <div className="p-3">
-                                                            <p className="text-[10px] font-bold uppercase text-text-muted mb-1">Output</p>
-                                                            <pre className="text-xs text-text-primary font-mono whitespace-pre-wrap">{tc.expected_output}</pre>
+                                                    )}
+                                                    <div className="border-t border-border">
+                                                        <div className="px-2.5 py-1 bg-bg-surface border-b border-border">
+                                                            <p className="text-[13px] font-bold lowercase text-text-primary font-mono">input</p>
                                                         </div>
+                                                        <pre className="px-2.5 py-2 text-sm text-text-primary font-mono whitespace-pre-wrap">{formatDsaSampleInput(tc)}</pre>
+                                                    </div>
+                                                    <div className="border-t border-border">
+                                                        <div className="px-2.5 py-1 bg-bg-surface border-b border-border">
+                                                            <p className="text-[13px] font-bold lowercase text-text-primary font-mono">output</p>
+                                                        </div>
+                                                        <pre className="px-2.5 py-2 text-sm text-text-primary font-mono whitespace-pre-wrap">{formatDsaSampleOutput(tc)}</pre>
                                                     </div>
                                                 </div>
                                             ))}
