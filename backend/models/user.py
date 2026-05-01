@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import String, Integer, DateTime, Index
+from sqlalchemy import String, Integer, DateTime, Index, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -24,6 +24,8 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    is_bot: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     
     elo: Mapped[int] = mapped_column(Integer, default=ELO_DEFAULT, nullable=False)
     matches_played: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
@@ -45,4 +47,5 @@ class User(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<User {self.username} elo={self.elo}>"
+        bot_tag = " [BOT]" if self.is_bot else ""
+        return f"<User {self.username} elo={self.elo}{bot_tag}>"

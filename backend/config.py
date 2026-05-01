@@ -64,8 +64,10 @@ class Settings(BaseSettings):
     def validate_jwt_secret(cls, v, info):
         if info.data.get("environment") == "production" and v == "change-me-in-production":
             raise ValueError("jwt_secret_key MUST be changed in production")
+        if info.data.get("environment") == "development" and v == "change-me-in-production":
+            raise ValueError("jwt_secret_key must be changed even in development for security")
         if len(v) < 32:
-            raise ValueError("jwt_secret_key must be at least 32 characters")
+            raise ValueError("jwt_secret_key must be at least 32 characters (use secrets.token_urlsafe(32))")
         return v
 
     # ── Match ─────────────────────────────────────────────────
@@ -100,6 +102,16 @@ class Settings(BaseSettings):
     # ── Server ────────────────────────────────────────────────
     host: str = Field(default="0.0.0.0", description="Server host")
     port: int = Field(default=8000, description="Server port")
+    spectator_require_auth: bool = Field(
+        default=True,
+        description="Require valid JWT token for spectator WebSocket endpoint",
+    )
+    private_room_code_rate_limit: int = Field(
+        default=10, description="Max room code requests per IP per minute"
+    )
+    match_access_strict: bool = Field(
+        default=True, description="Enforce strict match access control"
+    )
     
     # ── Email & Frontend ──────────────────────────────────────
     frontend_url: str = Field(default="http://localhost:5173", description="Frontend base URL for links")

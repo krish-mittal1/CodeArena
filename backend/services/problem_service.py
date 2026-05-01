@@ -27,6 +27,8 @@ async def create_problem(db: AsyncSession, data: ProblemCreate) -> Problem:
         input_format=data.input_format,
         output_format=data.output_format,
         constraints=data.constraints,
+        problem_type=data.problem_type,
+        rating=data.rating,
         time_limit_ms=data.time_limit_ms,
         memory_limit_mb=data.memory_limit_mb,
     )
@@ -72,11 +74,30 @@ async def get_active_problems(db: AsyncSession) -> Sequence[Problem]:
     return result.scalars().all()
 
 
+async def get_active_problem_catalog(
+    db: AsyncSession,
+    problem_type: str | None = None,
+) -> Sequence[Problem]:
+    """List active problems without loading heavy test-case/sample data."""
+    query = (
+        select(Problem)
+        .where(Problem.is_active == True)
+        .order_by(Problem.created_at.desc())
+    )
+
+    if problem_type:
+        query = query.where(Problem.problem_type == problem_type)
+
+    result = await db.execute(query)
+    return result.scalars().all()
+
+
 async def get_random_problem(db: AsyncSession) -> Problem:
     """Select a random active problem for a match (fallback, no ELO filtering)."""
     result = await db.execute(
         select(Problem)
         .where(Problem.is_active == True)
+        .where(Problem.problem_type == "dsa")
         .order_by(func.random())
         .limit(1)
         .options(selectinload(Problem.test_cases))
@@ -111,6 +132,7 @@ async def get_problem_for_match(db: AsyncSession, avg_elo: int) -> Problem:
         .where(
             and_(
                 Problem.is_active == True,
+                Problem.problem_type == "dsa",
                 Problem.rating >= rating_low,
                 Problem.rating <= rating_high,
             )

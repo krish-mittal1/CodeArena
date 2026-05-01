@@ -132,9 +132,6 @@ class ConnectionManager:
             await asyncio.wait_for(redis.ping(), timeout=2)
             self._redis = redis
             self._pubsub = redis.pubsub()
-            self._listener_task = asyncio.create_task(
-                self._redis_listener(), name="ws-pubsub-listener"
-            )
             logger.info("[WS] ConnectionManager initialized with Redis pub/sub")
         except asyncio.TimeoutError:
             logger.error("[WS] Redis connection timeout during init")
@@ -142,6 +139,13 @@ class ConnectionManager:
         except Exception as e:
             logger.error(f"[WS] Redis init failed: {e}")
             raise
+
+    def _start_listener_task(self) -> None:
+        """Start the Redis listener after startup returns control to the event loop."""
+        if self._listener_task is None or self._listener_task.done():
+            self._listener_task = asyncio.create_task(
+                self._redis_listener(), name="ws-pubsub-listener"
+            )
 
     async def shutdown(self):
         """Graceful shutdown — close all connections and cancel listener."""
@@ -556,6 +560,7 @@ class ConnectionManager:
         """Subscribe to a room's Redis channel (idempotent)."""
         if not self._pubsub:
             return
+        self._start_listener_task()
         channel = RedisKey.ws_channel(room_id)
         try:
             await self._pubsub.subscribe(channel)

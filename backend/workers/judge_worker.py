@@ -276,10 +276,25 @@ async def _process_submission_inner(
 
             # ── COMPILATION ERROR check ───────────────────
             if sandbox_result.stage == "compile" and sandbox_result.exit_code != 0:
+                is_infra_compile_failure = (
+                    sandbox_result.timed_out
+                    or "Execution engine error" in sandbox_result.stderr
+                    or "sandbox container did not respond" in sandbox_result.stderr
+                )
+                failure_status = (
+                    SubmissionStatus.RUNTIME_ERROR
+                    if is_infra_compile_failure
+                    else SubmissionStatus.COMPILATION_ERROR
+                )
+                failure_event = (
+                    "runtime_error"
+                    if is_infra_compile_failure
+                    else "compilation_error"
+                )
                 tc_result_obj = SubmissionResult(
                     submission_id=submission.id,
                     test_case_id=tc.id,
-                    verdict=SubmissionStatus.COMPILATION_ERROR,
+                    verdict=failure_status,
                     execution_time_ms=0,
                     memory_used_kb=0,
                     actual_output="",
@@ -287,18 +302,18 @@ async def _process_submission_inner(
                 )
                 db.add(tc_result_obj)
 
-                submission.status = SubmissionStatus.COMPILATION_ERROR
+                submission.status = failure_status
                 submission.passed_test_cases = passed
                 submission.judged_at = datetime.now(timezone.utc)
                 await db.commit()
 
                 logger.info(
                     f"[JUDGE] {submission_id} TC#{tc_idx}: "
-                    f"verdict=COMPILATION_ERROR, "
+                    f"verdict={submission.status}, "
                     f"stderr={repr(sandbox_result.stderr[:300])}"
                 )
                 await _emit_submission_result(
-                    submission, "compilation_error", passed, len(test_cases), 0, 0
+                    submission, failure_event, passed, len(test_cases), 0, 0
                 )
                 return
             else:
@@ -397,7 +412,7 @@ async def _process_submission_inner(
         )
 
         # ── If ACCEPTED, trigger match completion ─────────
-        if submission.status == SubmissionStatus.ACCEPTED:
+        if submission.status == SubmissionStatus.ACCEPTED and submission.match_id is not None:
             try:
                 from backend.services import match_service
 

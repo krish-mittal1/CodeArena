@@ -64,6 +64,14 @@ ELO_K_FACTORS = [
 ]
 
 
+# ── Bot Configuration ─────────────────────────────────────────
+
+BOT_WAIT_TIME_MIN = 10  # Minimum wait time before bot fallback (seconds)
+BOT_WAIT_TIME_MAX = 20  # Maximum wait time before bot fallback (seconds)
+BOT_SUBMISSION_DELAY_MIN = 5  # Bot submits after random delay (min seconds)
+BOT_SUBMISSION_DELAY_MAX = 25  # Bot submits after random delay (max seconds)
+
+
 # ── WebSocket Events ─────────────────────────────────────────
 
 class WSEvent(str, Enum):

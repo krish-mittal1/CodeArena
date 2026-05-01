@@ -13,6 +13,7 @@ from backend.db.session import get_db, AsyncSession
 from backend.dependencies import get_current_user, get_redis
 from backend.models.user import User
 from backend.core.constants import MatchStatus
+from backend.core.submission_rate_limit import ensure_submission_allowed, record_submission
 from backend.schemas.submission import SubmissionCreate, SubmissionResponse
 from backend.services import submission_service, match_service
 
@@ -43,7 +44,7 @@ async def submit_code(
     # Guard: reject submissions for completed matches
     if match.status == MatchStatus.COMPLETED:
         logger.warning(
-            f"[API] Rejected submission for completed match {data.match_id} "
+            f"[SECURITY] Rejected submission for completed match {data.match_id} "
             f"from user {current_user.id}"
         )
         raise HTTPException(
@@ -60,6 +61,10 @@ async def submit_code(
 
     # Guard: user must be a participant
     if current_user.id not in (match.player1_id, match.player2_id):
+        logger.error(
+            f"[API] Unauthorized submission attempt from {current_user.id} "
+            f"for match {data.match_id} (not a participant)"
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You are not a participant in this match.",
@@ -68,6 +73,9 @@ async def submit_code(
     # Validate via Redis (production only)
     if redis is not None:
         await match_service.validate_match_active(redis, data.match_id, current_user.id)
+
+    # Conservative anti-spam throttle: max 3 submissions per 5 seconds per user per match.
+    ensure_submission_allowed(str(current_user.id), str(data.match_id))
 
     # Create submission and enqueue (Redis or dev queue)
     submission = await submission_service.create_submission(
@@ -79,6 +87,7 @@ async def submit_code(
         language=data.language.value,
         redis=redis,
     )
+    record_submission(str(current_user.id), str(data.match_id))
 
     logger.info(
         f"[API] Submission {submission.id} created and enqueued "

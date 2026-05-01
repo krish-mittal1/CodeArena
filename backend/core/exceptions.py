@@ -29,6 +29,26 @@ class UserAlreadyExists(AppException):
         super().__init__(status.HTTP_409_CONFLICT, "Username or email already registered")
 
 
+class LoginRateLimited(AppException):
+    def __init__(self):
+        super().__init__(status.HTTP_429_TOO_MANY_REQUESTS, "Too many failed login attempts. Try again later.")
+
+
+class AdminAccessRequired(AppException):
+    def __init__(self):
+        super().__init__(status.HTTP_403_FORBIDDEN, "Admin access required")
+
+
+class SpectatorAuthRequired(AppException):
+    def __init__(self):
+        super().__init__(status.HTTP_401_UNAUTHORIZED, "Authentication required")
+
+
+class RoomCodeRateLimited(AppException):
+    def __init__(self):
+        super().__init__(status.HTTP_429_TOO_MANY_REQUESTS, "Too many room code attempts. Try again later.")
+
+
 # ── Matchmaking ──────────────────────────────────────────────
 
 class AlreadyInQueue(AppException):
@@ -73,6 +93,14 @@ class NotMatchParticipant(AppException):
 class UnsupportedLanguage(AppException):
     def __init__(self, lang: str):
         super().__init__(status.HTTP_400_BAD_REQUEST, f"Unsupported language: {lang}")
+
+
+class SubmissionRateLimited(AppException):
+    def __init__(self):
+        super().__init__(
+            status.HTTP_429_TOO_MANY_REQUESTS,
+            "Too many submissions in a short time. Please wait a moment and try again.",
+        )
 
 
 # ── Problem ───────────────────────────────────────────────────
