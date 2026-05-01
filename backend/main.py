@@ -139,7 +139,7 @@ async def lifespan(app: FastAPI):
         logger.critical("Redis is required in production startup")
         raise RuntimeError("Redis is required in production")
 
-    # ── Start dev-mode background tasks ────────────────────
+    # ── Start background tasks ─────────────────────────────
     if redis is not None:
         try:
             judge_task = asyncio.create_task(
@@ -177,14 +177,6 @@ async def lifespan(app: FastAPI):
                 run_matchmaking_poller(AsyncSessionLocal),
                 name="dev-matchmaking-poller",
             )
-            timer_sync_task = asyncio.create_task(
-                _run_timer_sync_poller(),
-                name="dev-match-timer-sync",
-            )
-            match_recovery_task = asyncio.create_task(
-                _run_match_recovery_poller(),
-                name="dev-match-recovery",
-            )
             logger.info("Dev-mode judge worker + matchmaking poller started")
         except Exception as exc:
             logger.error(f"Failed to start dev workers: {exc}", exc_info=True)
@@ -193,10 +185,28 @@ async def lifespan(app: FastAPI):
                 judge_task.cancel()
             if matchmaking_task:
                 matchmaking_task.cancel()
-            if timer_sync_task:
-                timer_sync_task.cancel()
-            if match_recovery_task:
-                match_recovery_task.cancel()
+
+    # ── Timer sync + match recovery run in ALL modes ──────
+    # These are critical for correct behavior in both Redis and dev modes:
+    #   - timer_sync: prevents client-side timer drift
+    #   - match_recovery: safety net that re-delivers match_found to any
+    #     connected user who has an active match but missed the notification
+    try:
+        timer_sync_task = asyncio.create_task(
+            _run_timer_sync_poller(),
+            name="match-timer-sync",
+        )
+        match_recovery_task = asyncio.create_task(
+            _run_match_recovery_poller(),
+            name="match-recovery",
+        )
+        logger.info("Timer sync + match recovery pollers started")
+    except Exception as exc:
+        logger.error(f"Failed to start timer/recovery pollers: {exc}", exc_info=True)
+        if timer_sync_task:
+            timer_sync_task.cancel()
+        if match_recovery_task:
+            match_recovery_task.cancel()
 
     # CRITICAL: Always yield, even if initialization failed
     yield
@@ -313,26 +323,46 @@ async def _run_redis_matchmaking_poller(redis) -> None:
                     if not match:
                         continue
 
+                    p1_id = str(match.player1.id)
+                    p2_id = str(match.player2.id)
+                    mid = str(match.id)
+
+                    data = {
+                        "match_id": mid,
+                        "problem_id": str(match.problem_id),
+                        "problem_title": match.problem.title,
+                        "duration_seconds": match.duration_seconds,
+                        "player1": {
+                            "user_id": p1_id,
+                            "username": match.player1.username,
+                            "elo": match.player1.elo,
+                        },
+                        "player2": {
+                            "user_id": p2_id,
+                            "username": match.player2.username,
+                            "elo": match.player2.elo,
+                        },
+                    }
+
+                    # PRIMARY: send match_found directly to both players
+                    # This is the reliable path — works on single-pod and
+                    # guarantees delivery to any locally-connected user.
+                    await manager.send_to_user(p1_id, WSEvent.MATCH_FOUND, data)
+                    await manager.send_to_user(p2_id, WSEvent.MATCH_FOUND, data)
+                    await manager.join_room(mid, p1_id)
+                    await manager.join_room(mid, p2_id)
+
+                    logger.info(
+                        f"[MM-REDIS] PAIRED: {p1_id} vs {p2_id} | match={mid}"
+                    )
+
+                    # SECONDARY: also publish to Redis for cross-instance delivery
+                    # (other pods pick this up if players are connected there)
                     await redis.publish(
-                        RedisKey.ws_channel(str(match_id)),
+                        RedisKey.ws_channel(mid),
                         json.dumps({
                             "event": WSEvent.MATCH_FOUND,
-                            "data": {
-                                "match_id": str(match.id),
-                                "problem_id": str(match.problem_id),
-                                "problem_title": match.problem.title,
-                                "duration_seconds": match.duration_seconds,
-                                "player1": {
-                                    "user_id": str(match.player1.id),
-                                    "username": match.player1.username,
-                                    "elo": match.player1.elo,
-                                },
-                                "player2": {
-                                    "user_id": str(match.player2.id),
-                                    "username": match.player2.username,
-                                    "elo": match.player2.elo,
-                                },
-                            },
+                            "data": data,
                         }),
                     )
 

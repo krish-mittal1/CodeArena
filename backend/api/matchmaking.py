@@ -17,13 +17,25 @@ from backend.services.matchmaking_memory import memory_queue, QueueEntry
 from backend.core.exceptions import AlreadyInMatch
 from backend.core.room_code_rate_limit import ensure_room_code_allowed, record_room_code_attempt
 import uuid
+import time
 import secrets
 import string
 
 logger = logging.getLogger(__name__)
 
 # Global memory dict for dev-mode private rooms
+# Each entry: {"creator": uid, "status": "waiting"|match_id, "created_at": timestamp}
 DEV_PRIVATE_ROOMS: Dict[str, dict] = {}
+DEV_ROOM_TTL_SECONDS = 300  # 5 minutes, same as Redis ex=300
+
+
+def _cleanup_expired_dev_rooms():
+    """Remove dev-mode private rooms older than TTL."""
+    now = time.time()
+    expired = [code for code, room in DEV_PRIVATE_ROOMS.items()
+               if now - room.get("created_at", 0) > DEV_ROOM_TTL_SECONDS]
+    for code in expired:
+        DEV_PRIVATE_ROOMS.pop(code, None)
 
 router = APIRouter(prefix="/matchmaking", tags=["Matchmaking"])
 
@@ -124,9 +136,10 @@ async def create_private_room(
         await redis.set(f"private_room_status:{code}", "waiting", ex=300)
     else:
         # dev mode
+        _cleanup_expired_dev_rooms()
         if uid in memory_queue._active_matches:
             raise AlreadyInMatch()
-        DEV_PRIVATE_ROOMS[code] = {"creator": uid, "status": "waiting"}
+        DEV_PRIVATE_ROOMS[code] = {"creator": uid, "status": "waiting", "created_at": time.time()}
 
     return {"status": "created", "code": code}
 
@@ -235,13 +248,25 @@ async def private_room_status(
     redis: Optional[Redis] = Depends(get_redis),
 ):
     """Poll if a private room has been joined by an opponent."""
-    # Rate limit: prevent brute force room code enumeration
-    ip = request.client.host if request and request.client else "unknown"
-    ensure_room_code_allowed(ip)
-    record_room_code_attempt(ip)
-    
     code = code.upper().strip()
-    
+
+    # Rate limit only non-creators to prevent brute-force room code guessing.
+    # The creator legitimately polls this endpoint every few seconds while waiting.
+    is_creator = False
+    if redis is not None:
+        creator_bytes = await redis.get(f"private_room:{code}")
+        if creator_bytes:
+            is_creator = (creator_bytes.decode() == str(current_user.id))
+    else:
+        room = DEV_PRIVATE_ROOMS.get(code)
+        if room:
+            is_creator = (room["creator"] == str(current_user.id))
+
+    if not is_creator:
+        ip = request.client.host if request and request.client else "unknown"
+        ensure_room_code_allowed(ip)
+        record_room_code_attempt(ip)
+
     if redis is not None:
         status_bytes = await redis.get(f"private_room_status:{code}")
         if not status_bytes:

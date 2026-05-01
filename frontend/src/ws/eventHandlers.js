@@ -41,12 +41,17 @@ export function registerEventHandlers() {
     unsubscribers.push(
         wsManager.on(WS_EVENTS.CONNECTED, safeHandler('CONNECTED', (data) => {
             console.log('[WS] Server acknowledged connection', data);
-            // WS connection should never imply matchmaking. Ensure stale queue UI is cleared.
-            // (Backend queue membership is handled explicitly via Find Match click.)
-            try {
-                useMatchmakingStore.getState().reset();
-            } catch (e) {
-                console.error('[WS] Failed to reset matchmaking store on CONNECTED:', e);
+            // Only reset matchmaking if user is NOT actively searching.
+            // A blind reset on reconnect would kill an in-progress queue session
+            // (user clicks Find Match → WS blips → UI resets to idle while still
+            // queued on the backend = ghost state).
+            const mmState = useMatchmakingStore.getState();
+            if (mmState.status !== 'searching') {
+                try {
+                    mmState.reset();
+                } catch (e) {
+                    console.error('[WS] Failed to reset matchmaking store on CONNECTED:', e);
+                }
             }
         }))
     );
