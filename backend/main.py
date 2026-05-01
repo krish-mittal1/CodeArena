@@ -177,6 +177,14 @@ async def lifespan(app: FastAPI):
                 run_matchmaking_poller(AsyncSessionLocal),
                 name="dev-matchmaking-poller",
             )
+            timer_sync_task = asyncio.create_task(
+                _run_timer_sync_poller(),
+                name="dev-match-timer-sync",
+            )
+            match_recovery_task = asyncio.create_task(
+                _run_match_recovery_poller(),
+                name="dev-match-recovery",
+            )
             logger.info("Dev-mode judge worker + matchmaking poller started")
         except Exception as exc:
             logger.error(f"Failed to start dev workers: {exc}", exc_info=True)
@@ -185,28 +193,10 @@ async def lifespan(app: FastAPI):
                 judge_task.cancel()
             if matchmaking_task:
                 matchmaking_task.cancel()
-
-    # ── Timer sync + match recovery run in ALL modes ──────
-    # These are critical for correct behavior in both Redis and dev modes:
-    #   - timer_sync: prevents client-side timer drift
-    #   - match_recovery: safety net that re-delivers match_found to any
-    #     connected user who has an active match but missed the notification
-    try:
-        timer_sync_task = asyncio.create_task(
-            _run_timer_sync_poller(),
-            name="match-timer-sync",
-        )
-        match_recovery_task = asyncio.create_task(
-            _run_match_recovery_poller(),
-            name="match-recovery",
-        )
-        logger.info("Timer sync + match recovery pollers started")
-    except Exception as exc:
-        logger.error(f"Failed to start timer/recovery pollers: {exc}", exc_info=True)
-        if timer_sync_task:
-            timer_sync_task.cancel()
-        if match_recovery_task:
-            match_recovery_task.cancel()
+            if timer_sync_task:
+                timer_sync_task.cancel()
+            if match_recovery_task:
+                match_recovery_task.cancel()
 
     # CRITICAL: Always yield, even if initialization failed
     yield
