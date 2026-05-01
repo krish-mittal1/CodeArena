@@ -146,31 +146,16 @@ async def process_submission(redis: aioredis.Redis, submission_id: uuid.UUID):
 
             # ── Detect compilation error (separate from runtime) ──
             if exec_result.stage == "compile" and exec_result.exit_code != 0:
-                is_infra_compile_failure = (
-                    exec_result.timed_out
-                    or "Execution engine error" in exec_result.stderr
-                    or "sandbox container did not respond" in exec_result.stderr
-                )
-                failure_status = (
-                    SubmissionStatus.RUNTIME_ERROR
-                    if is_infra_compile_failure
-                    else SubmissionStatus.COMPILATION_ERROR
-                )
-                failure_event = (
-                    "runtime_error"
-                    if is_infra_compile_failure
-                    else "compilation_error"
-                )
                 logger.info(
                     f"[WORKER] {submission_id} TC#{tc_idx}: "
-                    f"verdict={failure_status}, "
+                    f"verdict=COMPILATION_ERROR, "
                     f"stderr={repr(exec_result.stderr[:300])}"
                 )
 
                 case_result = SubmissionResult(
                     submission_id=submission.id,
                     test_case_id=tc.id,
-                    verdict=failure_status,
+                    verdict=SubmissionStatus.COMPILATION_ERROR,
                     execution_time_ms=0,
                     memory_used_kb=0,
                     actual_output="",
@@ -179,7 +164,7 @@ async def process_submission(redis: aioredis.Redis, submission_id: uuid.UUID):
                 results.append(case_result)
 
                 # Compilation error → stop, don't run other test cases
-                submission.status = failure_status
+                submission.status = SubmissionStatus.COMPILATION_ERROR
                 submission.passed_test_cases = 0
                 submission.execution_time_ms = 0
                 submission.memory_used_kb = 0
@@ -191,7 +176,7 @@ async def process_submission(redis: aioredis.Redis, submission_id: uuid.UUID):
                 await _publish_event(redis, match_channel, WSEvent.SUBMISSION_RESULT, {
                     "submission_id": str(submission.id),
                     "user_id": str(submission.user_id),
-                    "verdict": failure_event,
+                    "verdict": "compilation_error",
                     "passed": 0,
                     "total": len(list(test_cases)),
                     "runtime_ms": 0,

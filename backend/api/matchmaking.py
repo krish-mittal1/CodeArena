@@ -5,7 +5,7 @@ Routes handle both Redis-backed and in-memory (dev-mode) matchmaking.
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, Dict
@@ -13,11 +13,10 @@ from typing import Optional, Dict
 from backend.dependencies import get_current_user, get_redis, get_db
 from backend.models.user import User
 from backend.services import matchmaking_service
-from backend.services.matchmaking_memory import memory_queue, QueueEntry
+from backend.services.matchmaking_memory import memory_queue
 from backend.core.exceptions import AlreadyInMatch
-from backend.core.room_code_rate_limit import ensure_room_code_allowed, record_room_code_attempt
 import uuid
-import secrets
+import random
 import string
 
 logger = logging.getLogger(__name__)
@@ -39,25 +38,7 @@ async def join_queue(
         return {"status": "queued", "message": "You have been added to the matchmaking queue"}
 
     # Dev-mode: in-memory queue returns a dict with status
-    try:
-        result = await memory_queue.join_queue(current_user.id, current_user.elo)
-    except Exception as exc:
-        # Fail-safe: never return 500 for queue join in dev mode.
-        logger.error(f"[MM-DEV] join_queue fallback triggered: {exc}", exc_info=True)
-        uid = str(current_user.id)
-        async with memory_queue._lock:
-            if uid in memory_queue._active_matches:
-                match_id = memory_queue._active_matches[uid]
-                return {
-                    "status": "matched",
-                    "match_id": match_id,
-                    "message": "You are already in an active match",
-                }
-
-            if uid not in memory_queue._pending_pair and uid not in memory_queue._queue:
-                memory_queue._queue[uid] = QueueEntry(user_id=uid, elo=current_user.elo)
-
-        return {"status": "queued", "message": "You have been added to the matchmaking queue"}
+    result = await memory_queue.join_queue(current_user.id, current_user.elo)
 
     if result["status"] == "already_matched":
         return {
@@ -100,8 +81,7 @@ async def queue_status(
 
 
 def generate_room_code(length=6):
-    alphabet = string.ascii_uppercase + string.digits
-    return ''.join(secrets.choice(alphabet) for _ in range(length))
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
 
 @router.post("/private/create")
@@ -140,16 +120,10 @@ class JoinRoomRequest(BaseModel):
 async def join_private_room(
     payload: JoinRoomRequest,
     current_user: User = Depends(get_current_user),
-    request: Request = None,
     redis: Optional[Redis] = Depends(get_redis),
     db: AsyncSession = Depends(get_db),
 ):
     """Join a private room by code."""
-    # Rate limit: prevent brute force room code enumeration
-    ip = request.client.host if request and request.client else "unknown"
-    ensure_room_code_allowed(ip)
-    record_room_code_attempt(ip)
-    
     code = payload.code.upper().strip()
     if not code:
         raise HTTPException(status_code=400, detail="Room code required")
@@ -231,15 +205,9 @@ async def join_private_room(
 async def private_room_status(
     code: str,
     current_user: User = Depends(get_current_user),
-    request: Request = None,
     redis: Optional[Redis] = Depends(get_redis),
 ):
     """Poll if a private room has been joined by an opponent."""
-    # Rate limit: prevent brute force room code enumeration
-    ip = request.client.host if request and request.client else "unknown"
-    ensure_room_code_allowed(ip)
-    record_room_code_attempt(ip)
-    
     code = code.upper().strip()
     
     if redis is not None:

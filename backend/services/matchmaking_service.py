@@ -19,7 +19,6 @@ import uuid
 import logging
 
 from redis.asyncio import Redis
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
@@ -340,7 +339,7 @@ async def process_queue(redis: Redis, db: AsyncSession) -> list[uuid.UUID]:
                 f"vs {best['user_id']} (ELO={best['elo']}) "
                 f"| window=±{window} | match={match_id}"
             )
-        
+
     finally:
         # Always release global lock
         await redis.delete(RedisKey.MATCHMAKING_GLOBAL_LOCK)

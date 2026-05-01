@@ -20,7 +20,6 @@ from typing import Optional
 from fastapi import WebSocket, WebSocketDisconnect
 from redis.asyncio import Redis
 
-from backend.config import settings
 from backend.core.constants import WSEvent, RedisKey
 from backend.core.security import decode_token
 from backend.websocket.manager import manager
@@ -124,7 +123,16 @@ async def _auto_join_match_room(user_id: str, redis: Optional[Redis]):
             # Verify match still exists and is active
             match_state = await redis.hgetall(RedisKey.match_state(match_id))
             if match_state:
-                await _recover_active_match_from_db(user_id, expected_match_id=match_id, redis=redis)
+                await manager.join_room(match_id, user_id)
+
+                # Notify the user which room they were auto-joined to
+                remaining = await _get_remaining_time(redis, match_id)
+                await manager.send_to_user(user_id, "room_joined", {
+                    "match_id": match_id,
+                    "remaining_seconds": remaining,
+                    "reconnected": True,
+                })
+                logger.info(f"[WS] Player {user_id} auto-joined room {match_id} (reconnection)")
             else:
                 # Match expired, clean up stale active_match key
                 await redis.delete(RedisKey.user_active_match(user_id))
@@ -135,11 +143,7 @@ async def _auto_join_match_room(user_id: str, redis: Optional[Redis]):
         logger.error(f"[WS] Error auto-joining match room for {user_id}: {e}")
 
 
-async def _recover_active_match_from_db(
-    user_id: str,
-    expected_match_id: Optional[str] = None,
-    redis: Optional[Redis] = None,
-) -> None:
+async def _recover_active_match_from_db(user_id: str) -> None:
     """
     Recovery mechanism (no-Redis mode):
       - If user has an ACTIVE match in Postgres, (re)send match_found,
@@ -157,7 +161,6 @@ async def _recover_active_match_from_db(
             .where(
                 (Match.status == MatchStatus.ACTIVE)
                 & ((Match.player1_id == uid) | (Match.player2_id == uid))
-                & (Match.id == uuid.UUID(expected_match_id) if expected_match_id else True)
             )
             .order_by(Match.started_at.desc())
             .options(
@@ -173,9 +176,10 @@ async def _recover_active_match_from_db(
         return
 
     room_id = str(match.id)
-    already_joined = await manager.is_user_in_room(room_id, user_id)
-    if not already_joined:
-        await manager.join_room(room_id, user_id)
+
+    # If already joined to room, no need to resend.
+    if await manager.is_user_in_room(room_id, user_id):
+        return
 
     # Rebuild match_found payload (must match frontend expectations)
     payload = {
@@ -196,18 +200,17 @@ async def _recover_active_match_from_db(
     }
 
     await manager.send_to_user(user_id, WSEvent.MATCH_FOUND, payload)
+    await manager.join_room(room_id, user_id)
 
-    # Timer sync based on Redis timer in prod, DB started_at otherwise
-    remaining = await _get_remaining_time(redis, room_id) if redis is not None else None
-    if remaining is None:
-        try:
-            started_at = match.started_at
-            if started_at.tzinfo is None:
-                started_at = started_at.replace(tzinfo=timezone.utc)
-            elapsed = (datetime.now(timezone.utc) - started_at).total_seconds()
-            remaining = max(0, int(match.duration_seconds - elapsed))
-        except Exception:
-            remaining = match.duration_seconds
+    # Timer sync based on DB started_at (no Redis timers in dev mode)
+    try:
+        started_at = match.started_at
+        if started_at.tzinfo is None:
+            started_at = started_at.replace(tzinfo=timezone.utc)
+        elapsed = (datetime.now(timezone.utc) - started_at).total_seconds()
+        remaining = max(0, int(match.duration_seconds - elapsed))
+    except Exception:
+        remaining = match.duration_seconds
 
     await manager.send_to_user(user_id, WSEvent.MATCH_TIMER_SYNC, {"remaining_seconds": remaining})
     await manager.send_to_user(user_id, "room_joined", {
@@ -267,43 +270,21 @@ async def _player_receive_loop(user_id: str, websocket: WebSocket, redis: Option
 #  Spectator WebSocket Handler
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-async def handle_spectator_connection(
-    websocket: WebSocket,
-    match_id: str,
-    redis: Optional[Redis],
-    token: Optional[str] = None,
-):
+async def handle_spectator_connection(websocket: WebSocket, match_id: str, redis: Optional[Redis]):
     """
     Handle a spectator's read-only WebSocket connection.
 
-      1. Validate authentication (if required by config)
-      2. Validate the match exists and is active
-      3. Join the room as a spectator
-      4. Send initial room state (players, remaining time)
-      5. Receive loop (heartbeats only, reject anything else)
-      6. Clean up on disconnect
+      1. Validate the match exists and is active
+      2. Join the room as a spectator
+      3. Send initial room state (players, remaining time)
+      4. Receive loop (heartbeats only, reject anything else)
+      5. Clean up on disconnect
 
     Args:
         websocket: The FastAPI WebSocket object
         match_id: Match UUID from the URL path
         redis: Redis connection for match state lookup
-        token: Optional JWT token for spectator auth
-        
-    SECURITY: Spectator authentication is enforced by default (config: spectator_require_auth=True)
     """
-    from backend.config import settings
-    
-    # ✓ FIXED: Enforce spectator authentication by default
-    if settings.spectator_require_auth:
-        if not token:
-            await websocket.close(code=4001, reason="Authentication required")
-            return
-        try:
-            decode_token(token)
-        except Exception:
-            await websocket.close(code=4001, reason="Invalid or expired token")
-            return
-
     # ── 1. Validate match exists ──────────────────────────
     if redis is None:
         await websocket.close(code=4003, reason="Spectating unavailable (Redis disabled)")

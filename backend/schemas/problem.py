@@ -23,8 +23,6 @@ class ProblemCreate(BaseModel):
     input_format: str
     output_format: str
     constraints: Optional[str] = None
-    problem_type: str = "dsa"
-    rating: int = Field(800, ge=800, le=3500)
     time_limit_ms: int = Field(2000, ge=500, le=10000)
     memory_limit_mb: int = Field(256, ge=32, le=512)
     test_cases: List[TestCaseCreate] = Field(..., min_length=1)
@@ -46,26 +44,12 @@ class ProblemPublic(BaseModel):
     input_format: str
     output_format: str
     constraints: Optional[str]
-    problem_type: str = "dsa"
-    rating: int = 800
     time_limit_ms: int
     memory_limit_mb: int
     method_name: Optional[str] = None
     parameters: Optional[Any] = None
     return_type: Optional[str] = None
-    solved: bool = False
     sample_cases: List[TestCasePublic] = []
-
-    model_config = {"from_attributes": True}
-
-
-class ProblemCatalogPublic(BaseModel):
-    id: uuid.UUID
-    title: str
-    difficulty: str
-    problem_type: str = "dsa"
-    rating: int = 800
-    solved: bool = False
 
     model_config = {"from_attributes": True}
 

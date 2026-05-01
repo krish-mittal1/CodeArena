@@ -1,8 +1,7 @@
 """
 OTP authentication service.
 
-- Redis-backed OTP storage in normal environments
-- In-memory OTP fallback for development when Redis is disabled/unavailable
+- Dedicated Redis connection (independent of main app Redis)
 - Rate limiting per email and IP
 - Brute-force protection with attempt tracking
 - Disposable email blocking
@@ -17,7 +16,7 @@ import hmac
 import logging
 import secrets
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Optional
 
 import redis.asyncio as aioredis
@@ -39,91 +38,34 @@ from backend.schemas.user import TokenResponse
 
 logger = logging.getLogger(__name__)
 
+# ── Redis keys ────────────────────────────────────────────────
+
 _KEY_OTP = "otp:code:{email}"
 _KEY_ATTEMPTS = "otp:attempts:{email}"
 _KEY_RATE_EMAIL = "otp:rate:email:{email}"
 _KEY_RATE_IP = "otp:rate:ip:{ip}"
 
+# ── Dedicated Redis connection for OTP ────────────────────────
+
 _otp_redis: Optional[aioredis.Redis] = None
 
-_dev_otp_store: dict[str, tuple[str, datetime]] = {}
-_dev_attempt_store: dict[str, tuple[int, datetime]] = {}
-_dev_rate_email_store: dict[str, tuple[int, datetime]] = {}
-_dev_rate_ip_store: dict[str, tuple[int, datetime]] = {}
 
-
-def _now() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-def _get_store_value(store: dict[str, tuple[object, datetime]], key: str):
-    entry = store.get(key)
-    if entry is None:
-        return None
-
-    value, expires_at = entry
-    if expires_at <= _now():
-        store.pop(key, None)
-        return None
-
-    return value
-
-
-def _set_store_value(
-    store: dict[str, tuple[object, datetime]],
-    key: str,
-    value: object,
-    expires_in_seconds: int,
-) -> None:
-    store[key] = (value, _now() + timedelta(seconds=expires_in_seconds))
-
-
-def _delete_store_value(store: dict[str, tuple[object, datetime]], key: str) -> None:
-    store.pop(key, None)
-
-
-def _increment_store_value(
-    store: dict[str, tuple[int, datetime]],
-    key: str,
-    expires_in_seconds: int,
-) -> int:
-    current = _get_store_value(store, key)
-    next_value = int(current or 0) + 1
-    _set_store_value(store, key, next_value, expires_in_seconds)
-    return next_value
-
-
-async def _get_otp_redis() -> Optional[aioredis.Redis]:
+async def _get_otp_redis() -> aioredis.Redis:
     """Lazy-init a dedicated Redis client for OTP storage."""
     global _otp_redis
-
-    if not settings.redis_enabled:
-        if settings.is_development:
-            return None
-        raise RuntimeError("Redis must be enabled for OTP flows outside development")
-
     if _otp_redis is None:
-        try:
-            _otp_redis = aioredis.from_url(
-                settings.redis_url,
-                decode_responses=True,
-                socket_connect_timeout=5,
-                socket_timeout=5,
-            )
-            await _otp_redis.ping()
-            logger.info("OTP Redis connection established")
-        except Exception:
-            _otp_redis = None
-            if settings.is_development:
-                logger.warning(
-                    "OTP Redis unavailable in development; using in-memory OTP storage",
-                    exc_info=True,
-                )
-                return None
-            raise
-
+        _otp_redis = aioredis.from_url(
+            settings.redis_url,
+            decode_responses=True,
+            socket_connect_timeout=5,
+            socket_timeout=5,
+        )
+        await _otp_redis.ping()
+        logger.info("OTP Redis connection established")
     return _otp_redis
 
+
+# ── Disposable email blocklist ────────────────────────────────
 
 DISPOSABLE_DOMAINS = frozenset({
     "mailinator.com", "guerrillamail.com", "tempmail.com", "throwaway.email",
@@ -147,6 +89,8 @@ def _is_disposable(email: str) -> bool:
     return domain in DISPOSABLE_DOMAINS
 
 
+# ── OTP generation & hashing ─────────────────────────────────
+
 def _generate_otp() -> str:
     return str(secrets.randbelow(900000) + 100000)
 
@@ -159,6 +103,8 @@ def _compare_otp(plain: str, hashed: str) -> bool:
     return hmac.compare_digest(_hash_otp(plain), hashed)
 
 
+# ── Rate limiting ─────────────────────────────────────────────
+
 async def _check_rate_limits(r: aioredis.Redis, email: str, ip: str) -> None:
     pipe = r.pipeline()
     email_key = _KEY_RATE_EMAIL.format(email=email.lower())
@@ -167,19 +113,6 @@ async def _check_rate_limits(r: aioredis.Redis, email: str, ip: str) -> None:
     pipe.get(email_key)
     pipe.get(ip_key)
     email_count, ip_count = await pipe.execute()
-
-    if email_count and int(email_count) >= settings.otp_rate_limit_email:
-        logger.warning(f"OTP rate limit hit for email={email}")
-        raise OTPRateLimited()
-
-    if ip_count and int(ip_count) >= settings.otp_rate_limit_ip:
-        logger.warning(f"OTP rate limit hit for ip={ip}")
-        raise OTPRateLimited()
-
-
-def _check_rate_limits_dev(email: str, ip: str) -> None:
-    email_count = _get_store_value(_dev_rate_email_store, email.lower())
-    ip_count = _get_store_value(_dev_rate_ip_store, ip)
 
     if email_count and int(email_count) >= settings.otp_rate_limit_email:
         logger.warning(f"OTP rate limit hit for email={email}")
@@ -202,16 +135,13 @@ async def _increment_rate(r: aioredis.Redis, email: str, ip: str) -> None:
     await pipe.execute()
 
 
-def _increment_rate_dev(email: str, ip: str) -> None:
-    _increment_store_value(_dev_rate_email_store, email.lower(), 3600)
-    _increment_store_value(_dev_rate_ip_store, ip, 3600)
+# ── Email sending via Resend ──────────────────────────────────
 
-
-async def _send_otp_email(email: str, otp: str) -> bool:
+async def _send_otp_email(email: str, otp: str) -> None:
     if not settings.resend_api_key:
-        logger.warning("RESEND_API_KEY not set; OTP not emailed, logging instead")
+        logger.warning("RESEND_API_KEY not set — OTP not emailed, logging instead")
         logger.info(f"[DEV] OTP for {email}: {otp}")
-        return False
+        return
 
     resend.api_key = settings.resend_api_key
 
@@ -240,20 +170,14 @@ async def _send_otp_email(email: str, otp: str) -> bool:
             "html": html,
         })
         logger.info(f"OTP email sent to {email}")
-        return True
-    except Exception as exc:
-        if settings.is_development:
-            logger.warning(
-                f"Failed to send OTP email to {email}; using development fallback: {exc}",
-                exc_info=True,
-            )
-            logger.info(f"[DEV] OTP for {email}: {otp}")
-            return False
-        logger.error(f"Failed to send OTP email to {email}: {exc}", exc_info=True)
+    except Exception as e:
+        logger.error(f"Failed to send OTP email to {email}: {e}", exc_info=True)
         raise
 
 
-async def request_otp(email: str, ip: str) -> Optional[str]:
+# ── Public API ────────────────────────────────────────────────
+
+async def request_otp(email: str, ip: str) -> None:
     """Generate, store, rate-limit, and send an OTP."""
     email = email.lower().strip()
 
@@ -261,79 +185,59 @@ async def request_otp(email: str, ip: str) -> Optional[str]:
         raise DisposableEmailBlocked()
 
     r = await _get_otp_redis()
+
+    await _check_rate_limits(r, email, ip)
+
     otp = _generate_otp()
     hashed = _hash_otp(otp)
 
-    if r is None:
-        _check_rate_limits_dev(email, ip)
-        _set_store_value(_dev_otp_store, email, hashed, settings.otp_expire_seconds)
-        _delete_store_value(_dev_attempt_store, email)
-        _increment_rate_dev(email, ip)
-    else:
-        await _check_rate_limits(r, email, ip)
+    otp_key = _KEY_OTP.format(email=email)
+    attempts_key = _KEY_ATTEMPTS.format(email=email)
 
-        otp_key = _KEY_OTP.format(email=email)
-        attempts_key = _KEY_ATTEMPTS.format(email=email)
+    pipe = r.pipeline()
+    pipe.set(otp_key, hashed, ex=settings.otp_expire_seconds)
+    pipe.delete(attempts_key)  # Reset attempts on new OTP
+    await pipe.execute()
 
-        pipe = r.pipeline()
-        pipe.set(otp_key, hashed, ex=settings.otp_expire_seconds)
-        pipe.delete(attempts_key)
-        await pipe.execute()
-
-        await _increment_rate(r, email, ip)
-
-    email_sent = await _send_otp_email(email, otp)
-    return otp if settings.is_development and not email_sent else None
+    await _increment_rate(r, email, ip)
+    await _send_otp_email(email, otp)
 
 
 async def verify_otp_only(email: str, otp: str) -> bool:
-    """
-    Verify OTP without creating a user.
+    """Verify OTP without creating a user — just check the code is valid.
     Used for registration email verification.
+    Returns True if valid, raises otherwise.
     """
     email = email.lower().strip()
 
     r = await _get_otp_redis()
-    if r is None:
-        attempts = _get_store_value(_dev_attempt_store, email)
-        if attempts and int(attempts) >= settings.otp_max_attempts:
-            _delete_store_value(_dev_otp_store, email)
-            raise OTPMaxAttemptsExceeded()
+    otp_key = _KEY_OTP.format(email=email)
+    attempts_key = _KEY_ATTEMPTS.format(email=email)
 
-        stored_hash = _get_store_value(_dev_otp_store, email)
-        if not stored_hash:
-            raise OTPInvalid()
+    # Check attempt count
+    attempts = await r.get(attempts_key)
+    if attempts and int(attempts) >= settings.otp_max_attempts:
+        await r.delete(otp_key)
+        raise OTPMaxAttemptsExceeded()
 
-        if not _compare_otp(otp, stored_hash):
-            _increment_store_value(_dev_attempt_store, email, settings.otp_expire_seconds)
-            raise OTPInvalid()
+    # Retrieve stored hash
+    stored_hash = await r.get(otp_key)
+    if not stored_hash:
+        raise OTPInvalid()
 
-        _delete_store_value(_dev_otp_store, email)
-        _delete_store_value(_dev_attempt_store, email)
-    else:
-        otp_key = _KEY_OTP.format(email=email)
-        attempts_key = _KEY_ATTEMPTS.format(email=email)
-
-        attempts = await r.get(attempts_key)
-        if attempts and int(attempts) >= settings.otp_max_attempts:
-            await r.delete(otp_key)
-            raise OTPMaxAttemptsExceeded()
-
-        stored_hash = await r.get(otp_key)
-        if not stored_hash:
-            raise OTPInvalid()
-
-        if not _compare_otp(otp, stored_hash):
-            pipe = r.pipeline()
-            pipe.incr(attempts_key)
-            pipe.expire(attempts_key, settings.otp_expire_seconds, nx=True)
-            await pipe.execute()
-            raise OTPInvalid()
-
+    # Constant-time comparison
+    if not _compare_otp(otp, stored_hash):
         pipe = r.pipeline()
-        pipe.delete(otp_key)
-        pipe.delete(attempts_key)
+        pipe.incr(attempts_key)
+        pipe.expire(attempts_key, settings.otp_expire_seconds, nx=True)
         await pipe.execute()
+        raise OTPInvalid()
+
+    # OTP valid — delete it (single-use)
+    pipe = r.pipeline()
+    pipe.delete(otp_key)
+    pipe.delete(attempts_key)
+    await pipe.execute()
 
     logger.info(f"OTP: email verified (check only) for {email}")
     return True
@@ -346,51 +250,39 @@ async def verify_otp(
     user_agent: str,
     db: AsyncSession,
 ) -> TokenResponse:
-    """Verify OTP, find-or-create user, and issue JWT tokens."""
+    """Verify OTP, find-or-create user, issue JWT tokens."""
     email = email.lower().strip()
 
     r = await _get_otp_redis()
-    if r is None:
-        attempts = _get_store_value(_dev_attempt_store, email)
-        if attempts and int(attempts) >= settings.otp_max_attempts:
-            _delete_store_value(_dev_otp_store, email)
-            raise OTPMaxAttemptsExceeded()
+    otp_key = _KEY_OTP.format(email=email)
+    attempts_key = _KEY_ATTEMPTS.format(email=email)
 
-        stored_hash = _get_store_value(_dev_otp_store, email)
-        if not stored_hash:
-            raise OTPInvalid()
+    # ── Check attempt count ───────────────────────────────
+    attempts = await r.get(attempts_key)
+    if attempts and int(attempts) >= settings.otp_max_attempts:
+        await r.delete(otp_key)  # Invalidate OTP after too many failures
+        raise OTPMaxAttemptsExceeded()
 
-        if not _compare_otp(otp, stored_hash):
-            _increment_store_value(_dev_attempt_store, email, settings.otp_expire_seconds)
-            raise OTPInvalid()
+    # ── Retrieve stored hash ──────────────────────────────
+    stored_hash = await r.get(otp_key)
+    if not stored_hash:
+        raise OTPInvalid()
 
-        _delete_store_value(_dev_otp_store, email)
-        _delete_store_value(_dev_attempt_store, email)
-    else:
-        otp_key = _KEY_OTP.format(email=email)
-        attempts_key = _KEY_ATTEMPTS.format(email=email)
-
-        attempts = await r.get(attempts_key)
-        if attempts and int(attempts) >= settings.otp_max_attempts:
-            await r.delete(otp_key)
-            raise OTPMaxAttemptsExceeded()
-
-        stored_hash = await r.get(otp_key)
-        if not stored_hash:
-            raise OTPInvalid()
-
-        if not _compare_otp(otp, stored_hash):
-            pipe = r.pipeline()
-            pipe.incr(attempts_key)
-            pipe.expire(attempts_key, settings.otp_expire_seconds, nx=True)
-            await pipe.execute()
-            raise OTPInvalid()
-
+    # ── Constant-time comparison ──────────────────────────
+    if not _compare_otp(otp, stored_hash):
         pipe = r.pipeline()
-        pipe.delete(otp_key)
-        pipe.delete(attempts_key)
+        pipe.incr(attempts_key)
+        pipe.expire(attempts_key, settings.otp_expire_seconds, nx=True)
         await pipe.execute()
+        raise OTPInvalid()
 
+    # ── OTP valid — delete it (single-use) ────────────────
+    pipe = r.pipeline()
+    pipe.delete(otp_key)
+    pipe.delete(attempts_key)
+    await pipe.execute()
+
+    # ── Find or create user ───────────────────────────────
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
 
@@ -399,7 +291,7 @@ async def verify_otp(
         user = User(
             username=username,
             email=email,
-            password_hash="__otp_only__",
+            password_hash="__otp_only__",  # No password — OTP-only account
             elo=ELO_DEFAULT,
         )
         db.add(user)
@@ -407,6 +299,7 @@ async def verify_otp(
         await db.refresh(user)
         logger.info(f"OTP: created new user {user.id} ({email})")
 
+    # ── Issue tokens ──────────────────────────────────────
     subject = str(user.id)
     tokens = TokenResponse(
         access_token=create_access_token(subject, extra={"username": user.username}),

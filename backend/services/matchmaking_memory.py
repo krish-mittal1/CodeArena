@@ -75,13 +75,13 @@ class InMemoryMatchmakingQueue:
                 return {"status": "queued"}
 
             self._queue[uid] = QueueEntry(user_id=uid, elo=elo)
-            queued_size = len(self._queue)
+            size = len(self._queue)
 
-            logger.info(
-                f"[MM-DEV] Player {uid} joined queue (ELO={elo}). "
-                f"Queue size: {queued_size}"
-            )
-            return {"status": "queued"}
+        logger.info(
+            f"[MM-DEV] Player {uid} joined queue (ELO={elo}). "
+            f"Queue size: {size}"
+        )
+        return {"status": "queued"}
 
     async def leave_queue(self, user_id: uuid.UUID) -> bool:
         """
@@ -98,7 +98,6 @@ class InMemoryMatchmakingQueue:
         maybe_match_id = None
         removed_from_queue = False
         removed_from_pending = False
-        queue_size = 0
 
         async with self._lock:
             if uid in self._queue:
@@ -108,7 +107,7 @@ class InMemoryMatchmakingQueue:
                 self._pending_pair.discard(uid)
                 removed_from_pending = True
             maybe_match_id = self._active_matches.get(uid)
-            queue_size = len(self._queue)
+            size = len(self._queue)
 
         # Phase 2: (optional) clear stale active match mapping if safe
         if maybe_match_id:
@@ -130,13 +129,10 @@ class InMemoryMatchmakingQueue:
             logger.info(
                 f"[MM-DEV] Player {uid} left matchmaking state "
                 f"(queue={removed_from_queue}, pending={removed_from_pending}). "
-                f"Queue size: {queue_size}"
+                f"Queue size: {size}"
             )
         else:
-            logger.info(
-                f"[MM-DEV] Player {uid} not in queue (idempotent leave). "
-                f"Queue size: {queue_size}"
-            )
+            logger.info(f"[MM-DEV] Player {uid} not in queue (idempotent leave). Queue size: {size}")
 
         return True
 
@@ -185,7 +181,7 @@ class InMemoryMatchmakingQueue:
         """
         # ── Phase 1: find pairs atomically ────────────────
         async with self._lock:
-            if len(self._queue) == 0:
+            if len(self._queue) < 2:
                 return []
 
             players = sorted(self._queue.values(), key=lambda e: e.joined_at)
@@ -216,18 +212,20 @@ class InMemoryMatchmakingQueue:
                     matched_ids.add(player.user_id)
                     matched_ids.add(best.user_id)
 
-            # Atomically: remove pair candidates from queue, mark as pending
-            if pairs:
-                for p1, p2 in pairs:
-                    self._queue.pop(p1.user_id, None)
-                    self._queue.pop(p2.user_id, None)
-                    self._pending_pair.add(p1.user_id)
-                    self._pending_pair.add(p2.user_id)
+            if not pairs:
+                return []
 
-                logger.info(
-                    f"[MM-DEV] Found {len(pairs)} pair(s), "
-                    f"removed from queue, marked pending"
-                )
+            # Atomically: remove from queue, mark as pending
+            for p1, p2 in pairs:
+                self._queue.pop(p1.user_id, None)
+                self._queue.pop(p2.user_id, None)
+                self._pending_pair.add(p1.user_id)
+                self._pending_pair.add(p2.user_id)
+
+            logger.info(
+                f"[MM-DEV] Found {len(pairs)} pair(s), "
+                f"removed from queue, marked pending"
+            )
 
         # ── Phase 2: create matches in DB (outside lock) ──
         created: list[uuid.UUID] = []
@@ -260,7 +258,6 @@ class InMemoryMatchmakingQueue:
                     self._pending_pair.discard(p2.user_id)
                 logger.error(f"[MM-DEV] Match creation failed: {e}", exc_info=True)
 
-        # ── Phase 4: bot fallback for long-wait solo players ──
         return created
 
     async def _create_match(

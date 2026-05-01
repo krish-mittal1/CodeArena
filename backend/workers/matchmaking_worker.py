@@ -61,7 +61,7 @@ async def run_worker():
                 completed = await match_service.check_and_complete_expired_matches(db, redis)
                 for match_id in completed:
                     logger.info(f"Match {match_id} expired and completed")
-                
+
         except Exception as e:
             logger.error(f"Matchmaking worker error: {e}", exc_info=True)
 

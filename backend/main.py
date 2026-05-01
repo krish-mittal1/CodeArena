@@ -7,11 +7,9 @@ import logging
 import asyncio
 import uuid
 import os
-import json
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 from fastapi import FastAPI, WebSocket, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,19 +20,18 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from backend.config import settings
 from backend.core.logging_config import setup_logging, set_correlation_id, get_correlation_id
 from backend.api.router import api_router
-from backend.dependencies import get_redis, close_redis, set_redis_forced_disabled
+from backend.dependencies import get_redis, close_redis
 from backend.websocket.manager import manager
 from backend.websocket.handlers import (
     handle_player_connection,
     handle_spectator_connection,
 )
 from backend.db.session import AsyncSessionLocal, engine
-from backend.workers.judge_worker import run_dev_worker, run_redis_worker
+from backend.workers.judge_worker import run_dev_worker
 from backend.services.matchmaking_memory import run_matchmaking_poller
-from backend.services import matchmaking_service, match_service
 from backend.core.exceptions import AppException
 from backend.websocket.manager import manager
-from backend.core.constants import WSEvent, MatchStatus, RedisKey
+from backend.core.constants import WSEvent, MatchStatus
 from backend.models.match import Match
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -97,7 +94,6 @@ async def lifespan(app: FastAPI):
     except Exception as exc:
         logger.error(f"Alembic migration failed: {exc}", exc_info=True)
     
-    # ── Seed bot users ────────────────────────────────────
     redis = None
     judge_task = None
     matchmaking_task = None
@@ -135,38 +131,9 @@ async def lifespan(app: FastAPI):
         logger.error(f"Startup error: {exc}", exc_info=True)
         redis = None
 
-    if redis is None and settings.is_production:
-        logger.critical("Redis is required in production startup")
-        raise RuntimeError("Redis is required in production")
-
     # ── Start dev-mode background tasks ────────────────────
-    if redis is not None:
-        try:
-            judge_task = asyncio.create_task(
-                run_redis_worker(),
-                name="redis-judge-worker",
-            )
-            matchmaking_task = asyncio.create_task(
-                _run_redis_matchmaking_poller(redis),
-                name="redis-matchmaking-poller",
-            )
-            logger.info("Production judge worker started")
-            logger.info("Production matchmaking worker started")
-        except Exception as exc:
-            logger.error(
-                f"Failed to start production workers: {exc}",
-                exc_info=True,
-            )
-            if settings.is_production:
-                raise
-
     if redis is None:
         try:
-            # Keep runtime behavior consistent with startup decision.
-            # If Redis failed at boot and we start dev workers, do not allow
-            # request-time Redis reconnect to switch endpoints into Redis mode.
-            set_redis_forced_disabled(True)
-
             # Background tasks inherit correlation ID from their creation context
             # Each task will use "-" for correlation ID unless set in their own context
             judge_task = asyncio.create_task(
@@ -293,61 +260,6 @@ async def _run_timer_sync_poller() -> None:
         await asyncio.sleep(5)
 
 
-async def _run_redis_matchmaking_poller(redis) -> None:
-    """
-    Production Redis matchmaking loop:
-      - Processes the queue so players get paired.
-      - Completes expired matches.
-    """
-    logger = logging.getLogger(__name__)
-    poll_interval = settings.matchmaking_poll_interval_ms / 1000.0
-    logger.info("Redis matchmaking poller started")
-
-    while True:
-        try:
-            async with AsyncSessionLocal() as db:
-                new_matches = await matchmaking_service.process_queue(redis, db)
-
-                for match_id in new_matches:
-                    match = await match_service.get_match(db, match_id)
-                    if not match:
-                        continue
-
-                    await redis.publish(
-                        RedisKey.ws_channel(str(match_id)),
-                        json.dumps({
-                            "event": WSEvent.MATCH_FOUND,
-                            "data": {
-                                "match_id": str(match.id),
-                                "problem_id": str(match.problem_id),
-                                "problem_title": match.problem.title,
-                                "duration_seconds": match.duration_seconds,
-                                "player1": {
-                                    "user_id": str(match.player1.id),
-                                    "username": match.player1.username,
-                                    "elo": match.player1.elo,
-                                },
-                                "player2": {
-                                    "user_id": str(match.player2.id),
-                                    "username": match.player2.username,
-                                    "elo": match.player2.elo,
-                                },
-                            },
-                        }),
-                    )
-
-                completed = await match_service.check_and_complete_expired_matches(db, redis)
-                for match_id in completed:
-                    logger.info(f"Match {match_id} expired and completed")
-
-        except asyncio.CancelledError:
-            break
-        except Exception as exc:
-            logger.error(f"Redis matchmaking poller error: {exc}", exc_info=True)
-
-        await asyncio.sleep(poll_interval)
-
-
 async def _run_match_recovery_poller() -> None:
     """
     Dev-mode match_found recovery:
@@ -452,26 +364,8 @@ async def correlation_id_middleware(request: Request, call_next):
         response.headers["X-Correlation-ID"] = correlation_id
         return response
     finally:
+        # Clear correlation ID from context (optional, but clean)
         set_correlation_id("-")
-
-
-@app.middleware("http")
-async def security_headers_middleware(request: Request, call_next):
-    """
-    Add security headers to all HTTP responses.
-    Protects against common web vulnerabilities.
-    """
-    response = await call_next(request)
-    
-    # Prevent CSRF via SameSite cookie attribute
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
-    
-    return response
 
 
 # ── Global Exception Handlers ───────────────────────────────────
@@ -532,7 +426,7 @@ async def general_exception_handler(request: Request, exc: Exception):
         content={
             "error": detail,
             "correlation_id": correlation_id,
-            "type": type(exc).__name__ if settings.debug else "internal_error",
+            "type": type(exc).__name__,
         }
     )
 
@@ -550,10 +444,8 @@ app.add_middleware(
         "https://www.codexarena.app"
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allow_headers=["Content-Type", "Authorization"],
-    expose_headers=["Content-Type"],
-    max_age=3600,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ── HTTP Routes ───────────────────────────────────────────────
@@ -582,11 +474,7 @@ async def websocket_player(websocket: WebSocket, token: str = Query(...)):
 
 
 @app.websocket("/ws/spectate/{match_id}")
-async def websocket_spectator(
-    websocket: WebSocket,
-    match_id: str,
-    token: Optional[str] = Query(None),
-):
+async def websocket_spectator(websocket: WebSocket, match_id: str):
     """
     WebSocket endpoint for match spectators (read-only).
     
@@ -598,7 +486,7 @@ async def websocket_spectator(
     
     try:
         redis = await get_redis()
-        await handle_spectator_connection(websocket, match_id, redis, token)
+        await handle_spectator_connection(websocket, match_id, redis)
     finally:
         set_correlation_id("-")
 
