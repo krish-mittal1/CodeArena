@@ -143,10 +143,10 @@ export function registerEventHandlers() {
             // Data from server (via ConnectionManager.broadcast_match_ended):
             // { winner_id, winner_username, reason, your_elo_delta, new_elo }
             const isWinner = data.winner_id && data.winner_id === currentUserId;
-            const isDraw = !data.winner_id || data.reason === 'timeout';
+            const isDraw = !data.winner_id;
 
             const result =
-                isDraw ? (data.reason === 'forfeit' ? 'draw' : 'time_up') :
+                isDraw ? (data.reason === 'timeout' ? 'time_up' : 'draw') :
                     isWinner ? 'win' : 'loss';
 
             const elo_change = data.your_elo_delta ?? 0;

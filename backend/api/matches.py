@@ -5,7 +5,7 @@ Match routes — match details and history.
 import uuid
 import json
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from typing import Optional, List
 from redis.asyncio import Redis
 
