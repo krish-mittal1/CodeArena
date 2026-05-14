@@ -80,6 +80,21 @@ export default function Practice() {
         [problemId, language]
     );
 
+    // One-time cleanup: purge all stale drafts so correct templates load fresh
+    useEffect(() => {
+        const cleanupDone = window.sessionStorage.getItem('codearena:drafts-cleaned-v2');
+        if (cleanupDone) return;
+        const keysToRemove = [];
+        for (let i = 0; i < window.localStorage.length; i++) {
+            const key = window.localStorage.key(i);
+            if (key && key.startsWith('codearena:draft:')) {
+                keysToRemove.push(key);
+            }
+        }
+        keysToRemove.forEach((k) => window.localStorage.removeItem(k));
+        window.sessionStorage.setItem('codearena:drafts-cleaned-v2', '1');
+    }, []);
+
     // Load saved draft or boilerplate when problem/language changes
     useEffect(() => {
         if (!problem || !draftKey) return;
