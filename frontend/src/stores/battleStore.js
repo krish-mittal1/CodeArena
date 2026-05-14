@@ -21,8 +21,8 @@ export const useBattleStore = create((set, get) => ({
     timerRunning: false,
 
     // ── Editor ─────────────────────────────────────
-    language: 'python',
-    code: CODE_TEMPLATES.python,
+    language: 'cpp',
+    code: CODE_TEMPLATES.cpp,
 
     // ── Submissions ────────────────────────────────
     submissionStatus: 'idle',    // idle | submitting | running | judged
@@ -115,8 +115,8 @@ export const useBattleStore = create((set, get) => ({
         duration: 1800,
         remainingSeconds: 0,
         timerRunning: false,
-        language: 'python',
-        code: CODE_TEMPLATES.python,
+        language: 'cpp',
+        code: CODE_TEMPLATES.cpp,
         submissionStatus: 'idle',
         lastVerdict: null,
         submissionHistory: [],

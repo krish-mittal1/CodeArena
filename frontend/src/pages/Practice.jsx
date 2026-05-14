@@ -31,8 +31,8 @@ export default function Practice() {
     const { problemId } = useParams();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const [language, setLanguage] = useState('python');
-    const [code, setCode] = useState(CODE_TEMPLATES['python'] || '');
+    const [language, setLanguage] = useState('cpp');
+    const [code, setCode] = useState('');
     const [verdict, setVerdict] = useState(null);
     const [runResult, setRunResult] = useState(null);
     const [polling, setPolling] = useState(false);
@@ -73,7 +73,7 @@ export default function Practice() {
     const practiceBackPath = isCompetitiveProblem ? '/practice/competitive' : '/practice/dsa';
     const generatedBoilerplate = useMemo(
         () => (problem ? (generateBoilerplate(language, problem) || CODE_TEMPLATES[language] || '') : (CODE_TEMPLATES[language] || '')),
-        [language, problemId, problem?.method_name, problem?.return_type, problem?.problem_type, JSON.stringify(problem?.parameters || null)]
+        [language, problem]
     );
     const draftKey = useMemo(
         () => (problemId ? `codearena:draft:${problemId}:${language}` : ''),
@@ -90,10 +90,11 @@ export default function Practice() {
     }, [problemId, language, draftKey, generatedBoilerplate, problem]);
 
     useEffect(() => {
-        if (!draftKey) return;
+        if (!draftKey || !problem) return;
         if (code === codeLoadedRef.current) return;
+        if (!code) return;
         window.localStorage.setItem(draftKey, code);
-    }, [code, draftKey]);
+    }, [code, draftKey, problem]);
 
     const { data: history = [], refetch: refetchHistory } = useQuery({
         queryKey: ['practiceHistory', problemId],
