@@ -197,7 +197,7 @@ function PasswordForm() {
 
 function OTPForm() {
     const navigate = useNavigate();
-    const { _handleTokens } = useAuthStore();
+    const _handleTokens = useAuthStore((s) => s._handleTokens);
 
     const [step, setStep] = useState('email');       // 'email' | 'verify'
     const [email, setEmail] = useState('');

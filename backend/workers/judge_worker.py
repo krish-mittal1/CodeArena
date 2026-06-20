@@ -181,6 +181,17 @@ async def _process_submission_inner(
             )
             return
 
+        # If stuck in RUNNING for > 60s, another worker likely crashed — re-process
+        if submission.status == SubmissionStatus.RUNNING:
+            if submission.judged_at is None:
+                updated_at = submission.submitted_at
+            else:
+                updated_at = submission.judged_at
+            if updated_at and (datetime.now(timezone.utc) - updated_at.replace(tzinfo=timezone.utc if updated_at.tzinfo is None else updated_at.tzinfo)).total_seconds() < 60:
+                logger.info(f"[JUDGE] Submission {submission_id} already RUNNING (recent), skipping")
+                return
+            logger.warning(f"[JUDGE] Submission {submission_id} stuck in RUNNING > 60s, re-processing")
+
         # ── Load test cases ───────────────────────────────
         tc_result = await db.execute(
             select(TestCase)
@@ -205,7 +216,7 @@ async def _process_submission_inner(
             select(Submission)
             .where(
                 Submission.id == submission_id,
-                Submission.status == SubmissionStatus.QUEUED
+                Submission.status.in_([SubmissionStatus.QUEUED, SubmissionStatus.RUNNING])
             )
             .options(selectinload(Submission.problem))
         )
@@ -267,7 +278,7 @@ async def _process_submission_inner(
                     stdout="",
                     stderr=f"Execution engine error: {batch_err}",
                     exit_code=1, timed_out=False, oom_killed=False,
-                    time_ms=0, memory_kb=0, stage="run",
+                    time_ms=0, memory_kb=0, stage="infrastructure",
                 )
             ] * len(test_cases)
 
@@ -385,6 +396,7 @@ async def _process_submission_inner(
                 submission.status = SubmissionStatus.RUNTIME_ERROR
 
             submission.passed_test_cases = passed
+            submission.total_test_cases = len(test_cases)
             submission.execution_time_ms = max_time_ms
             submission.memory_used_kb = max_memory_kb
             submission.judged_at = datetime.now(timezone.utc)

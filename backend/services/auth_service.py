@@ -19,9 +19,15 @@ from backend.schemas.user import UserRegister, TokenResponse
 
 
 async def register_user(db: AsyncSession, data: UserRegister, bg_tasks: BackgroundTasks) -> Tuple[User, TokenResponse]:
-    """Register a new user and return tokens immediately."""
+    """Register a new user. Verifies email was OTP-verified server-side."""
+    from backend.services.otp_service import is_email_verified, consume_email_verification
+    if not await is_email_verified(data.email):
+        from backend.core.exceptions import AppException
+        raise AppException(status_code=400, detail="Email must be verified before registration")
+
+    from sqlalchemy import func
     existing = await db.execute(
-        select(User).where((User.username == data.username) | (User.email == data.email))
+        select(User).where((func.lower(User.username) == data.username.lower()) | (User.email == data.email))
     )
     if existing.scalar_one_or_none():
         raise UserAlreadyExists()
@@ -35,13 +41,16 @@ async def register_user(db: AsyncSession, data: UserRegister, bg_tasks: Backgrou
     await db.commit()
     await db.refresh(user)
 
+    await consume_email_verification(data.email)
+
     tokens = _create_tokens(user)
     return user, tokens
 
 
 async def login_user(db: AsyncSession, username: str, password: str) -> Tuple[User, TokenResponse]:
-    """Authenticate user and return tokens."""
-    result = await db.execute(select(User).where(User.username == username))
+    """Authenticate user and return tokens. Username lookup is case-insensitive."""
+    from sqlalchemy import func
+    result = await db.execute(select(User).where(func.lower(User.username) == username.lower()))
     user = result.scalar_one_or_none()
 
     if not user or not verify_password(password, user.password_hash):

@@ -41,12 +41,13 @@ export function registerEventHandlers() {
     unsubscribers.push(
         wsManager.on(WS_EVENTS.CONNECTED, safeHandler('CONNECTED', (data) => {
             console.log('[WS] Server acknowledged connection', data);
-            // Only reset matchmaking if user is NOT actively searching.
+            // Only reset matchmaking if user is NOT actively searching
+            // AND not currently in a battle (matchId set in battleStore).
             // A blind reset on reconnect would kill an in-progress queue session
-            // (user clicks Find Match → WS blips → UI resets to idle while still
-            // queued on the backend = ghost state).
+            // or desync battle state.
             const mmState = useMatchmakingStore.getState();
-            if (mmState.status !== 'searching') {
+            const battleState = useBattleStore.getState();
+            if (mmState.status !== 'searching' && !battleState.matchId) {
                 try {
                     mmState.reset();
                 } catch (e) {
@@ -94,7 +95,16 @@ export function registerEventHandlers() {
                 };
 
                 console.log('[WS] Setting battle store with:', battleData);
-                useBattleStore.getState().setMatch(battleData);
+                const currentState = useBattleStore.getState();
+                if (currentState.matchId === battleData.match_id) {
+                    // Reconnecting to same match — only update metadata, preserve code/submissions
+                    useBattleStore.setState({
+                        opponent: battleData.opponent || currentState.opponent,
+                        duration: battleData.duration_seconds || currentState.duration,
+                    });
+                } else {
+                    currentState.setMatch(battleData);
+                }
             } catch (error) {
                 console.error('[WS] Error handling match_found:', error);
                 // Re-throw to be caught by safeHandler wrapper

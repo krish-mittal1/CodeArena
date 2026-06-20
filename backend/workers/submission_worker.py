@@ -234,10 +234,7 @@ async def process_submission(redis: aioredis.Redis, submission_id: uuid.UUID):
                 verdict=verdict.value,
                 execution_time_ms=exec_result.time_ms,
                 memory_used_kb=exec_result.memory_kb,
-                actual_output=(
-                    exec_result.stdout[:5000]
-                    if verdict != Verdict.ACCEPTED else None
-                ),
+                actual_output=exec_result.stdout[:5000],
                 error_output=(
                     exec_result.stderr[:5000]
                     if exec_result.stderr else None
@@ -259,6 +256,7 @@ async def process_submission(redis: aioredis.Redis, submission_id: uuid.UUID):
 
         submission.status = overall_verdict.value
         submission.passed_test_cases = passed_count
+        submission.total_test_cases = len(test_cases)
         submission.execution_time_ms = max_time_ms
         submission.memory_used_kb = max_memory_kb
         submission.judged_at = datetime.now(timezone.utc)
@@ -286,8 +284,9 @@ async def process_submission(redis: aioredis.Redis, submission_id: uuid.UUID):
         # ── 6. Check for match completion ─────────────────
         if overall_verdict == Verdict.ACCEPTED:
             try:
-                result_data = await match_service.complete_match(
-                    db, redis, submission.match_id, reason="solved"
+                result_data = await match_service.complete_match_with_winner(
+                    db, redis, submission.match_id,
+                    winner_id=submission.user_id, reason="accepted"
                 )
                 if result_data:
                     await _publish_event(

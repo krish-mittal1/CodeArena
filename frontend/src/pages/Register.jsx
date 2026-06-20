@@ -47,6 +47,18 @@ export default function Register() {
             setClientError('Password must be at least 8 characters');
             return;
         }
+        if (!/[A-Z]/.test(password)) {
+            setClientError('Password must contain at least one uppercase letter');
+            return;
+        }
+        if (!/[a-z]/.test(password)) {
+            setClientError('Password must contain at least one lowercase letter');
+            return;
+        }
+        if (!/[0-9]/.test(password)) {
+            setClientError('Password must contain at least one digit');
+            return;
+        }
 
         setOtpLoading(true);
         try {
@@ -318,9 +330,14 @@ export default function Register() {
 function OTPVerifyStep({ email, isLoading, onVerify, onResend, onBack, cooldown }) {
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const inputRefs = useRef([]);
+    const verifyingRef = useRef(false);
+
+    useEffect(() => {
+        if (!isLoading) verifyingRef.current = false;
+    }, [isLoading]);
 
     const handleOtpChange = (index, value) => {
-        if (!/^\d*$/.test(value)) return;
+        if (!/^\d*$/.test(value) || isLoading) return;
         const newOtp = [...otp];
         newOtp[index] = value.slice(-1);
         setOtp(newOtp);
@@ -330,7 +347,8 @@ function OTPVerifyStep({ email, isLoading, onVerify, onResend, onBack, cooldown 
         }
 
         const otpString = newOtp.join('');
-        if (otpString.length === 6) {
+        if (otpString.length === 6 && !verifyingRef.current) {
+            verifyingRef.current = true;
             onVerify(otpString);
         }
     };
@@ -343,13 +361,18 @@ function OTPVerifyStep({ email, isLoading, onVerify, onResend, onBack, cooldown 
 
     const handleOtpPaste = (e) => {
         e.preventDefault();
+        if (isLoading || verifyingRef.current) return;
         const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
         if (!pasted) return;
         const newOtp = [...otp];
         for (let i = 0; i < 6; i++) newOtp[i] = pasted[i] || '';
         setOtp(newOtp);
-        if (pasted.length === 6) onVerify(pasted);
-        else inputRefs.current[pasted.length]?.focus();
+        if (pasted.length === 6) {
+            verifyingRef.current = true;
+            onVerify(pasted);
+        } else {
+            inputRefs.current[pasted.length]?.focus();
+        }
     };
 
     return (

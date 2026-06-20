@@ -267,17 +267,16 @@ async def request_otp(email: str, ip: str) -> Optional[str]:
     if r is None:
         _check_rate_limits_dev(email, ip)
         _set_store_value(_dev_otp_store, email, hashed, settings.otp_expire_seconds)
-        _delete_store_value(_dev_attempt_store, email)
+        # Don't reset attempt counter on resend — prevents brute force amplification
         _increment_rate_dev(email, ip)
     else:
         await _check_rate_limits(r, email, ip)
 
         otp_key = _KEY_OTP.format(email=email)
-        attempts_key = _KEY_ATTEMPTS.format(email=email)
 
         pipe = r.pipeline()
         pipe.set(otp_key, hashed, ex=settings.otp_expire_seconds)
-        pipe.delete(attempts_key)
+        # Don't delete attempts_key — preserving attempt count prevents brute force amplification
         await pipe.execute()
 
         await _increment_rate(r, email, ip)
@@ -336,7 +335,37 @@ async def verify_otp_only(email: str, otp: str) -> bool:
         await pipe.execute()
 
     logger.info(f"OTP: email verified (check only) for {email}")
+
+    # Store server-side proof of verification (used by register_user)
+    verified_key = f"email_verified:{email.lower()}"
+    if r is not None:
+        await r.set(verified_key, "1", ex=600)
+    else:
+        _set_store_value(_dev_otp_store, f"verified:{email.lower()}", "1", 600)
+
     return True
+
+
+async def is_email_verified(email: str) -> bool:
+    """Check if an email was verified via OTP (server-side proof)."""
+    r = await _get_otp_redis()
+    verified_key = f"email_verified:{email.lower()}"
+    if r is not None:
+        val = await r.get(verified_key)
+        return val is not None
+    else:
+        val = _get_store_value(_dev_otp_store, f"verified:{email.lower()}")
+        return val is not None
+
+
+async def consume_email_verification(email: str) -> None:
+    """Delete the server-side verification proof after registration."""
+    r = await _get_otp_redis()
+    verified_key = f"email_verified:{email.lower()}"
+    if r is not None:
+        await r.delete(verified_key)
+    else:
+        _delete_store_value(_dev_otp_store, f"verified:{email.lower()}")
 
 
 async def verify_otp(

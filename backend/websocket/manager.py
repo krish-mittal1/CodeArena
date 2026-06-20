@@ -113,7 +113,8 @@ class ConnectionManager:
         self._redis: Optional[Redis] = None
         self._pubsub = None
         self._listener_task: Optional[asyncio.Task] = None
-        self._instance_id = id(self)  # Unique per process (echo guard)
+        import uuid as _uuid
+        self._instance_id = str(_uuid.uuid4())  # Unique per process (echo guard)
 
     # ── Lifecycle ─────────────────────────────────────────────
 
@@ -186,24 +187,27 @@ class ConnectionManager:
     async def connect_player(self, user_id: str, websocket: WebSocket):
         """
         Accept and register a player's WebSocket connection.
-        If the user already has an active WS, close the old one
-        (single-session enforcement).
+        If the user already has an active WS, close the old one first
+        before registering the new one (prevents race with old connection's cleanup).
         """
         await websocket.accept()
         old_ws = None
 
         async with self._lock:
             old_ws = self._user_ws.get(user_id)
-            self._user_ws[user_id] = websocket
-            if user_id not in self._user_rooms:
-                self._user_rooms[user_id] = set()
 
-        # Close old connection OUTSIDE lock (I/O)
+        # Close old connection BEFORE registering new one to prevent
+        # the old connection's finally block from removing the new connection
         if old_ws:
             try:
                 await old_ws.close(code=4001, reason="New connection established")
             except Exception:
                 pass
+
+        async with self._lock:
+            self._user_ws[user_id] = websocket
+            if user_id not in self._user_rooms:
+                self._user_rooms[user_id] = set()
 
         logger.info(f"[WS] Player {user_id} connected")
 
@@ -228,8 +232,7 @@ class ConnectionManager:
 
         # Notify remaining room members OUTSIDE lock
         for room_id in rooms_to_notify:
-            await self._publish(room_id, WSEvent.SPECTATOR_UPDATE, {
-                "type": "player_disconnected",
+            await self.broadcast_to_room(room_id, "player_disconnected", {
                 "user_id": user_id,
             })
 
@@ -345,6 +348,11 @@ class ConnectionManager:
         async with self._lock:
             room = self._rooms.get(room_id)
             return bool(room and user_id in room.players)
+
+    async def is_user_in_any_room(self, user_id: str) -> bool:
+        """Whether a user is currently joined as a player in any room."""
+        async with self._lock:
+            return bool(self._user_rooms.get(user_id))
 
     async def broadcast_to_room(self, room_id: str, event: str, data: dict):
         """

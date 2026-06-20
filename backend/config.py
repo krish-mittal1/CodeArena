@@ -78,6 +78,7 @@ class Settings(BaseSettings):
     matchmaking_elo_max_window: int = Field(default=500, description="Maximum ELO matching window")
     matchmaking_elo_expand_interval_seconds: int = Field(default=30, description="ELO window expansion interval (seconds)")
     matchmaking_elo_expand_step: int = Field(default=100, description="ELO window expansion step")
+    matchmaking_bot_fallback_seconds: int = Field(default=15, description="Seconds before bot fallback in dev mode")
 
     # ── Sandbox ───────────────────────────────────────────────
     sandbox_memory_limit: str = Field(default="512m", description="Sandbox memory limit")

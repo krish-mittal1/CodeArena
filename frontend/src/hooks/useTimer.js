@@ -1,6 +1,6 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    useTimer — local countdown synced with battleStore
-   
+
    Ticks every second while `timerRunning` is true.
    Server syncs handled via battleStore.syncTimer().
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -15,8 +15,11 @@ export function useTimer() {
     const intervalRef = useRef(null);
 
     useEffect(() => {
-        if (timerRunning && remainingSeconds > 0) {
-            intervalRef.current = setInterval(() => tickTimer(), 1000);
+        if (timerRunning) {
+            intervalRef.current = setInterval(() => {
+                const remaining = useBattleStore.getState().remainingSeconds;
+                if (remaining > 0) tickTimer();
+            }, 1000);
         }
         return () => {
             if (intervalRef.current) {
@@ -24,7 +27,7 @@ export function useTimer() {
                 intervalRef.current = null;
             }
         };
-    }, [timerRunning, remainingSeconds > 0, tickTimer]);
+    }, [timerRunning, tickTimer]);
 
     return { remainingSeconds, timerRunning };
 }

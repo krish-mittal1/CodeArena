@@ -334,16 +334,33 @@ class Sandbox:
                 runner_script = f"""#!/bin/sh
 i=0
 while [ $i -lt {num_tests} ]; do
-    START_S=$(date +%s 2>/dev/null || echo 0)
-    timeout {timeout_s}s {run_cmd} < /sandbox/input_${{i}}.txt > /sandbox/output_${{i}}.txt 2>/sandbox/error_${{i}}.txt
+    START_NS=$(date +%s%N 2>/dev/null || echo 0)
+    timeout {timeout_s}s {run_cmd} < /sandbox/input_${{i}}.txt > /sandbox/output_${{i}}.txt 2>/sandbox/error_${{i}}.txt &
+    PID=$!
+    PEAK_KB=0
+    # Find the actual child process (not the timeout wrapper)
+    sleep 0.02
+    CHILD_PID=$(cat /proc/$PID/task/$PID/children 2>/dev/null | awk '{{print $1}}')
+    if [ -z "$CHILD_PID" ]; then CHILD_PID=$PID; fi
+    while kill -0 $PID 2>/dev/null; do
+        MEM_FILE="/proc/$CHILD_PID/status"
+        if [ -f "$MEM_FILE" ]; then
+            CUR_KB=$(grep VmRSS "$MEM_FILE" 2>/dev/null | awk '{{print $2}}')
+            if [ -n "$CUR_KB" ] && [ "$CUR_KB" -gt "$PEAK_KB" ] 2>/dev/null; then
+                PEAK_KB=$CUR_KB
+            fi
+        fi
+        sleep 0.05
+    done
+    wait $PID
     EXIT_CODE=$?
-    END_S=$(date +%s 2>/dev/null || echo 0)
-    if [ "$START_S" != "0" ] && [ "$END_S" != "0" ]; then
-        ELAPSED_MS=$(( (END_S - START_S) * 1000 ))
+    END_NS=$(date +%s%N 2>/dev/null || echo 0)
+    if [ "$START_NS" != "0" ] && [ "$END_NS" != "0" ]; then
+        ELAPSED_MS=$(( (END_NS - START_NS) / 1000000 ))
     else
         ELAPSED_MS=0
     fi
-    echo "${{EXIT_CODE}}|${{ELAPSED_MS}}" > /sandbox/meta_${{i}}.txt
+    echo "${{EXIT_CODE}}|${{ELAPSED_MS}}|${{PEAK_KB}}" > /sandbox/meta_${{i}}.txt
     i=$((i + 1))
 done
 """
@@ -421,6 +438,7 @@ done
 
                     exit_code = 1
                     time_ms = 0
+                    memory_kb = 0
                     tc_timed_out = False
                     oom_killed = False
 
@@ -432,6 +450,19 @@ done
                                 time_ms = int(parts[1])
                             except ValueError:
                                 pass
+                        if len(parts) >= 3:
+                            try:
+                                memory_kb = int(parts[2])
+                            except ValueError:
+                                pass
+                    else:
+                        # No meta file means test never ran or container crashed
+                        if batch_timed_out:
+                            tc_timed_out = True
+                            exit_code = TIMEOUT_EXIT_CODE
+                        elif i > 0 and not stdout and not stderr:
+                            oom_killed = True
+                            exit_code = DOCKER_OOM_EXIT_CODE
 
                     # timeout command returns 124 on timeout
                     if exit_code == TIMEOUT_EXIT_CODE:
@@ -446,7 +477,7 @@ done
                         stderr=stderr[:10_000],
                         exit_code=exit_code,
                         time_ms=time_ms,
-                        memory_kb=0,
+                        memory_kb=memory_kb,
                         timed_out=tc_timed_out,
                         oom_killed=oom_killed,
                         stage="run",

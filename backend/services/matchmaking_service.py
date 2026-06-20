@@ -318,6 +318,12 @@ async def process_queue(redis: Redis, db: AsyncSession) -> list[uuid.UUID]:
                 )
                 continue
 
+            # Lock both players to prevent re-matching before DB write completes
+            pair_lock = f"lock:pairing:{player['user_id']}:{best['user_id']}"
+            if not await redis.set(pair_lock, "1", nx=True, ex=10):
+                logger.debug(f"[MATCHMAKING] Pair lock held for {player['user_id']} vs {best['user_id']}")
+                continue
+
             # ── Create match ─────────────────────────────
             match_id = await _create_match(
                 db, redis,

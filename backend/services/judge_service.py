@@ -89,18 +89,23 @@ def judge(
 def _normalize_output(output: str) -> list[str]:
     """
     Normalize output for comparison:
-    - Strip leading/trailing whitespace from the entire output
     - Split into lines
     - Strip trailing whitespace from each line (but preserve internal spaces)
     - Remove trailing empty lines
+    - Remove leading empty lines
+    Note: leading/trailing blank lines are stripped symmetrically to avoid
+    false positives from programs that print extra newlines.
     """
     if not output:
         return []
 
-    lines = [line.rstrip() for line in output.strip().split("\n")]
+    lines = [line.rstrip() for line in output.split("\n")]
 
     while lines and lines[-1] == "":
         lines.pop()
+
+    while lines and lines[0] == "":
+        lines.pop(0)
 
     return lines
 

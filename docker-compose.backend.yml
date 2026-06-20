@@ -19,7 +19,7 @@ services:
       - PYTHONUNBUFFERED=1
       - SANDBOX_HOST_WORKDIR=${PWD}
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider --timeout=3 http://$$(hostname -i):8000/docs || kill 1"]
+      test: ["CMD-SHELL", "wget -q --spider --timeout=3 http://$$(hostname -i):8000/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 2

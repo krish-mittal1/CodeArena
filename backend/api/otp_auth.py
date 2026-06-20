@@ -51,24 +51,47 @@ async def verify_otp(
     """
     Verify OTP and return JWT tokens.
     Auto-creates user if email not registered.
+    Rate limited to prevent brute-force attempts.
     """
     ip = request.client.host if request.client else "unknown"
     user_agent = request.headers.get("user-agent", "unknown")
 
-    return await otp_service.verify_otp(
-        email=data.email,
-        otp=data.otp,
-        ip=ip,
-        user_agent=user_agent,
-        db=db,
-    )
+    from backend.core.auth_rate_limit import ensure_login_allowed, record_login_failure, clear_login_failures
+    verify_key = f"otp_verify:{data.email}"
+    ensure_login_allowed(verify_key, ip)
+
+    try:
+        result = await otp_service.verify_otp(
+            email=data.email,
+            otp=data.otp,
+            ip=ip,
+            user_agent=user_agent,
+            db=db,
+        )
+        clear_login_failures(verify_key, ip)
+        return result
+    except Exception:
+        record_login_failure(verify_key, ip)
+        raise
 
 
 @router.post("/verify-otp-only", response_model=OTPResponse)
-async def verify_otp_only(data: OTPVerify):
+async def verify_otp_only(data: OTPVerify, request: Request):
     """
     Verify OTP only — does NOT create a user or issue tokens.
     Used for registration email verification.
+    Rate limited to prevent brute-force attempts.
     """
-    await otp_service.verify_otp_only(email=data.email, otp=data.otp)
-    return OTPResponse(message="Email verified successfully.")
+    ip = request.client.host if request.client else "unknown"
+
+    from backend.core.auth_rate_limit import ensure_login_allowed, record_login_failure, clear_login_failures
+    verify_key = f"otp_verify_only:{data.email}"
+    ensure_login_allowed(verify_key, ip)
+
+    try:
+        await otp_service.verify_otp_only(email=data.email, otp=data.otp)
+        clear_login_failures(verify_key, ip)
+        return OTPResponse(message="Email verified successfully.")
+    except Exception:
+        record_login_failure(verify_key, ip)
+        raise

@@ -8,7 +8,7 @@ export default function SubmissionPanel() {
     const opponentActivity = useBattleStore((s) => s.opponentActivity);
 
     return (
-        <div className="flex flex-col h-56 bg-bg-root border-t border-border z-20 shrink-0">
+        <div className="flex flex-col h-56 bg-bg-root border-t border-border z-20 shrink-0 relative">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2 bg-bg-primary border-b border-border shrink-0">
                 <div className="flex items-center gap-2">

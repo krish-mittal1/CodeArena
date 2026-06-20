@@ -27,9 +27,11 @@ export default function CodeEditor() {
         defineCodeArenaTheme(monaco);
     }, []);
 
+    const remainingSeconds = useBattleStore((s) => s.remainingSeconds);
+
     // Derived states
     const isSubmitting = submissionStatus === 'submitting' || submissionStatus === 'running';
-    const canSubmit = !isSubmitting && !matchResult && code.trim().length > 0;
+    const canSubmit = !isSubmitting && !matchResult && code.trim().length > 0 && remainingSeconds > 0;
 
     const handleSubmit = async () => {
         if (!canSubmit || !matchId || !problem) return;

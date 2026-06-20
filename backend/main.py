@@ -285,6 +285,20 @@ async def _run_timer_sync_poller() -> None:
                         elapsed = (datetime.now(timezone.utc) - started_at).total_seconds()
                         remaining = max(0, int(match.duration_seconds - elapsed))
                         await manager.broadcast_to_room(room_id, WSEvent.MATCH_TIMER_SYNC, {"remaining_seconds": remaining})
+
+                        # Complete expired matches in dev mode
+                        if remaining <= 0:
+                            try:
+                                result_data = await match_service.complete_match(
+                                    db, None, match.id, reason="timeout"
+                                )
+                                if result_data:
+                                    await manager.broadcast_to_room(
+                                        room_id, WSEvent.MATCH_ENDED, result_data
+                                    )
+                                    logger.info(f"[MM-DEV] Match {room_id} expired and completed")
+                            except Exception as exp_err:
+                                logger.error(f"[MM-DEV] Error completing expired match {room_id}: {exp_err}")
         except asyncio.CancelledError:
             break
         except Exception as e:
@@ -564,11 +578,12 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
+    allow_origins=list({
+        settings.frontend_url,
         "http://localhost:5173",
         "https://codexarena.app",
-        "https://www.codexarena.app"
-    ],
+        "https://www.codexarena.app",
+    }),
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
     allow_headers=["Content-Type", "Authorization"],

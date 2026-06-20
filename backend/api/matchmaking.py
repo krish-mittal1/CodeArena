@@ -122,23 +122,40 @@ async def create_private_room(
     redis: Optional[Redis] = Depends(get_redis),
 ):
     """Create a private room and return a join code."""
-    code = generate_room_code()
     uid = str(current_user.id)
-    
+
     if redis is not None:
-        # Check active match first
         from backend.core.constants import RedisKey
         active = await redis.get(RedisKey.user_active_match(uid))
         if active:
             raise AlreadyInMatch()
-        
+
+        # Remove from public queue if present
+        await matchmaking_service.leave_queue(redis, current_user.id)
+
+        # Generate unique code with collision check
+        for _ in range(5):
+            code = generate_room_code()
+            existing = await redis.get(f"private_room:{code}")
+            if not existing:
+                break
+        else:
+            raise HTTPException(status_code=503, detail="Failed to generate unique room code, try again")
+
         await redis.set(f"private_room:{code}", uid, ex=300)
         await redis.set(f"private_room_status:{code}", "waiting", ex=300)
     else:
-        # dev mode
         _cleanup_expired_dev_rooms()
         if uid in memory_queue._active_matches:
             raise AlreadyInMatch()
+        # Remove from public queue if present
+        await memory_queue.leave_queue(current_user.id)
+        for _ in range(5):
+            code = generate_room_code()
+            if code not in DEV_PRIVATE_ROOMS:
+                break
+        else:
+            raise HTTPException(status_code=503, detail="Failed to generate unique room code, try again")
         DEV_PRIVATE_ROOMS[code] = {"creator": uid, "status": "waiting", "created_at": time.time()}
 
     return {"status": "created", "code": code}
@@ -266,6 +283,7 @@ async def private_room_status(
         ip = request.client.host if request and request.client else "unknown"
         ensure_room_code_allowed(ip)
         record_room_code_attempt(ip)
+        raise HTTPException(status_code=404, detail="Invalid or expired room code")
 
     if redis is not None:
         status_bytes = await redis.get(f"private_room_status:{code}")

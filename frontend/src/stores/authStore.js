@@ -17,6 +17,7 @@ export const useAuthStore = create((set, get) => ({
     user: null,
     isAuthenticated: false,
     isLoading: true,          // true until initial boot completes
+    _storageListenerAttached: false,
 
     // ── Actions ─────────────────────────────────────
 
@@ -48,8 +49,22 @@ export const useAuthStore = create((set, get) => ({
     /**
      * Boot — called once on app mount.
      * If refresh token exists, try silent refresh.
+     * Also sets up cross-tab logout synchronization.
      */
     boot: async () => {
+        // Listen for logout in other tabs (idempotent — only attach once)
+        if (!get()._storageListenerAttached) {
+            set({ _storageListenerAttached: true });
+            window.addEventListener('storage', (event) => {
+                if (event.key === null || event.key === 'refresh_token') {
+                    if (!storage.getRefreshToken()) {
+                        setAccessToken(null);
+                        set({ user: null, isAuthenticated: false, isLoading: false });
+                    }
+                }
+            });
+        }
+
         const refreshToken = storage.getRefreshToken();
         if (!refreshToken) {
             set({ isLoading: false });

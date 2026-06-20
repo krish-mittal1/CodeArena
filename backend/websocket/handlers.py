@@ -69,10 +69,11 @@ async def handle_player_connection(websocket: WebSocket, token: str, redis: Opti
     try:
         # ── 3. Auto-join active match room ────────────────
         await _auto_join_match_room(user_id, redis)
-        # Dev-mode / recovery: if Redis is disabled/unavailable, recover active match from DB.
-        # This prevents race conditions where match_found was missed due to reconnect timing.
-        if redis is None:
-            await _recover_active_match_from_db(user_id)
+        # Recovery: if Redis is disabled/unavailable OR if Redis auto-join didn't find
+        # a match room, fall back to DB recovery. This handles cases where match_found
+        # was missed due to reconnect timing or stale Redis state.
+        if not await manager.is_user_in_any_room(user_id):
+            await _recover_active_match_from_db(user_id, redis=redis)
 
         # ── 4. Send connection acknowledgment ─────────────
         await manager.send_to_user(user_id, "connected", {

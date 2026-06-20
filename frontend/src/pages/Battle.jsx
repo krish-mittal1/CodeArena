@@ -91,10 +91,11 @@ export default function Battle() {
     useEffect(() => {
         const handleMouseMove = (e) => {
             if (!isDragging.current || !containerRef.current) return;
-            const containerWidth = containerRef.current.getBoundingClientRect().width;
+            const rect = containerRef.current.getBoundingClientRect();
+            const activityBarWidth = 48;
+            const usableWidth = rect.width - activityBarWidth;
 
-            // Adjust for the 48px activity bar width
-            const newLeftWidth = ((e.clientX - 48) / containerWidth) * 100;
+            const newLeftWidth = ((e.clientX - rect.left - activityBarWidth) / usableWidth) * 100;
             if (newLeftWidth >= 20 && newLeftWidth <= 60) {
                 setLeftWidth(newLeftWidth);
             }
@@ -140,7 +141,7 @@ export default function Battle() {
             <TimerBar />
 
             {/* Main Application Body */}
-            <div className="flex flex-1 overflow-hidden relative">
+            <div ref={containerRef} className="flex flex-1 overflow-hidden relative">
 
                 {/* IDE-like Activity Bar (Leftmost) */}
                 <div className="w-12 bg-bg-primary border-r border-border shrink-0 flex flex-col items-center py-4 gap-6 z-10 selection:bg-transparent shadow-[6px_0_16px_rgba(0,0,0,0.12)]">
@@ -170,7 +171,6 @@ export default function Battle() {
 
                 {/* Resizer Handle (Flat Design) */}
                 <div
-                    ref={containerRef}
                     className="w-px cursor-col-resize shrink-0 bg-border hover:bg-accent active:bg-accent transition-colors z-30 group relative"
                     onMouseDown={startDrag}
                 >

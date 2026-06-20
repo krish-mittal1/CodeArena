@@ -261,6 +261,40 @@ class InMemoryMatchmakingQueue:
                 logger.error(f"[MM-DEV] Match creation failed: {e}", exc_info=True)
 
         # ── Phase 4: bot fallback for long-wait solo players ──
+        async with self._lock:
+            remaining_players = sorted(self._queue.values(), key=lambda e: e.joined_at)
+
+        for player in remaining_players:
+            wait_secs = time.time() - player.joined_at
+            if wait_secs >= settings.matchmaking_bot_fallback_seconds:
+                try:
+                    from backend.services.bot_service import get_random_bot_for_elo
+                    async with session_factory() as db:
+                        bot = await get_random_bot_for_elo(db, player.elo, player.user_id)
+                    if bot is None:
+                        continue
+                    async with self._lock:
+                        self._queue.pop(player.user_id, None)
+                        self._pending_pair.add(player.user_id)
+
+                    bot_id = str(bot.id)
+                    match_id = await self._create_match(
+                        session_factory, player.user_id, player.elo, bot_id, bot.elo
+                    )
+                    created.append(match_id)
+
+                    async with self._lock:
+                        self._pending_pair.discard(player.user_id)
+                        self._active_matches[player.user_id] = str(match_id)
+                        self._active_matches[bot_id] = str(match_id)
+
+                    await self._notify_match_found(session_factory, match_id, player.user_id, bot_id)
+                    logger.info(f"[MM-DEV] Bot fallback: {player.user_id} matched with bot {bot_id}")
+                except Exception as e:
+                    async with self._lock:
+                        self._pending_pair.discard(player.user_id)
+                    logger.error(f"[MM-DEV] Bot fallback failed for {player.user_id}: {e}", exc_info=True)
+
         return created
 
     async def _create_match(

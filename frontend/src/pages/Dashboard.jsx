@@ -37,6 +37,8 @@ export default function Dashboard() {
     const joinQueue = useMatchmakingStore((s) => s.joinQueue);
     const navigate = useNavigate();
     const [privateOverlayOpen, setPrivateOverlayOpen] = useState(false);
+    const [fakeOnline] = useState(() => Math.floor(Math.random() * 400) + 800);
+    const [fakeWait] = useState(() => Math.floor(Math.random() * 50) + 15);
 
     const { data: history, isLoading, isError } = useQuery({
         queryKey: ['matchHistory'],
@@ -193,11 +195,11 @@ export default function Dashboard() {
                                 <div className="db-battle__meta">
                                     <div className="db-battle__meta-row">
                                         <span>ACTIVE CODESMITHS</span>
-                                        <span className="db-battle__meta-val">{(Math.floor(Math.random() * 400) + 800).toLocaleString()}</span>
+                                        <span className="db-battle__meta-val">{fakeOnline.toLocaleString()}</span>
                                     </div>
                                     <div className="db-battle__meta-row">
                                         <span>EST. WAIT TIME</span>
-                                        <span className="db-battle__meta-val">00:{String(Math.floor(Math.random() * 50) + 15).padStart(2, '0')}s</span>
+                                        <span className="db-battle__meta-val">00:{String(fakeWait).padStart(2, '0')}s</span>
                                     </div>
                                 </div>
                             </div>

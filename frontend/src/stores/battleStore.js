@@ -86,7 +86,7 @@ export const useBattleStore = create((set, get) => ({
 
     setOpponentActivity: (data) => set({ opponentActivity: data }),
 
-    setOpponentDisconnected: () => set({ opponentDisconnected: true }),
+    setOpponentDisconnected: (data) => set({ opponentDisconnected: !(data?.reconnected) }),
 
     setMatchResult: (data) => set({
         matchResult: data,
@@ -97,8 +97,8 @@ export const useBattleStore = create((set, get) => ({
     syncTimer: (serverSeconds) => {
         const current = get().remainingSeconds;
         const drift = Math.abs(current - serverSeconds);
-        // Snap if drift > 2s, otherwise let local timer handle it
-        if (drift > 2) {
+        // Snap if drift > 1s to keep client and server closely aligned
+        if (drift > 1) {
             set({ remainingSeconds: serverSeconds });
         }
     },
