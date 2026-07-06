@@ -1,0 +1,30 @@
+slug: best-time-to-buy-and-sell-stock
+title: Best Time to Buy and Sell Stock
+problem_type: dsa
+difficulty: easy
+rating: 950
+description: 'You are given an array prices where prices[i] is the price of a given
+  stock on the ith day.
+
+
+  You want to maximize your profit by choosing a single day to buy one stock and choosing
+  a different future day to sell that stock.
+
+  Return the maximum profit you can achieve. If you cannot achieve any profit, return
+  0.'
+input_format: 'Line 1: JSON array prices'
+output_format: 'Single integer: maximum profit'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= prices.length <= 500
+
+  0 <= prices[i] <= 10^5'
+method_name: maxProfit
+parameters:
+- name: prices
+  type: int[]
+return_type: int
+generator:
+  count: 523
+  seed: 2743

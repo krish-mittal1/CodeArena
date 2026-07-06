@@ -1,0 +1,28 @@
+slug: product-of-array-except-self
+title: Product of Array Except Self
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'Given an integer array nums, return an array answer such that answer[i]
+  is equal to the product of all the elements of nums except nums[i].
+
+
+  The product of any prefix or suffix of nums is guaranteed to fit in a 32-bit integer.'
+input_format: 'Line 1: JSON array nums'
+output_format: JSON array answer
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 200
+
+  -6 <= nums[i] <= 6
+
+  The product of any prefix or suffix fits in 32-bit signed integer.'
+method_name: productExceptSelf
+parameters:
+- name: nums
+  type: int[]
+return_type: int[]
+generator:
+  count: 632
+  seed: 2600

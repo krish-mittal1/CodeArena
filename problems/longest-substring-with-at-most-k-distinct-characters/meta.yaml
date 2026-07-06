@@ -1,0 +1,53 @@
+slug: longest-substring-with-at-most-k-distinct-characters
+title: Longest Substring With At Most K Distinct Characters
+problem_type: dsa
+difficulty: hard
+rating: 1300
+description: 'Given a string s and an integer k, find the length of the longest substring
+  that contains at most k distinct characters.
+
+
+  A substring is a contiguous sequence of characters within a string.
+
+
+  Example 1
+
+  Input: s = "aababbcaacc", k = 2
+
+  Output: 6
+
+  Explanation: The longest substring with at most 2 distinct characters is "aababb"
+  with length 6.
+
+
+  Example 2
+
+  Input: s = "abcddefg", k = 3
+
+  Output: 4
+
+  Explanation: The longest substring with at most 3 distinct characters is "bcdd"
+  with length 4.'
+input_format: 'Line 1: string s (0 <= len(s) <= 5 * 10^4)
+
+  Line 2: integer k (0 <= k <= 26)'
+output_format: 'Single integer: length of longest substring with at most k distinct
+  characters'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= s.length <= 5 * 10^4
+
+  0 <= k <= 26
+
+  s consists of English letters only.'
+method_name: lengthOfLongestSubstringKDistinct
+parameters:
+- name: s
+  type: str
+- name: k
+  type: int
+return_type: int
+generator:
+  count: 240
+  seed: 4862

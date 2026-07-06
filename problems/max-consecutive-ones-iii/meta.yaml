@@ -1,0 +1,54 @@
+slug: max-consecutive-ones-iii
+title: Max Consecutive Ones III
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: 'Given a binary array nums and an integer k, flip at most k 0''s.
+
+
+  Return the maximum number of consecutive 1''s after performing the flipping operation.
+
+
+  Example 1
+
+  Input: nums = [1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0], k = 3
+
+  Output: 10
+
+  Explanation: Flip 0''s at indices 3, 4, 5 to get ten consecutive 1''s.
+
+
+  Example 2
+
+  Input: nums = [0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1], k = 3
+
+  Output: 9
+
+
+  Example 3
+
+  Input: nums = [1, 1, 0, 0, 1], k = 3
+
+  Output: 5'
+input_format: 'Line 1: JSON array nums (int[] containing only 0/1)
+
+  Line 2: integer k'
+output_format: 'Single integer: maximum consecutive ones after at most k flips'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 10^5
+
+  nums[i] is either 0 or 1
+
+  0 <= k <= nums.length'
+method_name: longestOnes
+parameters:
+- name: nums
+  type: int[]
+- name: k
+  type: int
+return_type: int
+generator:
+  count: 209
+  seed: 2174

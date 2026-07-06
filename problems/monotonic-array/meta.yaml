@@ -1,0 +1,22 @@
+slug: monotonic-array
+title: Monotonic Array
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: Return true if the array is monotone increasing or monotone decreasing.
+input_format: 'Line 1: JSON array nums (int[])'
+output_format: Boolean indicating whether the array is monotonic
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= nums.length <= 10^5
+
+  -10^5 <= nums[i] <= 10^5'
+method_name: isMonotonic
+parameters:
+- name: nums
+  type: int[]
+return_type: bool
+generator:
+  count: 530
+  seed: 1493

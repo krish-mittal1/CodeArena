@@ -1,0 +1,28 @@
+slug: same-tree
+title: Same Tree
+problem_type: dsa
+difficulty: easy
+rating: 950
+description: Given the roots of two binary trees p and q, return true if they are
+  the same tree. Two binary trees are the same if they are structurally identical
+  and every corresponding node stores the same value.
+input_format: 'Line 1: JSON array p in level-order form
+
+  Line 2: JSON array q in level-order form'
+output_format: Boolean true/false
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes in each tree <= 100
+
+  -10^4 <= Node.val <= 10^4'
+method_name: isSameTree
+parameters:
+- name: p
+  type: TreeNode
+- name: q
+  type: TreeNode
+return_type: bool
+generator:
+  count: 529
+  seed: 822

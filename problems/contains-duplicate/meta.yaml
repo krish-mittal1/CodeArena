@@ -1,0 +1,23 @@
+slug: contains-duplicate
+title: Contains Duplicate
+problem_type: dsa
+difficulty: easy
+rating: 700
+description: Given an integer array nums, return true if any value appears at least
+  twice and false if every element is distinct.
+input_format: 'Line 1: JSON array nums (int[])'
+output_format: Boolean indicating whether any duplicate exists
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= nums.length <= 10^5
+
+  -10^9 <= nums[i] <= 10^9'
+method_name: containsDuplicate
+parameters:
+- name: nums
+  type: int[]
+return_type: bool
+generator:
+  count: 530
+  seed: 1786

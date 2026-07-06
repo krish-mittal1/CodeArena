@@ -167,6 +167,7 @@ export function registerEventHandlers() {
 
             // Update battle state
             battleState.setMatchResult({
+                match_id: battleState.matchId,
                 result,
                 elo_change,
                 winner_username,

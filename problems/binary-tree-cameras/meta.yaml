@@ -1,0 +1,25 @@
+slug: binary-tree-cameras
+title: Binary Tree Cameras
+problem_type: dsa
+difficulty: hard
+rating: 1600
+description: Install cameras on tree nodes so that every node is monitored by a camera
+  on itself, its parent, or one of its children. Return the minimum number of cameras
+  needed.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: 'Single integer: the minimum number of cameras'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= number of nodes <= 1000
+
+  Node.val is always 0 in generated tests'
+method_name: minCameraCover
+parameters:
+- name: root
+  type: TreeNode
+return_type: int
+generator:
+  count: 530
+  seed: 1777

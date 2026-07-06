@@ -1,0 +1,26 @@
+slug: palindromic-substrings
+title: Palindromic Substrings
+problem_type: dsa
+difficulty: medium
+rating: 1250
+description: 'Given a string s, return the number of palindromic substrings in it.
+
+
+  A string is a palindrome when it reads the same backward as forward. A substring
+  is a contiguous sequence of characters within the string.'
+input_format: 'Line 1: string s'
+output_format: Single integer count
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= s.length <= 1000
+
+  s consists of lowercase English letters.'
+method_name: countSubstrings
+parameters:
+- name: s
+  type: string
+return_type: int
+generator:
+  count: 548
+  seed: 2246

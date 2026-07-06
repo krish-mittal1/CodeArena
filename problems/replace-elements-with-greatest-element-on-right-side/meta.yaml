@@ -1,0 +1,23 @@
+slug: replace-elements-with-greatest-element-on-right-side
+title: Replace Elements with Greatest Element on Right Side
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: Replace every element in the array with the greatest element among the
+  elements to its right, and replace the last element with -1.
+input_format: 'Line 1: JSON array arr (int[])'
+output_format: JSON array after replacement
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= arr.length <= 10^4
+
+  1 <= arr[i] <= 10^5'
+method_name: replaceElements
+parameters:
+- name: arr
+  type: int[]
+return_type: int[]
+generator:
+  count: 530
+  seed: 4862

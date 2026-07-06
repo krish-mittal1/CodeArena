@@ -1,0 +1,25 @@
+slug: minimum-depth-of-binary-tree
+title: Minimum Depth of Binary Tree
+problem_type: dsa
+difficulty: easy
+rating: 950
+description: Given the root of a binary tree, return its minimum depth. The minimum
+  depth is the number of nodes along the shortest path from the root down to the nearest
+  leaf node.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: 'Single integer: the minimum depth of the binary tree'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 10^5
+
+  -1000 <= Node.val <= 1000'
+method_name: minDepth
+parameters:
+- name: root
+  type: TreeNode
+return_type: int
+generator:
+  count: 530
+  seed: 2587

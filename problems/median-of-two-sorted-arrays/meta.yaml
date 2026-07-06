@@ -1,0 +1,25 @@
+slug: median-of-two-sorted-arrays
+title: Median of Two Sorted Arrays
+problem_type: dsa
+difficulty: hard
+rating: 1500
+description: Given two sorted arrays nums1 and nums2, return the median of the combined
+  numbers.
+input_format: 'Line 1: JSON array nums1 (int[])
+
+  Line 2: JSON array nums2 (int[])'
+output_format: 'Single number: median value'
+time_limit_ms: 2500
+memory_limit_mb: 256
+is_active: true
+constraints: 1 <= nums1.length + nums2.length <= 2000
+method_name: findMedianSortedArrays
+parameters:
+- name: nums1
+  type: int[]
+- name: nums2
+  type: int[]
+return_type: float
+generator:
+  count: 160
+  seed: 2496

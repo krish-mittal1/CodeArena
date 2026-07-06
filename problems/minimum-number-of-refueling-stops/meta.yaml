@@ -1,0 +1,35 @@
+slug: minimum-number-of-refueling-stops
+title: Minimum Number of Refueling Stops
+problem_type: dsa
+difficulty: hard
+rating: 1500
+description: A car starts with startFuel and needs to reach target miles. Return the
+  minimum number of refueling stops needed, or -1 if impossible.
+input_format: 'Line 1: integer target
+
+  Line 2: integer startFuel
+
+  Line 3: JSON matrix stations'
+output_format: Integer minimum refuel stops, or -1
+time_limit_ms: 1800
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= target <= 10^9
+
+  1 <= startFuel <= 10^9
+
+  0 <= stations.length <= 500
+
+  1 <= fueli <= 10^9'
+method_name: minRefuelStops
+parameters:
+- name: target
+  type: int
+- name: startFuel
+  type: int
+- name: stations
+  type: int[][]
+return_type: int
+generator:
+  count: 430
+  seed: 3156

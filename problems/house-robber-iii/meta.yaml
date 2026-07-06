@@ -1,0 +1,24 @@
+slug: house-robber-iii
+title: House Robber III
+problem_type: dsa
+difficulty: hard
+rating: 1550
+description: A thief cannot rob two directly-linked houses in a binary tree neighborhood.
+  Return the maximum amount of money that can be robbed without alerting the police.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: 'Single integer: the maximum loot'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 10^4
+
+  0 <= Node.val <= 10^4'
+method_name: rob
+parameters:
+- name: root
+  type: TreeNode
+return_type: int
+generator:
+  count: 530
+  seed: 1403

@@ -1,0 +1,29 @@
+slug: task-scheduler
+title: Task Scheduler
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: You are given CPU tasks represented by letters and a cooling interval
+  n. Return the least number of intervals needed to finish all tasks.
+input_format: 'Line 1: JSON array tasks
+
+  Line 2: integer n'
+output_format: Integer least interval count
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= tasks.length <= 10^4
+
+  0 <= n <= 100
+
+  tasks[i] is an uppercase English letter.'
+method_name: leastInterval
+parameters:
+- name: tasks
+  type: string[]
+- name: n
+  type: int
+return_type: int
+generator:
+  count: 430
+  seed: 1362

@@ -1,0 +1,36 @@
+slug: capacity-to-ship-packages-within-d-days
+title: Capacity To Ship Packages Within D Days
+problem_type: dsa
+difficulty: medium
+rating: 1300
+description: 'A conveyor belt has packages that must be shipped from one port to another
+  within days days.
+
+
+  The i-th package has weight weights[i]. Each day, you load the ship with packages
+  from the conveyor belt in the given order. The maximum load you can take in one
+  day is the ship capacity.
+
+
+  Return the least weight capacity of the ship that will result in all packages being
+  shipped within days days.'
+input_format: 'Line 1: JSON array weights
+
+  Line 2: integer days'
+output_format: 'Single integer: minimum ship capacity'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= days <= weights.length <= 5 * 10^4
+
+  1 <= weights[i] <= 500'
+method_name: shipWithinDays
+parameters:
+- name: weights
+  type: int[]
+- name: days
+  type: int
+return_type: int
+generator:
+  count: 582
+  seed: 3500

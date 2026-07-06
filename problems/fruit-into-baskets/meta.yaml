@@ -1,0 +1,53 @@
+slug: fruit-into-baskets
+title: Fruit Into Baskets
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: 'You are given an integer array fruits where fruits[i] is the type of
+  fruit produced by the i-th tree. You have two baskets, and each basket can only
+  hold one fruit type with unlimited quantity.
+
+
+  Starting from any tree, move to the right and pick exactly one fruit from each visited
+  tree. If the current fruit cannot fit in either basket, you must stop.
+
+
+  Return the maximum number of fruits you can pick.
+
+
+  Example 1
+
+  Input: fruits = [1,2,1]
+
+  Output: 3
+
+
+  Example 2
+
+  Input: fruits = [1,2,3,2,2]
+
+  Output: 4
+
+
+  Example 3
+
+  Input: fruits = [1,2,3,4,5]
+
+  Output: 2'
+input_format: 'Line 1: JSON array fruits (int[])'
+output_format: 'Single integer: maximum fruits collectable with at most two fruit
+  types'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= fruits.length <= 10^5
+
+  0 <= fruits[i] <= 10^9'
+method_name: totalFruit
+parameters:
+- name: fruits
+  type: int[]
+return_type: int
+generator:
+  count: 209
+  seed: 1713

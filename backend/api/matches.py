@@ -20,6 +20,18 @@ from backend.websocket.manager import manager
 router = APIRouter(prefix="/matches", tags=["Matches"])
 
 
+@router.get("/recap/{match_id}")
+async def get_match_recap(
+    match_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """Public read-only match recap for share links."""
+    recap = await match_service.get_match_recap(db, match_id)
+    if not recap:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match recap not available")
+    return recap
+
+
 @router.get("/{match_id}", response_model=MatchResponse)
 async def get_match(
     match_id: uuid.UUID,

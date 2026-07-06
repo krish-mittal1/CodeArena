@@ -1,0 +1,25 @@
+slug: binary-tree-maximum-path-sum
+title: Binary Tree Maximum Path Sum
+problem_type: dsa
+difficulty: hard
+rating: 1500
+description: A path in a binary tree is any sequence of nodes where adjacent nodes
+  are connected by an edge. The path does not need to pass through the root. Return
+  the maximum path sum of any non-empty path.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: 'Single integer: the maximum path sum'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= number of nodes <= 3 * 10^4
+
+  -1000 <= Node.val <= 1000'
+method_name: maxPathSum
+parameters:
+- name: root
+  type: TreeNode
+return_type: int
+generator:
+  count: 530
+  seed: 2581

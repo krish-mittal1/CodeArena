@@ -1,0 +1,25 @@
+slug: recover-binary-search-tree
+title: Recover Binary Search Tree
+problem_type: dsa
+difficulty: hard
+rating: 1550
+description: Two nodes of a binary search tree have been swapped by mistake. Recover
+  the tree without changing its structure and return the corrected root.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: JSON array of the recovered BST in level-order form using null for
+  missing children
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '2 <= number of nodes <= 10^4
+
+  -10^5 <= Node.val <= 10^5'
+method_name: recoverTreeFixed
+parameters:
+- name: root
+  type: TreeNode
+return_type: TreeNode
+generator:
+  count: 530
+  seed: 2433

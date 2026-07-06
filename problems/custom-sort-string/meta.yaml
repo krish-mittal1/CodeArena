@@ -1,0 +1,33 @@
+slug: custom-sort-string
+title: Custom Sort String
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: 'You are given two strings order and s. All the characters of order are
+  unique and were sorted in some custom order previously.
+
+
+  Permute the characters of s so that they match the order given by order as much
+  as possible. Return any such permutation.'
+input_format: 'Line 1: string order
+
+  Line 2: string s'
+output_format: Reordered string
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= order.length <= 26
+
+  0 <= s.length <= 200
+
+  order and s consist of lowercase English letters.'
+method_name: customSortString
+parameters:
+- name: order
+  type: string
+- name: s
+  type: string
+return_type: string
+generator:
+  count: 510
+  seed: 1754

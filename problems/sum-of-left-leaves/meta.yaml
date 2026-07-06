@@ -1,0 +1,23 @@
+slug: sum-of-left-leaves
+title: Sum of Left Leaves
+problem_type: dsa
+difficulty: easy
+rating: 950
+description: Given the root of a binary tree, return the sum of all left leaf nodes.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: 'Single integer: the sum of all left leaves'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 1000
+
+  -1000 <= Node.val <= 1000'
+method_name: sumOfLeftLeaves
+parameters:
+- name: root
+  type: TreeNode
+return_type: int
+generator:
+  count: 530
+  seed: 1621

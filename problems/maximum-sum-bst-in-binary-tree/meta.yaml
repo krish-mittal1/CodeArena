@@ -1,0 +1,24 @@
+slug: maximum-sum-bst-in-binary-tree
+title: Maximum Sum BST in Binary Tree
+problem_type: dsa
+difficulty: hard
+rating: 1650
+description: Return the maximum sum of any subtree of the given binary tree that is
+  also a valid binary search tree.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: 'Single integer: the maximum BST subtree sum'
+time_limit_ms: 2200
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= number of nodes <= 4 * 10^4
+
+  -4 * 10^4 <= Node.val <= 4 * 10^4'
+method_name: maxSumBST
+parameters:
+- name: root
+  type: TreeNode
+return_type: int
+generator:
+  count: 530
+  seed: 2664

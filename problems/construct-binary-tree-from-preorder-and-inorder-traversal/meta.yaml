@@ -1,0 +1,33 @@
+slug: construct-binary-tree-from-preorder-and-inorder-traversal
+title: Construct Binary Tree from Preorder and Inorder Traversal
+problem_type: dsa
+difficulty: medium
+rating: 1300
+description: Given two integer arrays preorder and inorder where preorder is the preorder
+  traversal of a binary tree and inorder is the inorder traversal of the same tree,
+  construct and return the binary tree.
+input_format: 'Line 1: JSON array preorder
+
+  Line 2: JSON array inorder'
+output_format: JSON array of the constructed tree in level-order form using null for
+  missing children
+time_limit_ms: 1800
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= preorder.length <= 300
+
+  inorder.length == preorder.length
+
+  -3000 <= preorder[i], inorder[i] <= 3000
+
+  preorder and inorder consist of unique values'
+method_name: buildTree
+parameters:
+- name: preorder
+  type: int[]
+- name: inorder
+  type: int[]
+return_type: TreeNode
+generator:
+  count: 530
+  seed: 5451

@@ -1,0 +1,27 @@
+slug: sum-root-to-leaf-numbers
+title: Sum Root to Leaf Numbers
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: You are given the root of a binary tree containing digits from 0 to 9
+  only. Each root-to-leaf path represents a number. Return the total sum of all root-to-leaf
+  numbers.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: 'Single integer: the sum of all root-to-leaf numbers'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= number of nodes <= 1000
+
+  0 <= Node.val <= 9
+
+  The depth of the tree does not exceed 10'
+method_name: sumNumbers
+parameters:
+- name: root
+  type: TreeNode
+return_type: int
+generator:
+  count: 530
+  seed: 2192

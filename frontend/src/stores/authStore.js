@@ -46,6 +46,8 @@ export const useAuthStore = create((set, get) => ({
         set({ user: null, isAuthenticated: false, isLoading: false });
     },
 
+    setUser: (user) => set({ user }),
+
     /**
      * Boot — called once on app mount.
      * If refresh token exists, try silent refresh.

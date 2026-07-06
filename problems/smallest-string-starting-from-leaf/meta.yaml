@@ -1,0 +1,24 @@
+slug: smallest-string-starting-from-leaf
+title: Smallest String Starting From Leaf
+problem_type: dsa
+difficulty: hard
+rating: 1550
+description: Every node stores a value from 0 to 25 representing 'a' to 'z'. Return
+  the lexicographically smallest string that starts at a leaf and ends at the root.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: Single lowercase string
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= number of nodes <= 8500
+
+  0 <= Node.val <= 25'
+method_name: smallestFromLeaf
+parameters:
+- name: root
+  type: TreeNode
+return_type: str
+generator:
+  count: 530
+  seed: 3220

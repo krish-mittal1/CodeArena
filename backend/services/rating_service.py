@@ -81,6 +81,16 @@ async def update_ratings(
     delta_p1 = calculate_elo_delta(p1.elo, p2.elo, score_p1)
     delta_p2 = calculate_elo_delta(p2.elo, p1.elo, score_p2)
 
+    # Weekday Blitz bonus for winners
+    from backend.services import event_service
+
+    blitz_multiplier = event_service.get_blitz_multiplier()
+    if blitz_multiplier > 1.0:
+        if score_p1 == 1.0 and delta_p1 > 0:
+            delta_p1 = round(delta_p1 * blitz_multiplier)
+        if score_p2 == 1.0 and delta_p2 > 0:
+            delta_p2 = round(delta_p2 * blitz_multiplier)
+
     # Apply with floor
     p1_new = max(ELO_FLOOR, p1.elo + delta_p1)
     p2_new = max(ELO_FLOOR, p2.elo + delta_p2)

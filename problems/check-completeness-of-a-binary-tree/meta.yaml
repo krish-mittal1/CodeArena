@@ -1,0 +1,24 @@
+slug: check-completeness-of-a-binary-tree
+title: Check Completeness of a Binary Tree
+problem_type: dsa
+difficulty: medium
+rating: 1250
+description: Given the root of a binary tree, determine if it is a complete binary
+  tree.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: Boolean true/false
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= number of nodes <= 100
+
+  1 <= Node.val <= 1000'
+method_name: isCompleteTree
+parameters:
+- name: root
+  type: TreeNode
+return_type: bool
+generator:
+  count: 530
+  seed: 3227

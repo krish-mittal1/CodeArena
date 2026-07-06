@@ -1,0 +1,23 @@
+slug: shortest-unsorted-continuous-subarray
+title: Shortest Unsorted Continuous Subarray
+problem_type: dsa
+difficulty: medium
+rating: 1300
+description: Return the length of the shortest continuous subarray such that sorting
+  only that subarray would make the whole array sorted in non-decreasing order.
+input_format: 'Line 1: JSON array nums (int[])'
+output_format: Single integer subarray length
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= nums.length <= 10^4
+
+  -10^5 <= nums[i] <= 10^5'
+method_name: findUnsortedSubarray
+parameters:
+- name: nums
+  type: int[]
+return_type: int
+generator:
+  count: 530
+  seed: 3728

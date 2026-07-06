@@ -1,0 +1,31 @@
+slug: reverse-nodes-in-k-group
+title: Reverse Nodes in k-Group
+problem_type: dsa
+difficulty: hard
+rating: 1600
+description: Given the head of a linked list, reverse the nodes of the list k at a
+  time and return the modified list. If the number of nodes is not a multiple of k,
+  leave the remaining nodes as-is.
+input_format: 'Line 1: JSON array of node values for head
+
+  Line 2: integer k'
+output_format: JSON array representing the linked list after reversing every full
+  block of size k
+time_limit_ms: 1800
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 5000
+
+  -10^4 <= Node.val <= 10^4
+
+  1 <= k <= 5000'
+method_name: reverseKGroup
+parameters:
+- name: head
+  type: ListNode
+- name: k
+  type: int
+return_type: ListNode
+generator:
+  count: 628
+  seed: 2225

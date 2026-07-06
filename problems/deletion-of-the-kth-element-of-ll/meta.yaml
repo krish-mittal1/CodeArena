@@ -1,0 +1,26 @@
+slug: deletion-of-the-kth-element-of-ll
+title: Deletion of the Kth element of LL
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: Given the head of a singly linked list and an integer k, delete the kth
+  node of the linked list and return the head of the modified list.
+input_format: 'JSON object: {linkedList: [...], k: int}. The runner converts linkedList
+  into head: ListNode and passes k as int.'
+output_format: JSON array representing the list after deleting kth node
+time_limit_ms: 1000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= k <= number of nodes <= 10^5
+
+  -10^9 <= Node.val <= 10^9'
+method_name: deleteKthNode
+parameters:
+- name: head
+  type: ListNode
+- name: k
+  type: int
+return_type: ListNode
+generator:
+  count: 209
+  seed: 2952

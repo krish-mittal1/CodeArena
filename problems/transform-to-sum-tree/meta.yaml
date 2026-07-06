@@ -1,0 +1,26 @@
+slug: transform-to-sum-tree
+title: Transform to Sum Tree
+problem_type: dsa
+difficulty: medium
+rating: 1300
+description: Given the root of a binary tree, convert it into a sum tree where each
+  node stores the sum of the values present in its left and right subtrees in the
+  original tree. Leaf nodes become 0.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: JSON array of the transformed sum tree in level-order form using null
+  for missing children
+time_limit_ms: 1800
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 10^4
+
+  -10^4 <= Node.val <= 10^4'
+method_name: toSumTree
+parameters:
+- name: root
+  type: TreeNode
+return_type: TreeNode
+generator:
+  count: 530
+  seed: 1988

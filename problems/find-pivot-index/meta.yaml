@@ -1,0 +1,24 @@
+slug: find-pivot-index
+title: Find Pivot Index
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: Return the leftmost pivot index of the array where the sum of the numbers
+  strictly to the left equals the sum strictly to the right. Return -1 if no pivot
+  index exists.
+input_format: 'Line 1: JSON array nums (int[])'
+output_format: Single integer pivot index or -1
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 10^4
+
+  -1000 <= nums[i] <= 1000'
+method_name: pivotIndex
+parameters:
+- name: nums
+  type: int[]
+return_type: int
+generator:
+  count: 530
+  seed: 1483

@@ -1,0 +1,24 @@
+slug: swap-nodes-in-pairs
+title: Swap Nodes in Pairs
+problem_type: dsa
+difficulty: medium
+rating: 1250
+description: Given a linked list, swap every two adjacent nodes and return its head.
+  You must solve the problem without modifying the values stored in the list nodes.
+input_format: 'Line 1: JSON array of node values for head'
+output_format: JSON array representing the linked list after every adjacent pair is
+  swapped
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 300
+
+  -10^4 <= Node.val <= 10^4'
+method_name: swapPairs
+parameters:
+- name: head
+  type: ListNode
+return_type: ListNode
+generator:
+  count: 512
+  seed: 1738

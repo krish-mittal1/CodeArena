@@ -1,0 +1,33 @@
+slug: h-index-ii
+title: H-Index II
+problem_type: dsa
+difficulty: medium
+rating: 1250
+description: 'Given an array of integers citations where citations[i] is the number
+  of citations a researcher received for their i-th paper and citations is sorted
+  in ascending order, return the researcher''s h-index.
+
+
+  The h-index is defined as the maximum value h such that the researcher has at least
+  h papers with at least h citations each.
+
+
+  You must write an algorithm that runs in logarithmic time.'
+input_format: 'Line 1: JSON array citations'
+output_format: 'Single integer: h-index'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= citations.length <= 10^5
+
+  0 <= citations[i] <= 1000
+
+  citations is sorted in ascending order.'
+method_name: hIndex
+parameters:
+- name: citations
+  type: int[]
+return_type: int
+generator:
+  count: 499
+  seed: 799

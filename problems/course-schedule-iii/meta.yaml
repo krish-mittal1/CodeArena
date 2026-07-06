@@ -1,0 +1,23 @@
+slug: course-schedule-iii
+title: Course Schedule III
+problem_type: dsa
+difficulty: hard
+rating: 1450
+description: Each course has a duration and a closing day. Return the maximum number
+  of courses that can be taken.
+input_format: 'Line 1: JSON matrix courses'
+output_format: Integer maximum courses taken
+time_limit_ms: 1800
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= courses.length <= 10^4
+
+  1 <= durationi, lastDayi <= 10^4'
+method_name: scheduleCourse
+parameters:
+- name: courses
+  type: int[][]
+return_type: int
+generator:
+  count: 430
+  seed: 1721

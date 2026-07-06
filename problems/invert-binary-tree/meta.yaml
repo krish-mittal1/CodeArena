@@ -1,0 +1,24 @@
+slug: invert-binary-tree
+title: Invert Binary Tree
+problem_type: dsa
+difficulty: easy
+rating: 1000
+description: Given the root of a binary tree, invert the tree and return its root.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: JSON array of the inverted tree in level-order form using null for
+  missing children
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 100
+
+  -100 <= Node.val <= 100'
+method_name: invertTree
+parameters:
+- name: root
+  type: TreeNode
+return_type: TreeNode
+generator:
+  count: 530
+  seed: 1709

@@ -1,0 +1,49 @@
+slug: longest-repeating-character-replacement
+title: Longest Repeating Character Replacement
+problem_type: dsa
+difficulty: hard
+rating: 1400
+description: 'Given a string s consisting of uppercase English letters and an integer
+  k, you may choose any character and change it to any other uppercase English letter
+  at most k times.
+
+
+  Return the length of the longest substring that can contain only one repeating letter
+  after performing at most k replacements.
+
+
+  Example 1
+
+  Input: s = "BAABAABBBAAA", k = 2
+
+  Output: 6
+
+
+  Example 2
+
+  Input: s = "AABABBA", k = 1
+
+  Output: 4'
+input_format: 'Line 1: JSON string s
+
+  Line 2: integer k'
+output_format: 'Single integer: maximum length of a repeating-character substring
+  after at most k replacements'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= s.length <= 10^5
+
+  0 <= k <= s.length
+
+  s consists of uppercase English letters'
+method_name: characterReplacement
+parameters:
+- name: s
+  type: str
+- name: k
+  type: int
+return_type: int
+generator:
+  count: 310
+  seed: 3800

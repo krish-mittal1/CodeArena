@@ -2,7 +2,15 @@ from __future__ import annotations
 
 import asyncio
 import random
-from itertools import pairwise
+from itertools import tee
+
+try:
+    from itertools import pairwise
+except ImportError:
+    def pairwise(iterable):
+        a, b = tee(iterable)
+        next(b, None)
+        return zip(a, b)
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 

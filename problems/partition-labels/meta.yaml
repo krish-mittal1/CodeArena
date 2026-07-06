@@ -1,0 +1,21 @@
+slug: partition-labels
+title: Partition Labels
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: Partition a string into as many parts as possible so that each letter
+  appears in at most one part. Return the sizes of the parts in order.
+input_format: 'Line 1: JSON string s'
+output_format: 'JSON array of integers: partition sizes'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: 1 <= s.length <= 500
+method_name: partitionLabels
+parameters:
+- name: s
+  type: str
+return_type: int[]
+generator:
+  count: 170
+  seed: 1581

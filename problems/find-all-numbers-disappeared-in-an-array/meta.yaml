@@ -1,0 +1,23 @@
+slug: find-all-numbers-disappeared-in-an-array
+title: Find All Numbers Disappeared in an Array
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: Given an array nums of length n where each value is in the range [1,
+  n], return all numbers in the range [1, n] that do not appear in nums.
+input_format: 'Line 1: JSON array nums (int[])'
+output_format: JSON array of missing numbers in ascending order
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 10^5
+
+  1 <= nums[i] <= nums.length'
+method_name: findDisappearedNumbers
+parameters:
+- name: nums
+  type: int[]
+return_type: int[]
+generator:
+  count: 530
+  seed: 3645

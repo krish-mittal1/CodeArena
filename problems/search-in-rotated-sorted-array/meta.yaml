@@ -1,0 +1,41 @@
+slug: search-in-rotated-sorted-array
+title: Search in Rotated Sorted Array
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: 'Given a sorted array of distinct integers that has been rotated at an
+  unknown pivot, return the index of target if it exists, otherwise return -1.
+
+
+  Example 1
+
+  Input: nums = [4,5,6,7,0,1,2], target = 0
+
+  Output: 4
+
+
+  Example 2
+
+  Input: nums = [4,5,6,7,0,1,2], target = 3
+
+  Output: -1'
+input_format: 'Line 1: JSON array nums (int[])
+
+  Line 2: integer target'
+output_format: 'Single integer: index of target or -1'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 5000
+
+  All nums are distinct'
+method_name: search
+parameters:
+- name: nums
+  type: int[]
+- name: target
+  type: int
+return_type: int
+generator:
+  count: 200
+  seed: 2800

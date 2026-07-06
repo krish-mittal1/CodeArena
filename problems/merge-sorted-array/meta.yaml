@@ -1,0 +1,44 @@
+slug: merge-sorted-array
+title: Merge Sorted Array
+problem_type: dsa
+difficulty: easy
+rating: 950
+description: 'You are given two integer arrays nums1 and nums2, sorted in non-decreasing
+  order, and two integers m and n, representing the number of valid elements in nums1
+  and nums2 respectively.
+
+
+  Merge nums1 and nums2 into a single array sorted in non-decreasing order.
+
+
+  On this platform, return the final merged nums1 array.'
+input_format: 'Line 1: JSON array nums1
+
+  Line 2: integer m
+
+  Line 3: JSON array nums2
+
+  Line 4: integer n'
+output_format: JSON array representing the merged sorted array
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= m, n <= 180
+
+  1 <= m + n <= 360
+
+  -10^4 <= nums1[i], nums2[i] <= 10^4'
+method_name: merge
+parameters:
+- name: nums1
+  type: int[]
+- name: m
+  type: int
+- name: nums2
+  type: int[]
+- name: n
+  type: int
+return_type: int[]
+generator:
+  count: 501
+  seed: 1696

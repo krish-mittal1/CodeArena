@@ -1,0 +1,30 @@
+slug: partition-list
+title: Partition List
+problem_type: dsa
+difficulty: medium
+rating: 1325
+description: Given the head of a linked list and a value x, partition it so that all
+  nodes less than x come before nodes greater than or equal to x while preserving
+  the original relative order in each partition.
+input_format: 'Line 1: JSON array of node values for head
+
+  Line 2: integer x'
+output_format: JSON array representing the partitioned linked list
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 300
+
+  -10^4 <= Node.val <= 10^4
+
+  -10^4 <= x <= 10^4'
+method_name: partition
+parameters:
+- name: head
+  type: ListNode
+- name: x
+  type: int
+return_type: ListNode
+generator:
+  count: 571
+  seed: 1398

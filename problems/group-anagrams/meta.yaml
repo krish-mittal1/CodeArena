@@ -1,0 +1,25 @@
+slug: group-anagrams
+title: Group Anagrams
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: Given an array of strings strs, group the anagrams together. You can
+  return the answer in any order.
+input_format: 'Line 1: JSON array strs'
+output_format: JSON array of string groups
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= strs.length <= 10^4
+
+  0 <= strs[i].length <= 100
+
+  strs[i] consists of lowercase English letters.'
+method_name: groupAnagrams
+parameters:
+- name: strs
+  type: string[]
+return_type: string[][]
+generator:
+  count: 512
+  seed: 1367

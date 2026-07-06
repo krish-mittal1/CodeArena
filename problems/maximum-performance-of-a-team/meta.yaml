@@ -1,0 +1,37 @@
+slug: maximum-performance-of-a-team
+title: Maximum Performance of a Team
+problem_type: dsa
+difficulty: hard
+rating: 1550
+description: Choose at most k engineers with given speed and efficiency to maximize
+  team performance. Return the answer modulo 1e9 + 7.
+input_format: 'Line 1: integer n
+
+  Line 2: JSON array speed
+
+  Line 3: JSON array efficiency
+
+  Line 4: integer k'
+output_format: Integer maximum performance modulo 1e9+7
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= n <= 10^5
+
+  1 <= speed[i], efficiency[i] <= 10^8
+
+  1 <= k <= n'
+method_name: maxPerformance
+parameters:
+- name: n
+  type: int
+- name: speed
+  type: int[]
+- name: efficiency
+  type: int[]
+- name: k
+  type: int
+return_type: int
+generator:
+  count: 430
+  seed: 2701

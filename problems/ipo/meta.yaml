@@ -1,0 +1,40 @@
+slug: ipo
+title: IPO
+problem_type: dsa
+difficulty: hard
+rating: 1600
+description: You may complete at most k projects, but can only start projects whose
+  capital requirement you can afford. Return the maximized capital after at most k
+  projects.
+input_format: 'Line 1: integer k
+
+  Line 2: integer w
+
+  Line 3: JSON array profits
+
+  Line 4: JSON array capital'
+output_format: Integer final capital
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= k <= 10^5
+
+  0 <= w <= 10^9
+
+  0 <= profits.length == capital.length <= 10^5
+
+  0 <= profits[i], capital[i] <= 10^9'
+method_name: findMaximizedCapital
+parameters:
+- name: k
+  type: int
+- name: w
+  type: int
+- name: profits
+  type: int[]
+- name: capital
+  type: int[]
+return_type: int
+generator:
+  count: 430
+  seed: 232

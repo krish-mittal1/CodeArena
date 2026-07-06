@@ -1,0 +1,30 @@
+slug: find-minimum-in-rotated-sorted-array
+title: Find Minimum in Rotated Sorted Array
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: 'Suppose an array of distinct integers is sorted in ascending order and
+  rotated between 1 and n times. Return the minimum element in the array.
+
+
+  You must write an algorithm that runs in O(log n) time.'
+input_format: 'Line 1: JSON array nums'
+output_format: 'Single integer: the minimum element'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 5000
+
+  -10^9 <= nums[i] <= 10^9
+
+  All integers are unique.
+
+  nums is sorted and rotated.'
+method_name: findMin
+parameters:
+- name: nums
+  type: int[]
+return_type: int
+generator:
+  count: 530
+  seed: 3351

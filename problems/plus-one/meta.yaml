@@ -1,0 +1,23 @@
+slug: plus-one
+title: Plus One
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: You are given a large integer represented as an integer array digits.
+  Increment the integer by one and return the resulting array of digits.
+input_format: 'Line 1: JSON array digits (int[])'
+output_format: JSON array of digits after adding one
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= digits.length <= 100
+
+  0 <= digits[i] <= 9'
+method_name: plusOne
+parameters:
+- name: digits
+  type: int[]
+return_type: int[]
+generator:
+  count: 530
+  seed: 742

@@ -1,14 +1,17 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useBattleStore } from '../../stores/battleStore';
+import { matchmakingApi } from '../../api/auth';
 import { formatEloDelta } from '../../utils/formatters';
-import { Trophy, Skull, Handshake, Clock } from 'lucide-react';
+import { Trophy, Skull, Handshake, Clock, Share2, RotateCcw } from 'lucide-react';
 
 export default function MatchResultModal() {
     const matchResult = useBattleStore((s) => s.matchResult);
     const reset = useBattleStore((s) => s.reset);
     const navigate = useNavigate();
     const navigatedRef = useRef(false);
+    const [rematchLoading, setRematchLoading] = useState(false);
 
     useEffect(() => {
         if (!matchResult) return;
@@ -18,13 +21,13 @@ export default function MatchResultModal() {
             navigatedRef.current = true;
             reset();
             navigate('/dashboard');
-        }, 5000);
+        }, 8000);
         return () => clearTimeout(timeout);
     }, [matchResult, reset, navigate]);
 
     if (!matchResult) return null;
 
-    const { result, elo_change, winner_username, reason } = matchResult;
+    const { match_id, result, elo_change, winner_username, reason } = matchResult;
 
     const isWin = result === 'win';
     const isLoss = result === 'loss';
@@ -34,14 +37,42 @@ export default function MatchResultModal() {
     const Icon = isWin ? Trophy : isLoss ? Skull : isTimeUp ? Clock : Handshake;
     const title = isWin ? 'Victory' : isLoss ? 'Defeat' : isTimeUp ? "Time's Up!" : (reason === 'forfeit' ? 'Forfeit' : 'Draw');
     
-    const colorClass = isWin ? 'text-win' : isLoss ? 'text-loss' : isTimeUp ? 'text-draw' : 'text-draw';
+    const colorClass = isWin ? 'text-win' : isLoss ? 'text-loss' : 'text-draw';
     const borderColorClass = isWin ? 'border-win' : isLoss ? 'border-loss' : 'border-draw';
 
-    const handleDashboard = () => {
+    const goDashboard = () => {
         if (navigatedRef.current) return;
         navigatedRef.current = true;
         reset();
         navigate('/dashboard');
+    };
+
+    const handleShare = () => {
+        if (!match_id) {
+            toast.error('Recap not available yet');
+            return;
+        }
+        const url = `${window.location.origin}/recap/${match_id}`;
+        navigator.clipboard.writeText(url).then(
+            () => toast.success('Recap link copied'),
+            () => toast.error('Could not copy link'),
+        );
+    };
+
+    const handleRematch = async () => {
+        setRematchLoading(true);
+        try {
+            const room = await matchmakingApi.createPrivateRoom();
+            navigatedRef.current = true;
+            reset();
+            await navigator.clipboard.writeText(room.code);
+            toast.success(`Room code ${room.code} copied — share with your opponent`);
+            navigate('/dashboard');
+        } catch (err) {
+            toast.error(err.response?.data?.detail || 'Failed to create rematch room');
+        } finally {
+            setRematchLoading(false);
+        }
     };
 
     return (
@@ -64,7 +95,7 @@ export default function MatchResultModal() {
                     </p>
 
                     {elo_change != null && (
-                        <div className="flex flex-col items-center justify-center mb-8 px-8 py-4 bg-bg-surface border border-border rounded-sm w-full">
+                        <div className="flex flex-col items-center justify-center mb-6 px-8 py-4 bg-bg-surface border border-border rounded-sm w-full">
                             <div className={`font-mono text-2xl font-bold ${isTimeUp ? 'text-text-muted' : elo_change >= 0 ? 'text-win' : 'text-loss'}`}>
                                 {formatEloDelta(elo_change)}
                             </div>
@@ -74,17 +105,39 @@ export default function MatchResultModal() {
                         </div>
                     )}
 
+                    <div className="flex gap-2 w-full mb-3">
+                        {match_id && (
+                            <button
+                                type="button"
+                                onClick={handleShare}
+                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-bg-surface border border-border text-sm font-medium hover:bg-bg-hover"
+                            >
+                                <Share2 size={14} />
+                                Share
+                            </button>
+                        )}
+                        <button
+                            type="button"
+                            disabled={rematchLoading}
+                            onClick={handleRematch}
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-bg-surface border border-border text-sm font-medium hover:bg-bg-hover disabled:opacity-50"
+                        >
+                            <RotateCcw size={14} />
+                            {rematchLoading ? '...' : 'Rematch'}
+                        </button>
+                    </div>
+
                     <button 
+                        type="button"
                         className="w-full px-4 py-2 bg-bg-surface border border-border text-sm font-semibold text-text-primary hover:bg-bg-hover hover:border-text-muted transition-colors rounded-sm"
-                        onClick={handleDashboard}
+                        onClick={goDashboard}
                     >
                         Return to Dashboard
                     </button>
                 </div>
                 
-                {/* Auto close progress indicator */}
                 <div className="absolute bottom-0 left-0 h-0.5 bg-bg-surface w-full">
-                    <div className="h-full bg-text-muted animate-[shrink_5s_linear_forwards]" style={{ transformOrigin: 'left' }} />
+                    <div className="h-full bg-text-muted animate-[shrink_8s_linear_forwards]" style={{ transformOrigin: 'left' }} />
                 </div>
             </div>
             

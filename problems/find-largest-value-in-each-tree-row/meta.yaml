@@ -1,0 +1,24 @@
+slug: find-largest-value-in-each-tree-row
+title: Find Largest Value in Each Tree Row
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: Given the root of a binary tree, return an array containing the largest
+  value in each level of the tree.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: JSON array containing the largest value from each tree row
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 10^4
+
+  -2^31 <= Node.val <= 2^31 - 1'
+method_name: largestValues
+parameters:
+- name: root
+  type: TreeNode
+return_type: int[]
+generator:
+  count: 530
+  seed: 3104

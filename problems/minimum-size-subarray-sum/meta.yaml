@@ -1,0 +1,30 @@
+slug: minimum-size-subarray-sum
+title: Minimum Size Subarray Sum
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: Given an array of positive integers nums and a positive integer target,
+  return the minimal length of a subarray whose sum is greater than or equal to target.
+  Return 0 if there is no such subarray.
+input_format: 'Line 1: integer target
+
+  Line 2: JSON array nums (positive int[])'
+output_format: Single integer minimum subarray length
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= nums.length <= 10^5
+
+  1 <= nums[i] <= 10^4
+
+  1 <= target <= 10^9'
+method_name: minSubArrayLen
+parameters:
+- name: target
+  type: int
+- name: nums
+  type: int[]
+return_type: int
+generator:
+  count: 530
+  seed: 2389

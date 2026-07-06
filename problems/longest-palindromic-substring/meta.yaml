@@ -1,0 +1,22 @@
+slug: longest-palindromic-substring
+title: Longest Palindromic Substring
+problem_type: dsa
+difficulty: medium
+rating: 1300
+description: Given a string s, return the longest palindromic substring in s.
+input_format: 'Line 1: string s'
+output_format: Longest palindromic substring
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= s.length <= 1000
+
+  s consist of only digits and English letters.'
+method_name: longestPalindrome
+parameters:
+- name: s
+  type: string
+return_type: string
+generator:
+  count: 570
+  seed: 2895

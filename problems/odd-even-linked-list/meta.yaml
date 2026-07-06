@@ -1,0 +1,24 @@
+slug: odd-even-linked-list
+title: Odd Even Linked List
+problem_type: dsa
+difficulty: medium
+rating: 1300
+description: Given the head of a singly linked list, group all nodes positioned at
+  odd indices together followed by the nodes positioned at even indices, and return
+  the reordered list.
+input_format: 'Line 1: JSON array of node values for head'
+output_format: JSON array representing the reordered linked list
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 10^4
+
+  -10^6 <= Node.val <= 10^6'
+method_name: oddEvenList
+parameters:
+- name: head
+  type: ListNode
+return_type: ListNode
+generator:
+  count: 436
+  seed: 1784

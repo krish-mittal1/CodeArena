@@ -1,0 +1,21 @@
+slug: trapping-rain-water
+title: Trapping Rain Water
+problem_type: dsa
+difficulty: hard
+rating: 1400
+description: Given elevation heights, compute how much rain water can be trapped after
+  raining.
+input_format: 'Line 1: JSON array height (int[])'
+output_format: 'Single integer: total trapped water'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 1 <= height.length <= 2 * 10^4
+method_name: trap
+parameters:
+- name: height
+  type: int[]
+return_type: int
+generator:
+  count: 170
+  seed: 1810

@@ -1,0 +1,25 @@
+slug: jump-game-ii
+title: Jump Game II
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: Given an array nums where each element is your maximum jump length from
+  that position, return the minimum number of jumps needed to reach the last index.
+input_format: 'Line 1: JSON array nums (int[])'
+output_format: 'Single integer: minimum number of jumps'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 10^4
+
+  0 <= nums[i] <= 10^5
+
+  The last index is reachable'
+method_name: jump
+parameters:
+- name: nums
+  type: int[]
+return_type: int
+generator:
+  count: 170
+  seed: 1000

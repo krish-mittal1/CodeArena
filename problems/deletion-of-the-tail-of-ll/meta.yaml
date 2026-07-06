@@ -1,0 +1,24 @@
+slug: deletion-of-the-tail-of-ll
+title: Deletion of the tail of LL
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: Given the head of a singly linked list, delete the tail of the linked
+  list and return the head of the modified list.
+input_format: 'Line 1: JSON array representing linked-list node values in order. The
+  runner converts this array into head: ListNode before calling your method.'
+output_format: JSON array representing the list after deleting the tail node
+time_limit_ms: 1000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 10^5
+
+  -10^9 <= Node.val <= 10^9'
+method_name: deleteTail
+parameters:
+- name: head
+  type: ListNode
+return_type: ListNode
+generator:
+  count: 149
+  seed: 2305

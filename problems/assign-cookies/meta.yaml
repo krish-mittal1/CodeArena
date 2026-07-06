@@ -1,0 +1,28 @@
+slug: assign-cookies
+title: Assign Cookies
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: Assume you are an awesome parent and want to give your children cookies.
+  Each child has a greed factor and each cookie has a size. Return the maximum number
+  of content children.
+input_format: 'Line 1: JSON array g
+
+  Line 2: JSON array s'
+output_format: Integer count of satisfied children
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= g.length, s.length <= 300
+
+  1 <= g[i], s[j] <= 10^3'
+method_name: findContentChildren
+parameters:
+- name: g
+  type: int[]
+- name: s
+  type: int[]
+return_type: int
+generator:
+  count: 430
+  seed: 1362

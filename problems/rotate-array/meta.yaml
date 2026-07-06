@@ -1,0 +1,31 @@
+slug: rotate-array
+title: Rotate Array
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: 'Given an integer array nums, rotate the array to the right by k steps.
+
+
+  On this platform, return the final rotated array.'
+input_format: 'Line 1: JSON array nums
+
+  Line 2: integer k'
+output_format: JSON array after rotating
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 260
+
+  -10^5 <= nums[i] <= 10^5
+
+  0 <= k <= 10^6'
+method_name: rotate
+parameters:
+- name: nums
+  type: int[]
+- name: k
+  type: int
+return_type: int[]
+generator:
+  count: 560
+  seed: 1166

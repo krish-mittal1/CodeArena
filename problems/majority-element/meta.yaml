@@ -1,0 +1,26 @@
+slug: majority-element
+title: Majority Element
+problem_type: dsa
+difficulty: easy
+rating: 950
+description: 'Given an array nums of size n, return the majority element.
+
+
+  The majority element is the element that appears more than ⌊n / 2⌋ times. You may
+  assume that the majority element always exists in the array.'
+input_format: 'Line 1: JSON array nums'
+output_format: 'Single integer: majority element'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 401
+
+  -10^9 <= nums[i] <= 10^9'
+method_name: majorityElement
+parameters:
+- name: nums
+  type: int[]
+return_type: int
+generator:
+  count: 537
+  seed: 1593

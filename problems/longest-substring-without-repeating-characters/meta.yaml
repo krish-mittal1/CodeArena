@@ -1,0 +1,54 @@
+slug: longest-substring-without-repeating-characters
+title: Longest Substring Without Repeating Characters
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: 'Given a string s, find the length of the longest substring without repeating
+  characters.
+
+
+  A substring is a contiguous sequence of characters within a string.
+
+
+  Example 1:
+
+  Input: s = "abcabcbb"
+
+  Output: 3
+
+  Explanation: The answer is "abc", with length 3.
+
+
+  Example 2:
+
+  Input: s = "bbbbb"
+
+  Output: 1
+
+  Explanation: The answer is "b", with length 1.
+
+
+  Example 3:
+
+  Input: s = "pwwkew"
+
+  Output: 3
+
+  Explanation: The answer is "wke", with length 3. Note that the answer must be a
+  substring, "pwke" is a subsequence and not a substring.'
+input_format: 'Line 1: string s (0 <= length <= 5 * 10^4)'
+output_format: 'Single integer: length of longest substring without repeating characters'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= s.length <= 5 * 10^4
+
+  s consists of English letters, digits, symbols and spaces.'
+method_name: lengthOfLongestSubstring
+parameters:
+- name: s
+  type: str
+return_type: int
+generator:
+  count: 142
+  seed: 4528

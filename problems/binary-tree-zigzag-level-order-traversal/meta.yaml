@@ -1,0 +1,25 @@
+slug: binary-tree-zigzag-level-order-traversal
+title: Binary Tree Zigzag Level Order Traversal
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: Given the root of a binary tree, return the zigzag level order traversal
+  of its nodes' values from left to right, then right to left for the next level,
+  and so on.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: JSON matrix containing the zigzag level-order traversal
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 2000
+
+  -100 <= Node.val <= 100'
+method_name: zigzagLevelOrder
+parameters:
+- name: root
+  type: TreeNode
+return_type: int[][]
+generator:
+  count: 530
+  seed: 3753

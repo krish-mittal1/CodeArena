@@ -1,0 +1,24 @@
+slug: maximum-product-of-splitted-binary-tree
+title: Maximum Product of Splitted Binary Tree
+problem_type: dsa
+difficulty: hard
+rating: 1600
+description: Remove exactly one edge from the binary tree to split it into two trees.
+  Return the maximum product of the sums of the resulting two trees modulo 1e9+7.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: 'Single integer: the maximum product modulo 1000000007'
+time_limit_ms: 2200
+memory_limit_mb: 256
+is_active: true
+constraints: '2 <= number of nodes <= 5 * 10^4
+
+  1 <= Node.val <= 10^4'
+method_name: maxProduct
+parameters:
+- name: root
+  type: TreeNode
+return_type: int
+generator:
+  count: 530
+  seed: 3698

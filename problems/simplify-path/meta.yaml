@@ -1,0 +1,29 @@
+slug: simplify-path
+title: Simplify Path
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'Given an absolute path for a Unix-style file system, simplify it.
+
+
+  A period ''.'' refers to the current directory, a double period ''..'' goes up one
+  directory, and multiple slashes are treated as a single slash.
+
+
+  Return the simplified canonical path.'
+input_format: 'Line 1: string path'
+output_format: Simplified canonical path
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= path.length <= 3000
+
+  path consists of English letters, digits, ''.'', ''/'', and ''_''.'
+method_name: simplifyPath
+parameters:
+- name: path
+  type: string
+return_type: string
+generator:
+  count: 505
+  seed: 1274

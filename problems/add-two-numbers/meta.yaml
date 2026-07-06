@@ -1,0 +1,30 @@
+slug: add-two-numbers
+title: Add Two Numbers
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: You are given two non-empty linked lists representing two non-negative
+  integers. The digits are stored in reverse order, and each node contains a single
+  digit. Add the two numbers and return the sum as a linked list.
+input_format: 'Line 1: JSON array for l1 digits in reverse order
+
+  Line 2: JSON array for l2 digits in reverse order'
+output_format: JSON array representing the resulting linked list in reverse order
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= l1.length, l2.length <= 150
+
+  0 <= Node.val <= 9
+
+  The numbers do not contain leading zeroes except the number 0 itself.'
+method_name: addTwoNumbers
+parameters:
+- name: l1
+  type: ListNode
+- name: l2
+  type: ListNode
+return_type: ListNode
+generator:
+  count: 457
+  seed: 1375

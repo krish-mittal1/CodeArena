@@ -1,0 +1,39 @@
+slug: regular-expression-matching
+title: Regular Expression Matching
+problem_type: dsa
+difficulty: hard
+rating: 1650
+description: 'Given an input string s and a pattern p, implement regular expression
+  matching with support for ''.'' and ''*''.
+
+
+  ''.'' Matches any single character.
+
+  ''*'' Matches zero or more of the preceding element.
+
+
+  The matching should cover the entire input string.'
+input_format: 'Line 1: string s
+
+  Line 2: string p'
+output_format: Boolean true/false
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= s.length <= 20
+
+  0 <= p.length <= 30
+
+  s contains only lowercase English letters.
+
+  p contains only lowercase English letters, ''.'', and ''*''.'
+method_name: isMatch
+parameters:
+- name: s
+  type: string
+- name: p
+  type: string
+return_type: boolean
+generator:
+  count: 562
+  seed: 2669

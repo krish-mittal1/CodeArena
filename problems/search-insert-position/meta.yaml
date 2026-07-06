@@ -1,0 +1,28 @@
+slug: search-insert-position
+title: Search Insert Position
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: Given a sorted array of distinct integers and a target value, return
+  the index if the target exists. Otherwise return the index where it should be inserted
+  to keep the array sorted.
+input_format: 'Line 1: JSON array nums (int[])
+
+  Line 2: integer target'
+output_format: 'Single integer: insertion index'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= nums.length <= 10^4
+
+  nums is strictly increasing'
+method_name: searchInsert
+parameters:
+- name: nums
+  type: int[]
+- name: target
+  type: int
+return_type: int
+generator:
+  count: 170
+  seed: 2144

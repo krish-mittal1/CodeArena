@@ -1,0 +1,23 @@
+slug: move-zeroes
+title: Move Zeroes
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: Move all 0's to the end of the array while maintaining the relative order
+  of the non-zero elements.
+input_format: 'Line 1: JSON array nums (int[])'
+output_format: JSON array after moving all zeroes to the end
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= nums.length <= 10^5
+
+  -2^31 <= nums[i] <= 2^31 - 1'
+method_name: moveZeroes
+parameters:
+- name: nums
+  type: int[]
+return_type: int[]
+generator:
+  count: 530
+  seed: 1071

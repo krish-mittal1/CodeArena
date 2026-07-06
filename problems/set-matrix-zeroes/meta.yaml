@@ -1,0 +1,26 @@
+slug: set-matrix-zeroes
+title: Set Matrix Zeroes
+problem_type: dsa
+difficulty: medium
+rating: 1250
+description: 'Given an m x n integer matrix, if an element is 0, set its entire row
+  and column to 0.
+
+
+  On this platform, return the final matrix after applying the in-place transformation.'
+input_format: 'Line 1: JSON 2D array matrix'
+output_format: JSON 2D array after setting rows and columns to zero
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= matrix.length, matrix[0].length <= 25
+
+  -2^31 <= matrix[i][j] <= 2^31 - 1'
+method_name: setZeroes
+parameters:
+- name: matrix
+  type: int[][]
+return_type: int[][]
+generator:
+  count: 597
+  seed: 1625

@@ -1,0 +1,46 @@
+slug: binary-subarrays-with-sum
+title: Binary Subarrays With Sum
+problem_type: dsa
+difficulty: hard
+rating: 1400
+description: 'Given a binary array nums and an integer goal, return the number of
+  non-empty subarrays with sum equal to goal.
+
+
+  A subarray is a contiguous part of the array.
+
+
+  Example 1
+
+  Input: nums = [1,1,0,1,0,0,1], goal = 3
+
+  Output: 4
+
+
+  Example 2
+
+  Input: nums = [0,0,0,0,1], goal = 0
+
+  Output: 10'
+input_format: 'Line 1: JSON array nums (binary int[])
+
+  Line 2: integer goal'
+output_format: 'Single integer: number of non-empty subarrays whose sum equals goal'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 3 * 10^4
+
+  nums[i] is either 0 or 1
+
+  0 <= goal <= nums.length'
+method_name: numSubarraysWithSum
+parameters:
+- name: nums
+  type: int[]
+- name: goal
+  type: int
+return_type: int
+generator:
+  count: 374
+  seed: 2386

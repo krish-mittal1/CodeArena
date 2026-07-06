@@ -1,0 +1,23 @@
+slug: largest-number
+title: Largest Number
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: Given a list of non-negative integers nums, arrange them such that they
+  form the largest possible number and return it as a string.
+input_format: 'Line 1: JSON array nums (int[])'
+output_format: String representing the largest concatenated number
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 100
+
+  0 <= nums[i] <= 10^9'
+method_name: largestNumber
+parameters:
+- name: nums
+  type: int[]
+return_type: string
+generator:
+  count: 530
+  seed: 1371

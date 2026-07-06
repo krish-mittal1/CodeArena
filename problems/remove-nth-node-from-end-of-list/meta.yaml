@@ -1,0 +1,27 @@
+slug: remove-nth-node-from-end-of-list
+title: Remove Nth Node From End of List
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: Given the head of a linked list, remove its nth node from the end and
+  return the head of the modified list.
+input_format: 'Line 1: JSON array of node values
+
+  Line 2: integer n. The runner converts the array into head: ListNode.'
+output_format: JSON array representing the linked list after removal
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= number of nodes <= 5000
+
+  1 <= n <= number of nodes'
+method_name: removeNthFromEnd
+parameters:
+- name: head
+  type: ListNode
+- name: n
+  type: int
+return_type: ListNode
+generator:
+  count: 169
+  seed: 2810

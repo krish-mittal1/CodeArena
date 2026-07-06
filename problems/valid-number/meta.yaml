@@ -1,0 +1,27 @@
+slug: valid-number
+title: Valid Number
+problem_type: dsa
+difficulty: hard
+rating: 1550
+description: 'A valid number can be split into these components in order: an optional
+  sign, digits with an optional decimal point, and an optional exponent marked by
+  ''e'' or ''E''.
+
+
+  Given a string s, return true if s is a valid number.'
+input_format: 'Line 1: string s'
+output_format: Boolean true/false
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= s.length <= 50
+
+  s consists of English letters, digits, ''+'', ''-'', ''.'', and spaces.'
+method_name: isNumber
+parameters:
+- name: s
+  type: string
+return_type: boolean
+generator:
+  count: 578
+  seed: 1145

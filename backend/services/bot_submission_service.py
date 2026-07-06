@@ -26,6 +26,42 @@ from backend.services import bot_service, submission_service
 logger = logging.getLogger(__name__)
 
 
+class _DevRedis:
+    """Minimal in-memory Redis stand-in for dev-mode bot state."""
+
+    def __init__(self) -> None:
+        self._kv: dict[str, str] = {}
+        self._hash: dict[str, dict[str, str]] = {}
+
+    async def set(self, key: str, value: str, nx: bool = False, ex: int | None = None):
+        if nx and key in self._kv:
+            return False
+        self._kv[key] = value
+        return True
+
+    async def delete(self, key: str) -> None:
+        self._kv.pop(key, None)
+        self._hash.pop(key, None)
+
+    async def hgetall(self, key: str) -> dict:
+        return self._hash.get(key, {})
+
+    async def hset(self, key: str, mapping: dict | None = None, **kwargs) -> None:
+        bucket = self._hash.setdefault(key, {})
+        if mapping:
+            bucket.update({str(k): str(v) for k, v in mapping.items()})
+
+    async def expire(self, key: str, seconds: int) -> None:
+        pass
+
+
+_dev_redis = _DevRedis()
+
+
+def _redis_or_dev(redis: Redis | None) -> Redis:
+    return redis if redis is not None else _dev_redis  # type: ignore[return-value]
+
+
 class BotSubmissionState:
     """Track per-bot state inside a match."""
 
@@ -51,7 +87,7 @@ def _decode(value, default: str = "") -> str:
 
 async def check_and_submit_bot_code(
     db: AsyncSession,
-    redis: Redis,
+    redis: Redis | None,
     match_id: uuid.UUID,
 ) -> None:
     """
@@ -59,6 +95,7 @@ async def check_and_submit_bot_code(
     submit now.
     """
     match_id_str = str(match_id)
+    redis = _redis_or_dev(redis)
 
     try:
         result = await db.execute(
@@ -234,7 +271,7 @@ async def _try_bot_submission(
 
 async def process_bot_submissions_for_active_matches(
     db: AsyncSession,
-    redis: Redis,
+    redis: Redis | None,
 ) -> int:
     """
     Scan all active matches and process bot submissions.

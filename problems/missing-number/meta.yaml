@@ -1,0 +1,23 @@
+slug: missing-number
+title: Missing Number
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: Given an array nums containing n distinct numbers in the range [0, n],
+  return the only number in the range that is missing from the array.
+input_format: 'Line 1: JSON array nums (int[])'
+output_format: 'Single integer: the missing number'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= n <= 10^5
+
+  nums contains unique values from [0, n]'
+method_name: missingNumber
+parameters:
+- name: nums
+  type: int[]
+return_type: int
+generator:
+  count: 530
+  seed: 1379

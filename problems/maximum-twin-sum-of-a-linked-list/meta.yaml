@@ -1,0 +1,25 @@
+slug: maximum-twin-sum-of-a-linked-list
+title: Maximum Twin Sum of a Linked List
+problem_type: dsa
+difficulty: medium
+rating: 1400
+description: In a linked list of even length, the twin of the ith node is the (n -
+  1 - i)th node. Return the maximum twin sum of the linked list.
+input_format: 'Line 1: JSON array of node values for head'
+output_format: Single integer representing the maximum twin sum
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '2 <= number of nodes <= 10^5
+
+  The number of nodes is even.
+
+  1 <= Node.val <= 10^5'
+method_name: pairSum
+parameters:
+- name: head
+  type: ListNode
+return_type: int
+generator:
+  count: 546
+  seed: 2974

@@ -1,0 +1,23 @@
+slug: middle-of-the-linked-list
+title: Middle of the Linked List
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: Given the head of a singly linked list, return the middle node. If there
+  are two middle nodes, return the second one.
+input_format: 'Line 1: JSON array of node values. The runner converts it into head:
+  ListNode.'
+output_format: JSON array representing the linked list starting from the returned
+  middle node
+time_limit_ms: 1200
+memory_limit_mb: 256
+is_active: true
+constraints: 1 <= number of nodes <= 10^5
+method_name: middleNode
+parameters:
+- name: head
+  type: ListNode
+return_type: ListNode
+generator:
+  count: 160
+  seed: 2264

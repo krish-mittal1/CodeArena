@@ -1,0 +1,30 @@
+slug: sort-an-array-of-0s-1s-and-2s
+title: Sort an array of 0's 1's and 2's
+problem_type: dsa
+difficulty: medium
+rating: 1000
+description: 'Given an array `nums` consisting of only 0, 1, or 2. Sort the array
+  in non-decreasing order.
+
+
+  The sorting must be done in-place, without making a copy of the original array.
+
+
+  **Note for this platform:** Even though the algorithm is in-place, our execution
+  engine requires your function to **return the modified array** `nums`.'
+input_format: A JSON array `nums` of integers (0, 1, or 2).
+output_format: A JSON array representing the sorted `nums`.
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 10^5
+
+  nums[i] is either 0, 1, or 2.'
+method_name: sortColors
+parameters:
+- name: nums
+  type: int[]
+return_type: int[]
+generator:
+  count: 144
+  seed: 2527

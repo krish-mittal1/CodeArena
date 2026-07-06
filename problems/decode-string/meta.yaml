@@ -1,0 +1,28 @@
+slug: decode-string
+title: Decode String
+problem_type: dsa
+difficulty: medium
+rating: 1250
+description: 'Given an encoded string, return its decoded string.
+
+
+  The encoding rule is: k[encoded_string], where the encoded_string inside the square
+  brackets is repeated exactly k times. Assume the input string is always valid.'
+input_format: 'Line 1: string s'
+output_format: Decoded string
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= s.length <= 300
+
+  s consists of lowercase English letters, digits, and square brackets.
+
+  All integers in s are in the range [1, 300].'
+method_name: decodeString
+parameters:
+- name: s
+  type: string
+return_type: string
+generator:
+  count: 536
+  seed: 1243

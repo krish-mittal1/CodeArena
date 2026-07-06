@@ -3,10 +3,12 @@ User routes — profile, stats.
 """
 
 from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.dependencies import get_current_user
+from backend.db.session import get_db
 from backend.models.user import User
-from backend.schemas.user import UserProfile, UserStats
+from backend.schemas.user import UserProfile, UserStats, OnboardingComplete
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -31,3 +33,17 @@ async def get_my_stats(current_user: User = Depends(get_current_user)):
         matches_won=current_user.matches_won,
         win_rate=win_rate,
     )
+
+
+@router.post("/me/onboarding", response_model=UserProfile)
+async def complete_onboarding(
+    data: OnboardingComplete,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Mark onboarding complete and store the user's preferred track."""
+    current_user.onboarding_completed = True
+    current_user.preferred_track = data.track
+    await db.commit()
+    await db.refresh(current_user)
+    return current_user

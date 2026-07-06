@@ -1,0 +1,23 @@
+slug: summary-ranges
+title: Summary Ranges
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: Given a sorted unique integer array nums, return the smallest sorted
+  list of ranges that exactly covers all the numbers in the array.
+input_format: 'Line 1: JSON array nums (sorted unique int[])'
+output_format: JSON array of strings describing the ranges
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= nums.length <= 10^5
+
+  -2^31 <= nums[i] <= 2^31 - 1'
+method_name: summaryRanges
+parameters:
+- name: nums
+  type: int[]
+return_type: string[]
+generator:
+  count: 530
+  seed: 1390

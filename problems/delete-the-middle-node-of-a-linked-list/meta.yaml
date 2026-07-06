@@ -1,0 +1,24 @@
+slug: delete-the-middle-node-of-a-linked-list
+title: Delete the Middle Node of a Linked List
+problem_type: dsa
+difficulty: medium
+rating: 1275
+description: You are given the head of a linked list. Delete the middle node and return
+  the head of the modified linked list. For an even number of nodes, the second middle
+  node is considered the middle.
+input_format: 'Line 1: JSON array of node values for head'
+output_format: JSON array representing the linked list after removing the middle node
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= number of nodes <= 10^5
+
+  1 <= Node.val <= 10^5'
+method_name: deleteMiddle
+parameters:
+- name: head
+  type: ListNode
+return_type: ListNode
+generator:
+  count: 420
+  seed: 3442

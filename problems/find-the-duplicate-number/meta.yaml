@@ -1,0 +1,25 @@
+slug: find-the-duplicate-number
+title: Find the Duplicate Number
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: Given an array of n + 1 integers where each integer is in the range [1,
+  n] inclusive, return the duplicated number.
+input_format: 'Line 1: JSON array nums (int[])'
+output_format: Single integer duplicated value
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= n <= 10^5
+
+  nums.length == n + 1
+
+  1 <= nums[i] <= n'
+method_name: findDuplicate
+parameters:
+- name: nums
+  type: int[]
+return_type: int
+generator:
+  count: 530
+  seed: 2342

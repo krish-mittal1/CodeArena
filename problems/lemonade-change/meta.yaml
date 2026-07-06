@@ -1,0 +1,23 @@
+slug: lemonade-change
+title: Lemonade Change
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: Each lemonade costs $5. Customers pay in order with 5, 10, or 20 dollar
+  bills. Return true if you can provide every customer with the correct change.
+input_format: 'Line 1: JSON array bills'
+output_format: Boolean true/false
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= bills.length <= 10^5
+
+  bills[i] is 5, 10, or 20'
+method_name: lemonadeChange
+parameters:
+- name: bills
+  type: int[]
+return_type: bool
+generator:
+  count: 430
+  seed: 1419

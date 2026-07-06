@@ -1,0 +1,31 @@
+slug: path-sum-iii
+title: Path Sum III
+problem_type: dsa
+difficulty: medium
+rating: 1350
+description: Given the root of a binary tree and an integer targetSum, return the
+  number of paths where the sum of the values along the path equals targetSum. The
+  path does not need to start at the root or end at a leaf, but it must go downward.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children
+
+  Line 2: integer targetSum'
+output_format: 'Single integer: the number of valid downward paths'
+time_limit_ms: 1800
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 1000
+
+  -10^9 <= Node.val <= 10^9
+
+  -1000 <= targetSum <= 1000'
+method_name: pathSumIII
+parameters:
+- name: root
+  type: TreeNode
+- name: targetSum
+  type: int
+return_type: int
+generator:
+  count: 530
+  seed: 989

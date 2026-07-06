@@ -1,0 +1,23 @@
+slug: print-the-matrix-in-spiral-manner
+title: Print the matrix in spiral manner
+problem_type: cp
+difficulty: medium
+rating: 1100
+description: 'Given an M * N matrix, print the elements in a clockwise spiral manner.
+
+
+  Return an array with the elements in the order of their appearance when printed
+  in a spiral manner.'
+input_format: 'First line contains two integers M and N.
+
+  Next M lines contain N integers each.'
+output_format: Print all elements space-separated in clockwise spiral order.
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= M, N <= 100
+
+  -1000 <= matrix[i][j] <= 1000'
+generator:
+  count: 98
+  seed: 3174

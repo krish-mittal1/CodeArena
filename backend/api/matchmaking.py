@@ -12,10 +12,11 @@ from typing import Optional, Dict
 
 from backend.dependencies import get_current_user, get_redis, get_db, get_client_ip
 from backend.models.user import User
-from backend.services import matchmaking_service
+from backend.services import matchmaking_service, match_service
 from backend.services.matchmaking_memory import memory_queue, QueueEntry
 from backend.core.exceptions import AlreadyInMatch
 from backend.core.room_code_rate_limit import ensure_room_code_allowed, record_room_code_attempt
+from backend.core.constants import RedisKey, WSEvent
 import uuid
 import time
 import secrets
@@ -79,6 +80,54 @@ async def join_queue(
         }
 
     return {"status": "queued", "message": "You have been added to the matchmaking queue"}
+
+
+@router.post("/join/tutorial")
+async def join_tutorial_match(
+    current_user: User = Depends(get_current_user),
+    redis: Optional[Redis] = Depends(get_redis),
+    db: AsyncSession = Depends(get_db),
+):
+    """Immediately start a bot match (onboarding / tutorial)."""
+    from backend.services.matchmaking_service import create_immediate_bot_match
+    from backend.websocket.manager import manager
+    from backend.core.constants import WSEvent
+    import json
+
+    try:
+        if redis is not None:
+            active = await redis.get(RedisKey.user_active_match(str(current_user.id)))
+            if active:
+                return {"status": "matched", "match_id": active.decode() if isinstance(active, bytes) else active}
+        else:
+            async with memory_queue._lock:
+                if str(current_user.id) in memory_queue._active_matches:
+                    return {"status": "matched", "match_id": memory_queue._active_matches[str(current_user.id)]}
+
+        match_id = await create_immediate_bot_match(db, redis, current_user.id, current_user.elo)
+        match = await match_service.get_match(db, match_id)
+
+        data = {
+            "match_id": str(match_id),
+            "problem_id": str(match.problem_id),
+            "problem_title": match.problem.title,
+            "duration_seconds": match.duration_seconds,
+            "player1": {"user_id": str(match.player1_id), "username": match.player1.username, "elo": match.player1.elo},
+            "player2": {"user_id": str(match.player2_id), "username": match.player2.username, "elo": match.player2.elo},
+        }
+        await manager.send_to_user(str(current_user.id), WSEvent.MATCH_FOUND, data)
+        await manager.join_room(str(match_id), str(current_user.id))
+
+        if redis is not None:
+            await redis.publish(
+                RedisKey.ws_channel(str(match_id)),
+                json.dumps({"event": WSEvent.MATCH_FOUND, "data": data}),
+            )
+
+        return {"status": "matched", "match_id": str(match_id)}
+    except Exception as exc:
+        logger.error("Tutorial match failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail="Could not start tutorial match") from exc
 
 
 @router.delete("/leave")

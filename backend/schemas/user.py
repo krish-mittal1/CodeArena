@@ -45,8 +45,15 @@ class UserPublic(BaseModel):
 class UserProfile(UserPublic):
     email: str
     created_at: datetime
+    onboarding_completed: bool = False
+    preferred_track: str | None = None
 
     model_config = {"from_attributes": True}
+
+
+class OnboardingComplete(BaseModel):
+    track: str = Field(..., pattern=r"^(interview|cp|battle)$")
+    start_tutorial_match: bool = False
 
 
 class UserStats(BaseModel):

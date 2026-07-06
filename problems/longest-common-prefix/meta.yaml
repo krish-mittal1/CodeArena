@@ -1,0 +1,28 @@
+slug: longest-common-prefix
+title: Longest Common Prefix
+problem_type: dsa
+difficulty: easy
+rating: 850
+description: 'Write a function to find the longest common prefix string amongst an
+  array of strings.
+
+
+  If there is no common prefix, return an empty string "".'
+input_format: 'Line 1: JSON array strs'
+output_format: 'String: longest common prefix'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= strs.length <= 200
+
+  0 <= strs[i].length <= 200
+
+  strs[i] consists of lowercase English letters.'
+method_name: longestCommonPrefix
+parameters:
+- name: strs
+  type: string[]
+return_type: string
+generator:
+  count: 506
+  seed: 2035

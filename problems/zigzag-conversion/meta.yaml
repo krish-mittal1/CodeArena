@@ -1,0 +1,32 @@
+slug: zigzag-conversion
+title: Zigzag Conversion
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: 'The string "PAYPALISHIRING" is written in a zigzag pattern on a given
+  number of rows. Read line by line to produce a new string.
+
+
+  Given a string s and an integer numRows, return the converted string.'
+input_format: 'Line 1: string s
+
+  Line 2: integer numRows'
+output_format: Converted zigzag string
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= s.length <= 1000
+
+  1 <= numRows <= 1000
+
+  s consists of English letters, '','' and ''.''.'
+method_name: convert
+parameters:
+- name: s
+  type: string
+- name: numRows
+  type: int
+return_type: string
+generator:
+  count: 541
+  seed: 1714

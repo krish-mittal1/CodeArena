@@ -1,0 +1,35 @@
+slug: all-nodes-distance-k-in-binary-tree
+title: All Nodes Distance K in Binary Tree
+problem_type: dsa
+difficulty: hard
+rating: 1600
+description: Given the root of a binary tree, a target node value, and an integer
+  k, return all node values at distance k from the target. Return the answer sorted
+  in ascending order.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children
+
+  Line 2: integer target
+
+  Line 3: integer k'
+output_format: JSON array of node values sorted in ascending order
+time_limit_ms: 2200
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= number of nodes <= 5 * 10^4
+
+  All Node.val values are unique
+
+  0 <= k <= 5 * 10^4'
+method_name: distanceKValues
+parameters:
+- name: root
+  type: TreeNode
+- name: target
+  type: int
+- name: k
+  type: int
+return_type: int[]
+generator:
+  count: 530
+  seed: 3092

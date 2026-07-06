@@ -1,0 +1,42 @@
+slug: successful-pairs-of-spells-and-potions
+title: Successful Pairs of Spells and Potions
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'You are given two positive integer arrays spells and potions, where
+  spells[i] represents the strength of the i-th spell and potions[j] represents the
+  strength of the j-th potion.
+
+
+  You are also given an integer success. A spell and potion pair is considered successful
+  if their product is at least success.
+
+
+  Return an integer array where the i-th element is the number of potions that will
+  form a successful pair with the i-th spell.'
+input_format: 'Line 1: JSON array spells
+
+  Line 2: JSON array potions
+
+  Line 3: integer success'
+output_format: JSON array answer
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= spells.length, potions.length <= 10^5
+
+  1 <= spells[i], potions[i] <= 10^5
+
+  1 <= success <= 10^10'
+method_name: successfulPairs
+parameters:
+- name: spells
+  type: int[]
+- name: potions
+  type: int[]
+- name: success
+  type: long
+return_type: int[]
+generator:
+  count: 536
+  seed: 3622

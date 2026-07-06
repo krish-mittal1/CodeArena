@@ -10,10 +10,11 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useAuthStore } from '../stores/authStore';
 import { useMatchmakingStore } from '../stores/matchmakingStore';
-import { matchApi } from '../api/auth';
+import { matchApi, statsApi, leaderboardApi, eventsApi } from '../api/auth';
 import { formatWinRate, formatElo } from '../utils/formatters';
 import QueueOverlay from '../components/matchmaking/QueueOverlay';
 import PrivateRoomOverlay from '../components/matchmaking/PrivateRoomOverlay';
+import OnboardingModal from '../components/onboarding/OnboardingModal';
 import RatingChart from '../components/dashboard/RatingChart';
 import { StatCardSkeleton, ChartSkeleton } from '../components/ui/Skeleton';
 
@@ -37,8 +38,6 @@ export default function Dashboard() {
     const joinQueue = useMatchmakingStore((s) => s.joinQueue);
     const navigate = useNavigate();
     const [privateOverlayOpen, setPrivateOverlayOpen] = useState(false);
-    const [fakeOnline] = useState(() => Math.floor(Math.random() * 400) + 800);
-    const [fakeWait] = useState(() => Math.floor(Math.random() * 50) + 15);
 
     const { data: history, isLoading, isError } = useQuery({
         queryKey: ['matchHistory'],
@@ -46,12 +45,39 @@ export default function Dashboard() {
         enabled: !!user,
     });
 
+    const { data: platformStats } = useQuery({
+        queryKey: ['platformStats'],
+        queryFn: statsApi.getPlatform,
+        enabled: !!user,
+        refetchInterval: 15_000,
+    });
+
+    const { data: weeklyBoard } = useQuery({
+        queryKey: ['leaderboard', 'weekly', 5],
+        queryFn: () => leaderboardApi.get('weekly', 5),
+        enabled: !!user,
+        staleTime: 60_000,
+    });
+
+    const { data: activeEvents } = useQuery({
+        queryKey: ['activeEvents'],
+        queryFn: eventsApi.getActive,
+        enabled: !!user,
+        staleTime: 60_000,
+    });
+
+    const showOnboarding = user && user.onboarding_completed === false;
+
     if (!user) return null;
 
     const winRate = formatWinRate(user.matches_won, user.matches_played);
     const isSearching = queueStatus !== 'idle';
     const allMatches = history || [];
     const recentMatches = allMatches.slice(0, 5);
+    const onlineUsers = platformStats?.online_users ?? 0;
+    const estWait = platformStats?.estimated_wait_seconds ?? 0;
+    const topWeekly = weeklyBoard?.entries?.slice(0, 3) || [];
+    const liveEvent = activeEvents?.events?.[0];
 
     const stats = [
         { label: 'ELO RATING', value: formatElo(user.elo) },
@@ -195,12 +221,22 @@ export default function Dashboard() {
                                 <div className="db-battle__meta">
                                     <div className="db-battle__meta-row">
                                         <span>ACTIVE CODESMITHS</span>
-                                        <span className="db-battle__meta-val">{fakeOnline.toLocaleString()}</span>
+                                        <span className="db-battle__meta-val">{onlineUsers.toLocaleString()}</span>
                                     </div>
                                     <div className="db-battle__meta-row">
                                         <span>EST. WAIT TIME</span>
-                                        <span className="db-battle__meta-val">00:{String(fakeWait).padStart(2, '0')}s</span>
+                                        <span className="db-battle__meta-val">
+                                            {estWait >= 60
+                                                ? `${Math.floor(estWait / 60)}:${String(estWait % 60).padStart(2, '0')}m`
+                                                : `00:${String(estWait).padStart(2, '0')}s`}
+                                        </span>
                                     </div>
+                                    {platformStats?.active_battles > 0 && (
+                                        <div className="db-battle__meta-row">
+                                            <span>LIVE BATTLES</span>
+                                            <span className="db-battle__meta-val">{platformStats.active_battles}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </Fade>
@@ -234,6 +270,44 @@ export default function Dashboard() {
                                 <p className="db-sidebar-card__desc">Review past operations and ELO flux.</p>
                             </button>
                         </Fade>
+
+                        {/* Leaderboard snippet */}
+                        {topWeekly.length > 0 && (
+                            <Fade delay={0.28}>
+                                <button
+                                    onClick={() => navigate('/leaderboard')}
+                                    className="db-sidebar-card paper-card grain-panel group text-left w-full"
+                                >
+                                    <h4 className="db-sidebar-card__title mb-2">WEEKLY TOP 3</h4>
+                                    <ul className="space-y-1.5 text-xs text-text-secondary">
+                                        {topWeekly.map((row) => (
+                                            <li key={row.user_id} className="flex justify-between">
+                                                <span>#{row.rank} {row.username}</span>
+                                                <span className="font-mono text-accent">{row.weekly_wins}W</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </button>
+                            </Fade>
+                        )}
+
+                        {/* Active event */}
+                        {liveEvent && (
+                            <Fade delay={0.32}>
+                                <button
+                                    onClick={() => navigate('/leaderboard')}
+                                    className="db-sidebar-card paper-card grain-panel group text-left w-full border-accent/30"
+                                >
+                                    <h4 className="db-sidebar-card__title text-accent">{liveEvent.title}</h4>
+                                    <p className="db-sidebar-card__desc text-xs mt-1">{liveEvent.description}</p>
+                                    {liveEvent.bonus_elo_multiplier > 1 && (
+                                        <p className="text-xs text-win mt-2 font-mono">
+                                            {liveEvent.bonus_elo_multiplier}× ELO on wins
+                                        </p>
+                                    )}
+                                </button>
+                            </Fade>
+                        )}
                     </div>
                 </div>
 
@@ -248,6 +322,7 @@ export default function Dashboard() {
 
             <QueueOverlay />
             <PrivateRoomOverlay isOpen={privateOverlayOpen} onClose={() => setPrivateOverlayOpen(false)} />
+            {showOnboarding && <OnboardingModal />}
         </div>
     );
 }

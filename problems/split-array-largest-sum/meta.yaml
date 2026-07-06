@@ -1,0 +1,35 @@
+slug: split-array-largest-sum
+title: Split Array Largest Sum
+problem_type: dsa
+difficulty: hard
+rating: 1550
+description: 'Given an integer array nums and an integer k, split nums into k non-empty
+  contiguous subarrays.
+
+
+  Write an algorithm to minimize the largest sum among these subarrays.
+
+
+  Return the minimized largest sum.'
+input_format: 'Line 1: JSON array nums
+
+  Line 2: integer k'
+output_format: 'Single integer: minimized largest sum'
+time_limit_ms: 2500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 1000
+
+  0 <= nums[i] <= 10^6
+
+  1 <= k <= min(50, nums.length)'
+method_name: splitArray
+parameters:
+- name: nums
+  type: int[]
+- name: k
+  type: int
+return_type: int
+generator:
+  count: 573
+  seed: 2162

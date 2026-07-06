@@ -1,0 +1,22 @@
+slug: candy
+title: Candy
+problem_type: dsa
+difficulty: hard
+rating: 1300
+description: There are children standing in a line with ratings. Give each child at
+  least one candy, and children with a higher rating than an adjacent child must get
+  more candies. Return the minimum candies needed.
+input_format: 'Line 1: JSON array ratings (int[])'
+output_format: 'Single integer: minimum candies'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: 1 <= ratings.length <= 2 * 10^4
+method_name: candy
+parameters:
+- name: ratings
+  type: int[]
+return_type: int
+generator:
+  count: 170
+  seed: 495

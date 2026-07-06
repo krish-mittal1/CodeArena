@@ -1,0 +1,31 @@
+slug: next-permutation
+title: Next Permutation
+problem_type: dsa
+difficulty: hard
+rating: 1450
+description: 'A permutation of an array of integers is an arrangement of its members
+  into a sequence or linear order.
+
+
+  Given an array nums, find the next permutation of nums.
+
+
+  On this platform, return the modified array after computing the next lexicographically
+  greater permutation. If such an arrangement is not possible, return the lowest possible
+  order.'
+input_format: 'Line 1: JSON array nums'
+output_format: JSON array representing the next permutation
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 8
+
+  0 <= nums[i] <= 100'
+method_name: nextPermutation
+parameters:
+- name: nums
+  type: int[]
+return_type: int[]
+generator:
+  count: 722
+  seed: 1623

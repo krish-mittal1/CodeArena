@@ -101,6 +101,7 @@ async def lifespan(app: FastAPI):
     redis = None
     judge_task = None
     matchmaking_task = None
+    bot_task = None
     timer_sync_task = None
     match_recovery_task = None
 
@@ -150,6 +151,10 @@ async def lifespan(app: FastAPI):
                 _run_redis_matchmaking_poller(redis),
                 name="redis-matchmaking-poller",
             )
+            bot_task = asyncio.create_task(
+                _run_bot_submission_poller(redis),
+                name="bot-submission-poller",
+            )
             logger.info("Production judge worker started")
             logger.info("Production matchmaking worker started")
         except Exception as exc:
@@ -185,6 +190,10 @@ async def lifespan(app: FastAPI):
                 _run_match_recovery_poller(),
                 name="dev-match-recovery",
             )
+            bot_task = asyncio.create_task(
+                _run_bot_submission_poller(redis),
+                name="bot-submission-poller",
+            )
             logger.info("Dev-mode judge worker + matchmaking poller started")
         except Exception as exc:
             logger.error(f"Failed to start dev workers: {exc}", exc_info=True)
@@ -197,6 +206,8 @@ async def lifespan(app: FastAPI):
                 timer_sync_task.cancel()
             if match_recovery_task:
                 match_recovery_task.cancel()
+            if bot_task:
+                bot_task.cancel()
 
     # CRITICAL: Always yield, even if initialization failed
     yield
@@ -231,6 +242,13 @@ async def lifespan(app: FastAPI):
         match_recovery_task.cancel()
         try:
             await asyncio.wait_for(match_recovery_task, timeout=5)
+        except (asyncio.CancelledError, asyncio.TimeoutError):
+            pass
+
+    if bot_task is not None:
+        bot_task.cancel()
+        try:
+            await asyncio.wait_for(bot_task, timeout=5)
         except (asyncio.CancelledError, asyncio.TimeoutError):
             pass
     
@@ -380,6 +398,22 @@ async def _run_redis_matchmaking_poller(redis) -> None:
             logger.error(f"Redis matchmaking poller error: {exc}", exc_info=True)
 
         await asyncio.sleep(poll_interval)
+
+
+async def _run_bot_submission_poller(redis) -> None:
+    """Periodically submit code for bot players in active matches."""
+    from backend.services.bot_submission_service import process_bot_submissions_for_active_matches
+
+    logger.info("Bot submission poller started")
+    while True:
+        try:
+            async with AsyncSessionLocal() as db:
+                await process_bot_submissions_for_active_matches(db, redis)
+        except asyncio.CancelledError:
+            break
+        except Exception as exc:
+            logger.error("Bot submission poller error: %s", exc, exc_info=True)
+        await asyncio.sleep(3)
 
 
 async def _run_match_recovery_poller() -> None:

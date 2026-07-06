@@ -1,0 +1,34 @@
+slug: word-break
+title: Word Break
+problem_type: dsa
+difficulty: medium
+rating: 1300
+description: 'Given a string s and a dictionary of strings wordDict, return true if
+  s can be segmented into a space-separated sequence of one or more dictionary words.
+
+
+  The same word in the dictionary may be reused multiple times.'
+input_format: 'Line 1: string s
+
+  Line 2: JSON array wordDict'
+output_format: Boolean true/false
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= s.length <= 300
+
+  1 <= wordDict.length <= 1000
+
+  1 <= wordDict[i].length <= 20
+
+  s and wordDict[i] consist of lowercase English letters.'
+method_name: wordBreak
+parameters:
+- name: s
+  type: string
+- name: wordDict
+  type: string[]
+return_type: boolean
+generator:
+  count: 567
+  seed: 929

@@ -1,0 +1,27 @@
+slug: distribute-coins-in-binary-tree
+title: Distribute Coins in Binary Tree
+problem_type: dsa
+difficulty: hard
+rating: 1550
+description: Each node stores some coins and the total number of coins equals the
+  total number of nodes. One move transfers a coin between adjacent nodes. Return
+  the minimum moves needed so every node has exactly one coin.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: 'Single integer: the minimum number of moves'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= number of nodes <= 1000
+
+  0 <= Node.val <= number of nodes
+
+  Total coins equals number of nodes'
+method_name: distributeCoins
+parameters:
+- name: root
+  type: TreeNode
+return_type: int
+generator:
+  count: 530
+  seed: 2919

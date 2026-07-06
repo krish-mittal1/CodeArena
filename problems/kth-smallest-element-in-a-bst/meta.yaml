@@ -1,0 +1,30 @@
+slug: kth-smallest-element-in-a-bst
+title: Kth Smallest Element in a BST
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: Given the root of a binary search tree and an integer k, return the kth
+  smallest value in the tree.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children
+
+  Line 2: integer k'
+output_format: 'Single integer: the kth smallest value'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= number of nodes <= 10^4
+
+  1 <= k <= n
+
+  -10^4 <= Node.val <= 10^4'
+method_name: kthSmallest
+parameters:
+- name: root
+  type: TreeNode
+- name: k
+  type: int
+return_type: int
+generator:
+  count: 530
+  seed: 2551

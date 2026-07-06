@@ -1,0 +1,31 @@
+slug: single-element-in-a-sorted-array
+title: Single Element in a Sorted Array
+problem_type: dsa
+difficulty: medium
+rating: 1250
+description: 'You are given a sorted array consisting of only integers where every
+  element appears exactly twice, except for one element which appears exactly once.
+
+
+  Return the single element that appears only once.
+
+
+  Your solution must run in O(log n) time and O(1) space.'
+input_format: 'Line 1: JSON array nums'
+output_format: 'Single integer: the non-duplicated value'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 10^5
+
+  0 <= nums.length % 2 == 1
+
+  -10^9 <= nums[i] <= 10^9'
+method_name: singleNonDuplicate
+parameters:
+- name: nums
+  type: int[]
+return_type: int
+generator:
+  count: 552
+  seed: 2932

@@ -1,0 +1,33 @@
+slug: isomorphic-strings
+title: Isomorphic Strings
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: 'Given two strings s and t, determine if they are isomorphic.
+
+
+  Two strings are isomorphic if the characters in s can be replaced to get t while
+  preserving order. No two characters may map to the same character, but a character
+  may map to itself.'
+input_format: 'Line 1: string s
+
+  Line 2: string t'
+output_format: Boolean true/false
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= s.length <= 5 * 10^4
+
+  s.length == t.length
+
+  s and t consist of valid ASCII characters.'
+method_name: isIsomorphic
+parameters:
+- name: s
+  type: string
+- name: t
+  type: string
+return_type: boolean
+generator:
+  count: 522
+  seed: 1831

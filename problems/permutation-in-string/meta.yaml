@@ -1,0 +1,43 @@
+slug: permutation-in-string
+title: Permutation in String
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'Given two strings s1 and s2, return true if some permutation of s1 appears
+  as a contiguous substring of s2. Otherwise return false.
+
+
+  Example 1
+
+  Input: s1 = "ab", s2 = "eidbaooo"
+
+  Output: true
+
+
+  Example 2
+
+  Input: s1 = "ab", s2 = "eidboaoo"
+
+  Output: false'
+input_format: 'Line 1: JSON string s1
+
+  Line 2: JSON string s2'
+output_format: 'Boolean: true if a permutation of s1 appears in s2, else false'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= s1.length <= 10^4
+
+  1 <= s2.length <= 10^4
+
+  s1 and s2 consist of lowercase English letters'
+method_name: checkInclusion
+parameters:
+- name: s1
+  type: str
+- name: s2
+  type: str
+return_type: bool
+generator:
+  count: 170
+  seed: 2086

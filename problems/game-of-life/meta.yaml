@@ -1,0 +1,28 @@
+slug: game-of-life
+title: Game of Life
+problem_type: dsa
+difficulty: medium
+rating: 1300
+description: 'According to Wikipedia''s article: "The Game of Life, also known simply
+  as Life, is a cellular automaton devised by the British mathematician John Horton
+  Conway."
+
+
+  Given the current state of the m x n grid board, return the next state after applying
+  the classic Game of Life rules.'
+input_format: 'Line 1: JSON 2D array board'
+output_format: JSON 2D array representing the next board state
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= board.length, board[0].length <= 20
+
+  board[i][j] is 0 or 1'
+method_name: gameOfLife
+parameters:
+- name: board
+  type: int[][]
+return_type: int[][]
+generator:
+  count: 513
+  seed: 1039

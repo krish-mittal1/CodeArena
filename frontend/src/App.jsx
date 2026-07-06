@@ -23,6 +23,9 @@ import Practice from './pages/Practice';
 import CompanyProblems from './pages/CompanyProblems';
 import DsaPracticeHub from './pages/DsaPracticeHub';
 import CompetitiveProblems from './pages/CompetitiveProblems';
+import Leaderboard from './pages/Leaderboard';
+import Spectate from './pages/Spectate';
+import MatchRecap from './pages/MatchRecap';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -82,6 +85,7 @@ function AppRoutes() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
           <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
+          <Route path="/recap/:matchId" element={<MatchRecap />} />
 
 
           {/* Protected */}
@@ -151,6 +155,22 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <Practice />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/leaderboard"
+            element={
+              <ProtectedRoute>
+                {matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <Leaderboard />}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/spectate/:matchId"
+            element={
+              <ProtectedRoute>
+                <Spectate />
               </ProtectedRoute>
             }
           />

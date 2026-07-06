@@ -1,0 +1,27 @@
+slug: delete-the-element-with-value-x
+title: Delete the element with value X
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: Given the head of a singly linked list and an integer X, delete the node
+  with value X and return the head of the modified list.
+input_format: 'JSON object: {linkedList: [...], X: int}. The runner converts linkedList
+  into head: ListNode and passes X as int.'
+output_format: JSON array representing the list after deleting first node with value
+  X
+time_limit_ms: 1000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 10^5
+
+  -10^9 <= Node.val, X <= 10^9'
+method_name: deleteNodeWithValue
+parameters:
+- name: head
+  type: ListNode
+- name: X
+  type: int
+return_type: ListNode
+generator:
+  count: 219
+  seed: 2895

@@ -1,0 +1,32 @@
+slug: reverse-linked-list-ii
+title: Reverse Linked List II
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: Given the head of a singly linked list and two positions left and right,
+  reverse the nodes of the list from position left to position right and return the
+  modified list.
+input_format: 'Line 1: JSON array of node values
+
+  Line 2: integer left
+
+  Line 3: integer right. The runner converts the array into head: ListNode.'
+output_format: JSON array representing the linked list after the sublist reversal
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= number of nodes <= 5000
+
+  1 <= left <= right <= number of nodes'
+method_name: reverseBetween
+parameters:
+- name: head
+  type: ListNode
+- name: left
+  type: int
+- name: right
+  type: int
+return_type: ListNode
+generator:
+  count: 170
+  seed: 1985

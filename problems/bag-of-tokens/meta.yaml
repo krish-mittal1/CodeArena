@@ -1,0 +1,27 @@
+slug: bag-of-tokens
+title: Bag of Tokens
+problem_type: dsa
+difficulty: medium
+rating: 1250
+description: You start with power and a bag of tokens. Spending power can gain score,
+  and spending score can gain power. Return the maximum score achievable.
+input_format: 'Line 1: JSON array tokens
+
+  Line 2: integer power'
+output_format: Integer maximum score
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= tokens.length <= 1000
+
+  0 <= tokens[i], power <= 10^4'
+method_name: bagOfTokensScore
+parameters:
+- name: tokens
+  type: int[]
+- name: power
+  type: int
+return_type: int
+generator:
+  count: 430
+  seed: 1171

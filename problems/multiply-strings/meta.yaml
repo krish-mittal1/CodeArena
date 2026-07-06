@@ -1,0 +1,33 @@
+slug: multiply-strings
+title: Multiply Strings
+problem_type: dsa
+difficulty: medium
+rating: 1250
+description: 'Given two non-negative integers num1 and num2 represented as strings,
+  return the product of num1 and num2, also represented as a string.
+
+
+  You must not use any built-in BigInteger library or convert the inputs directly
+  to integers.'
+input_format: 'Line 1: string num1
+
+  Line 2: string num2'
+output_format: String product
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= num1.length, num2.length <= 200
+
+  num1 and num2 consist of digits only.
+
+  Both do not contain leading zeroes except the number 0 itself.'
+method_name: multiply
+parameters:
+- name: num1
+  type: string
+- name: num2
+  type: string
+return_type: string
+generator:
+  count: 520
+  seed: 1642

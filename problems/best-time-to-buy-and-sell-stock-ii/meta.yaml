@@ -1,0 +1,23 @@
+slug: best-time-to-buy-and-sell-stock-ii
+title: Best Time to Buy and Sell Stock II
+problem_type: dsa
+difficulty: medium
+rating: 1000
+description: You may buy and sell the stock multiple times. Return the maximum profit
+  you can achieve.
+input_format: 'Line 1: JSON array prices (int[])'
+output_format: Single integer maximum profit
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= prices.length <= 3 * 10^4
+
+  0 <= prices[i] <= 10^4'
+method_name: maxProfit
+parameters:
+- name: prices
+  type: int[]
+return_type: int
+generator:
+  count: 530
+  seed: 2921

@@ -1,0 +1,26 @@
+slug: minimum-remove-to-make-valid-parentheses
+title: Minimum Remove to Make Valid Parentheses
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'Given a string s of ''('', '')'' and lowercase English characters, remove
+  the minimum number of parentheses so that the resulting string is valid.
+
+
+  Return any valid string after the removals.'
+input_format: 'Line 1: string s'
+output_format: Valid string after minimum removals
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= s.length <= 10^5
+
+  s[i] is either ''('' , '')'' , or lowercase English letter.'
+method_name: minRemoveToMakeValid
+parameters:
+- name: s
+  type: string
+return_type: string
+generator:
+  count: 552
+  seed: 3773

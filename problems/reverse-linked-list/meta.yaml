@@ -1,0 +1,24 @@
+slug: reverse-linked-list
+title: Reverse Linked List
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: Given the head of a singly linked list, reverse the list and return the
+  new head.
+input_format: 'Line 1: JSON array of node values. The runner converts this array into
+  head: ListNode.'
+output_format: JSON array representing the reversed linked list
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 5000
+
+  -10^4 <= Node.val <= 10^4'
+method_name: reverseList
+parameters:
+- name: head
+  type: ListNode
+return_type: ListNode
+generator:
+  count: 169
+  seed: 1807

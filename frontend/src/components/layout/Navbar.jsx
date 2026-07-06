@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Swords, LayoutDashboard, History, User, Bell, Settings, LogOut, ChevronDown, Building2, Menu, X
+    Swords, LayoutDashboard, History, User, Bell, Settings, LogOut, ChevronDown, Building2, Menu, X, Trophy
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useBattleStore } from '../../stores/battleStore';
@@ -80,6 +80,10 @@ export default function Navbar() {
                             <NavLink to="/history" className={linkClass} onClick={matchId ? handleLockedNav('/history') : undefined}>
                                 <History size={16} />
                                 History
+                            </NavLink>
+                            <NavLink to="/leaderboard" className={linkClass} onClick={matchId ? handleLockedNav('/leaderboard') : undefined}>
+                                <Trophy size={16} />
+                                Leaderboard
                             </NavLink>
                         </div>
                     )}
@@ -185,6 +189,10 @@ export default function Navbar() {
                             <NavLink to="/history" className={mobileLinkClass} onClick={matchId ? handleLockedNav('/history') : undefined}>
                                 <History size={20} />
                                 History
+                            </NavLink>
+                            <NavLink to="/leaderboard" className={mobileLinkClass} onClick={matchId ? handleLockedNav('/leaderboard') : undefined}>
+                                <Trophy size={20} />
+                                Leaderboard
                             </NavLink>
                         </div>
                     </motion.div>

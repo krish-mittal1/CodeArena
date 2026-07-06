@@ -1,0 +1,24 @@
+slug: binary-tree-level-order-traversal
+title: Binary Tree Level Order Traversal
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: Given the root of a binary tree, return the level order traversal of
+  its nodes' values from left to right, level by level.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: JSON matrix representing the node values level by level
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 2000
+
+  -1000 <= Node.val <= 1000'
+method_name: levelOrder
+parameters:
+- name: root
+  type: TreeNode
+return_type: int[][]
+generator:
+  count: 529
+  seed: 3101

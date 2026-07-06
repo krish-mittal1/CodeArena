@@ -12,6 +12,9 @@ from backend.api.submissions import router as submissions_router
 from backend.api.problems import router as problems_router
 from backend.api.users import router as users_router
 from backend.api.practice import router as practice_router
+from backend.api.stats import router as stats_router
+from backend.api.leaderboard import router as leaderboard_router
+from backend.api.events import router as events_router
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -23,4 +26,7 @@ api_router.include_router(matches_router)
 api_router.include_router(submissions_router)
 api_router.include_router(problems_router)
 api_router.include_router(practice_router)
+api_router.include_router(stats_router)
+api_router.include_router(leaderboard_router)
+api_router.include_router(events_router)
 

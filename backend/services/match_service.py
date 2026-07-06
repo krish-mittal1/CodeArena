@@ -32,6 +32,7 @@ async def get_match(db: AsyncSession, match_id: uuid.UUID) -> Match:
             selectinload(Match.player1),
             selectinload(Match.player2),
             selectinload(Match.problem),
+            selectinload(Match.winner),
         )
     )
     match = result.scalar_one_or_none()
@@ -202,7 +203,7 @@ async def complete_match(
 
         logger.info(f"Match {match_id} completed. Winner: {winner_id}. Reason: {reason}")
 
-        return {
+        result = {
             "match_id": str(match_id),
             "winner_id": str(winner_id) if winner_id else None,
             "winner_username": winner_username,
@@ -214,7 +215,10 @@ async def complete_match(
             "player2_elo_delta": p2_delta,
             "player1_new_elo": p1_new,
             "player2_new_elo": p2_new,
+            "problem_title": match.problem.title if match.problem else None,
         }
+        await _record_event_wins(redis, match, winner_id)
+        return result
     finally:
         if redis is not None:
             await redis.delete(lock_key)
@@ -301,7 +305,7 @@ async def complete_match_with_winner(
             f"Winner: {winner_id} ({winner_username}). Reason: {reason}"
         )
 
-        return {
+        result = {
             "match_id": str(match_id),
             "winner_id": str(winner_id),
             "winner_username": winner_username,
@@ -313,7 +317,10 @@ async def complete_match_with_winner(
             "player2_elo_delta": p2_delta,
             "player1_new_elo": p1_new,
             "player2_new_elo": p2_new,
+            "problem_title": match.problem.title if match.problem else None,
         }
+        await _record_event_wins(redis, match, winner_id)
+        return result
     finally:
         if redis is not None:
             await redis.delete(lock_key)
@@ -470,3 +477,46 @@ async def _determine_winner(db: AsyncSession, match: Match) -> Optional[uuid.UUI
 
     # First accepted submission wins
     return accepted_submissions[0].user_id
+
+
+async def _record_event_wins(
+    redis: Optional[Redis],
+    match: Match,
+    winner_id: Optional[uuid.UUID],
+) -> None:
+    if not winner_id:
+        return
+    winner = match.player1 if match.player1_id == winner_id else match.player2
+    if winner and winner.is_bot:
+        return
+    try:
+        from backend.services import event_service
+
+        for event in event_service.get_active_events():
+            if event.event_type == "cup":
+                await event_service.record_event_win(
+                    redis,
+                    event_id=event.id,
+                    user_id=str(winner_id),
+                )
+    except Exception as exc:
+        logger.warning("Failed to record event win: %s", exc)
+
+
+async def get_match_recap(db: AsyncSession, match_id: uuid.UUID) -> Optional[dict]:
+    """Public-safe match summary for share links."""
+    match = await get_match(db, match_id)
+    if match.status != MatchStatus.COMPLETED:
+        return None
+    return {
+        "match_id": str(match.id),
+        "problem_title": match.problem.title if match.problem else "Unknown",
+        "player1_username": match.player1.username,
+        "player2_username": match.player2.username,
+        "winner_username": match.winner.username if match.winner else None,
+        "reason": "completed",
+        "started_at": match.started_at.isoformat() if match.started_at else None,
+        "ended_at": match.ended_at.isoformat() if match.ended_at else None,
+        "player1_elo_delta": (match.player1_elo_after or 0) - match.player1_elo_before,
+        "player2_elo_delta": (match.player2_elo_after or 0) - match.player2_elo_before,
+    }

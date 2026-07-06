@@ -1,0 +1,30 @@
+slug: koko-eating-bananas
+title: Koko Eating Bananas
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: Koko must finish all banana piles within h hours. Each hour she picks
+  one pile and eats at most k bananas. Return the minimum integer k that lets her
+  finish on time.
+input_format: 'Line 1: JSON array piles (int[])
+
+  Line 2: integer h'
+output_format: 'Single integer: minimum eating speed'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= piles.length <= 10^4
+
+  1 <= piles[i] <= 10^9
+
+  piles.length <= h'
+method_name: minEatingSpeed
+parameters:
+- name: piles
+  type: int[]
+- name: h
+  type: int
+return_type: int
+generator:
+  count: 170
+  seed: 1760

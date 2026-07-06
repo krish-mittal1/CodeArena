@@ -1,0 +1,23 @@
+slug: squares-of-a-sorted-array
+title: Squares of a Sorted Array
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: Given an integer array nums sorted in non-decreasing order, return an
+  array of the squares of each number sorted in non-decreasing order.
+input_format: 'Line 1: JSON array nums (sorted int[])'
+output_format: JSON array of sorted squares
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= nums.length <= 10^4
+
+  -10^4 <= nums[i] <= 10^4'
+method_name: sortedSquares
+parameters:
+- name: nums
+  type: int[]
+return_type: int[]
+generator:
+  count: 530
+  seed: 2314

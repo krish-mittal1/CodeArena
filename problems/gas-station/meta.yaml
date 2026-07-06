@@ -1,0 +1,28 @@
+slug: gas-station
+title: Gas Station
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: There are n gas stations on a circular route. gas[i] is the fuel at station
+  i and cost[i] is the fuel needed to go from i to i+1. Return the starting station
+  index if you can complete the circuit once, otherwise return -1.
+input_format: 'Line 1: JSON array gas (int[])
+
+  Line 2: JSON array cost (int[])'
+output_format: 'Single integer: starting index or -1'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= gas.length == cost.length <= 10^5
+
+  0 <= gas[i], cost[i] <= 10^4'
+method_name: canCompleteCircuit
+parameters:
+- name: gas
+  type: int[]
+- name: cost
+  type: int[]
+return_type: int
+generator:
+  count: 170
+  seed: 1053

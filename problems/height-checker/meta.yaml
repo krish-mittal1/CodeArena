@@ -1,0 +1,23 @@
+slug: height-checker
+title: Height Checker
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: Return the number of indices where the current heights array differs
+  from the array sorted in non-decreasing order.
+input_format: 'Line 1: JSON array heights (int[])'
+output_format: Single integer mismatch count
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= heights.length <= 100
+
+  1 <= heights[i] <= 100'
+method_name: heightChecker
+parameters:
+- name: heights
+  type: int[]
+return_type: int
+generator:
+  count: 530
+  seed: 1326

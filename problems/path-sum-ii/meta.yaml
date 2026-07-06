@@ -1,0 +1,30 @@
+slug: path-sum-ii
+title: Path Sum II
+problem_type: dsa
+difficulty: medium
+rating: 1250
+description: Given the root of a binary tree and an integer targetSum, return all
+  root-to-leaf paths where the sum of the node values equals targetSum.
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children
+
+  Line 2: integer targetSum'
+output_format: JSON matrix of all matching root-to-leaf paths
+time_limit_ms: 1800
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 5000
+
+  -1000 <= Node.val <= 1000
+
+  -10^5 <= targetSum <= 10^5'
+method_name: pathSum
+parameters:
+- name: root
+  type: TreeNode
+- name: targetSum
+  type: int
+return_type: int[][]
+generator:
+  count: 530
+  seed: 916

@@ -1,0 +1,28 @@
+slug: string-to-integer-atoi
+title: String to Integer (atoi)
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: 'Implement the myAtoi(string s) function, which converts a string to
+  a 32-bit signed integer.
+
+
+  The algorithm should discard leading whitespace, take an optional sign, read in
+  the next characters until a non-digit is found, and clamp the value to the 32-bit
+  signed range.'
+input_format: 'Line 1: string s'
+output_format: Single integer result
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= s.length <= 200
+
+  s consists of English letters, digits, spaces, ''+'', ''-'', and ''.''.'
+method_name: myAtoi
+parameters:
+- name: s
+  type: string
+return_type: int
+generator:
+  count: 556
+  seed: 2182

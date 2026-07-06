@@ -1,0 +1,45 @@
+slug: traversal-in-linked-list
+title: Traversal in Linked List
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: 'Given the head of a singly linked list, traverse the entire linked list
+  and return its elements in an array in the same order.
+
+
+  Example 1
+
+  Input: head = [5, 4, 3, 1, 0]
+
+  Output: [5, 4, 3, 1, 0]
+
+
+  Example 2
+
+  Input: head = [1]
+
+  Output: [1]
+
+
+  Example 3
+
+  Input: head = [0, 2, 5]
+
+  Output: [0, 2, 5]'
+input_format: 'Line 1: JSON array representing linked-list node values in order. The
+  runner converts this array into head: ListNode before calling your method.'
+output_format: JSON array containing all node values in traversal order
+time_limit_ms: 1000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= number of nodes <= 10^5
+
+  -10^9 <= Node.val <= 10^9'
+method_name: traverseLinkedList
+parameters:
+- name: head
+  type: ListNode
+return_type: int[]
+generator:
+  count: 129
+  seed: 2270

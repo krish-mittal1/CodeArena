@@ -1,0 +1,23 @@
+slug: find-all-duplicates-in-an-array
+title: Find All Duplicates in an Array
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: Given an integer array nums of length n where all the integers are in
+  the range [1, n], return all the integers that appear twice.
+input_format: 'Line 1: JSON array nums (int[])'
+output_format: JSON array of duplicates in ascending encounter order
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 10^5
+
+  1 <= nums[i] <= nums.length'
+method_name: findDuplicates
+parameters:
+- name: nums
+  type: int[]
+return_type: int[]
+generator:
+  count: 530
+  seed: 2797

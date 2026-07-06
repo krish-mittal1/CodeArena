@@ -1,0 +1,27 @@
+slug: two-sum-ii-input-array-is-sorted
+title: Two Sum II - Input Array Is Sorted
+problem_type: dsa
+difficulty: medium
+rating: 1000
+description: Given a 1-indexed array sorted in non-decreasing order, return the 1-based
+  indices of two values whose sum equals target.
+input_format: 'Line 1: JSON array numbers (int[])
+
+  Line 2: integer target'
+output_format: 'JSON array of two integers: 1-based indices'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '2 <= numbers.length <= 3 * 10^4
+
+  Exactly one valid answer exists'
+method_name: twoSum
+parameters:
+- name: numbers
+  type: int[]
+- name: target
+  type: int
+return_type: int[]
+generator:
+  count: 170
+  seed: 2890

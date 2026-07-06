@@ -276,7 +276,15 @@ async def process_queue(redis: Redis, db: AsyncSession) -> list[uuid.UUID]:
         )
 
         if len(queue_entries) < 2:
-            return []
+            if len(queue_entries) == 1:
+                players = _parse_queue_entries(queue_entries)
+                player = players[0]
+                wait_secs = time.time() - player["joined_at"]
+                if wait_secs >= settings.matchmaking_bot_fallback_seconds:
+                    bot_match_id = await _try_bot_fallback_match(db, redis, player)
+                    if bot_match_id:
+                        created_matches.append(bot_match_id)
+            return created_matches
 
         # Parse queue into structured list
         players = _parse_queue_entries(queue_entries)
@@ -420,6 +428,67 @@ def _calculate_elo_window(wait_seconds: float) -> int:
     expansions = int(wait_seconds / settings.matchmaking_elo_expand_interval_seconds)
     window = settings.matchmaking_elo_initial_window + (expansions * settings.matchmaking_elo_expand_step)
     return min(window, settings.matchmaking_elo_max_window)
+
+
+async def _try_bot_fallback_match(db: AsyncSession, redis: Redis, player: dict) -> uuid.UUID | None:
+    """Pair a long-waiting solo player with a bot."""
+    from backend.services.bot_service import get_random_bot_for_elo
+
+    bot = await get_random_bot_for_elo(db, player["elo"], player["user_id"])
+    if bot is None:
+        return None
+
+    await redis.zrem(RedisKey.MATCHMAKING_QUEUE, player["member"])
+    await redis.delete(RedisKey.matchmaking_lock(player["user_id"]))
+
+    bot_id = str(bot.id)
+    match_id = await _create_match(
+        db, redis,
+        player["user_id"], player["elo"],
+        bot_id, bot.elo,
+    )
+    logger.info(
+        "[MATCHMAKING] Bot fallback: %s (ELO=%s) vs bot %s",
+        player["user_id"], player["elo"], bot_id,
+    )
+    return match_id
+
+
+async def create_immediate_bot_match(
+    db: AsyncSession,
+    redis: Optional[Redis],
+    user_id: uuid.UUID,
+    user_elo: int,
+) -> uuid.UUID:
+    """Create a match immediately against a bot (tutorial / onboarding)."""
+    from backend.services.bot_service import get_random_bot_for_elo
+    from backend.services.matchmaking_memory import memory_queue
+
+    bot = await get_random_bot_for_elo(db, user_elo, str(user_id))
+    if bot is None:
+        raise ValueError("No bot available")
+
+    bot_id = str(bot.id)
+    if redis is not None:
+        await redis.delete(RedisKey.matchmaking_lock(str(user_id)))
+        member_pattern = f"{user_id}:"
+        queue_entries = await redis.zrange(RedisKey.MATCHMAKING_QUEUE, 0, -1)
+        for member in queue_entries:
+            member_str = member.decode() if isinstance(member, bytes) else str(member)
+            if member_str.startswith(member_pattern):
+                await redis.zrem(RedisKey.MATCHMAKING_QUEUE, member_str)
+        return await _create_match(db, redis, str(user_id), user_elo, bot_id, bot.elo)
+
+    from backend.db.session import AsyncSessionLocal
+
+    match_id = await memory_queue._create_match(
+        AsyncSessionLocal, str(user_id), user_elo, bot_id, bot.elo
+    )
+    async with memory_queue._lock:
+        memory_queue._active_matches[str(user_id)] = str(match_id)
+        memory_queue._active_matches[bot_id] = str(match_id)
+    await memory_queue._notify_match_found(AsyncSessionLocal, match_id, str(user_id), bot_id)
+    return match_id
 
 
 async def _create_match(

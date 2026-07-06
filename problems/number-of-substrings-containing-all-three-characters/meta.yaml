@@ -1,0 +1,38 @@
+slug: number-of-substrings-containing-all-three-characters
+title: Number of Substrings Containing All Three Characters
+problem_type: dsa
+difficulty: hard
+rating: 1400
+description: 'Given a string s consisting only of characters ''a'', ''b'', and ''c'',
+  return the number of substrings that contain at least one occurrence of each character.
+
+
+  Example 1
+
+  Input: s = "abcba"
+
+  Output: 5
+
+
+  Example 2
+
+  Input: s = "ccabcc"
+
+  Output: 8'
+input_format: 'Line 1: JSON string s (only lowercase ''a'', ''b'', ''c'')'
+output_format: 'Single integer: count of substrings containing at least one ''a'',
+  one ''b'', and one ''c'''
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= s.length <= 10^5
+
+  s[i] is one of {''a'', ''b'', ''c''}'
+method_name: numberOfSubstrings
+parameters:
+- name: s
+  type: str
+return_type: int
+generator:
+  count: 420
+  seed: 4941

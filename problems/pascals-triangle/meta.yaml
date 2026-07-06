@@ -1,0 +1,20 @@
+slug: pascals-triangle
+title: Pascal's Triangle
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: Given an integer numRows, return the first numRows of Pascal's triangle.
+input_format: 'Line 1: integer numRows'
+output_format: JSON 2D array containing Pascal's triangle
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: 1 <= numRows <= 25
+method_name: generate
+parameters:
+- name: numRows
+  type: int
+return_type: int[][]
+generator:
+  count: 512
+  seed: 1604

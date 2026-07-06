@@ -1,0 +1,26 @@
+slug: roman-to-integer
+title: Roman to Integer
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: 'Roman numerals are represented by seven different symbols: I, V, X,
+  L, C, D and M.
+
+
+  Given a roman numeral, convert it to an integer.'
+input_format: 'Line 1: string s'
+output_format: Single integer value
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= s.length <= 15
+
+  s is a valid Roman numeral in the range [1, 3999].'
+method_name: romanToInt
+parameters:
+- name: s
+  type: string
+return_type: int
+generator:
+  count: 498
+  seed: 1518

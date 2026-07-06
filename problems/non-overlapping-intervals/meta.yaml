@@ -1,0 +1,21 @@
+slug: non-overlapping-intervals
+title: Non-overlapping Intervals
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: Given a list of intervals, return the minimum number of intervals you
+  must remove to make the rest non-overlapping.
+input_format: 'Line 1: JSON array intervals (int[][])'
+output_format: 'Single integer: minimum removals'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: 1 <= intervals.length <= 10^5
+method_name: eraseOverlapIntervals
+parameters:
+- name: intervals
+  type: int[][]
+return_type: int
+generator:
+  count: 170
+  seed: 2519

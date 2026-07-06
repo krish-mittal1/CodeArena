@@ -1,0 +1,22 @@
+slug: palindrome-linked-list
+title: Palindrome Linked List
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: Given the head of a singly linked list, return true if it is a palindrome,
+  otherwise return false.
+input_format: 'Line 1: JSON array of node values. The runner converts it into head:
+  ListNode.'
+output_format: 'Boolean: true if the linked list is a palindrome'
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: 0 <= number of nodes <= 10^5
+method_name: isPalindrome
+parameters:
+- name: head
+  type: ListNode
+return_type: bool
+generator:
+  count: 170
+  seed: 2110

@@ -1,0 +1,47 @@
+slug: minimum-number-of-days-to-make-m-bouquets
+title: Minimum Number of Days to Make m Bouquets
+problem_type: dsa
+difficulty: medium
+rating: 1350
+description: 'You are given an integer array bloomDay, an integer m and an integer
+  k.
+
+
+  You want to make m bouquets. To make a bouquet, you need to use k adjacent flowers
+  from the garden.
+
+
+  The garden consists of n flowers, where the i-th flower will bloom on the bloomDay[i]
+  day and then can be used in exactly one bouquet.
+
+
+  Return the minimum number of days you need to wait to be able to make m bouquets.
+  If it is impossible, return -1.'
+input_format: 'Line 1: JSON array bloomDay
+
+  Line 2: integer m
+
+  Line 3: integer k'
+output_format: 'Single integer: minimum day or -1'
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= bloomDay.length <= 10^5
+
+  1 <= bloomDay[i] <= 10^9
+
+  1 <= m <= 10^6
+
+  1 <= k <= bloomDay.length'
+method_name: minDays
+parameters:
+- name: bloomDay
+  type: int[]
+- name: m
+  type: int
+- name: k
+  type: int
+return_type: int
+generator:
+  count: 560
+  seed: 3761

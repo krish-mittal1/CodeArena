@@ -9,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.db.base import Base
 from backend.core.constants import ELO_DEFAULT
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from backend.models.submission import Submission  # Adjust path if needed
@@ -30,6 +30,8 @@ class User(Base):
     elo: Mapped[int] = mapped_column(Integer, default=ELO_DEFAULT, nullable=False)
     matches_played: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     matches_won: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    onboarding_completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    preferred_track: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

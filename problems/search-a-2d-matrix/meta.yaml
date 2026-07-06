@@ -1,0 +1,38 @@
+slug: search-a-2d-matrix
+title: Search a 2D Matrix
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'You are given an m x n integer matrix with the following two properties:
+
+
+  1. Each row is sorted in non-decreasing order.
+
+  2. The first integer of each row is greater than the last integer of the previous
+  row.
+
+
+  Given an integer target, return true if target is in matrix or false otherwise.
+
+
+  You must write a solution in O(log(m * n)) time complexity.'
+input_format: 'Line 1: JSON matrix matrix
+
+  Line 2: integer target'
+output_format: Boolean true/false
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= m, n <= 100
+
+  -10^9 <= matrix[i][j], target <= 10^9'
+method_name: searchMatrix
+parameters:
+- name: matrix
+  type: int[][]
+- name: target
+  type: int
+return_type: boolean
+generator:
+  count: 518
+  seed: 1538

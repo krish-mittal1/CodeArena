@@ -1,0 +1,24 @@
+slug: boundary-of-binary-tree
+title: Boundary of Binary Tree
+problem_type: dsa
+difficulty: hard
+rating: 1600
+description: 'Return the boundary of the binary tree in anti-clockwise order starting
+  from the root: left boundary, leaves, then reversed right boundary, without duplicates.'
+input_format: 'Line 1: JSON array root in level-order form using null for missing
+  children'
+output_format: JSON array representing the boundary traversal
+time_limit_ms: 2200
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= number of nodes <= 10^4
+
+  -1000 <= Node.val <= 1000'
+method_name: boundaryOfBinaryTree
+parameters:
+- name: root
+  type: TreeNode
+return_type: int[]
+generator:
+  count: 530
+  seed: 2158

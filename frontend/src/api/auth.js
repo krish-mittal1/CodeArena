@@ -19,10 +19,27 @@ export const authApi = {
 export const userApi = {
     getProfile: () => api.get('/users/me').then((r) => r.data),
     getStats: () => api.get('/users/me/stats').then((r) => r.data),
+    completeOnboarding: (data) => api.post('/users/me/onboarding', data).then((r) => r.data),
+};
+
+export const statsApi = {
+    getPlatform: () => api.get('/stats/platform').then((r) => r.data),
+};
+
+export const leaderboardApi = {
+    get: (period = 'all_time', limit = 100) =>
+        api.get('/leaderboard', { params: { period, limit } }).then((r) => r.data),
+};
+
+export const eventsApi = {
+    getActive: () => api.get('/events/active').then((r) => r.data),
+    getLeaderboard: (eventId, limit = 50) =>
+        api.get(`/events/${eventId}/leaderboard`, { params: { limit } }).then((r) => r.data),
 };
 
 export const matchmakingApi = {
     join: () => api.post('/matchmaking/join').then((r) => r.data),
+    joinTutorial: () => api.post('/matchmaking/join/tutorial').then((r) => r.data),
     leave: () => api.delete('/matchmaking/leave').then((r) => r.data),
     status: () => api.get('/matchmaking/status').then((r) => r.data),
     
@@ -35,6 +52,7 @@ export const matchmakingApi = {
 export const matchApi = {
     getMatch: (id) => api.get(`/matches/${id}`).then((r) => r.data),
     getHistory: () => api.get('/matches/history/me').then((r) => r.data),
+    getRecap: (id) => api.get(`/matches/recap/${id}`).then((r) => r.data),
     forfeit: (id) => api.post(`/matches/${id}/forfeit`).then((r) => r.data),
 };
 

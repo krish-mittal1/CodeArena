@@ -1,0 +1,24 @@
+slug: count-and-say
+title: Count and Say
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: 'The count-and-say sequence is a sequence of digit strings defined by
+  reading off the digits of the previous term.
+
+
+  Given an integer n, return the nth term of the count-and-say sequence.'
+input_format: 'Line 1: integer n'
+output_format: String nth term
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: 1 <= n <= 30
+method_name: countAndSay
+parameters:
+- name: n
+  type: int
+return_type: string
+generator:
+  count: 490
+  seed: 1193

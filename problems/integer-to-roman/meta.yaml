@@ -1,0 +1,20 @@
+slug: integer-to-roman
+title: Integer to Roman
+problem_type: dsa
+difficulty: medium
+rating: 1050
+description: Convert an integer to a Roman numeral.
+input_format: 'Line 1: integer num'
+output_format: String Roman numeral
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: 1 <= num <= 3999
+method_name: intToRoman
+parameters:
+- name: num
+  type: int
+return_type: string
+generator:
+  count: 492
+  seed: 1518

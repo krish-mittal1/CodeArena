@@ -1,0 +1,29 @@
+slug: can-place-flowers
+title: Can Place Flowers
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: You have a flowerbed where adjacent flowers cannot both be planted. Return
+  true if n new flowers can be planted without violating the rule.
+input_format: 'Line 1: JSON array flowerbed
+
+  Line 2: integer n'
+output_format: Boolean true/false
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= flowerbed.length <= 2 * 10^4
+
+  flowerbed[i] is 0 or 1
+
+  0 <= n <= flowerbed.length'
+method_name: canPlaceFlowers
+parameters:
+- name: flowerbed
+  type: int[]
+- name: n
+  type: int
+return_type: bool
+generator:
+  count: 430
+  seed: 1561

@@ -1,0 +1,27 @@
+slug: merge-two-sorted-lists
+title: Merge Two Sorted Lists
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: You are given the heads of two sorted linked lists. Merge them into one
+  sorted linked list and return its head.
+input_format: 'Line 1: JSON array list1
+
+  Line 2: JSON array list2. The runner converts each array into a ListNode chain.'
+output_format: JSON array representing the merged sorted linked list
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= nodes in both lists <= 5000
+
+  -10^4 <= Node.val <= 10^4'
+method_name: mergeTwoLists
+parameters:
+- name: list1
+  type: ListNode
+- name: list2
+  type: ListNode
+return_type: ListNode
+generator:
+  count: 169
+  seed: 2058
