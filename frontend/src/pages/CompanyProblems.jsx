@@ -20,7 +20,20 @@ function companyNameMatches(datasetName, mappedName) {
     return dataset === mapped || dataset.includes(mapped) || mapped.includes(dataset);
 }
 
-    };
+export default function CompanyProblems() {
+    const { companyId } = useParams();
+    const navigate = useNavigate();
+    const [difficultyFilter, setDifficultyFilter] = useState('all');
+    const [topicFilter, setTopicFilter] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const company = COMPANIES.find((c) => c.id === companyId);
+
+    const { data: problems = [], isLoading } = useQuery({
+        queryKey: ['problem-catalog', 'dsa'],
+        queryFn: () => problemApi.getCatalog({ problem_type: 'dsa' }),
+        staleTime: 5 * 60 * 1000,
+    });
 
     const companyProblems = problems
         .filter((p) => p.problem_type !== 'cp')
