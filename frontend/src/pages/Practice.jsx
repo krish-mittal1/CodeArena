@@ -144,6 +144,10 @@ export default function Practice() {
             if (result.share_slug) setShareSlug(result.share_slug);
         } catch (err) {
             console.error('AI analysis failed:', err);
+            const timedOut = err.code === 'ECONNABORTED' || err.message?.includes('timeout');
+            const failReason = timedOut
+                ? 'Analysis timed out — the server is still processing. Wait a moment and submit again, or check your GEMINI_API_KEY on the server.'
+                : 'Please try again in a moment.';
             setAiAnalysis({
                 problem_concept: 'The core idea could not be generated right now.',
                 verdict_explanation: 'AI analysis could not be completed at this time.',
@@ -155,7 +159,7 @@ export default function Practice() {
                 worst_space_complexity: 'N/A',
                 issues: [],
                 failed_test_explanation: '',
-                optimized_approach: 'Please try again later.',
+                optimized_approach: failReason,
                 optimized_time_complexity: 'N/A',
                 optimized_space_complexity: 'N/A',
                 alternative_approaches: [],

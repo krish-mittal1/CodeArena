@@ -12,8 +12,11 @@ from backend.config import settings
 logger = logging.getLogger(__name__)
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-GEMINI_MODEL = "gemini-2.5-flash"
 GROQ_MODEL = "llama-3.3-70b-versatile"
+
+
+def _gemini_model() -> str:
+    return settings.gemini_model or "gemini-2.5-flash"
 
 
 def llm_provider() -> Optional[str]:
@@ -60,19 +63,27 @@ async def _call_groq(system: str, user: str, max_tokens: int) -> str:
 
 
 async def _call_gemini(system: str, user: str, max_tokens: int) -> str:
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+    model = _gemini_model()
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
     params = {"key": settings.gemini_api_key}
     payload = {
         "systemInstruction": {"parts": [{"text": system}]},
-        "contents": [{"role": "user", "parts": [{"text": user}]}],
+        "contents": [{"parts": [{"text": user}]}],
         "generationConfig": {
             "responseMimeType": "application/json",
             "maxOutputTokens": max_tokens,
         },
     }
-    async with httpx.AsyncClient(timeout=60.0) as client:
+    async with httpx.AsyncClient(timeout=90.0) as client:
         response = await client.post(url, params=params, json=payload)
     if response.status_code != 200:
-        raise RuntimeError(f"Gemini HTTP {response.status_code}: {response.text[:200]}")
+        raise RuntimeError(f"Gemini HTTP {response.status_code}: {response.text[:300]}")
     data = response.json()
-    return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+    candidates = data.get("candidates") or []
+    if not candidates:
+        block = data.get("promptFeedback", {}).get("blockReason", "no candidates")
+        raise RuntimeError(f"Gemini blocked response: {block}")
+    parts = candidates[0].get("content", {}).get("parts") or []
+    if not parts:
+        raise RuntimeError("Gemini returned empty content")
+    return parts[0].get("text", "").strip()

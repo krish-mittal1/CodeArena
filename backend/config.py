@@ -130,6 +130,7 @@ class Settings(BaseSettings):
     # ── AI Providers ──────────────────────────────────────────
     gemini_api_key: Optional[str] = Field(default=None, description="Google Gemini API key")
     groq_api_key: Optional[str] = Field(default=None, description="Groq API key (preferred if both are set)")
+    gemini_model: str = Field(default="gemini-2.5-flash", description="Gemini model id for AI features")
 
     @field_validator("gemini_api_key", "groq_api_key")
     @classmethod

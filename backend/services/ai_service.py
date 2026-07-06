@@ -213,7 +213,7 @@ Return EXACTLY the JSON object as instructed."""
             raw = await call_json_llm(
                 system=_SYSTEM_PROMPT,
                 user=prompt,
-                max_tokens=4096,
+                max_tokens=2048,
             )
             result = _normalize_analysis_result(json.loads(raw), verdict_status)
 

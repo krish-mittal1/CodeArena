@@ -48,7 +48,11 @@ Constraints: {constraints or 'Not specified'}"""
         return {"hint_level": hint_level, "content": data.get("content", "")}
     except Exception as exc:
         logger.warning("Hint generation failed: %s", exc)
-        return {
-            "hint_level": hint_level,
-            "content": "Could not generate hint right now. Try breaking the problem into smaller cases.",
-        }
+        msg = str(exc)
+        if "401" in msg or "403" in msg or "API key" in msg.lower():
+            content = "AI hints unavailable — check GEMINI_API_KEY on the server."
+        elif "400" in msg:
+            content = "AI hints unavailable — Gemini model or API config issue. Check server logs."
+        else:
+            content = "Could not generate hint right now. Try again in a few seconds."
+        return {"hint_level": hint_level, "content": content}

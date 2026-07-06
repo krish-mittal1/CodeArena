@@ -87,13 +87,15 @@ export const problemApi = {
     getById: (id) => api.get(`/problems/${id}`).then((r) => r.data),
 };
 
+const AI_REQUEST_TIMEOUT_MS = 120000;
+
 export const practiceApi = {
     run: (data) => api.post('/practice/run', data).then((r) => r.data),
     submit: (data) => api.post('/practice/submit', data).then((r) => r.data),
     getSubmissions: (problemId) => api.get(`/practice/submissions/${problemId}`).then((r) => r.data),
-    analyze: (data) => api.post('/practice/analyze', data).then((r) => r.data),
-    analyzeMatch: (matchId) => api.post(`/practice/analyze/match/${matchId}`).then((r) => r.data),
-    getHint: (data) => api.post('/practice/hint', data).then((r) => r.data),
+    analyze: (data) => api.post('/practice/analyze', data, { timeout: AI_REQUEST_TIMEOUT_MS }).then((r) => r.data),
+    analyzeMatch: (matchId) => api.post(`/practice/analyze/match/${matchId}`, null, { timeout: AI_REQUEST_TIMEOUT_MS }).then((r) => r.data),
+    getHint: (data) => api.post('/practice/hint', data, { timeout: 60000 }).then((r) => r.data),
     recordSolve: (problemId) => api.post('/practice/record-solve', { problem_id: problemId }).then((r) => r.data),
 };
 
