@@ -254,9 +254,9 @@ async def get_hint(
         problem_description=problem.description,
         constraints=getattr(problem, "constraints", None),
     )
-    if result.get("content") and "unavailable" not in result["content"].lower():
+    if result.get("ok"):
         record_hint_use(str(current_user.id), str(data.problem_id), data.hint_level)
-    return result
+    return {k: v for k, v in result.items() if k != "ok"}
 
 
 @router.post("/record-solve")
