@@ -1,0 +1,33 @@
+slug: merge-intervals
+title: Merge Intervals
+problem_type: dsa
+difficulty: medium
+rating: 1250
+
+method_name: merge
+parameters:
+  - name: intervals
+    type: int[][]
+return_type: int[][]
+
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+
+description: |
+  Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals and return an array of the non-overlapping intervals that cover all the intervals in the input.
+
+input_format: |
+  Line 1: JSON 2D array intervals
+
+output_format: |
+  JSON 2D array of merged intervals
+
+constraints: |
+  1 <= intervals.length <= 180
+  intervals[i].length == 2
+  -10^4 <= starti <= endi <= 10^4
+
+generator:
+  count: 671
+  seed: 2026040210

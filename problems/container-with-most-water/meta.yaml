@@ -1,0 +1,31 @@
+slug: container-with-most-water
+title: Container With Most Water
+problem_type: dsa
+difficulty: medium
+rating: 1100
+
+method_name: maxArea
+parameters:
+  - name: height
+    type: int[]
+return_type: int
+
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+
+description: |
+  Given an array height, choose two lines that together with the x-axis form a container that stores the most water.
+
+input_format: |
+  Line 1: JSON array height (int[])
+
+output_format: |
+  Single integer: maximum area
+
+constraints: |
+  2 <= height.length <= 10^5
+
+generator:
+  count: 173
+  seed: 20260331

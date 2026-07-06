@@ -1,0 +1,32 @@
+slug: 3sum
+title: 3 Sum
+problem_type: cp
+difficulty: medium
+rating: 1500
+
+time_limit_ms: 3000
+memory_limit_mb: 256
+is_active: true
+
+description: |
+  Given an integer array `nums`, return all triplets `[nums[i], nums[j], nums[k]]` such that `i != j`, `i != k`, and `j != k`, and `nums[i] + nums[j] + nums[k] == 0`.
+
+  Notice that the solution set must not contain duplicate triplets.
+
+input_format: |
+  First line integer N (length of array).
+  Next line contains N space-separated integers representing the array `nums`.
+
+output_format: |
+  Print the number of triplets K on the first line.
+  Then print K lines, each containing 3 space-separated integers representing a triplet.
+
+  Elements within each triplet must be sorted in ascending order. The K lines of triplets themselves must be sorted lexicographically.
+
+constraints: |
+  3 <= N <= 1500
+  -10^4 <= nums[i] <= 10^4
+
+generator:
+  count: 100
+  seed: 42
