@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
@@ -8,7 +8,8 @@ import {
     ArrowLeft, Code2, Play, RotateCcw, Settings2,
     CheckCircle2, XCircle, Clock, AlertTriangle, Sparkles,
 } from 'lucide-react';
-import { problemApi, practiceApi } from '../api/auth';
+import toast from 'react-hot-toast';
+import { problemApi, practiceApi, mockInterviewApi } from '../api/auth';
 import { LANGUAGES, CODE_TEMPLATES, VERDICTS, generateBoilerplate } from '../utils/constants';
 import { defineCodeArenaTheme, CODEARENA_THEME_NAME } from '../utils/editorTheme';
 import Badge from '../components/ui/Badge';
@@ -30,6 +31,9 @@ const STATUS_ICONS = {
 export default function Practice() {
     const { problemId } = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const mockSessionId = searchParams.get('mock');
+    const isMockMode = Boolean(mockSessionId);
     const queryClient = useQueryClient();
     const [language, setLanguage] = useState('cpp');
     const [code, setCode] = useState('');
@@ -42,6 +46,9 @@ export default function Practice() {
     const [aiAnalysis, setAiAnalysis] = useState(null);
     const [showAIPanel, setShowAIPanel] = useState(false);
     const [aiLoading, setAiLoading] = useState(false);
+    const [shareSlug, setShareSlug] = useState(null);
+    const [hintText, setHintText] = useState(null);
+    const [hintLoading, setHintLoading] = useState(false);
     const codeLoadedRef = useRef('');
 
     // Monaco custom theme
@@ -134,6 +141,7 @@ export default function Practice() {
                 problem_id: problemId,
             });
             setAiAnalysis(result);
+            if (result.share_slug) setShareSlug(result.share_slug);
         } catch (err) {
             console.error('AI analysis failed:', err);
             setAiAnalysis({
@@ -207,8 +215,12 @@ export default function Practice() {
                             current ? { ...current, solved: true } : current
                         );
                         queryClient.invalidateQueries({ queryKey: ['problems'] });
+                        practiceApi.recordSolve(problemId).catch(() => {});
                     }
-                    if (!isCompetitiveProblem) {
+                    if (isMockMode && mockSessionId) {
+                        mockInterviewApi.recordSubmission(mockSessionId, problemId, sub.id).catch(() => {});
+                        toast.success('Submission recorded — return to mock interview when ready', { duration: 4000 });
+                    } else if (!isCompetitiveProblem) {
                         triggerAIAnalysis(sub);
                     }
                 } else if (sub) {
@@ -220,7 +232,29 @@ export default function Practice() {
         }, 1500);
 
         return () => clearInterval(interval);
-    }, [polling, submissionId, problemId, queryClient, refetchHistory, isCompetitiveProblem]);
+    }, [polling, submissionId, problemId, queryClient, refetchHistory, isCompetitiveProblem, isMockMode, mockSessionId]);
+
+    const handleHint = async (level) => {
+        if (!problemId || hintLoading) return;
+        setHintLoading(true);
+        try {
+            const res = await practiceApi.getHint({ problem_id: problemId, hint_level: level });
+            setHintText(res.content);
+        } catch (err) {
+            setHintText(err.response?.data?.detail || 'Hint unavailable');
+        } finally {
+            setHintLoading(false);
+        }
+    };
+
+    const handleShareInsight = () => {
+        if (!shareSlug) return;
+        const url = `${window.location.origin}/insight/${shareSlug}`;
+        navigator.clipboard.writeText(url).then(
+            () => toast.success('Insight link copied'),
+            () => toast.error('Could not copy'),
+        );
+    };
 
     const handleSubmit = () => {
         if (submitMutation.isPending || !code.trim()) return;
@@ -353,7 +387,7 @@ export default function Practice() {
             <div className="flex items-center justify-between px-4 py-3 bg-bg-primary border-b border-border shrink-0 shadow-[0_8px_16px_rgba(0,0,0,0.12)]">
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={() => navigate(practiceBackPath)}
+                        onClick={() => (isMockMode ? navigate('/mock-interview') : navigate(practiceBackPath))}
                         className="p-1.5 rounded-[12px_9px_11px_8px] hover:bg-bg-hover text-text-secondary hover:text-text-primary transition-colors"
                     >
                         <ArrowLeft size={18} />
@@ -377,6 +411,11 @@ export default function Practice() {
                     <Badge color={problem.difficulty === 'easy' ? 'green' : problem.difficulty === 'medium' ? 'yellow' : 'red'}>
                         {problem.difficulty}
                     </Badge>
+                    {isMockMode && (
+                        <span className="text-[10px] uppercase tracking-wider px-2 py-1 border border-accent/40 text-accent">
+                            Mock interview
+                        </span>
+                    )}
                     {isCompetitiveProblem && (
                         <span className="px-2.5 py-1 rounded-full border border-[#7ec4cf]/30 bg-[#7ec4cf]/10 text-[#7ec4cf] text-xs font-semibold">
                             {problem.rating}
@@ -585,6 +624,27 @@ export default function Practice() {
                         />
                     </div>
 
+                    {/* Hint bar — DSA only, disabled during mock interview */}
+                    {!isCompetitiveProblem && !isMockMode && (
+                        <div className="shrink-0 border-t border-border bg-bg-surface/50 px-4 py-2 flex flex-wrap items-center gap-2">
+                            <span className="text-[10px] uppercase tracking-wider text-text-muted mr-1">AI hints</span>
+                            {['nudge', 'pattern', 'outline'].map((level) => (
+                                <button
+                                    key={level}
+                                    type="button"
+                                    disabled={hintLoading}
+                                    onClick={() => handleHint(level)}
+                                    className="px-2.5 py-1 text-xs border border-border hover:border-accent/40 capitalize disabled:opacity-50"
+                                >
+                                    {level}
+                                </button>
+                            ))}
+                            {hintText && (
+                                <p className="w-full text-xs text-text-secondary mt-1 border-l-2 border-accent pl-2">{hintText}</p>
+                            )}
+                        </div>
+                    )}
+
                     {/* Bottom Action Bar (LeetCode-style) */}
                     <div className="shrink-0 border-t border-border bg-bg-primary px-4 py-3">
                         <div className="flex items-center justify-end gap-2">
@@ -740,7 +800,7 @@ export default function Practice() {
                                         <span className="font-mono">{(verdict.memory_used_kb / 1024).toFixed(1)}MB</span>
                                     )}
                                     {/* Re-open AI panel button */}
-                                    {!isCompetitiveProblem && aiAnalysis && !showAIPanel && (
+                                    {!isCompetitiveProblem && !isMockMode && aiAnalysis && !showAIPanel && (
                                         <button
                                             onClick={() => setShowAIPanel(true)}
                                             className="flex items-center gap-1 px-2.5 py-1 rounded-[12px_9px_11px_8px] bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors text-xs font-semibold"
@@ -796,7 +856,7 @@ export default function Practice() {
 
             {/* AI Analysis Modal - auto-pops after every verdict */}
             <AnimatePresence>
-                {!isCompetitiveProblem && showAIPanel && (
+                {!isCompetitiveProblem && !isMockMode && showAIPanel && (
                     aiLoading ? (
                         <motion.div
                             key="ai-loading"
@@ -832,6 +892,8 @@ export default function Practice() {
                             analysis={aiAnalysis}
                             verdict={verdict}
                             onClose={() => setShowAIPanel(false)}
+                            shareSlug={shareSlug}
+                            onShare={shareSlug ? handleShareInsight : undefined}
                         />
                     )
                 )}

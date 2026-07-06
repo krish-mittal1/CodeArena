@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useBattleStore } from '../../stores/battleStore';
-import { matchmakingApi } from '../../api/auth';
+import { matchmakingApi, practiceApi } from '../../api/auth';
 import { formatEloDelta } from '../../utils/formatters';
-import { Trophy, Skull, Handshake, Clock, Share2, RotateCcw } from 'lucide-react';
+import { Trophy, Skull, Handshake, Clock, Share2, RotateCcw, Sparkles } from 'lucide-react';
+import AIAnalysisPanel from '../ui/AIAnalysisPanel';
 
 export default function MatchResultModal() {
     const matchResult = useBattleStore((s) => s.matchResult);
@@ -12,6 +13,9 @@ export default function MatchResultModal() {
     const navigate = useNavigate();
     const navigatedRef = useRef(false);
     const [rematchLoading, setRematchLoading] = useState(false);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiDebrief, setAiDebrief] = useState(null);
+    const [showAi, setShowAi] = useState(false);
 
     useEffect(() => {
         if (!matchResult) return;
@@ -75,6 +79,30 @@ export default function MatchResultModal() {
         }
     };
 
+    const handleReviewAI = async () => {
+        if (!match_id) return;
+        setAiLoading(true);
+        try {
+            const res = await practiceApi.analyzeMatch(match_id);
+            setAiDebrief(res.analysis);
+            setShowAi(true);
+        } catch (err) {
+            toast.error(err.response?.data?.detail || 'No submission to analyze');
+        } finally {
+            setAiLoading(false);
+        }
+    };
+
+    if (showAi && aiDebrief) {
+        return (
+            <AIAnalysisPanel
+                analysis={aiDebrief}
+                verdict={{ status: result === 'win' ? 'accepted' : 'wrong_answer' }}
+                onClose={() => { setShowAi(false); goDashboard(); }}
+            />
+        );
+    }
+
     return (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-bg-root/90 backdrop-blur-sm animate-in fade-in duration-200">
             <div className={`bg-bg-primary border ${borderColorClass} border-t-4 p-8 min-w-[380px] max-w-lg shadow-2xl relative`}>
@@ -105,7 +133,19 @@ export default function MatchResultModal() {
                         </div>
                     )}
 
-                    <div className="flex gap-2 w-full mb-3">
+                    <div className="flex flex-col gap-2 w-full mb-3">
+                        {match_id && (
+                            <button
+                                type="button"
+                                disabled={aiLoading}
+                                onClick={handleReviewAI}
+                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-accent/10 border border-accent/30 text-sm font-medium text-accent hover:bg-accent/20 disabled:opacity-50"
+                            >
+                                <Sparkles size={14} />
+                                {aiLoading ? 'Analyzing...' : 'Review with AI'}
+                            </button>
+                        )}
+                        <div className="flex gap-2 w-full">
                         {match_id && (
                             <button
                                 type="button"
@@ -125,6 +165,7 @@ export default function MatchResultModal() {
                             <RotateCcw size={14} />
                             {rematchLoading ? '...' : 'Rematch'}
                         </button>
+                        </div>
                     </div>
 
                     <button 

@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Sparkles, Clock, AlertTriangle, CheckCircle2,
-    Lightbulb, Code2, TrendingDown, X, ChevronRight, GitBranch, BookOpen
+    Lightbulb, Code2, TrendingDown, X, ChevronRight, GitBranch, BookOpen, Share2
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -222,7 +222,7 @@ const ApproachCard = ({ title, description, time, space, icon: Icon, tone = 'neu
     );
 };
 
-export default function AIAnalysisPanel({ analysis, verdict, onClose }) {
+export default function AIAnalysisPanel({ analysis, verdict, onClose, shareSlug, onShare }) {
     const isAccepted = verdict?.status === 'accepted';
 
     const quickSummary = useMemo(() => buildQuickSummary(analysis, isAccepted), [analysis, isAccepted]);
@@ -279,12 +279,24 @@ export default function AIAnalysisPanel({ analysis, verdict, onClose }) {
                             </p>
                         </div>
                     </div>
-                    <button
+                    <div className="flex items-center gap-2">
+                        {onShare && shareSlug && (
+                            <button
+                                type="button"
+                                onClick={onShare}
+                                className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium text-text-secondary border border-border hover:bg-white/5"
+                            >
+                                <Share2 size={14} />
+                                Share insight
+                            </button>
+                        )}
+                        <button
                         onClick={onClose}
                         className="rounded-xl p-2 text-text-muted transition-all duration-200 hover:bg-white/5 hover:text-white hover:rotate-90"
                     >
                         <X size={20} />
                     </button>
+                    </div>
                 </div>
 
                 <div className="custom-scrollbar flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-bg-surface/20 via-bg-primary to-bg-root p-6 lg:p-10">

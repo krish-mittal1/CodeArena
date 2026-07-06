@@ -20,6 +20,27 @@ export const userApi = {
     getProfile: () => api.get('/users/me').then((r) => r.data),
     getStats: () => api.get('/users/me/stats').then((r) => r.data),
     completeOnboarding: (data) => api.post('/users/me/onboarding', data).then((r) => r.data),
+    getProgress: () => api.get('/users/me/progress').then((r) => r.data),
+    getReviewQueue: () => api.get('/users/me/review-queue').then((r) => r.data),
+    completeReview: (reviewId) => api.post(`/users/me/review-queue/${reviewId}/complete`).then((r) => r.data),
+    getDailyProblem: () => api.get('/users/me/daily-problem').then((r) => r.data),
+};
+
+export const insightsApi = {
+    list: (params) => api.get('/insights', { params }).then((r) => r.data),
+    get: (id) => api.get(`/insights/${id}`).then((r) => r.data),
+    getShared: (slug) => api.get(`/insights/share/${slug}`).then((r) => r.data),
+};
+
+export const mockInterviewApi = {
+    start: (company) => api.post('/mock-interview/start', { company }).then((r) => r.data),
+    getSession: (id) => api.get(`/mock-interview/session/${id}`).then((r) => r.data),
+    recordSubmission: (sessionId, problemId, submissionId) =>
+        api.post(`/mock-interview/session/${sessionId}/record`, {
+            problem_id: problemId,
+            submission_id: submissionId,
+        }).then((r) => r.data),
+    debrief: (data) => api.post('/mock-interview/debrief', data).then((r) => r.data),
 };
 
 export const statsApi = {
@@ -71,5 +92,8 @@ export const practiceApi = {
     submit: (data) => api.post('/practice/submit', data).then((r) => r.data),
     getSubmissions: (problemId) => api.get(`/practice/submissions/${problemId}`).then((r) => r.data),
     analyze: (data) => api.post('/practice/analyze', data).then((r) => r.data),
+    analyzeMatch: (matchId) => api.post(`/practice/analyze/match/${matchId}`).then((r) => r.data),
+    getHint: (data) => api.post('/practice/hint', data).then((r) => r.data),
+    recordSolve: (problemId) => api.post('/practice/record-solve', { problem_id: problemId }).then((r) => r.data),
 };
 

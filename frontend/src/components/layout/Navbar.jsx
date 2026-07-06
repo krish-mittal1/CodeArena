@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Swords, LayoutDashboard, History, User, Bell, Settings, LogOut, ChevronDown, Building2, Menu, X, Trophy
+    Swords, LayoutDashboard, History, User, Bell, Settings, LogOut, ChevronDown, Building2, Menu, X, Trophy, Target, Sparkles
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useBattleStore } from '../../stores/battleStore';
@@ -84,6 +84,14 @@ export default function Navbar() {
                             <NavLink to="/leaderboard" className={linkClass} onClick={matchId ? handleLockedNav('/leaderboard') : undefined}>
                                 <Trophy size={16} />
                                 Leaderboard
+                            </NavLink>
+                            <NavLink to="/progress" className={linkClass} onClick={matchId ? handleLockedNav('/progress') : undefined}>
+                                <Target size={16} />
+                                Progress
+                            </NavLink>
+                            <NavLink to="/insights" className={linkClass} onClick={matchId ? handleLockedNav('/insights') : undefined}>
+                                <Sparkles size={16} />
+                                Insights
                             </NavLink>
                         </div>
                     )}
@@ -193,6 +201,14 @@ export default function Navbar() {
                             <NavLink to="/leaderboard" className={mobileLinkClass} onClick={matchId ? handleLockedNav('/leaderboard') : undefined}>
                                 <Trophy size={20} />
                                 Leaderboard
+                            </NavLink>
+                            <NavLink to="/progress" className={mobileLinkClass} onClick={matchId ? handleLockedNav('/progress') : undefined}>
+                                <Target size={20} />
+                                Progress
+                            </NavLink>
+                            <NavLink to="/insights" className={mobileLinkClass} onClick={matchId ? handleLockedNav('/insights') : undefined}>
+                                <Sparkles size={20} />
+                                Insights
                             </NavLink>
                         </div>
                     </motion.div>

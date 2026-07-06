@@ -6,5 +6,7 @@ from backend.models.test_case import TestCase
 from backend.models.match import Match
 from backend.models.submission import Submission
 from backend.models.submission_result import SubmissionResult
+from backend.models.ai_analysis import AIAnalysis
+from backend.models.review_queue import ReviewQueueItem
 
-__all__ = ["User", "Problem", "TestCase", "Match", "Submission", "SubmissionResult"]
+__all__ = ["User", "Problem", "TestCase", "Match", "Submission", "SubmissionResult", "AIAnalysis", "ReviewQueueItem"]

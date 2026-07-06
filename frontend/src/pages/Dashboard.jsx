@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useAuthStore } from '../stores/authStore';
 import { useMatchmakingStore } from '../stores/matchmakingStore';
-import { matchApi, statsApi, leaderboardApi, eventsApi } from '../api/auth';
+import { matchApi, statsApi, leaderboardApi, eventsApi, userApi } from '../api/auth';
 import { formatWinRate, formatElo } from '../utils/formatters';
 import QueueOverlay from '../components/matchmaking/QueueOverlay';
 import PrivateRoomOverlay from '../components/matchmaking/PrivateRoomOverlay';
@@ -62,6 +62,25 @@ export default function Dashboard() {
     const { data: activeEvents } = useQuery({
         queryKey: ['activeEvents'],
         queryFn: eventsApi.getActive,
+        enabled: !!user,
+        staleTime: 60_000,
+    });
+
+    const { data: reviewData } = useQuery({
+        queryKey: ['reviewQueue'],
+        queryFn: userApi.getReviewQueue,
+        enabled: !!user,
+    });
+
+    const { data: dailyProblem } = useQuery({
+        queryKey: ['dailyProblem'],
+        queryFn: userApi.getDailyProblem,
+        enabled: !!user,
+    });
+
+    const { data: progressSummary } = useQuery({
+        queryKey: ['userProgress'],
+        queryFn: userApi.getProgress,
         enabled: !!user,
         staleTime: 60_000,
     });
@@ -238,6 +257,65 @@ export default function Dashboard() {
                                         </div>
                                     )}
                                 </div>
+                            </div>
+                        </Fade>
+
+                        {/* Interview prep cards */}
+                        <Fade delay={0.12}>
+                            <div className="grid gap-3 mb-4">
+                                {dailyProblem?.problem && (
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate(`/practice/${dailyProblem.problem.id}`)}
+                                        className="db-sidebar-card paper-card grain-panel text-left w-full border-accent/20"
+                                    >
+                                        <h4 className="db-sidebar-card__title text-accent">Daily problem</h4>
+                                        <p className="text-sm text-text-primary mt-1">{dailyProblem.problem.title}</p>
+                                        <p className="text-xs text-text-muted mt-1">
+                                            Streak: {dailyProblem.practice_streak || 0} days
+                                        </p>
+                                    </button>
+                                )}
+                                {reviewData?.items?.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate(`/practice/${reviewData.items[0].problem_id}`)}
+                                        className="db-sidebar-card paper-card grain-panel text-left w-full"
+                                    >
+                                        <h4 className="db-sidebar-card__title">Due for review</h4>
+                                        <p className="text-xs text-text-secondary mt-1">
+                                            {reviewData.items.length} problem(s) — start with {reviewData.items[0].problem_title}
+                                        </p>
+                                    </button>
+                                )}
+                                {progressSummary && (
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate('/progress')}
+                                        className="db-sidebar-card paper-card grain-panel text-left w-full"
+                                    >
+                                        <h4 className="db-sidebar-card__title">Interview readiness</h4>
+                                        <p className="text-xs text-text-secondary mt-1">
+                                            {progressSummary.total_solved}/{progressSummary.total_problems} DSA solved
+                                        </p>
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/study-paths')}
+                                    className="db-sidebar-card paper-card grain-panel text-left w-full"
+                                >
+                                    <h4 className="db-sidebar-card__title">Study paths</h4>
+                                    <p className="text-xs text-text-secondary mt-1">Blind 75 · FAANG 30-day · Google sprint</p>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/mock-interview')}
+                                    className="db-sidebar-card paper-card grain-panel text-left w-full"
+                                >
+                                    <h4 className="db-sidebar-card__title">Mock interview</h4>
+                                    <p className="text-xs text-text-secondary mt-1">45-min timed session + AI debrief</p>
+                                </button>
                             </div>
                         </Fade>
 

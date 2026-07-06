@@ -41,6 +41,20 @@ export function useLocation() {
     };
 }
 
+export function useSearchParams() {
+    const router = useRouter();
+    const asPath = router.asPath || '/';
+    const [, search = ''] = asPath.split('?');
+    const params = new URLSearchParams(search ? `?${search}` : '');
+    const setParams = (next) => {
+        const base = asPath.split('?')[0];
+        const q = typeof next === 'function' ? next(params) : next;
+        const str = q.toString();
+        router.push(str ? `${base}?${str}` : base);
+    };
+    return [params, setParams];
+}
+
 export function useParams() {
     const { params } = useContext(RouterCompatContext);
     return params || {};

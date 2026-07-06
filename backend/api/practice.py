@@ -37,6 +37,16 @@ class PracticeSubmissionCreate(BaseModel):
 class AIAnalyzeRequest(BaseModel):
     submission_id: uuid.UUID
     problem_id: uuid.UUID
+    match_id: Optional[uuid.UUID] = None
+
+
+class HintRequest(BaseModel):
+    problem_id: uuid.UUID
+    hint_level: str = Field(..., pattern=r"^(nudge|pattern|outline)$")
+
+
+class RecordSolveRequest(BaseModel):
+    problem_id: uuid.UUID
 
 
 class PracticeRunRequest(BaseModel):
@@ -200,6 +210,10 @@ async def practice_submit(
         redis=redis,
     )
 
+    from backend.services import review_service
+    await review_service.bump_practice_streak(db, current_user)
+    await db.commit()
+
     logger.info(
         f"[Practice] Submission {submission.id} created "
         f"(problem={data.problem_id}, user={current_user.id})"
@@ -219,6 +233,95 @@ async def get_practice_submissions(
         db, current_user.id, problem_id
     )
     return submissions
+
+
+@router.post("/hint")
+async def get_hint(
+    data: HintRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from backend.core.ai_rate_limit import ensure_hint_allowed
+    from backend.services import hint_service
+
+    ensure_hint_allowed(str(current_user.id), str(data.problem_id))
+    problem = await problem_service.get_problem_by_id(db, data.problem_id)
+    if not problem:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Problem not found.")
+    return await hint_service.get_hint(
+        hint_level=data.hint_level,
+        problem_title=problem.title,
+        problem_description=problem.description,
+        constraints=getattr(problem, "constraints", None),
+    )
+
+
+@router.post("/record-solve")
+async def record_solve(
+    data: RecordSolveRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from backend.services import review_service
+
+    await review_service.schedule_review_after_solve(db, current_user.id, data.problem_id)
+    await db.commit()
+    return {"status": "ok"}
+
+
+@router.post("/analyze/match/{match_id}")
+async def analyze_match_submission(
+    match_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> Any:
+    """Analyze the user's latest submission from a completed match."""
+    from sqlalchemy.orm import selectinload
+    from backend.models.submission import Submission
+
+    result = await db.execute(
+        select(Submission)
+        .where(Submission.match_id == match_id, Submission.user_id == current_user.id)
+        .order_by(Submission.submitted_at.desc())
+        .limit(1)
+        .options(selectinload(Submission.results))
+    )
+    submission = result.scalar_one_or_none()
+    if not submission:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No submission found for this match.")
+
+    problem = await problem_service.get_problem_by_id(db, submission.problem_id)
+    if not problem:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Problem not found.")
+
+    failed_input = expected_output = actual_output = error_output = None
+    if submission.failed_test_case:
+        ftc = submission.failed_test_case
+        if isinstance(ftc, dict):
+            failed_input = ftc.get("input")
+            expected_output = ftc.get("expected_output")
+            actual_output = ftc.get("actual_output")
+            error_output = ftc.get("error_output")
+
+    analysis = await ai_service.analyze_code(
+        problem_title=problem.title,
+        problem_description=problem.description,
+        constraints=getattr(problem, "constraints", None),
+        language=submission.language,
+        code=submission.code,
+        verdict_status=submission.status,
+        failed_input=failed_input,
+        expected_output=expected_output,
+        actual_output=actual_output,
+        error_output=error_output,
+        submission_id=str(submission.id),
+    )
+    return {
+        "analysis": analysis,
+        "submission_id": str(submission.id),
+        "problem_id": str(problem.id),
+        "verdict": submission.status,
+    }
 
 
 @router.post("/analyze")
@@ -290,9 +393,29 @@ async def analyze_submission(
         submission_id=str(submission.id),
     )
 
+    from backend.models.ai_analysis import AIAnalysis
+    from backend.services.interview_metadata_service import get_problem_meta
+    import secrets
+
+    topic = get_problem_meta(problem.title).get("topic")
+    share_slug = secrets.token_urlsafe(8)[:12]
+    row = AIAnalysis(
+        user_id=current_user.id,
+        submission_id=submission.id,
+        problem_id=problem.id,
+        problem_title=problem.title,
+        topic=topic,
+        verdict=submission.status,
+        analysis=analysis,
+        share_slug=share_slug,
+    )
+    db.add(row)
+    await db.commit()
+    await db.refresh(row)
+
     logger.info(
         f"[AI] Analysis completed for submission {submission.id} "
         f"(status={submission.status})"
     )
 
-    return analysis
+    return {**analysis, "insight_id": str(row.id), "share_slug": share_slug}

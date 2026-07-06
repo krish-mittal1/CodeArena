@@ -47,6 +47,7 @@ class UserProfile(UserPublic):
     created_at: datetime
     onboarding_completed: bool = False
     preferred_track: str | None = None
+    practice_streak: int = 0
 
     model_config = {"from_attributes": True}
 

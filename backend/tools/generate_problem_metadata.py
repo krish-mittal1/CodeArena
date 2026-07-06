@@ -84,7 +84,11 @@ def main() -> None:
         "}\n"
     )
     _OUT.write_text(body, encoding="utf-8")
+    _BACKEND_OUT = _REPO / "backend" / "data" / "problem_metadata.json"
+    _BACKEND_OUT.parent.mkdir(parents=True, exist_ok=True)
+    _BACKEND_OUT.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     print(f"Wrote {len(metadata)} entries to {_OUT}")
+    print(f"Wrote {len(metadata)} entries to {_BACKEND_OUT}")
 
 
 if __name__ == "__main__":

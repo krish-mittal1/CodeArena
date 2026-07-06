@@ -1,9 +1,9 @@
 """User model."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
-from sqlalchemy import String, Integer, DateTime, Index, Boolean
+from sqlalchemy import String, Integer, DateTime, Date, Index, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -32,6 +32,8 @@ class User(Base):
     matches_won: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     onboarding_completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     preferred_track: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    practice_streak: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    last_practice_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

@@ -15,6 +15,8 @@ from backend.api.practice import router as practice_router
 from backend.api.stats import router as stats_router
 from backend.api.leaderboard import router as leaderboard_router
 from backend.api.events import router as events_router
+from backend.api.insights import router as insights_router
+from backend.api.mock_interview import router as mock_interview_router
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -29,4 +31,6 @@ api_router.include_router(practice_router)
 api_router.include_router(stats_router)
 api_router.include_router(leaderboard_router)
 api_router.include_router(events_router)
+api_router.include_router(insights_router)
+api_router.include_router(mock_interview_router)
 

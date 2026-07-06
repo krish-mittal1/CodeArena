@@ -78,6 +78,17 @@ export default function DsaPracticeHub() {
                                 / {filtered.length} active systems
                             </span>
                         </h1>
+                        <div className="flex flex-wrap gap-2 mt-3">
+                            <button type="button" onClick={() => navigate('/practice/dsa/topics')} className="text-xs px-3 py-1 border border-border hover:border-accent/40">
+                                Browse by topic
+                            </button>
+                            <button type="button" onClick={() => navigate('/study-paths')} className="text-xs px-3 py-1 border border-border hover:border-accent/40">
+                                Study paths
+                            </button>
+                            <button type="button" onClick={() => navigate('/mock-interview')} className="text-xs px-3 py-1 border border-accent/40 text-accent">
+                                Mock interview
+                            </button>
+                        </div>
                     </div>
                     <div className="dsa-hub__search-wrap">
                         <Search size={15} className="dsa-hub__search-icon" />

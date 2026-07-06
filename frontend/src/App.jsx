@@ -26,6 +26,13 @@ import CompetitiveProblems from './pages/CompetitiveProblems';
 import Leaderboard from './pages/Leaderboard';
 import Spectate from './pages/Spectate';
 import MatchRecap from './pages/MatchRecap';
+import Progress from './pages/Progress';
+import Insights from './pages/Insights';
+import InsightDetail from './pages/InsightDetail';
+import InsightShare from './pages/InsightShare';
+import StudyPaths from './pages/StudyPaths';
+import TopicBrowse from './pages/TopicBrowse';
+import MockInterview from './pages/MockInterview';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -155,6 +162,55 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <Practice />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/progress"
+            element={
+              <ProtectedRoute>
+                {matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <Progress />}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/insights"
+            element={
+              <ProtectedRoute>
+                {matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <Insights />}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/insights/:insightId"
+            element={
+              <ProtectedRoute>
+                <InsightDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/insight/:shareSlug" element={<InsightShare />} />
+          <Route
+            path="/study-paths"
+            element={
+              <ProtectedRoute>
+                {matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <StudyPaths />}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mock-interview"
+            element={
+              <ProtectedRoute>
+                {matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <MockInterview />}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/practice/dsa/topics"
+            element={
+              <ProtectedRoute>
+                {matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <TopicBrowse />}
               </ProtectedRoute>
             }
           />
