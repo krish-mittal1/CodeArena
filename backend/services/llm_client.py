@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import logging
-from typing import Optional
+import re
+from typing import Any, Optional
 
 import httpx
 
@@ -25,6 +27,26 @@ def llm_provider() -> Optional[str]:
     if settings.gemini_api_key:
         return "gemini"
     return None
+
+
+def parse_llm_json(raw: str) -> dict[str, Any]:
+    """Parse JSON from LLM output, tolerating markdown fences and extra text."""
+    text = (raw or "").strip()
+    if not text:
+        raise json.JSONDecodeError("empty response", text, 0)
+
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"\s*```$", "", text).strip()
+
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        start = text.find("{")
+        end = text.rfind("}")
+        if start >= 0 and end > start:
+            return json.loads(text[start : end + 1])
+        raise
 
 
 async def call_json_llm(

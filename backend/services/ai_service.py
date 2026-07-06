@@ -7,7 +7,7 @@ import logging
 from collections import OrderedDict
 from typing import Optional
 
-from backend.services.llm_client import call_json_llm, llm_provider
+from backend.services.llm_client import call_json_llm, llm_provider, parse_llm_json
 
 logger = logging.getLogger(__name__)
 
@@ -213,9 +213,9 @@ Return EXACTLY the JSON object as instructed."""
             raw = await call_json_llm(
                 system=_SYSTEM_PROMPT,
                 user=prompt,
-                max_tokens=2048,
+                max_tokens=4096,
             )
-            result = _normalize_analysis_result(json.loads(raw), verdict_status)
+            result = _normalize_analysis_result(parse_llm_json(raw), verdict_status)
 
             if submission_id:
                 AI_CACHE.set_cache(submission_id, result)
@@ -224,7 +224,12 @@ Return EXACTLY the JSON object as instructed."""
             return result
 
         except json.JSONDecodeError as e:
-            logger.error("LLM returned invalid JSON: %s", e)
+            last_error = f"Invalid JSON: {e}"
+            logger.error("LLM returned invalid JSON (attempt %d): %s", attempt + 1, e)
+            if attempt < max_retries - 1:
+                import asyncio
+                await asyncio.sleep((attempt + 1) * 2)
+                continue
             return _fallback_analysis(verdict_status, "Invalid AI response format")
         except Exception as e:
             last_error = str(e)

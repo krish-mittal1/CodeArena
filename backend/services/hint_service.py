@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Optional
 
-from backend.config import settings
-from backend.services.llm_client import call_json_llm, llm_provider
+from backend.services.llm_client import call_json_llm, llm_provider, parse_llm_json
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +42,7 @@ Constraints: {constraints or 'Not specified'}"""
 
     try:
         raw = await call_json_llm(system=system, user=prompt, max_tokens=512)
-        data = json.loads(raw)
+        data = parse_llm_json(raw)
         return {"hint_level": hint_level, "content": data.get("content", "")}
     except Exception as exc:
         logger.warning("Hint generation failed: %s", exc)
