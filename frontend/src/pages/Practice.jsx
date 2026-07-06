@@ -241,7 +241,13 @@ export default function Practice() {
             const res = await practiceApi.getHint({ problem_id: problemId, hint_level: level });
             setHintText(res.content);
         } catch (err) {
-            setHintText(err.response?.data?.detail || 'Hint unavailable');
+            const detail = err.response?.data?.detail;
+            const message = typeof detail === 'string'
+                ? detail
+                : err.response?.status === 429
+                    ? 'Daily hint limit reached for this problem. Try again tomorrow.'
+                    : 'Hint unavailable right now. Please try again.';
+            setHintText(message);
         } finally {
             setHintLoading(false);
         }

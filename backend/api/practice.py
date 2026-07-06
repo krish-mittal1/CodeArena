@@ -241,19 +241,22 @@ async def get_hint(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    from backend.core.ai_rate_limit import ensure_hint_allowed
+    from backend.core.ai_rate_limit import ensure_hint_allowed, record_hint_use
     from backend.services import hint_service
 
-    ensure_hint_allowed(str(current_user.id), str(data.problem_id))
+    ensure_hint_allowed(str(current_user.id), str(data.problem_id), data.hint_level)
     problem = await problem_service.get_problem_by_id(db, data.problem_id)
     if not problem:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Problem not found.")
-    return await hint_service.get_hint(
+    result = await hint_service.get_hint(
         hint_level=data.hint_level,
         problem_title=problem.title,
         problem_description=problem.description,
         constraints=getattr(problem, "constraints", None),
     )
+    if result.get("content") and "unavailable" not in result["content"].lower():
+        record_hint_use(str(current_user.id), str(data.problem_id), data.hint_level)
+    return result
 
 
 @router.post("/record-solve")
