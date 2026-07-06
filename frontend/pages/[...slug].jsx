@@ -13,6 +13,9 @@ import Practice from '../src/pages/Practice';
 import CompanyProblems from '../src/pages/CompanyProblems';
 import DsaPracticeHub from '../src/pages/DsaPracticeHub';
 import CompetitiveProblems from '../src/pages/CompetitiveProblems';
+import Leaderboard from '../src/pages/Leaderboard';
+import Spectate from '../src/pages/Spectate';
+import MatchRecap from '../src/pages/MatchRecap';
 import { useAuthStore } from '../src/stores/authStore';
 import { useBattleStore } from '../src/stores/battleStore';
 import { RouterCompatProvider } from '../src/next/routerCompat';
@@ -37,6 +40,7 @@ function resolveRoute(slug) {
     if (slug.length === 1 && slug[0] === 'register') return { kind: 'publicOnly', component: Register, params: {} };
     if (slug.length === 1 && slug[0] === 'dashboard') return { kind: 'protected', component: Dashboard, params: {} };
     if (slug.length === 1 && slug[0] === 'history') return { kind: 'protected', component: History, params: {} };
+    if (slug.length === 1 && slug[0] === 'leaderboard') return { kind: 'protected', component: Leaderboard, params: {} };
     if (slug.length === 1 && slug[0] === 'profile') return { kind: 'protected', component: Profile, params: {} };
     if (slug.length === 1 && slug[0] === 'settings') return { kind: 'protected', component: Settings, params: {} };
     if (slug.length === 1 && slug[0] === 'problems') return { kind: 'public', component: Problems, params: {} };
@@ -45,6 +49,8 @@ function resolveRoute(slug) {
     if (slug.length === 2 && slug[0] === 'practice') return { kind: 'protected', component: Practice, params: { problemId: slug[1] } };
     if (slug.length === 2 && slug[0] === 'company') return { kind: 'public', component: CompanyProblems, params: { companyId: slug[1] } };
     if (slug.length === 2 && slug[0] === 'battle') return { kind: 'protected', component: Battle, params: { matchId: slug[1] } };
+    if (slug.length === 2 && slug[0] === 'spectate') return { kind: 'protected', component: Spectate, params: { matchId: slug[1] } };
+    if (slug.length === 2 && slug[0] === 'recap') return { kind: 'public', component: MatchRecap, params: { matchId: slug[1] } };
     return null;
 }
 
@@ -82,7 +88,8 @@ export default function CatchAllPage() {
         if (
             route.kind === 'protected' &&
             matchId &&
-            !currentPath.startsWith('/battle/')
+            !currentPath.startsWith('/battle/') &&
+            !currentPath.startsWith('/spectate/')
         ) {
             router.replace(`/battle/${matchId}`);
         }
@@ -100,7 +107,7 @@ export default function CatchAllPage() {
         return <LoadingScreen />;
     }
 
-    if (route.kind === 'protected' && matchId && !currentPath.startsWith('/battle/')) {
+    if (route.kind === 'protected' && matchId && !currentPath.startsWith('/battle/') && !currentPath.startsWith('/spectate/')) {
         return <LoadingScreen />;
     }
 
@@ -113,10 +120,13 @@ export default function CatchAllPage() {
                         slug[0] === 'register' ? 'Register' :
                             slug[0] === 'dashboard' ? 'Dashboard' :
                                 slug[0] === 'history' ? 'History' :
+                                slug[0] === 'leaderboard' ? 'Leaderboard' :
                                     slug[0] === 'profile' ? 'Profile' :
                                         slug[0] === 'settings' ? 'Settings' :
                                             slug[0] === 'battle' ? 'Live Battle' :
-                                                slug[0] === 'practice' ? 'Practice Problem' :
+                                                slug[0] === 'spectate' ? 'Spectate' :
+                                                    slug[0] === 'recap' ? 'Match Recap' :
+                                                        slug[0] === 'practice' ? 'Practice Problem' :
                                                     'CodeArena'
                 }
                 path={currentPath}
