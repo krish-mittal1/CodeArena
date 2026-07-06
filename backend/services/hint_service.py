@@ -6,10 +6,8 @@ import json
 import logging
 from typing import Optional
 
-import httpx
-
 from backend.config import settings
-from backend.services.ai_service import GROQ_API_URL, _fallback_analysis
+from backend.services.llm_client import call_json_llm, llm_provider
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +28,11 @@ async def get_hint(
     if hint_level not in _HINT_PROMPTS:
         hint_level = "nudge"
 
-    if not settings.groq_api_key:
-        return {"hint_level": hint_level, "content": "AI hints are unavailable. Check GROQ_API_KEY in server config."}
+    if not llm_provider():
+        return {
+            "hint_level": hint_level,
+            "content": "AI hints are unavailable. Set GROQ_API_KEY or GEMINI_API_KEY in server config.",
+        }
 
     system = f"You are a coding interview tutor. {_HINT_PROMPTS[hint_level]} Return JSON: {{\"content\": \"...\"}}"
 
@@ -41,25 +42,13 @@ async def get_hint(
 
 Constraints: {constraints or 'Not specified'}"""
 
-    headers = {"Authorization": f"Bearer {settings.groq_api_key}", "Content-Type": "application/json"}
-    payload = {
-        "model": "llama-3.3-70b-versatile",
-        "messages": [
-            {"role": "system", "content": system},
-            {"role": "user", "content": prompt},
-        ],
-        "response_format": {"type": "json_object"},
-        "max_completion_tokens": 512,
-    }
-
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(GROQ_API_URL, headers=headers, json=payload)
-        if response.status_code != 200:
-            raise RuntimeError(f"HTTP {response.status_code}")
-        raw = response.json()["choices"][0]["message"]["content"]
+        raw = await call_json_llm(system=system, user=prompt, max_tokens=512)
         data = json.loads(raw)
         return {"hint_level": hint_level, "content": data.get("content", "")}
     except Exception as exc:
         logger.warning("Hint generation failed: %s", exc)
-        return {"hint_level": hint_level, "content": "Could not generate hint right now. Try breaking the problem into smaller cases."}
+        return {
+            "hint_level": hint_level,
+            "content": "Could not generate hint right now. Try breaking the problem into smaller cases.",
+        }

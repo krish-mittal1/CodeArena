@@ -1,6 +1,5 @@
 """
-AI Code Analysis Service - uses Groq REST API (via httpx) to analyze submitted code.
-Zero external SDK dependencies required.
+AI Code Analysis Service — Groq or Google Gemini via unified LLM client.
 """
 
 import json
@@ -8,9 +7,7 @@ import logging
 from collections import OrderedDict
 from typing import Optional
 
-import httpx
-
-from backend.config import settings
+from backend.services.llm_client import call_json_llm, llm_provider
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +57,6 @@ Rules:
 - If there are other realistic approaches, include 1 to 3 items in alternative_approaches. If there are no meaningful alternatives, return [].
 - Make the analysis teach the user the whole problem, not only the submitted code.
 """
-
-GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 _AI_CACHE_MAX = 256
 
@@ -166,9 +161,9 @@ async def analyze_code(
             logger.info("Returning cached AI analysis for submission %s", submission_id)
             return _normalize_analysis_result(cached, verdict_status)
 
-    if not settings.groq_api_key:
-        logger.warning("GROQ_API_KEY not set - returning placeholder analysis")
-        return _fallback_analysis(verdict_status, "Groq API key missing. Add GROQ_API_KEY to .env")
+    if not llm_provider():
+        logger.warning("GROQ_API_KEY / GEMINI_API_KEY not set - returning placeholder analysis")
+        return _fallback_analysis(verdict_status, "AI API key missing. Add GROQ_API_KEY or GEMINI_API_KEY to .env")
 
     failed_section = ""
     if failed_input:
@@ -202,49 +197,24 @@ Before answering, think about what would help a learner understand this problem 
 Keep the explanation simple, specific, and helpful.
 Return EXACTLY the JSON object as instructed."""
 
-    headers = {
-        "Authorization": f"Bearer {settings.groq_api_key}",
-        "Content-Type": "application/json",
-    }
-
-    payload = {
-        "model": "llama-3.3-70b-versatile",
-        "messages": [
-            {"role": "system", "content": _SYSTEM_PROMPT},
-            {"role": "user", "content": prompt},
-        ],
-        "response_format": {"type": "json_object"},
-        "max_completion_tokens": 4096,
-    }
-
     max_retries = 3
     last_error = ""
 
     for attempt in range(max_retries):
         try:
-            logger.info("Calling Groq REST API for '%s' (Attempt %d/%d)...", problem_title, attempt + 1, max_retries)
+            logger.info(
+                "Calling %s for '%s' (Attempt %d/%d)...",
+                llm_provider(),
+                problem_title,
+                attempt + 1,
+                max_retries,
+            )
 
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                response = await client.post(GROQ_API_URL, headers=headers, json=payload)
-
-            if response.status_code == 429:
-                last_error = "Rate limit exceeded"
-                logger.warning("Groq 429 hit. Retrying in %ss...", (attempt + 1) * 2)
-                import asyncio
-                await asyncio.sleep((attempt + 1) * 2)
-                continue
-
-            if response.status_code == 401:
-                logger.error("Groq API key is invalid (401)")
-                return _fallback_analysis(verdict_status, "Invalid Groq API key in .env")
-
-            if response.status_code != 200:
-                last_error = f"HTTP {response.status_code}: {response.text[:100]}"
-                logger.error("Groq API error: %s", last_error)
-                raise Exception(last_error)
-
-            data = response.json()
-            raw = data["choices"][0]["message"]["content"].strip()
+            raw = await call_json_llm(
+                system=_SYSTEM_PROMPT,
+                user=prompt,
+                max_tokens=4096,
+            )
             result = _normalize_analysis_result(json.loads(raw), verdict_status)
 
             if submission_id:
@@ -254,17 +224,17 @@ Return EXACTLY the JSON object as instructed."""
             return result
 
         except json.JSONDecodeError as e:
-            logger.error("Groq returned invalid JSON: %s", e)
+            logger.error("LLM returned invalid JSON: %s", e)
             return _fallback_analysis(verdict_status, "Invalid AI response format")
         except Exception as e:
             last_error = str(e)
-            logger.error("Groq API error (attempt %d): %s", attempt + 1, last_error)
+            logger.error("LLM API error (attempt %d): %s", attempt + 1, last_error)
             if attempt < max_retries - 1:
                 import asyncio
                 await asyncio.sleep((attempt + 1) * 2)
                 continue
 
-    logger.error("All %d Groq API attempts failed: %s", max_retries, last_error)
+    logger.error("All %d LLM API attempts failed: %s", max_retries, last_error)
     return _fallback_analysis(verdict_status, f"AI Error: {last_error[:60]}")
 
 

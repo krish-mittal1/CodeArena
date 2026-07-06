@@ -129,7 +129,7 @@ class Settings(BaseSettings):
 
     # ── AI Providers ──────────────────────────────────────────
     gemini_api_key: Optional[str] = Field(default=None, description="Google Gemini API key")
-    groq_api_key: Optional[str] = Field(default=None, description="Groq API key for Llama 3 analysis")
+    groq_api_key: Optional[str] = Field(default=None, description="Groq API key (preferred if both are set)")
 
     @field_validator("gemini_api_key", "groq_api_key")
     @classmethod
@@ -137,6 +137,11 @@ class Settings(BaseSettings):
         if v:
             return v.strip()
         return v
+
+    @property
+    def llm_api_key(self) -> Optional[str]:
+        """Active LLM key — Groq takes priority over Gemini."""
+        return self.groq_api_key or self.gemini_api_key
 
     @property
     def is_production(self) -> bool:
