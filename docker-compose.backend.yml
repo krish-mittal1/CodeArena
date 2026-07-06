@@ -17,6 +17,7 @@ services:
       - redis
     environment:
       - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
       - SANDBOX_HOST_WORKDIR=${PWD}
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider --timeout=3 http://$$(hostname -i):8000/health || exit 1"]
