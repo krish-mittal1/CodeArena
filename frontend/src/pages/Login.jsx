@@ -208,6 +208,11 @@ function OTPForm() {
     const [cooldown, setCooldown] = useState(0);
 
     const inputRefs = useRef([]);
+    const verifyingRef = useRef(false);
+
+    useEffect(() => {
+        if (!isLoading) verifyingRef.current = false;
+    }, [isLoading]);
 
     // Cooldown timer
     useEffect(() => {
@@ -284,7 +289,7 @@ function OTPForm() {
 
     // ── OTP digit input handler ──────────────────────
     const handleOtpChange = (index, value) => {
-        if (!/^\d*$/.test(value)) return;
+        if (!/^\d*$/.test(value) || isLoading) return;
 
         const newOtp = [...otp];
         newOtp[index] = value.slice(-1);
@@ -297,7 +302,8 @@ function OTPForm() {
 
         // Auto-submit when all 6 digits entered
         const otpString = newOtp.join('');
-        if (otpString.length === 6) {
+        if (otpString.length === 6 && !verifyingRef.current) {
+            verifyingRef.current = true;
             handleVerifyOTP(otpString);
         }
     };
@@ -310,6 +316,7 @@ function OTPForm() {
 
     const handleOtpPaste = (e) => {
         e.preventDefault();
+        if (isLoading || verifyingRef.current) return;
         const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
         if (!pasted) return;
 
@@ -320,6 +327,7 @@ function OTPForm() {
         setOtp(newOtp);
 
         if (pasted.length === 6) {
+            verifyingRef.current = true;
             handleVerifyOTP(pasted);
         } else {
             inputRefs.current[pasted.length]?.focus();

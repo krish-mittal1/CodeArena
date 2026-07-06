@@ -32,9 +32,9 @@ export default function TimerBar() {
         setForfeiting(true);
         try {
             await matchApi.forfeit(matchId);
-            // MATCH_ENDED WS event will drive UI updates
         } catch (err) {
             console.error('Failed to forfeit match:', err);
+        } finally {
             setForfeiting(false);
         }
     };

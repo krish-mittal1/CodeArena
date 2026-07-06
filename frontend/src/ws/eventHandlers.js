@@ -123,7 +123,7 @@ export function registerEventHandlers() {
     // ── Submission status updates ───────────────────────
     unsubscribers.push(
         wsManager.on(WS_EVENTS.SUBMISSION_RUNNING, safeHandler('SUBMISSION_RUNNING', (data) => {
-            useBattleStore.getState().setSubmissionStatus('running', data);
+            useBattleStore.getState().setSubmissionStatus('running');
         }))
     );
 

@@ -32,9 +32,11 @@ class WebSocketManager {
         this._token = null;
         this._state = WS_STATE.DISCONNECTED;
         this._intentionalClose = false;
+        this._connectId = 0;
 
         // Reconnection
         this._reconnectAttempt = 0;
+        this._maxReconnectAttempts = 50;
         this._maxReconnectDelay = 16000;   // 16s cap
         this._baseReconnectDelay = 1000;   // 1s start
         this._reconnectTimer = null;
@@ -77,10 +79,15 @@ class WebSocketManager {
 
         // Close existing connection first
         if (this._ws) {
-            this._intentionalClose = true;
+            this._ws.onopen = null;
+            this._ws.onmessage = null;
+            this._ws.onclose = null;
+            this._ws.onerror = null;
             this._ws.close();
+            this._ws = null;
         }
 
+        this._cleanup();
         this._token = token;
         this._intentionalClose = false;
         this._reconnectAttempt = 0;
@@ -95,6 +102,10 @@ class WebSocketManager {
         this._cleanup();
 
         if (this._ws) {
+            this._ws.onopen = null;
+            this._ws.onmessage = null;
+            this._ws.onclose = null;
+            this._ws.onerror = null;
             this._ws.close(1000, 'client_disconnect');
             this._ws = null;
         }
@@ -155,14 +166,26 @@ class WebSocketManager {
             this._reconnectAttempt > 0 ? WS_STATE.RECONNECTING : WS_STATE.CONNECTING
         );
 
+        const myConnectId = ++this._connectId;
+
         try {
             const url = `${WS_BASE}/ws?token=${encodeURIComponent(this._token)}`;
-            this._ws = new WebSocket(url);
+            const ws = new WebSocket(url);
+            this._ws = ws;
 
-            this._ws.onopen = () => this._handleOpen();
-            this._ws.onmessage = (e) => this._handleMessage(e);
-            this._ws.onclose = (e) => this._handleClose(e);
-            this._ws.onerror = () => { }; // onclose fires after onerror
+            ws.onopen = () => {
+                if (this._connectId !== myConnectId) return;
+                this._handleOpen();
+            };
+            ws.onmessage = (e) => {
+                if (this._connectId !== myConnectId) return;
+                this._handleMessage(e);
+            };
+            ws.onclose = (e) => {
+                if (this._connectId !== myConnectId) return;
+                this._handleClose(e);
+            };
+            ws.onerror = () => {};
         } catch (err) {
             console.error('[WS] Connection error:', err);
             this._scheduleReconnect();
@@ -232,6 +255,11 @@ class WebSocketManager {
 
     _scheduleReconnect() {
         if (this._intentionalClose || !this._token) return;
+        if (this._reconnectAttempt >= this._maxReconnectAttempts) {
+            console.error('[WS] Max reconnect attempts reached, giving up');
+            this._setState(WS_STATE.DISCONNECTED);
+            return;
+        }
 
         this._setState(WS_STATE.RECONNECTING);
 

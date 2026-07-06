@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBattleStore } from '../../stores/battleStore';
 import { formatEloDelta } from '../../utils/formatters';
@@ -8,10 +8,14 @@ export default function MatchResultModal() {
     const matchResult = useBattleStore((s) => s.matchResult);
     const reset = useBattleStore((s) => s.reset);
     const navigate = useNavigate();
+    const navigatedRef = useRef(false);
 
     useEffect(() => {
         if (!matchResult) return;
+        navigatedRef.current = false;
         const timeout = setTimeout(() => {
+            if (navigatedRef.current) return;
+            navigatedRef.current = true;
             reset();
             navigate('/dashboard');
         }, 5000);
@@ -34,6 +38,8 @@ export default function MatchResultModal() {
     const borderColorClass = isWin ? 'border-win' : isLoss ? 'border-loss' : 'border-draw';
 
     const handleDashboard = () => {
+        if (navigatedRef.current) return;
+        navigatedRef.current = true;
         reset();
         navigate('/dashboard');
     };

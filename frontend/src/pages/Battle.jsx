@@ -78,12 +78,10 @@ export default function Battle() {
         };
     }, [storeMatchId, problemId, problem, setProblem]);
 
-    // Cleanup on unmount
+    // Cleanup on unmount — always reset to prevent stale state leaking into next match
     useEffect(() => {
         return () => {
-            if (useBattleStore.getState().matchResult) {
-                reset();
-            }
+            reset();
         };
     }, [reset]);
 
