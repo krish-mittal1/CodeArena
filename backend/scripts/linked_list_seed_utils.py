@@ -1,13 +1,8 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Iterable
 
-from sqlalchemy import delete, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from backend.models.problem import Problem
-from backend.models.test_case import TestCase
+from backend.problem_bank.upsert import upsert_problem
 
 
 def encode_lines(*values) -> str:
@@ -21,6 +16,8 @@ def make_case(*inputs, expected_output, idx: int, is_sample: bool = False) -> di
         "order_index": idx,
         "is_sample": is_sample,
     }
+
+
 def merge_sorted(a: list[int], b: list[int]) -> list[int]:
     i = 0
     j = 0
@@ -35,31 +32,3 @@ def merge_sorted(a: list[int], b: list[int]) -> list[int]:
     out.extend(a[i:])
     out.extend(b[j:])
     return out
-
-
-async def upsert_problem(db: AsyncSession, title: str, kwargs: dict, cases: Iterable[dict]) -> None:
-    result = await db.execute(select(Problem).where(Problem.title == title))
-    problem = result.scalar_one_or_none()
-
-    if problem:
-        for key, value in kwargs.items():
-            setattr(problem, key, value)
-        deleted = False
-        try:
-            await db.execute(delete(TestCase).where(TestCase.problem_id == problem.id))
-            await db.flush()
-            deleted = True
-        except Exception:
-            await db.rollback()
-            await db.refresh(problem)
-    else:
-        problem = Problem(title=title, **kwargs)
-        db.add(problem)
-        await db.flush()
-        deleted = True
-
-    if deleted:
-        for test_case in cases:
-            db.add(TestCase(problem_id=problem.id, **test_case))
-
-    await db.commit()

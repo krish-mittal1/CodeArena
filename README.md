@@ -363,6 +363,26 @@ docker compose -f docker-compose.backend.yml ps
 docker logs api --tail 100
 ```
 
+### Syncing problem packages
+
+Problems are defined as version-controlled packages under `problems/` (see `problems/README.md`). Sync them into PostgreSQL after deploy or when adding new problems:
+
+```bash
+# Validate packages (no DB writes)
+docker compose -f docker-compose.backend.yml exec api \
+  python -m backend.tools.sync_problems --all --dry-run
+
+# Sync all packages
+docker compose -f docker-compose.backend.yml exec api \
+  python -m backend.tools.sync_problems --all
+
+# Sync one problem
+docker compose -f docker-compose.backend.yml exec api \
+  python -m backend.tools.sync_problems --slug two-sum
+```
+
+Legacy `backend/scripts/seed_*.py` scripts still work; prefer the package format for new problems.
+
 ## Health Checks
 
 The backend exposes:

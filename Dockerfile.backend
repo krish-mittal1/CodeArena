@@ -9,8 +9,9 @@ COPY backend/pyproject.toml backend/uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
-# Copy the backend source
+# Copy the backend source and problem packages
 COPY backend/ ./backend/
+COPY problems/ ./problems/
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync

@@ -1,0 +1,31 @@
+slug: valid-palindrome
+title: Valid Palindrome
+problem_type: dsa
+difficulty: easy
+rating: 700
+
+method_name: isPalindrome
+parameters:
+  - name: s
+    type: str
+return_type: bool
+
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+
+description: |
+  Given a string, decide whether it is a palindrome after lowercasing and removing non-alphanumeric characters.
+
+input_format: |
+  Line 1: JSON string s
+
+output_format: |
+  Boolean: true if palindrome after normalization
+
+constraints: |
+  0 <= s.length <= 2 * 10^5
+
+generator:
+  count: 159
+  seed: 20260331

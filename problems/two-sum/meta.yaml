@@ -1,0 +1,40 @@
+slug: two-sum
+title: Two Sum
+problem_type: dsa
+difficulty: easy
+rating: 900
+
+method_name: twoSum
+parameters:
+  - name: nums
+    type: int[]
+  - name: target
+    type: int
+return_type: int[]
+
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+
+description: |
+  Given an array of integers nums and an integer target, return the indices of the two numbers such that they add up to target.
+
+  You may assume that each input has exactly one solution, and you may not use the same element twice.
+  Return the answer in any order.
+
+input_format: |
+  Line 1: JSON array nums
+  Line 2: integer target
+
+output_format: |
+  JSON array of two indices
+
+constraints: |
+  2 <= nums.length <= 220
+  -10^9 <= nums[i] <= 10^9
+  -10^9 <= target <= 10^9
+  Exactly one valid answer exists.
+
+generator:
+  count: 590
+  seed: 2026040201
