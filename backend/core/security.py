@@ -2,6 +2,7 @@
 JWT token management and password hashing utilities.
 """
 
+import uuid
 from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
@@ -9,6 +10,8 @@ import bcrypt
 
 from backend.config import settings
 from backend.core.exceptions import InvalidCredentials, TokenExpired
+
+_used_refresh_tokens: dict[str, float] = {}
 
 
 # ── Password ──────────────────────────────────────────────────
@@ -44,8 +47,32 @@ def create_refresh_token(subject: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.jwt_refresh_token_expire_minutes
     )
-    payload = {"sub": subject, "exp": expire, "type": "refresh"}
+    payload = {"sub": subject, "exp": expire, "type": "refresh", "jti": uuid.uuid4().hex}
     return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+
+
+def consume_refresh_token(token: str) -> dict:
+    """Decode a refresh token and mark it as used. Raises if already used (replay)."""
+    import time
+    _prune_used_tokens()
+    payload = decode_token(token)
+    if payload.get("type") != "refresh":
+        raise InvalidCredentials()
+    jti = payload.get("jti")
+    if jti:
+        if jti in _used_refresh_tokens:
+            raise InvalidCredentials()
+        _used_refresh_tokens[jti] = time.monotonic()
+    return payload
+
+
+def _prune_used_tokens() -> None:
+    """Remove entries older than the refresh token lifetime to prevent unbounded growth."""
+    import time
+    cutoff = time.monotonic() - (settings.jwt_refresh_token_expire_minutes * 60)
+    stale = [k for k, v in _used_refresh_tokens.items() if v < cutoff]
+    for k in stale:
+        del _used_refresh_tokens[k]
 
 
 def decode_token(token: str) -> dict:

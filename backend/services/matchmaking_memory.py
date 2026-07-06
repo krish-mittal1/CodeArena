@@ -389,17 +389,18 @@ class InMemoryMatchmakingQueue:
         """Remove active match tracking (called after match ends)."""
         self._active_matches.pop(user_id, None)
 
-    def clear_match_for_both(self, user1_id: str, user2_id: str) -> None:
+    async def clear_match_for_both(self, user1_id: str, user2_id: str) -> None:
         """
         Remove active match tracking for both players.
 
         This is critical in dev-mode: if `_active_matches` is not cleared after
         match end (solve/forfeit/timeout), players cannot re-queue.
         """
-        before_1 = self._active_matches.get(user1_id)
-        before_2 = self._active_matches.get(user2_id)
-        self._active_matches.pop(user1_id, None)
-        self._active_matches.pop(user2_id, None)
+        async with self._lock:
+            before_1 = self._active_matches.get(user1_id)
+            before_2 = self._active_matches.get(user2_id)
+            self._active_matches.pop(user1_id, None)
+            self._active_matches.pop(user2_id, None)
         logger.info(
             f"[MM-DEV] Cleaned active_matches for both players: "
             f"{user1_id} ({before_1}) and {user2_id} ({before_2})"

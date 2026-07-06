@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import BackgroundTasks
 
-from backend.core.security import hash_password, verify_password, create_access_token, create_refresh_token, decode_token
+from backend.core.security import hash_password, verify_password, create_access_token, create_refresh_token, decode_token, consume_refresh_token
 from backend.core.exceptions import InvalidCredentials, UserAlreadyExists, TokenExpired
 from backend.models.user import User
 from backend.schemas.user import UserRegister, TokenResponse
@@ -61,10 +61,8 @@ async def login_user(db: AsyncSession, username: str, password: str) -> Tuple[Us
 
 
 async def refresh_tokens(db: AsyncSession, refresh_token: str) -> TokenResponse:
-    """Issue new access + refresh tokens from a valid refresh token."""
-    payload = decode_token(refresh_token)
-    if payload.get("type") != "refresh":
-        raise InvalidCredentials()
+    """Issue new access + refresh tokens from a valid refresh token. One-time use."""
+    payload = consume_refresh_token(refresh_token)
 
     user_id = payload["sub"]
     result = await db.execute(select(User).where(User.id == uuid.UUID(user_id)))

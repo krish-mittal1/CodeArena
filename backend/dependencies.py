@@ -7,7 +7,7 @@ import asyncio
 import time
 from typing import Optional
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import redis.asyncio as aioredis
 
@@ -168,3 +168,13 @@ async def get_admin_user(current_user: User = Depends(get_current_user)) -> User
     if not current_user.is_admin:
         raise AdminAccessRequired()
     return current_user
+
+
+def get_client_ip(request: Request) -> str:
+    """Extract client IP, checking X-Forwarded-For for proxied requests."""
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    if request.client:
+        return request.client.host
+    return "unknown"

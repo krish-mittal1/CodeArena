@@ -10,7 +10,7 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, Dict
 
-from backend.dependencies import get_current_user, get_redis, get_db
+from backend.dependencies import get_current_user, get_redis, get_db, get_client_ip
 from backend.models.user import User
 from backend.services import matchmaking_service
 from backend.services.matchmaking_memory import memory_queue, QueueEntry
@@ -176,7 +176,7 @@ async def join_private_room(
 ):
     """Join a private room by code."""
     # Rate limit: prevent brute force room code enumeration
-    ip = request.client.host if request and request.client else "unknown"
+    ip = get_client_ip(request) if request else "unknown"
     ensure_room_code_allowed(ip)
     record_room_code_attempt(ip)
     
@@ -192,36 +192,44 @@ async def join_private_room(
         if active:
             raise AlreadyInMatch()
 
-        creator_id_bytes = await redis.get(f"private_room:{code}")
-        if not creator_id_bytes:
-            raise HTTPException(status_code=404, detail="Invalid or expired room code")
-        
-        creator_id = creator_id_bytes.decode()
-        if creator_id == uid_joiner:
-            raise HTTPException(status_code=400, detail="Cannot join your own room")
-            
-        # Get creator user to get ELO
-        from sqlalchemy import select
-        from backend.models.user import User
-        
-        res = await db.execute(select(User).where(User.id == uuid.UUID(creator_id)))
-        creator_user = res.scalar_one_or_none()
-        if not creator_user:
-            raise HTTPException(status_code=404, detail="Creator account not found")
-        
-        # Create match
+        # Atomic claim: delete the room key and check if we got it
+        join_lock_key = f"lock:private_join:{code}"
+        if not await redis.set(join_lock_key, uid_joiner, nx=True, ex=10):
+            raise HTTPException(status_code=409, detail="Someone else is joining this room")
+
         try:
-            match_id = await matchmaking_service.create_private_match(
-                db, redis,
-                creator_id, creator_user.elo,
-                uid_joiner, current_user.elo
-            )
-            # Update status for the creator to unblock their polling
-            await redis.set(f"private_room_status:{code}", str(match_id), ex=300)
-            await redis.delete(f"private_room:{code}")
-            return {"status": "matched", "match_id": str(match_id)}
-        except AlreadyInMatch:
-            raise HTTPException(status_code=409, detail="One of the players is already in a match")
+            creator_id_bytes = await redis.get(f"private_room:{code}")
+            if not creator_id_bytes:
+                raise HTTPException(status_code=404, detail="Invalid or expired room code")
+
+            creator_id = creator_id_bytes.decode()
+            if creator_id == uid_joiner:
+                raise HTTPException(status_code=400, detail="Cannot join your own room")
+
+            # Get creator user to get ELO
+            from sqlalchemy import select
+            from backend.models.user import User
+
+            res = await db.execute(select(User).where(User.id == uuid.UUID(creator_id)))
+            creator_user = res.scalar_one_or_none()
+            if not creator_user:
+                raise HTTPException(status_code=404, detail="Creator account not found")
+
+            # Create match
+            try:
+                match_id = await matchmaking_service.create_private_match(
+                    db, redis,
+                    creator_id, creator_user.elo,
+                    uid_joiner, current_user.elo
+                )
+                # Update status for the creator to unblock their polling
+                await redis.set(f"private_room_status:{code}", str(match_id), ex=300)
+                await redis.delete(f"private_room:{code}")
+                return {"status": "matched", "match_id": str(match_id)}
+            except AlreadyInMatch:
+                raise HTTPException(status_code=409, detail="One of the players is already in a match")
+        finally:
+            await redis.delete(join_lock_key)
 
     else:
         # dev mode
@@ -280,7 +288,7 @@ async def private_room_status(
             is_creator = (room["creator"] == str(current_user.id))
 
     if not is_creator:
-        ip = request.client.host if request and request.client else "unknown"
+        ip = get_client_ip(request) if request else "unknown"
         ensure_room_code_allowed(ip)
         record_room_code_attempt(ip)
         raise HTTPException(status_code=404, detail="Invalid or expired room code")

@@ -110,10 +110,7 @@ class Settings(BaseSettings):
     private_room_code_rate_limit: int = Field(
         default=10, description="Max room code requests per IP per minute"
     )
-    match_access_strict: bool = Field(
-        default=True, description="Enforce strict match access control"
-    )
-    
+
     # ── Email & Frontend ──────────────────────────────────────
     frontend_url: str = Field(default="http://localhost:5173", description="Frontend base URL for links")
     smtp_host: Optional[str] = Field(default=None, description="SMTP Server Host (e.g., smtp.gmail.com)")

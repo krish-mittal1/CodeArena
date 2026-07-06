@@ -57,6 +57,9 @@ async def handle_player_connection(websocket: WebSocket, token: str, redis: Opti
     # ── 1. Authenticate ───────────────────────────────────
     try:
         payload = decode_token(token)
+        if payload.get("type") != "access":
+            await websocket.close(code=4001, reason="Access token required")
+            return
         user_id = payload["sub"]
         username = payload.get("username", "unknown")
     except Exception:
@@ -300,7 +303,10 @@ async def handle_spectator_connection(
             await websocket.close(code=4001, reason="Authentication required")
             return
         try:
-            decode_token(token)
+            payload = decode_token(token)
+            if payload.get("type") != "access":
+                await websocket.close(code=4001, reason="Access token required")
+                return
         except Exception:
             await websocket.close(code=4001, reason="Invalid or expired token")
             return

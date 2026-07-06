@@ -29,6 +29,20 @@ def _key(*parts: str) -> str:
     return "|".join((part or "").strip().lower() for part in parts)
 
 
+_last_full_prune: float = 0.0
+_FULL_PRUNE_INTERVAL = 300.0
+
+
+def _full_prune_if_needed(now: float) -> None:
+    global _last_full_prune
+    if now - _last_full_prune < _FULL_PRUNE_INTERVAL:
+        return
+    _last_full_prune = now
+    stale = [k for k, v in _entries.items() if not v or v[-1] < now - _WINDOW_SECONDS]
+    for k in stale:
+        del _entries[k]
+
+
 def ensure_login_allowed(username: str, ip: str) -> None:
     """
     Raise if recent failed attempts for this username/IP combination exceed
@@ -42,6 +56,7 @@ def ensure_login_allowed(username: str, ip: str) -> None:
     )
 
     with _lock:
+        _full_prune_if_needed(now)
         for entry_key in candidate_keys:
             attempts = _entries.get(entry_key)
             if not attempts:
@@ -71,6 +86,7 @@ def record_login_failure(username: str, ip: str) -> None:
 def clear_login_failures(username: str, ip: str) -> None:
     success_keys = (
         _key("login", "user", username),
+        _key("login", "ip", ip),
         _key("login", "pair", username, ip),
     )
 

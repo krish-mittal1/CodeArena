@@ -29,12 +29,23 @@ def _key(user_id: str, match_id: str) -> str:
     return f"submit|{user_id}|{match_id}"
 
 
+_last_full_prune: float = 0.0
+_FULL_PRUNE_INTERVAL = 60.0
+
+
 def ensure_submission_allowed(user_id: str, match_id: str) -> None:
     """Raise if submissions exceed the short rolling window threshold."""
+    global _last_full_prune
     now = time.monotonic()
     entry_key = _key(user_id, match_id)
 
     with _lock:
+        if now - _last_full_prune > _FULL_PRUNE_INTERVAL:
+            _last_full_prune = now
+            stale = [k for k, v in _entries.items() if not v or v[-1] < now - _WINDOW_SECONDS]
+            for k in stale:
+                del _entries[k]
+
         attempts = _entries.get(entry_key)
         if attempts:
             _prune(now, attempts)

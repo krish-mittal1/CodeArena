@@ -445,7 +445,7 @@ async def _process_submission_inner(
 
                         try:
                             from backend.services.matchmaking_memory import memory_queue
-                            memory_queue.clear_match_for_both(
+                            await memory_queue.clear_match_for_both(
                                 match_result["player1_id"],
                                 match_result["player2_id"],
                             )
@@ -474,15 +474,17 @@ async def run_dev_worker(session_factory: async_sessionmaker) -> None:
     while True:
         try:
             submission_id_str = await dev_queue.get()
-            submission_id = uuid.UUID(submission_id_str)
-            logger.info(f"[JUDGE] Dequeued submission {submission_id} from dev queue")
-            await process_submission(session_factory, submission_id)
-            dev_queue.task_done()
+            try:
+                submission_id = uuid.UUID(submission_id_str)
+                logger.info(f"[JUDGE] Dequeued submission {submission_id} from dev queue")
+                await process_submission(session_factory, submission_id)
+            except Exception as e:
+                logger.error(f"[JUDGE] Dev worker error: {e}", exc_info=True)
+            finally:
+                dev_queue.task_done()
         except asyncio.CancelledError:
             logger.info("[JUDGE] Dev worker shutting down")
             break
-        except Exception as e:
-            logger.error(f"[JUDGE] Dev worker error: {e}", exc_info=True)
 
 
 async def run_redis_worker() -> None:

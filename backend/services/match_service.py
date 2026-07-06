@@ -185,7 +185,7 @@ async def complete_match(
         # Always clean up dev-mode active match tracking
         try:
             from backend.services.matchmaking_memory import memory_queue
-            memory_queue.clear_match_for_both(str(match.player1_id), str(match.player2_id))
+            await memory_queue.clear_match_for_both(str(match.player1_id), str(match.player2_id))
         except Exception:
             pass
 
@@ -282,7 +282,7 @@ async def complete_match_with_winner(
         # Always clean up dev-mode active match tracking
         try:
             from backend.services.matchmaking_memory import memory_queue
-            memory_queue.clear_match_for_both(str(match.player1_id), str(match.player2_id))
+            await memory_queue.clear_match_for_both(str(match.player1_id), str(match.player2_id))
         except Exception:
             pass
 
@@ -392,7 +392,7 @@ async def forfeit_match(
         # Always clean up dev-mode active match tracking
         try:
             from backend.services.matchmaking_memory import memory_queue
-            memory_queue.clear_match_for_both(str(match.player1_id), str(match.player2_id))
+            await memory_queue.clear_match_for_both(str(match.player1_id), str(match.player2_id))
         except Exception:
             pass
 

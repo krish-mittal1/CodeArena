@@ -19,7 +19,7 @@ class Submission(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     match_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("matches.id"), nullable=True
+        UUID(as_uuid=True), ForeignKey("matches.id", ondelete="CASCADE"), nullable=True
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
@@ -51,6 +51,8 @@ class Submission(Base):
 
     __table_args__ = (
         Index("idx_submissions_match_user", "match_id", "user_id"),
+        Index("idx_submissions_user_id", "user_id"),
+        Index("idx_submissions_problem_id", "problem_id"),
         Index(
             "idx_submissions_status_pending",
             "status",

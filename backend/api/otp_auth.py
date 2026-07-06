@@ -10,6 +10,7 @@ from backend.db.session import get_db, AsyncSession
 from backend.schemas.otp import OTPRequest, OTPVerify, OTPResponse
 from backend.schemas.user import TokenResponse
 from backend.services import otp_service
+from backend.dependencies import get_client_ip
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ async def request_otp(data: OTPRequest, request: Request):
     Rate limited: 3/email/hour, 5/IP/hour.
     Always returns success to prevent user enumeration.
     """
-    ip = request.client.host if request.client else "unknown"
+    ip = get_client_ip(request)
 
     try:
         debug_otp = await otp_service.request_otp(data.email, ip)
@@ -53,7 +54,7 @@ async def verify_otp(
     Auto-creates user if email not registered.
     Rate limited to prevent brute-force attempts.
     """
-    ip = request.client.host if request.client else "unknown"
+    ip = get_client_ip(request)
     user_agent = request.headers.get("user-agent", "unknown")
 
     from backend.core.auth_rate_limit import ensure_login_allowed, record_login_failure, clear_login_failures
@@ -82,7 +83,7 @@ async def verify_otp_only(data: OTPVerify, request: Request):
     Used for registration email verification.
     Rate limited to prevent brute-force attempts.
     """
-    ip = request.client.host if request.client else "unknown"
+    ip = get_client_ip(request)
 
     from backend.core.auth_rate_limit import ensure_login_allowed, record_login_failure, clear_login_failures
     verify_key = f"otp_verify_only:{data.email}"

@@ -322,6 +322,9 @@ async def process_queue(redis: Redis, db: AsyncSession) -> list[uuid.UUID]:
             pair_lock = f"lock:pairing:{player['user_id']}:{best['user_id']}"
             if not await redis.set(pair_lock, "1", nx=True, ex=10):
                 logger.debug(f"[MATCHMAKING] Pair lock held for {player['user_id']} vs {best['user_id']}")
+                # Re-add both players to the queue so they aren't lost
+                await redis.zadd(RedisKey.MATCHMAKING_QUEUE, {player["member"]: player["elo"]})
+                await redis.zadd(RedisKey.MATCHMAKING_QUEUE, {best["member"]: best["elo"]})
                 continue
 
             # ── Create match ─────────────────────────────

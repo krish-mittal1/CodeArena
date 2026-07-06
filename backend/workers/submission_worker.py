@@ -109,6 +109,19 @@ async def process_submission(redis: aioredis.Redis, submission_id: uuid.UUID):
 
         if not test_cases:
             logger.error(f"[WORKER] No test cases for problem {submission.problem_id}")
+            submission.status = SubmissionStatus.RUNTIME_ERROR
+            submission.passed_test_cases = 0
+            submission.total_test_cases = 0
+            submission.judged_at = datetime.now(timezone.utc)
+            await db.commit()
+            match_channel = RedisKey.ws_channel(str(submission.match_id))
+            await _publish_event(redis, match_channel, WSEvent.SUBMISSION_RESULT, {
+                "submission_id": str(submission.id),
+                "user_id": str(submission.user_id),
+                "verdict": "runtime_error",
+                "passed": 0, "total": 0,
+                "runtime_ms": 0, "memory_kb": 0,
+            })
             return
 
         # ── 2. Mark as running ────────────────────────────

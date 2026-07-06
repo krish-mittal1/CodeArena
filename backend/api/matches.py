@@ -121,7 +121,7 @@ async def forfeit_match(
         try:
             from backend.services.matchmaking_memory import memory_queue
 
-            memory_queue.clear_match_for_both(result["player1_id"], result["player2_id"])
+            await memory_queue.clear_match_for_both(result["player1_id"], result["player2_id"])
         except Exception:
             # Best-effort cleanup — stale mappings are tolerated
             pass

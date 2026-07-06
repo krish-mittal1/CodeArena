@@ -5,6 +5,7 @@ Zero external SDK dependencies required.
 
 import json
 import logging
+from collections import OrderedDict
 from typing import Optional
 
 import httpx
@@ -62,8 +63,22 @@ Rules:
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-# In-memory cache to prevent redundant AI calls for the same submission ID
-AI_CACHE = {}
+_AI_CACHE_MAX = 256
+
+class _LRUCache(OrderedDict):
+    def get_cache(self, key):
+        if key in self:
+            self.move_to_end(key)
+            return self[key]
+        return None
+
+    def set_cache(self, key, value):
+        self[key] = value
+        self.move_to_end(key)
+        while len(self) > _AI_CACHE_MAX:
+            self.popitem(last=False)
+
+AI_CACHE = _LRUCache()
 
 
 def _normalize_analysis_result(result: dict, verdict_status: str) -> dict:
@@ -145,9 +160,11 @@ async def analyze_code(
     Call Groq REST API (Llama 3) to analyze submitted code.
     Uses httpx directly - no Groq SDK needed.
     """
-    if submission_id and submission_id in AI_CACHE:
-        logger.info("Returning cached AI analysis for submission %s", submission_id)
-        return _normalize_analysis_result(AI_CACHE[submission_id], verdict_status)
+    if submission_id:
+        cached = AI_CACHE.get_cache(submission_id)
+        if cached is not None:
+            logger.info("Returning cached AI analysis for submission %s", submission_id)
+            return _normalize_analysis_result(cached, verdict_status)
 
     if not settings.groq_api_key:
         logger.warning("GROQ_API_KEY not set - returning placeholder analysis")
@@ -231,7 +248,7 @@ Return EXACTLY the JSON object as instructed."""
             result = _normalize_analysis_result(json.loads(raw), verdict_status)
 
             if submission_id:
-                AI_CACHE[submission_id] = result
+                AI_CACHE.set_cache(submission_id, result)
 
             logger.info("AI analysis complete for '%s'", problem_title)
             return result

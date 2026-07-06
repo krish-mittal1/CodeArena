@@ -114,19 +114,18 @@ def _normalize_output(output: str) -> list[str]:
 #  JSON-based comparison (LeetCode driver mode)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-def _normalize_json_value(val: Any) -> Any:
+def _normalize_json_value(val: Any, sort_lists: bool = False) -> Any:
     """
     Recursively normalize a parsed JSON value for comparison.
-    - Lists of lists: sort inner lists, then sort outer list
-    - This handles problems like 3Sum where order doesn't matter
+    Only sorts when sort_lists=True (for nested lists like 3Sum).
     """
     if isinstance(val, list):
-        normalized = [_normalize_json_value(item) for item in val]
-        # Try to sort if all elements are comparable
-        try:
-            normalized.sort()
-        except TypeError:
-            pass
+        normalized = [_normalize_json_value(item, sort_lists=True) for item in val]
+        if sort_lists:
+            try:
+                normalized.sort()
+            except TypeError:
+                pass
         return normalized
     return val
 

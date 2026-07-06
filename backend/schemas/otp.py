@@ -14,4 +14,4 @@ class OTPVerify(BaseModel):
 
 class OTPResponse(BaseModel):
     message: str
-    debug_otp: str | None = None
+    debug_otp: str | None = Field(default=None, exclude=True)

@@ -407,7 +407,7 @@ done
                             timeout=total_timeout + 5.0,
                         )
 
-                    loop = asyncio.get_event_loop()
+                    loop = asyncio.get_running_loop()
                     await loop.run_in_executor(None, _sync_run)
 
                 except subprocess.TimeoutExpired:

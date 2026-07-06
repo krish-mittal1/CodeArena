@@ -576,14 +576,17 @@ async def general_exception_handler(request: Request, exc: Exception):
 # meaning it is the FIRST middleware executed on incoming requests and LAST on outgoing responses.
 # ── CORS ──────────────────────────────────────────────────────
 
+_cors_origins = {
+    settings.frontend_url,
+    "https://codexarena.app",
+    "https://www.codexarena.app",
+}
+if settings.is_development:
+    _cors_origins.add("http://localhost:5173")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=list({
-        settings.frontend_url,
-        "http://localhost:5173",
-        "https://codexarena.app",
-        "https://www.codexarena.app",
-    }),
+    allow_origins=list(_cors_origins),
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
     allow_headers=["Content-Type", "Authorization"],
