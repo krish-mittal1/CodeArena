@@ -80,8 +80,23 @@ async def practice_run(
     data: PracticeRunRequest,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    redis: Optional[Redis] = Depends(get_redis),
 ):
-    """Run code against sample test cases only (LeetCode-style Run)."""
+    """
+    Run code against sample test cases only (LeetCode-style Run).
+
+    Executes synchronously so the frontend can show results immediately, but
+    shares the sandbox container semaphore with the judge worker. Under load,
+    requests fail with 503 after sandbox_acquire_timeout rather than blocking
+    the API indefinitely. Full async queueing would require frontend polling.
+    """
+    import asyncio
+    from backend.config import settings
+    from backend.core.submission_rate_limit import ensure_submission_allowed, record_submission
+
+    # Light throttle (same window as battle submit; separate key from practice submit)
+    await ensure_submission_allowed(str(current_user.id), "practice_run", redis=redis)
+
     problem = await problem_service.get_problem_by_id(db, data.problem_id)
     if not problem:
         raise HTTPException(
@@ -113,14 +128,40 @@ async def practice_run(
             "return_type": problem.return_type,
         }
 
-    batch_results = await sandbox.execute_batch(
-        language=data.language.value,
-        code=data.code,
-        test_inputs=[tc.input for tc in sample_cases],
-        time_limit_ms=problem.time_limit_ms or 2000,
-        memory_limit_mb=problem.memory_limit_mb or 256,
-        problem_meta=problem_meta,
-    )
+    try:
+        batch_results = await asyncio.wait_for(
+            sandbox.execute_batch(
+                language=data.language.value,
+                code=data.code,
+                test_inputs=[tc.input for tc in sample_cases],
+                time_limit_ms=problem.time_limit_ms or 2000,
+                memory_limit_mb=problem.memory_limit_mb or 256,
+                problem_meta=problem_meta,
+            ),
+            timeout=settings.sandbox_total_timeout + settings.sandbox_acquire_timeout_seconds,
+        )
+    except TimeoutError as exc:
+        # Includes sandbox capacity TimeoutError from _acquire_container_slot
+        logger.warning(
+            "[Practice] Run rejected for user=%s problem=%s: %s",
+            current_user.id,
+            data.problem_id,
+            exc,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Code execution is busy. Please try again in a moment.",
+        ) from exc
+    except asyncio.TimeoutError as exc:
+        logger.warning(
+            "[Practice] Run timed out for user=%s problem=%s",
+            current_user.id,
+            data.problem_id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Code execution timed out. Please try again.",
+        ) from exc
 
     passed = 0
     max_time_ms = 0
@@ -134,6 +175,9 @@ async def practice_run(
             actual_output = ""
             error_output = run_result.stderr[:2000]
         else:
+            unordered_mode = None
+            if isinstance(getattr(problem, "presentation", None), dict):
+                unordered_mode = problem.presentation.get("unordered_output")
             verdict = judge(
                 actual_output=run_result.stdout,
                 expected_output=tc.expected_output,
@@ -142,6 +186,7 @@ async def practice_run(
                 oom_killed=run_result.oom_killed,
                 problem_title=problem.title,
                 is_leetcode_mode=problem_meta is not None,
+                unordered_mode=unordered_mode,
             ).value
             actual_output = run_result.stdout[:2000]
             error_output = run_result.stderr[:2000] if run_result.stderr else None
@@ -166,6 +211,8 @@ async def practice_run(
                 memory_used_kb=run_result.memory_kb,
             )
         )
+
+    await record_submission(str(current_user.id), "practice_run", redis=redis)
 
     logger.info(
         "[Practice] Run completed for user=%s problem=%s (%d/%d sample cases passed)",
@@ -193,6 +240,11 @@ async def practice_submit(
     redis: Optional[Redis] = Depends(get_redis),
 ):
     """Submit code for a practice problem (no match required)."""
+    from backend.core.submission_rate_limit import ensure_submission_allowed, record_submission
+
+    # Same style throttle as battle submissions (3 / 5s per user)
+    await ensure_submission_allowed(str(current_user.id), "practice", redis=redis)
+
     # Validate problem exists
     problem = await problem_service.get_problem_by_id(db, data.problem_id)
     if not problem:
@@ -213,6 +265,7 @@ async def practice_submit(
     from backend.services import review_service
     await review_service.bump_practice_streak(db, current_user)
     await db.commit()
+    await record_submission(str(current_user.id), "practice", redis=redis)
 
     logger.info(
         f"[Practice] Submission {submission.id} created "
@@ -240,11 +293,14 @@ async def get_hint(
     data: HintRequest,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    redis: Optional[Redis] = Depends(get_redis),
 ):
     from backend.core.ai_rate_limit import ensure_hint_allowed, record_hint_use
     from backend.services import hint_service
 
-    ensure_hint_allowed(str(current_user.id), str(data.problem_id), data.hint_level)
+    await ensure_hint_allowed(
+        str(current_user.id), str(data.problem_id), data.hint_level, redis=redis
+    )
     problem = await problem_service.get_problem_by_id(db, data.problem_id)
     if not problem:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Problem not found.")
@@ -255,7 +311,9 @@ async def get_hint(
         constraints=getattr(problem, "constraints", None),
     )
     if result.get("ok"):
-        record_hint_use(str(current_user.id), str(data.problem_id), data.hint_level)
+        await record_hint_use(
+            str(current_user.id), str(data.problem_id), data.hint_level, redis=redis
+        )
     return {k: v for k, v in result.items() if k != "ok"}
 
 
@@ -277,17 +335,24 @@ async def analyze_match_submission(
     match_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    redis: Optional[Redis] = Depends(get_redis),
 ) -> Any:
     """Analyze the user's latest submission from a completed match."""
     from sqlalchemy.orm import selectinload
     from backend.models.submission import Submission
+    from backend.models.submission_result import SubmissionResult
+    from backend.core.ai_rate_limit import (
+        ensure_analysis_allowed,
+        record_analysis_use,
+        release_analysis_slot,
+    )
 
     result = await db.execute(
         select(Submission)
         .where(Submission.match_id == match_id, Submission.user_id == current_user.id)
         .order_by(Submission.submitted_at.desc())
         .limit(1)
-        .options(selectinload(Submission.results))
+        .options(selectinload(Submission.results).selectinload(SubmissionResult.test_case))
     )
     submission = result.scalar_one_or_none()
     if not submission:
@@ -306,21 +371,41 @@ async def analyze_match_submission(
             actual_output = ftc.get("actual_output")
             error_output = ftc.get("error_output")
 
-    analysis = await ai_service.analyze_code(
-        problem_title=problem.title,
-        problem_description=problem.description,
-        constraints=getattr(problem, "constraints", None),
-        language=submission.language,
-        code=submission.code,
-        verdict_status=submission.status,
-        failed_input=failed_input,
-        expected_output=expected_output,
-        actual_output=actual_output,
-        error_output=error_output,
-        submission_id=str(submission.id),
-    )
+    # Reserve quota only when an LLM call may be needed (not cache hits).
+    reservation = None
+    if not ai_service.has_cached_analysis(str(submission.id)):
+        reservation = await ensure_analysis_allowed(str(current_user.id), redis=redis)
+
+    try:
+        outcome = await ai_service.analyze_code(
+            problem_title=problem.title,
+            problem_description=problem.description,
+            constraints=getattr(problem, "constraints", None),
+            language=submission.language,
+            code=submission.code,
+            verdict_status=submission.status,
+            failed_input=failed_input,
+            expected_output=expected_output,
+            actual_output=actual_output,
+            error_output=error_output,
+            submission_id=str(submission.id),
+        )
+    except Exception:
+        if reservation is not None:
+            await release_analysis_slot(str(current_user.id), reservation, redis=redis)
+        raise
+
+    # Quota ticks only on a real LLM response (not cache / fallback).
+    if reservation is not None:
+        if outcome.used_llm:
+            await record_analysis_use(
+                str(current_user.id), redis=redis, reservation=reservation
+            )
+        else:
+            await release_analysis_slot(str(current_user.id), reservation, redis=redis)
+
     return {
-        "analysis": analysis,
+        "analysis": outcome.analysis,
         "submission_id": str(submission.id),
         "problem_id": str(problem.id),
         "verdict": submission.status,
@@ -332,21 +417,32 @@ async def analyze_submission(
     data: AIAnalyzeRequest,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    redis: Optional[Redis] = Depends(get_redis),
 ) -> Any:
     """
     Analyze a completed submission using AI.
-    Returns structured feedback: verdict explanation, TC/SC, issues,
-    optimized approach, improved code, and tips.
+    Returns structured feedback: verdict_summary, root_cause, complexity,
+    key_insight, fix_hints, edge_cases, optional improved_code, and tips
+    (plus legacy aliases for older clients).
     """
     from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
     from backend.models.submission import Submission
+    from backend.models.submission_result import SubmissionResult
+    from backend.core.ai_rate_limit import (
+        ensure_analysis_allowed,
+        record_analysis_use,
+        release_analysis_slot,
+    )
 
-    # Fetch submission (must belong to current user)
+    # Fetch submission (must belong to current user) with results for failed_test_case I/O
     result = await db.execute(
-        select(Submission).where(
+        select(Submission)
+        .where(
             Submission.id == data.submission_id,
             Submission.user_id == current_user.id,
         )
+        .options(selectinload(Submission.results).selectinload(SubmissionResult.test_case))
     )
     submission = result.scalar_one_or_none()
     if not submission:
@@ -382,19 +478,38 @@ async def analyze_submission(
             actual_output = getattr(ftc, "actual_output", None)
             error_output = getattr(ftc, "error_output", None)
 
-    analysis = await ai_service.analyze_code(
-        problem_title=problem.title,
-        problem_description=problem.description,
-        constraints=getattr(problem, "constraints", None),
-        language=submission.language,
-        code=submission.code,
-        verdict_status=submission.status,
-        failed_input=failed_input,
-        expected_output=expected_output,
-        actual_output=actual_output,
-        error_output=error_output,
-        submission_id=str(submission.id),
-    )
+    reservation = None
+    if not ai_service.has_cached_analysis(str(submission.id)):
+        reservation = await ensure_analysis_allowed(str(current_user.id), redis=redis)
+
+    try:
+        outcome = await ai_service.analyze_code(
+            problem_title=problem.title,
+            problem_description=problem.description,
+            constraints=getattr(problem, "constraints", None),
+            language=submission.language,
+            code=submission.code,
+            verdict_status=submission.status,
+            failed_input=failed_input,
+            expected_output=expected_output,
+            actual_output=actual_output,
+            error_output=error_output,
+            submission_id=str(submission.id),
+        )
+    except Exception:
+        if reservation is not None:
+            await release_analysis_slot(str(current_user.id), reservation, redis=redis)
+        raise
+
+    if reservation is not None:
+        if outcome.used_llm:
+            await record_analysis_use(
+                str(current_user.id), redis=redis, reservation=reservation
+            )
+        else:
+            await release_analysis_slot(str(current_user.id), reservation, redis=redis)
+
+    analysis = outcome.analysis
 
     from backend.models.ai_analysis import AIAnalysis
     from backend.services.interview_metadata_service import get_problem_meta

@@ -99,15 +99,81 @@ async def _get_solved_problem_ids(
 
 def _to_public(problem, solved: bool = False) -> ProblemPublic:
     """Convert problem model to public schema with only sample test cases."""
-    sample_cases = [
-        TestCasePublic(
-            input=tc.input,
-            expected_output=tc.expected_output,
-            order_index=tc.order_index,
-        )
+    from backend.schemas.problem import ProblemExamplePublic, ProblemImagePublic
+
+    presentation = getattr(problem, "presentation", None) or {}
+    presentation_examples = presentation.get("examples") if isinstance(presentation, dict) else None
+    presentation_images = presentation.get("images") if isinstance(presentation, dict) else None
+
+    sample_cases_raw = [
+        tc
         for tc in (problem.test_cases if hasattr(problem, "test_cases") and problem.test_cases else [])
         if tc.is_sample
     ]
+
+    sample_cases = []
+    examples = []
+    for i, tc in enumerate(sample_cases_raw):
+        overlay = (
+            presentation_examples[i]
+            if isinstance(presentation_examples, list) and i < len(presentation_examples)
+            else None
+        )
+        explanation = None
+        if isinstance(overlay, dict):
+            explanation = overlay.get("explanation")
+        sample_cases.append(
+            TestCasePublic(
+                input=tc.input,
+                expected_output=tc.expected_output,
+                order_index=tc.order_index,
+                explanation=explanation,
+            )
+        )
+        examples.append(
+            ProblemExamplePublic(
+                input=(overlay.get("input") if isinstance(overlay, dict) and overlay.get("input") else tc.input),
+                output=(
+                    overlay.get("output")
+                    if isinstance(overlay, dict) and overlay.get("output")
+                    else tc.expected_output
+                ),
+                explanation=explanation,
+            )
+        )
+
+    # Presentation-only examples beyond sample count (display only, never executed)
+    if isinstance(presentation_examples, list) and len(presentation_examples) > len(sample_cases_raw):
+        for overlay in presentation_examples[len(sample_cases_raw) :]:
+            if not isinstance(overlay, dict):
+                continue
+            if not overlay.get("input") and not overlay.get("output"):
+                continue
+            examples.append(
+                ProblemExamplePublic(
+                    input=overlay.get("input") or "",
+                    output=overlay.get("output") or "",
+                    explanation=overlay.get("explanation"),
+                )
+            )
+
+    # Fallback: derive examples from samples when presentation missing (pre-sync)
+    if not examples and sample_cases:
+        examples = [
+            ProblemExamplePublic(
+                input=tc.input,
+                output=tc.expected_output,
+                explanation=tc.explanation,
+            )
+            for tc in sample_cases
+        ]
+
+    images = []
+    if isinstance(presentation_images, list):
+        for img in presentation_images:
+            if isinstance(img, dict) and img.get("src"):
+                images.append(ProblemImagePublic(src=img["src"], alt=img.get("alt")))
+
     return ProblemPublic(
         id=problem.id,
         title=problem.title,
@@ -125,4 +191,6 @@ def _to_public(problem, solved: bool = False) -> ProblemPublic:
         return_type=getattr(problem, "return_type", None),
         solved=solved,
         sample_cases=sample_cases,
+        examples=examples,
+        images=images,
     )
