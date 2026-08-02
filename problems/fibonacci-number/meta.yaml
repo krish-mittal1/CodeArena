@@ -1,0 +1,25 @@
+slug: fibonacci-number
+title: Fibonacci Number
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: 'The Fibonacci numbers, commonly denoted F(n) form a sequence, called
+  the Fibonacci sequence, such that each number is the sum of the two preceding ones,
+  starting from 0 and 1. That is, F(0) = 0, F(1) = 1, F(n) = F(n - 1) + F(n - 2) for
+  n > 1.
+
+  Given n, calculate F(n).'
+input_format: 'Line 1: integer n'
+output_format: Integer F(n)
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 0 <= n <= 30
+method_name: fib
+parameters:
+- name: n
+  type: int
+return_type: int
+generator:
+  count: 31
+  seed: 21058

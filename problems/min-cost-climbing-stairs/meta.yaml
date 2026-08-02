@@ -1,0 +1,27 @@
+slug: min-cost-climbing-stairs
+title: Min Cost Climbing Stairs
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: 'You are given an integer array cost where cost[i] is the cost of ith
+  step on a staircase. Once you pay the cost, you can either climb one or two steps.
+
+  You can either start from the step with index 0, or the step with index 1.
+
+  Return the minimum cost to reach the top of the floor.'
+input_format: 'Line 1: JSON array cost'
+output_format: Integer minimum cost
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '2 <= cost.length <= 1000
+
+  0 <= cost[i] <= 999'
+method_name: minCostClimbingStairs
+parameters:
+- name: cost
+  type: int[]
+return_type: int
+generator:
+  count: 100
+  seed: 21019

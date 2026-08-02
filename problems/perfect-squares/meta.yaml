@@ -1,0 +1,23 @@
+slug: perfect-squares
+title: Perfect Squares
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'Given an integer n, return the least number of perfect square numbers
+  that sum to n.
+
+  A perfect square is an integer that is the square of an integer.'
+input_format: 'Line 1: integer n'
+output_format: Integer least count
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 1 <= n <= 10^4
+method_name: numSquares
+parameters:
+- name: n
+  type: int
+return_type: int
+generator:
+  count: 60
+  seed: 21056

@@ -1,0 +1,38 @@
+slug: coin-change
+title: Coin Change
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: |
+  You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money.
+  Return the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1.
+  You may assume that you have an infinite number of each kind of coin.
+input_format: |
+  Line 1: JSON array coins
+  Line 2: integer amount
+output_format: |
+  Integer fewest coins, or -1
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: |
+  1 <= coins.length <= 12
+  1 <= coins[i] <= 2^31 - 1
+  0 <= amount <= 10000
+method_name: coinChange
+parameters:
+  - name: coins
+    type: int[]
+  - name: amount
+    type: int
+return_type: int
+generator:
+  count: 100
+  seed: 12001
+examples:
+  - explanation: |
+      11 = 5 + 5 + 1. The fewest coins needed is 3.
+  - explanation: |
+      The amount 3 cannot be made from only coins of value 2, so return -1.
+  - explanation: |
+      The amount is already 0, so no coins are needed.

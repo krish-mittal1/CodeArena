@@ -1,0 +1,40 @@
+slug: house-robber
+title: House Robber
+problem_type: dsa
+difficulty: medium
+rating: 1000
+description: 'You are a professional robber planning to rob houses along a street. Each house has a certain
+  amount of money stashed.
+
+  Adjacent houses have security systems connected — if two adjacent houses are broken into on the same
+  night, the police are alerted.
+
+  Given an integer array nums representing the amount of money of each house, return the maximum amount
+  you can rob tonight without alerting the police.
+
+  '
+input_format: 'Line 1: JSON array nums
+
+  '
+output_format: 'Integer maximum amount
+
+  '
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 100
+
+  0 <= nums[i] <= 400
+
+  '
+method_name: rob
+parameters:
+- name: nums
+  type: int[]
+return_type: int
+generator:
+  count: 120
+  seed: 10001
+examples:
+- explanation: Rob house 1 (1) and house 3 (3) for a total of 4.
+- explanation: Rob house 1 (2), house 3 (9), and house 5 (1) for a total of 12.
