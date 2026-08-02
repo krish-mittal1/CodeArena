@@ -12,7 +12,6 @@ import { useAuthStore } from '../stores/authStore';
 import { useMatchmakingStore } from '../stores/matchmakingStore';
 import { matchApi, statsApi, leaderboardApi, eventsApi, userApi } from '../api/auth';
 import { formatWinRate, formatElo } from '../utils/formatters';
-import QueueOverlay from '../components/matchmaking/QueueOverlay';
 import PrivateRoomOverlay from '../components/matchmaking/PrivateRoomOverlay';
 import OnboardingModal from '../components/onboarding/OnboardingModal';
 import RatingChart from '../components/dashboard/RatingChart';
@@ -398,7 +397,6 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <QueueOverlay />
             <PrivateRoomOverlay isOpen={privateOverlayOpen} onClose={() => setPrivateOverlayOpen(false)} />
             {showOnboarding && <OnboardingModal />}
         </div>

@@ -83,22 +83,30 @@ export const CODE_TEMPLATES = {
 const TYPE_MAPS = {
     python: {
         'int': 'int', 'int[]': 'List[int]', 'int[][]': 'List[List[int]]',
-        'str': 'str', 'str[]': 'List[str]', 'bool': 'bool',
+        'str': 'str', 'str[]': 'List[str]', 'string': 'str', 'string[]': 'List[str]',
+        'char[][]': 'List[List[str]]', 'string[][]': 'List[List[str]]',
+        'bool': 'bool',
         'float': 'float', 'float[]': 'List[float]', 'ListNode': "Optional['ListNode']", 'TreeNode': "Optional['TreeNode']",
     },
     cpp: {
         'int': 'int', 'int[]': 'vector<int>', 'int[][]': 'vector<vector<int>>',
-        'str': 'string', 'str[]': 'vector<string>', 'bool': 'bool',
+        'str': 'string', 'str[]': 'vector<string>', 'string': 'string', 'string[]': 'vector<string>',
+        'char[][]': 'vector<vector<char>>', 'string[][]': 'vector<vector<string>>',
+        'bool': 'bool',
         'float': 'double', 'float[]': 'vector<double>', 'ListNode': 'ListNode*', 'TreeNode': 'TreeNode*',
     },
     java: {
         'int': 'int', 'int[]': 'int[]', 'int[][]': 'int[][]',
-        'str': 'String', 'str[]': 'String[]', 'bool': 'boolean',
+        'str': 'String', 'str[]': 'String[]', 'string': 'String', 'string[]': 'String[]',
+        'char[][]': 'char[][]', 'string[][]': 'String[][]',
+        'bool': 'boolean',
         'float': 'double', 'float[]': 'double[]', 'ListNode': 'ListNode', 'TreeNode': 'TreeNode',
     },
     javascript: {
         'int': 'number', 'int[]': 'number[]', 'int[][]': 'number[][]',
-        'str': 'string', 'str[]': 'string[]', 'bool': 'boolean',
+        'str': 'string', 'str[]': 'string[]', 'string': 'string', 'string[]': 'string[]',
+        'char[][]': 'string[][]', 'string[][]': 'string[][]',
+        'bool': 'boolean',
         'float': 'number', 'float[]': 'number[]', 'ListNode': 'ListNode', 'TreeNode': 'TreeNode',
     },
 };

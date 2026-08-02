@@ -9,6 +9,7 @@ import { useThemeStore } from './stores/themeStore';
 import Navbar from './components/layout/Navbar';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import ErrorBoundary from './components/layout/ErrorBoundary';
+import QueueOverlay from './components/matchmaking/QueueOverlay';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -22,7 +23,6 @@ import Problems from './pages/Problems';
 import Practice from './pages/Practice';
 import CompanyProblems from './pages/CompanyProblems';
 import DsaPracticeHub from './pages/DsaPracticeHub';
-import CompetitiveProblems from './pages/CompetitiveProblems';
 import Leaderboard from './pages/Leaderboard';
 import Spectate from './pages/Spectate';
 import MatchRecap from './pages/MatchRecap';
@@ -86,10 +86,11 @@ function AppRoutes() {
   return (
     <>
       <Navbar />
+      {isAuthenticated && <QueueOverlay />}
       <main className="flex-1">
         <Routes>
           {/* Public */}
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <Landing />} />
           <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
           <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
           <Route path="/recap/:matchId" element={<MatchRecap />} />
@@ -149,19 +150,12 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/practice/competitive"
-            element={
-              <ProtectedRoute>
-                {matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <CompetitiveProblems />}
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/practice/competitive" element={<Navigate to="/practice/dsa" replace />} />
           <Route
             path="/practice/:problemId"
             element={
               <ProtectedRoute>
-                <Practice />
+                {matchId ? <Navigate to={`/battle/${matchId}`} replace /> : <Practice />}
               </ProtectedRoute>
             }
           />

@@ -2,10 +2,11 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Search, Building2, ChevronRight, Briefcase, Terminal, Activity
+    Search, ChevronRight, Briefcase, Terminal
 } from 'lucide-react';
-import { COMPANIES, COMPANY_CATEGORIES } from '../utils/companies';
+import { COMPANY_CATEGORIES, getCompaniesWithMappedProblems } from '../utils/companies';
 import CompanyLogo from '../components/ui/CompanyLogo';
+import { PROBLEM_METADATA } from '../data/problemMetadata';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -15,22 +16,27 @@ export default function DsaPracticeHub() {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
+    const activeCompanies = useMemo(
+        () => getCompaniesWithMappedProblems(PROBLEM_METADATA),
+        [],
+    );
+
     const categoryCounts = useMemo(() => {
         const counts = {};
-        COMPANIES.forEach((c) => {
+        activeCompanies.forEach((c) => {
             counts[c.category] = (counts[c.category] || 0) + 1;
         });
-        counts.All = COMPANIES.length;
+        counts.All = activeCompanies.length;
         return counts;
-    }, []);
+    }, [activeCompanies]);
 
     const filtered = useMemo(() => {
-        return COMPANIES.filter((c) => {
+        return activeCompanies.filter((c) => {
             const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
             const matchesCategory = selectedCategory === 'All' || c.category === selectedCategory;
             return matchesSearch && matchesCategory;
         });
-    }, [search, selectedCategory]);
+    }, [activeCompanies, search, selectedCategory]);
 
     const visibleCompanies = filtered.slice(0, visibleCount);
     const hasMore = visibleCount < filtered.length;
@@ -75,7 +81,7 @@ export default function DsaPracticeHub() {
                         <h1 className="dsa-hub__title">
                             Company Hub
                             <span className="dsa-hub__title-meta">
-                                / {filtered.length} active systems
+                                / {filtered.length} {filtered.length === 1 ? 'company' : 'companies'}
                             </span>
                         </h1>
                         <div className="flex flex-wrap gap-2 mt-3">
@@ -145,7 +151,7 @@ export default function DsaPracticeHub() {
                             <div className="dsa-hub__intel-row">
                                 <span className="dsa-hub__intel-label">Companies</span>
                                 <span className="dsa-hub__intel-value dsa-hub__intel-value--accent">
-                                    {COMPANIES.length} Total
+                                    {activeCompanies.length} Mapped
                                 </span>
                             </div>
                             <div className="dsa-hub__intel-row">
@@ -167,7 +173,7 @@ export default function DsaPracticeHub() {
                         {filtered.length === 0 ? (
                             <div className="dsa-hub__empty">
                                 <Briefcase size={40} className="dsa-hub__empty-icon" />
-                                <p className="dsa-hub__empty-title">No systems found</p>
+                                <p className="dsa-hub__empty-title">No companies found</p>
                                 <p className="dsa-hub__empty-sub">Adjust search query or sector filters</p>
                             </div>
                         ) : (

@@ -12,7 +12,6 @@ import { useMatchmakingStore } from '../stores/matchmakingStore';
 import { matchApi } from '../api/auth';
 import { formatWinRate, formatElo } from '../utils/formatters';
 import RatingChart from '../components/dashboard/RatingChart';
-import QueueOverlay from '../components/matchmaking/QueueOverlay';
 import PrivateRoomOverlay from '../components/matchmaking/PrivateRoomOverlay';
 import { StatCardSkeleton, ChartSkeleton } from '../components/ui/Skeleton';
 
@@ -424,7 +423,6 @@ export default function Profile() {
                 </div>
             </div>
 
-            <QueueOverlay />
             <PrivateRoomOverlay isOpen={privateOverlayOpen} onClose={() => setPrivateOverlayOpen(false)} />
         </div>
     );
