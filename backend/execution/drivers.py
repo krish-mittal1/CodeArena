@@ -40,6 +40,8 @@ def _python_type_hint(param_type: str) -> str:
         "string": "str",
         "str[]": "List[str]",
         "string[]": "List[str]",
+        "char[][]": "List[List[str]]",
+        "string[][]": "List[List[str]]",
         "float": "float",
         "float[]": "List[float]",
         "bool": "bool",
@@ -63,6 +65,8 @@ def _cpp_type(param_type: str) -> str:
         "string": "string",
         "str[]": "vector<string>",
         "string[]": "vector<string>",
+        "char[][]": "vector<vector<char>>",
+        "string[][]": "vector<vector<string>>",
         "float": "double",
         "float[]": "vector<double>",
         "bool": "bool",
@@ -86,6 +90,8 @@ def _java_type(param_type: str) -> str:
         "string": "String",
         "str[]": "String[]",
         "string[]": "String[]",
+        "char[][]": "char[][]",
+        "string[][]": "String[][]",
         "float": "double",
         "float[]": "double[]",
         "bool": "boolean",
@@ -101,10 +107,20 @@ def _java_type(param_type: str) -> str:
 def _indent_python_reads(parameters: List[Dict[str, str]]) -> str:
     lines = ""
     for p in parameters:
-        if p.get("type") == "ListNode":
+        ptype = p.get("type")
+        if ptype == "ListNode":
             lines += f"    {p['name']} = build_linked_list(json.loads(input_data[idx]))\n"
-        elif p.get("type") == "TreeNode":
+        elif ptype == "TreeNode":
             lines += f"    {p['name']} = build_tree(json.loads(input_data[idx]))\n"
+        elif ptype == "char[][]":
+            # Accept [["1","0"], ...] or legacy ["10","01"] string rows.
+            lines += (
+                f"    __raw_{p['name']} = json.loads(input_data[idx])\n"
+                f"    if __raw_{p['name']} and isinstance(__raw_{p['name']}[0], str):\n"
+                f"        {p['name']} = [list(row) for row in __raw_{p['name']}]\n"
+                f"    else:\n"
+                f"        {p['name']} = [[(c if isinstance(c, str) else str(c))[0] for c in row] for row in __raw_{p['name']}]\n"
+            )
         else:
             lines += f"    {p['name']} = json.loads(input_data[idx])\n"
         lines += "    idx += 1\n"
@@ -156,20 +172,23 @@ class TreeNode:
         self.right = right
 
 def build_tree(values):
-    if not values:
+    # LeetCode level-order: only non-null nodes own left/right slots.
+    if not values or values[0] is None:
         return None
-    nodes = [None if value is None else TreeNode(value) for value in values]
-    child_idx = 1
-    for node in nodes:
-        if node is None:
-            continue
-        if child_idx < len(nodes):
-            node.left = nodes[child_idx]
-            child_idx += 1
-        if child_idx < len(nodes):
-            node.right = nodes[child_idx]
-            child_idx += 1
-    return nodes[0]
+    root = TreeNode(values[0])
+    queue = deque([root])
+    i = 1
+    while queue and i < len(values):
+        node = queue.popleft()
+        if i < len(values) and values[i] is not None:
+            node.left = TreeNode(values[i])
+            queue.append(node.left)
+        i += 1
+        if i < len(values) and values[i] is not None:
+            node.right = TreeNode(values[i])
+            queue.append(node.right)
+        i += 1
+    return root
 
 def tree_to_array(root):
     if root is None:
@@ -194,6 +213,12 @@ def tree_to_array(root):
         serializer_line = "    print(json.dumps(linked_list_to_array(result)))"
     elif return_type == "TreeNode":
         serializer_line = "    print(json.dumps(tree_to_array(result)))"
+    elif return_type == "char[][]":
+        serializer_line = (
+            "    print(json.dumps([[c if isinstance(c, str) else str(c) for c in row] for row in result]))"
+        )
+    elif return_type == "string[][]":
+        serializer_line = "    print(json.dumps(result))"
 
     return f"""import sys
 import json
@@ -201,7 +226,7 @@ import json
 {listnode_helpers}
 {treenode_helpers}
 
-sys.path.insert(0, '/sandbox')
+sys.path.insert(0, '/sandbox/in')
 from solution import Solution
 
 def main():
@@ -228,6 +253,13 @@ def generate_javascript_driver(method_name: str, parameters: List[Dict[str, str]
             read_lines += f"    const {p['name']} = buildLinkedList(JSON.parse(lines[{idx}]));\n"
         elif p.get("type") == "TreeNode":
             read_lines += f"    const {p['name']} = buildTree(JSON.parse(lines[{idx}]));\n"
+        elif p.get("type") == "char[][]":
+            read_lines += (
+                f"    let {p['name']} = JSON.parse(lines[{idx}]);\n"
+                f"    if ({p['name']}.length && typeof {p['name']}[0] === 'string') "
+                f"{p['name']} = {p['name']}.map(row => row.split(''));\n"
+                f"    else {p['name']} = {p['name']}.map(row => row.map(c => String(c)[0]));\n"
+            )
         else:
             read_lines += f"    const {p['name']} = JSON.parse(lines[{idx}]);\n"
 
@@ -275,15 +307,25 @@ class TreeNode {
 }
 
 function buildTree(values) {
-    if (!values || values.length === 0) return null;
-    const nodes = values.map((value) => (value === null ? null : new TreeNode(value)));
-    let childIndex = 1;
-    for (let i = 0; i < nodes.length && childIndex < nodes.length; i++) {
-        if (nodes[i] === null) continue;
-        if (childIndex < nodes.length) nodes[i].left = nodes[childIndex++];
-        if (childIndex < nodes.length) nodes[i].right = nodes[childIndex++];
+    // LeetCode level-order: only non-null nodes own left/right slots.
+    if (!values || values.length === 0 || values[0] === null) return null;
+    const root = new TreeNode(values[0]);
+    const queue = [root];
+    let i = 1;
+    while (queue.length && i < values.length) {
+        const node = queue.shift();
+        if (i < values.length && values[i] !== null) {
+            node.left = new TreeNode(values[i]);
+            queue.push(node.left);
+        }
+        i++;
+        if (i < values.length && values[i] !== null) {
+            node.right = new TreeNode(values[i]);
+            queue.push(node.right);
+        }
+        i++;
     }
-    return nodes[0];
+    return root;
 }
 
 function treeToArray(root) {
@@ -303,6 +345,8 @@ function treeToArray(root) {
     while (out.length && out[out.length - 1] === null) out.pop();
     return out;
 }
+
+globalThis.TreeNode = TreeNode;
 """
 
     result_printer = "    console.log(JSON.stringify(result));"
@@ -311,14 +355,17 @@ function treeToArray(root) {
     elif return_type == "TreeNode":
         result_printer = "    console.log(JSON.stringify(treeToArray(result)));"
 
+    # Expose ListNode globally when present so user code can construct nodes.
+    listnode_global = "globalThis.ListNode = ListNode;\n" if uses_listnode else ""
+
     return f"""const fs = require('fs');
-const raw = fs.readFileSync('/dev/stdin', 'utf8').trim();
+const raw = fs.readFileSync(0, 'utf8').trim();
 const lines = raw ? raw.split('\\n') : [];
 
 {listnode_helpers}
-{treenode_helpers}
+{listnode_global}{treenode_helpers}
 
-const userModule = require('/sandbox/code.js');
+const userModule = require('/sandbox/in/code.js');
 
 let solution;
 if (typeof userModule === 'function') {{
@@ -360,6 +407,10 @@ def _cpp_json_parser(param_type: str, var_name: str) -> str:
         return f"    vector<long long> {var_name} = parseJsonLongArray(line);"
     if param_type == "int[][]":
         return f"    vector<vector<int>> {var_name} = parseJson2DIntArray(line);"
+    if param_type == "char[][]":
+        return f"    vector<vector<char>> {var_name} = parseJson2DCharArray(line);"
+    if param_type == "string[][]":
+        return f"    vector<vector<string>> {var_name} = parseJson2DStringArray(line);"
     if param_type in {"str[]", "string[]"}:
         return f"    vector<string> {var_name} = parseJsonStringArray(line);"
     if param_type == "float":
@@ -410,6 +461,30 @@ def _cpp_json_serializer(return_type: str) -> str:
         for (size_t j = 0; j < result[i].size(); j++) {
             if (j > 0) cout << ",";
             cout << result[i][j];
+        }
+        cout << "]";
+    }
+    cout << "]" << endl;"""
+    if return_type == "char[][]":
+        return """    cout << "[";
+    for (size_t i = 0; i < result.size(); i++) {
+        if (i > 0) cout << ",";
+        cout << "[";
+        for (size_t j = 0; j < result[i].size(); j++) {
+            if (j > 0) cout << ",";
+            cout << "\\\"" << result[i][j] << "\\\"";
+        }
+        cout << "]";
+    }
+    cout << "]" << endl;"""
+    if return_type == "string[][]":
+        return """    cout << "[";
+    for (size_t i = 0; i < result.size(); i++) {
+        if (i > 0) cout << ",";
+        cout << "[";
+        for (size_t j = 0; j < result[i].size(); j++) {
+            if (j > 0) cout << ",";
+            cout << "\\\"" << result[i][j] << "\\\"";
         }
         cout << "]";
     }
@@ -505,19 +580,31 @@ vector<optional<int>> parseJsonTreeArray(const string& s) {
 }
 
 TreeNode* buildTree(const vector<optional<int>>& values) {
+    // LeetCode level-order: only non-null nodes own left/right slots.
     if (values.empty() || !values[0].has_value()) return nullptr;
-    vector<TreeNode*> nodes;
-    nodes.reserve(values.size());
-    for (const auto& value : values) {
-        nodes.push_back(value.has_value() ? new TreeNode(*value) : nullptr);
+    TreeNode* root = new TreeNode(*values[0]);
+    queue<TreeNode*> q;
+    q.push(root);
+    size_t i = 1;
+    while (!q.empty() && i < values.size()) {
+        TreeNode* node = q.front();
+        q.pop();
+        if (i < values.size()) {
+            if (values[i].has_value()) {
+                node->left = new TreeNode(*values[i]);
+                q.push(node->left);
+            }
+            ++i;
+        }
+        if (i < values.size()) {
+            if (values[i].has_value()) {
+                node->right = new TreeNode(*values[i]);
+                q.push(node->right);
+            }
+            ++i;
+        }
     }
-    size_t childIdx = 1;
-    for (size_t i = 0; i < nodes.size() && childIdx < nodes.size(); ++i) {
-        if (!nodes[i]) continue;
-        if (childIdx < nodes.size()) nodes[i]->left = nodes[childIdx++];
-        if (childIdx < nodes.size()) nodes[i]->right = nodes[childIdx++];
-    }
-    return nodes[0];
+    return root;
 }
 
 string treeToJson(TreeNode* root) {
@@ -637,6 +724,66 @@ vector<string> parseJsonStringArray(const string& s) {{
     return res;
 }}
 
+vector<vector<string>> parseJson2DStringArray(const string& s) {{
+    vector<vector<string>> res;
+    int depth = 0;
+    bool inStr = false;
+    string current;
+    for (size_t i = 0; i < s.size(); i++) {{
+        char c = s[i];
+        if (c == '"' ) {{
+            if (inStr) {{
+                if (depth >= 2 && !res.empty()) res.back().push_back(current);
+                current.clear();
+            }}
+            inStr = !inStr;
+            continue;
+        }}
+        if (inStr) {{
+            current += c;
+            continue;
+        }}
+        if (c == '[') {{
+            depth++;
+            if (depth == 2) res.emplace_back();
+        }} else if (c == ']') {{
+            depth--;
+        }}
+    }}
+    return res;
+}}
+
+vector<vector<char>> parseJson2DCharArray(const string& s) {{
+    string trimmed = s;
+    while (!trimmed.empty() && isspace(static_cast<unsigned char>(trimmed.front()))) trimmed.erase(trimmed.begin());
+    while (!trimmed.empty() && isspace(static_cast<unsigned char>(trimmed.back()))) trimmed.pop_back();
+    size_t look = 1;
+    while (look < trimmed.size() && isspace(static_cast<unsigned char>(trimmed[look]))) look++;
+    bool nested = trimmed.size() >= 2 && trimmed[0] == '[' && look < trimmed.size() && trimmed[look] == '[';
+
+    if (!nested) {{
+        vector<string> rows = parseJsonStringArray(s);
+        vector<vector<char>> res;
+        for (const auto& row : rows) {{
+            res.emplace_back(row.begin(), row.end());
+        }}
+        return res;
+    }}
+
+    vector<vector<string>> cells = parseJson2DStringArray(s);
+    vector<vector<char>> res;
+    res.reserve(cells.size());
+    for (const auto& row : cells) {{
+        vector<char> out;
+        out.reserve(row.size());
+        for (const auto& cell : row) {{
+            out.push_back(cell.empty() ? '\\0' : cell[0]);
+        }}
+        res.push_back(std::move(out));
+    }}
+    return res;
+}}
+
 {listnode_defs}
 {treenode_defs}
 
@@ -669,10 +816,16 @@ def _java_json_parser(param_type: str, var_name: str) -> str:
         return f"        long[] {var_name} = parseJsonLongArray(lines[idx++].trim());"
     if param_type == "int[][]":
         return f"        int[][] {var_name} = parseJson2DIntArray(lines[idx++].trim());"
+    if param_type == "char[][]":
+        return f"        char[][] {var_name} = parseJson2DCharArray(lines[idx++].trim());"
+    if param_type == "string[][]":
+        return f"        String[][] {var_name} = parseJson2DStringArray(lines[idx++].trim());"
     if param_type in {"str[]", "string[]"}:
         return f"        String[] {var_name} = parseJsonStringArray(lines[idx++].trim());"
     if param_type in {"bool", "boolean"}:
         return f'        boolean {var_name} = lines[idx++].trim().equals("true");'
+    if param_type == "float":
+        return f"        double {var_name} = Double.parseDouble(lines[idx++].trim());"
     if param_type == "ListNode":
         return f"        ListNode {var_name} = buildLinkedList(parseJsonIntArray(lines[idx++].trim()));"
     if param_type == "TreeNode":
@@ -687,6 +840,8 @@ def _java_json_serializer(return_type: str) -> str:
         return '        System.out.println("\\"" + result + "\\"");'
     if return_type in {"bool", "boolean"}:
         return '        System.out.println(result ? "true" : "false");'
+    if return_type == "float":
+        return "        System.out.println(result);"
     if return_type == "int[]":
         return """        StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < result.length; i++) {
@@ -711,6 +866,32 @@ def _java_json_serializer(return_type: str) -> str:
             for (int j = 0; j < result[i].length; j++) {
                 if (j > 0) sb.append(",");
                 sb.append(result[i][j]);
+            }
+            sb.append("]");
+        }
+        sb.append("]");
+        System.out.println(sb.toString());"""
+    if return_type == "char[][]":
+        return """        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < result.length; i++) {
+            if (i > 0) sb.append(",");
+            sb.append("[");
+            for (int j = 0; j < result[i].length; j++) {
+                if (j > 0) sb.append(",");
+                sb.append("\\\"").append(result[i][j]).append("\\\"");
+            }
+            sb.append("]");
+        }
+        sb.append("]");
+        System.out.println(sb.toString());"""
+    if return_type == "string[][]":
+        return """        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < result.length; i++) {
+            if (i > 0) sb.append(",");
+            sb.append("[");
+            for (int j = 0; j < result[i].length; j++) {
+                if (j > 0) sb.append(",");
+                sb.append("\\\"").append(result[i][j]).append("\\\"");
             }
             sb.append("]");
         }
@@ -832,6 +1013,58 @@ public class Main {{
         return list.toArray(new int[0][]);
     }}
 
+    static char[][] parseJson2DCharArray(String s) {{
+        s = s.trim();
+        if (s.equals("[]")) return new char[0][];
+        int look = 1;
+        while (look < s.length() && Character.isWhitespace(s.charAt(look))) look++;
+        boolean nested = s.startsWith("[") && look < s.length() && s.charAt(look) == '[';
+        if (!nested) {{
+            String[] rows = parseJsonStringArray(s);
+            char[][] res = new char[rows.length][];
+            for (int i = 0; i < rows.length; i++) res[i] = rows[i].toCharArray();
+            return res;
+        }}
+        String[][] cells = parseJson2DStringArray(s);
+        char[][] res = new char[cells.length][];
+        for (int i = 0; i < cells.length; i++) {{
+            res[i] = new char[cells[i].length];
+            for (int j = 0; j < cells[i].length; j++) {{
+                res[i][j] = cells[i][j].isEmpty() ? '\\0' : cells[i][j].charAt(0);
+            }}
+        }}
+        return res;
+    }}
+
+    static String[][] parseJson2DStringArray(String s) {{
+        s = s.trim();
+        if (s.equals("[]")) return new String[0][];
+        List<List<String>> list = new ArrayList<>();
+        int depth = 0;
+        boolean inStr = false;
+        StringBuilder current = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {{
+            char c = s.charAt(i);
+            if (c == '"') {{
+                if (inStr) {{
+                    if (depth >= 2 && !list.isEmpty()) list.get(list.size() - 1).add(current.toString());
+                    current = new StringBuilder();
+                }}
+                inStr = !inStr;
+            }} else if (inStr) {{
+                current.append(c);
+            }} else if (c == '[') {{
+                depth++;
+                if (depth == 2) list.add(new ArrayList<>());
+            }} else if (c == ']') {{
+                depth--;
+            }}
+        }}
+        String[][] res = new String[list.size()][];
+        for (int i = 0; i < list.size(); i++) res[i] = list.get(i).toArray(new String[0]);
+        return res;
+    }}
+
     static String[] parseJsonStringArray(String s) {{
         s = s.trim();
         if (s.equals("[]")) return new String[0];
@@ -878,18 +1111,30 @@ public class Main {{
     }}
 
     static TreeNode buildTree(Integer[] values) {{
+        // LeetCode level-order: only non-null nodes own left/right slots.
         if (values.length == 0 || values[0] == null) return null;
-        TreeNode[] nodes = new TreeNode[values.length];
-        for (int i = 0; i < values.length; i++) {{
-            if (values[i] != null) nodes[i] = new TreeNode(values[i]);
+        TreeNode root = new TreeNode(values[0]);
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        int i = 1;
+        while (!queue.isEmpty() && i < values.length) {{
+            TreeNode node = queue.poll();
+            if (i < values.length) {{
+                if (values[i] != null) {{
+                    node.left = new TreeNode(values[i]);
+                    queue.add(node.left);
+                }}
+                i++;
+            }}
+            if (i < values.length) {{
+                if (values[i] != null) {{
+                    node.right = new TreeNode(values[i]);
+                    queue.add(node.right);
+                }}
+                i++;
+            }}
         }}
-        int childIdx = 1;
-        for (int i = 0; i < values.length && childIdx < values.length; i++) {{
-            if (nodes[i] == null) continue;
-            if (childIdx < values.length) nodes[i].left = nodes[childIdx++];
-            if (childIdx < values.length) nodes[i].right = nodes[childIdx++];
-        }}
-        return nodes[0];
+        return root;
     }}
 
     static String treeToJson(TreeNode root) {{
