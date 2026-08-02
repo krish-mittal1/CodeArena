@@ -294,21 +294,35 @@ async def process_submission(redis: aioredis.Redis, submission_id: uuid.UUID):
             f"{max_time_ms}ms, {max_memory_kb}KB)"
         )
 
-        # ── 6. Check for match completion ─────────────────
-        if overall_verdict == Verdict.ACCEPTED:
+        # ── 6. Check for match completion (all problems ACCEPTED) ─
+        if overall_verdict == Verdict.ACCEPTED and submission.match_id is not None:
             try:
-                result_data = await match_service.complete_match_with_winner(
-                    db, redis, submission.match_id,
-                    winner_id=submission.user_id, reason="accepted"
+                match = await match_service.get_match(db, submission.match_id)
+                solved_all = await match_service.user_has_accepted_all_match_problems(
+                    db, match, submission.user_id
                 )
-                if result_data:
-                    await _publish_event(
-                        redis, match_channel,
-                        WSEvent.MATCH_ENDED, result_data,
+                if not solved_all:
+                    solved_count = await match_service.count_user_accepted_match_problems(
+                        db, match, submission.user_id
                     )
+                    total = len(match_service.get_match_problem_ids(match))
                     logger.info(
-                        f"[WORKER] Match {submission.match_id} completed (solved)"
+                        f"[WORKER] Match {submission.match_id}: "
+                        f"user {submission.user_id} solved {solved_count}/{total} — continuing"
                     )
+                else:
+                    result_data = await match_service.complete_match_with_winner(
+                        db, redis, submission.match_id,
+                        winner_id=submission.user_id, reason="accepted"
+                    )
+                    if result_data:
+                        await _publish_event(
+                            redis, match_channel,
+                            WSEvent.MATCH_ENDED, result_data,
+                        )
+                        logger.info(
+                            f"[WORKER] Match {submission.match_id} completed (all problems solved)"
+                        )
             except Exception as e:
                 logger.error(f"[WORKER] Error completing match: {e}", exc_info=True)
 

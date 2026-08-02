@@ -70,28 +70,38 @@ async def submit_code(
             detail="You are not a participant in this match.",
         )
 
-    # Validate via Redis (production only)
+    match_problem_ids = match_service.get_match_problem_ids(match)
+    problem_id = data.problem_id or match.problem_id
+    if problem_id not in match_problem_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Problem is not part of this match.",
+        )
+
+    # Validate via Redis; DB fallback if match_state missing (started_at pattern)
     if redis is not None:
-        await match_service.validate_match_active(redis, data.match_id, current_user.id)
+        await match_service.validate_match_active(
+            redis, data.match_id, current_user.id, db=db
+        )
 
     # Conservative anti-spam throttle: max 3 submissions per 5 seconds per user per match.
-    ensure_submission_allowed(str(current_user.id), str(data.match_id))
+    await ensure_submission_allowed(str(current_user.id), str(data.match_id), redis=redis)
 
     # Create submission and enqueue (Redis or dev queue)
     submission = await submission_service.create_submission(
         db=db,
         match_id=data.match_id,
         user_id=current_user.id,
-        problem_id=match.problem_id,
+        problem_id=problem_id,
         code=data.code,
         language=data.language.value,
         redis=redis,
     )
-    record_submission(str(current_user.id), str(data.match_id))
+    await record_submission(str(current_user.id), str(data.match_id), redis=redis)
 
     logger.info(
         f"[API] Submission {submission.id} created and enqueued "
-        f"(match={data.match_id}, user={current_user.id})"
+        f"(match={data.match_id}, user={current_user.id}, problem={problem_id})"
     )
 
     return submission

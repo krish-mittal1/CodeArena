@@ -2,11 +2,14 @@
 Judge worker — process submissions from queue, execute in sandbox, save results.
 
 Usage:
-    # With Redis (production):
+    # With Redis (production) — standalone process (preferred when scaling off API):
     python -m backend.workers.judge_worker
 
+    # With Redis (single-VM) — also started in-process by FastAPI lifespan
+    # via run_redis_worker() so one container can host API + judge.
+
     # Without Redis (dev mode): started automatically by FastAPI lifespan
-    # as an in-process background task.
+    # as an in-process background task (asyncio.Queue).
 
 Architecture:
     1. Pop submission_id from queue (Redis BRPOP or asyncio.Queue)
@@ -16,14 +19,15 @@ Architecture:
        b. Call judge_service.judge() to get verdict
        c. Save SubmissionResult to DB
     4. Update Submission.status based on results
-    5. Broadcast SUBMISSION_RESULT via WebSocket
-    6. If ACCEPTED → trigger match completion + ELO update
-    7. Broadcast MATCH_ENDED via WebSocket
+    5. Broadcast SUBMISSION_RESULT via WebSocket (Redis pub/sub in production)
+    6. If ACCEPTED on all match problems → complete_match_with_winner(redis=...) + ELO update
+    7. Broadcast MATCH_ENDED via WebSocket (Redis pub/sub in production)
 """
 
 import asyncio
 import json
 import logging
+import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
@@ -33,7 +37,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from backend.config import settings
-from backend.core.constants import SubmissionStatus, Verdict
+from backend.core.constants import SubmissionStatus, Verdict, RedisKey, WSEvent
 from backend.models.submission import Submission
 from backend.models.submission_result import SubmissionResult
 from backend.models.test_case import TestCase
@@ -46,6 +50,12 @@ logger = logging.getLogger(__name__)
 dev_queue: asyncio.Queue[str] = asyncio.Queue()
 
 
+async def _publish_event(redis, channel: str, event: str, data: dict) -> None:
+    """Publish a WebSocket event through Redis pub/sub (production path)."""
+    payload = json.dumps({"event": event, "data": data})
+    await redis.publish(channel, payload)
+
+
 async def _emit_submission_result(
     submission: Submission,
     verdict: str,
@@ -53,15 +63,20 @@ async def _emit_submission_result(
     total: int,
     runtime_ms: int,
     memory_kb: int,
+    redis=None,
 ) -> None:
-    """Emit SUBMISSION_RESULT WebSocket event to the submitter (dev-mode, no Redis)."""
+    """
+    Emit SUBMISSION_RESULT to the submitter (personalized) and OPPONENT_SUBMITTED to others.
+
+    Always routes through ConnectionManager so local sockets and Redis pub/sub
+    both receive personalized/redacted payloads.
+    """
     try:
+        submission_id = str(submission.id)
+        submitter_id = str(submission.user_id)
         from backend.websocket.manager import manager
 
-        room_id = str(submission.match_id)
-        submitter_id = str(submission.user_id)
-        submission_id = str(submission.id)
-
+        room_id = str(submission.match_id) if submission.match_id else "practice"
         await manager.broadcast_submission_result(
             room_id=room_id,
             submitter_id=submitter_id,
@@ -71,7 +86,24 @@ async def _emit_submission_result(
             runtime_ms=runtime_ms,
             memory_kb=memory_kb,
             submission_id=submission_id,
+            problem_id=str(submission.problem_id) if submission.problem_id else None,
         )
+
+        # Standalone judge worker: manager may have no Redis — also publish raw
+        # so API pods can personalize via their Redis listener.
+        if redis is not None and submission.match_id is not None and not manager._redis:
+            channel = RedisKey.ws_channel(str(submission.match_id))
+            await _publish_event(redis, channel, WSEvent.SUBMISSION_RESULT, {
+                "submission_id": submission_id,
+                "user_id": submitter_id,
+                "verdict": verdict,
+                "passed": passed,
+                "total": total,
+                "runtime_ms": runtime_ms,
+                "memory_kb": memory_kb,
+                "problem_id": str(submission.problem_id) if submission.problem_id else None,
+            })
+
         logger.info(
             f"[WS] Sent submission_result to {submitter_id} "
             f"(verdict={verdict}, submission={submission_id})"
@@ -80,13 +112,23 @@ async def _emit_submission_result(
         logger.error(f"[WS] Failed to emit submission_result: {e}", exc_info=True)
 
 
-async def _emit_match_ended(match_result: dict) -> None:
-    """Emit MATCH_ENDED WebSocket event to both players (dev-mode, no Redis)."""
+async def _emit_match_ended(match_result: dict, redis=None) -> None:
+    """
+    Emit MATCH_ENDED to both players with personalized ELO deltas.
+
+    Routes through ConnectionManager.broadcast_match_ended (local + Redis).
+    Standalone workers also publish raw when manager has no Redis binding.
+    """
     try:
+        room_id = match_result["match_id"]
         from backend.websocket.manager import manager
 
-        room_id = match_result["match_id"]
         await manager.broadcast_match_ended(room_id, match_result)
+
+        if redis is not None and not manager._redis:
+            channel = RedisKey.ws_channel(room_id)
+            await _publish_event(redis, channel, WSEvent.MATCH_ENDED, match_result)
+
         logger.info(
             f"[WS] Sent match_ended to {match_result.get('player1_id')} "
             f"and {match_result.get('player2_id')} "
@@ -99,6 +141,7 @@ async def _emit_match_ended(match_result: dict) -> None:
 async def process_submission(
     session_factory: async_sessionmaker,
     submission_id: uuid.UUID,
+    redis=None,
 ) -> None:
     """
     Fail-safe wrapper around the judge pipeline.
@@ -106,7 +149,7 @@ async def process_submission(
     even if the sandbox, DB, or any other component crashes.
     """
     try:
-        await _process_submission_inner(session_factory, submission_id)
+        await _process_submission_inner(session_factory, submission_id, redis=redis)
     except Exception as e:
         logger.error(
             f"[JUDGE] Unhandled error processing submission {submission_id}: {e}",
@@ -135,7 +178,7 @@ async def process_submission(
                     )
 
                     await _emit_submission_result(
-                        submission, "runtime_error", 0, 0, 0, 0
+                        submission, "runtime_error", 0, 0, 0, 0, redis=redis
                     )
         except Exception as fallback_err:
             logger.error(
@@ -147,6 +190,7 @@ async def process_submission(
 async def _process_submission_inner(
     session_factory: async_sessionmaker,
     submission_id: uuid.UUID,
+    redis=None,
 ) -> None:
     """
     Full judge pipeline for a single submission.
@@ -208,7 +252,7 @@ async def _process_submission_inner(
             submission.status = SubmissionStatus.RUNTIME_ERROR
             submission.judged_at = datetime.now(timezone.utc)
             await db.commit()
-            await _emit_submission_result(submission, "runtime_error", 0, 0, 0, 0)
+            await _emit_submission_result(submission, "runtime_error", 0, 0, 0, 0, redis=redis)
             return
 
         # ── Mark as running (atomic update) ───────────────
@@ -324,12 +368,15 @@ async def _process_submission_inner(
                     f"stderr={repr(sandbox_result.stderr[:300])}"
                 )
                 await _emit_submission_result(
-                    submission, failure_event, passed, len(test_cases), 0, 0
+                    submission, failure_event, passed, len(test_cases), 0, 0, redis=redis
                 )
                 return
             else:
                 problem_title = submission.problem.title if submission.problem else None
                 is_leetcode = problem_meta is not None
+                unordered_mode = None
+                if submission.problem and isinstance(submission.problem.presentation, dict):
+                    unordered_mode = submission.problem.presentation.get("unordered_output")
                 verdict = judge(
                     actual_output=sandbox_result.stdout,
                     expected_output=tc.expected_output,
@@ -338,6 +385,7 @@ async def _process_submission_inner(
                     oom_killed=sandbox_result.oom_killed,
                     problem_title=problem_title,
                     is_leetcode_mode=is_leetcode,
+                    unordered_mode=unordered_mode,
                 )
 
             # ── Log per-test-case details ─────────────────
@@ -421,44 +469,63 @@ async def _process_submission_inner(
             len(test_cases),
             max_time_ms,
             max_memory_kb,
+            redis=redis,
         )
 
-        # ── If ACCEPTED, trigger match completion ─────────
+        # ── If ACCEPTED, complete match only when all problems are solved ─
         if submission.status == SubmissionStatus.ACCEPTED and submission.match_id is not None:
             try:
                 from backend.services import match_service
 
                 async with session_factory() as match_db:
-                    match_result = await match_service.complete_match_with_winner(
-                        db=match_db,
-                        redis=None,
-                        match_id=submission.match_id,
-                        winner_id=submission.user_id,
-                        reason="accepted",
+                    match = await match_service.get_match(match_db, submission.match_id)
+                    solved_all = await match_service.user_has_accepted_all_match_problems(
+                        match_db, match, submission.user_id
                     )
-                    if match_result:
-                        logger.info(
-                            f"[JUDGE] Match {submission.match_id} completed. "
-                            f"Winner: {match_result.get('winner_id')}"
+                    if not solved_all:
+                        solved_count = await match_service.count_user_accepted_match_problems(
+                            match_db, match, submission.user_id
                         )
-                        await _emit_match_ended(match_result)
-
-                        try:
-                            from backend.services.matchmaking_memory import memory_queue
-                            await memory_queue.clear_match_for_both(
-                                match_result["player1_id"],
-                                match_result["player2_id"],
-                            )
-                        except Exception as e:
-                            logger.warning(
-                                f"[JUDGE] Failed to clear dev active_matches: {e}",
-                                exc_info=True,
-                            )
+                        total = len(match_service.get_match_problem_ids(match))
+                        logger.info(
+                            f"[JUDGE] Match {submission.match_id}: "
+                            f"user {submission.user_id} solved {solved_count}/{total} "
+                            f"(problem={submission.problem_id}) — match continues"
+                        )
                     else:
-                        logger.info(
-                            f"[JUDGE] Match {submission.match_id} already completed, "
-                            f"skipping duplicate completion"
+                        match_result = await match_service.complete_match_with_winner(
+                            db=match_db,
+                            redis=redis,
+                            match_id=submission.match_id,
+                            winner_id=submission.user_id,
+                            reason="accepted",
                         )
+                        if match_result:
+                            logger.info(
+                                f"[JUDGE] Match {submission.match_id} completed. "
+                                f"Winner: {match_result.get('winner_id')}"
+                            )
+                            await _emit_match_ended(match_result, redis=redis)
+
+                            # Dev-only cleanup — production Redis path is handled
+                            # inside complete_match_with_winner (active_match + state keys).
+                            if redis is None:
+                                try:
+                                    from backend.services.matchmaking_memory import memory_queue
+                                    await memory_queue.clear_match_for_both(
+                                        match_result["player1_id"],
+                                        match_result["player2_id"],
+                                    )
+                                except Exception as e:
+                                    logger.warning(
+                                        f"[JUDGE] Failed to clear dev active_matches: {e}",
+                                        exc_info=True,
+                                    )
+                        else:
+                            logger.info(
+                                f"[JUDGE] Match {submission.match_id} already completed, "
+                                f"skipping duplicate completion"
+                            )
             except Exception as e:
                 logger.warning(f"[JUDGE] Match completion failed: {e}", exc_info=True)
 
@@ -477,7 +544,7 @@ async def run_dev_worker(session_factory: async_sessionmaker) -> None:
             try:
                 submission_id = uuid.UUID(submission_id_str)
                 logger.info(f"[JUDGE] Dequeued submission {submission_id} from dev queue")
-                await process_submission(session_factory, submission_id)
+                await process_submission(session_factory, submission_id, redis=None)
             except Exception as e:
                 logger.error(f"[JUDGE] Dev worker error: {e}", exc_info=True)
             finally:
@@ -488,9 +555,14 @@ async def run_dev_worker(session_factory: async_sessionmaker) -> None:
 
 
 async def run_redis_worker() -> None:
-    """Production worker: polls Redis BRPOP (standalone process)."""
+    """
+    Production worker: polls Redis BRPOP.
+
+    Safe to run:
+      - In-process via FastAPI lifespan (single-VM deploy)
+      - Standalone: python -m backend.workers.judge_worker
+    """
     import redis.asyncio as aioredis
-    from backend.core.constants import RedisKey
 
     engine = create_async_engine(settings.database_url, echo=False)
     session_factory = async_sessionmaker(engine, expire_on_commit=False)
@@ -500,10 +572,16 @@ async def run_redis_worker() -> None:
     logger.info("[JUDGE] Redis worker started")
     logger.info(f"[JUDGE] Polling queue: {RedisKey.SUBMISSION_QUEUE}")
 
+    last_sweep = time.monotonic()
+
     while True:
         try:
             result = await redis.brpop(RedisKey.SUBMISSION_QUEUE, timeout=5)
             if result is None:
+                # Periodically re-queue stuck RUNNING/QUEUED jobs lost to BRPOP crashes
+                if time.monotonic() - last_sweep >= 30:
+                    last_sweep = time.monotonic()
+                    await _sweep_stuck_submissions(session_factory, redis)
                 continue
 
             _, payload = result
@@ -511,7 +589,7 @@ async def run_redis_worker() -> None:
             submission_id = uuid.UUID(data["submission_id"])
 
             logger.info(f"[JUDGE] Dequeued submission {submission_id} from Redis")
-            await process_submission(session_factory, submission_id)
+            await process_submission(session_factory, submission_id, redis=redis)
 
         except asyncio.CancelledError:
             break
@@ -521,6 +599,42 @@ async def run_redis_worker() -> None:
 
     await redis.close()
     await engine.dispose()
+
+
+async def _sweep_stuck_submissions(session_factory: async_sessionmaker, redis) -> None:
+    """
+    Re-LPUSH submissions stuck in QUEUED/RUNNING that never completed
+    (e.g. worker crash after BRPOP removed the job from the queue).
+    """
+    try:
+        cutoff = datetime.now(timezone.utc).timestamp() - 90
+        async with session_factory() as db:
+            result = await db.execute(
+                select(Submission)
+                .where(
+                    Submission.status.in_([SubmissionStatus.QUEUED, SubmissionStatus.RUNNING])
+                )
+                .limit(50)
+            )
+            stuck = list(result.scalars().all())
+
+        for sub in stuck:
+            submitted = sub.submitted_at
+            if submitted is None:
+                continue
+            if submitted.tzinfo is None:
+                submitted = submitted.replace(tzinfo=timezone.utc)
+            if submitted.timestamp() > cutoff:
+                continue
+            # Only requeue RUNNING older than 90s, or QUEUED older than 90s
+            payload = json.dumps({"submission_id": str(sub.id)})
+            await redis.lpush(RedisKey.SUBMISSION_QUEUE, payload)
+            logger.warning(
+                f"[JUDGE] Sweeper re-queued stuck submission {sub.id} "
+                f"(status={sub.status})"
+            )
+    except Exception as e:
+        logger.error(f"[JUDGE] Stuck submission sweep failed: {e}", exc_info=True)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -20,8 +20,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from backend.models.match import Match
+from backend.models.match_problem import MatchProblem
 from backend.models.submission import Submission
+from backend.core.constants import SubmissionStatus
 from backend.services import bot_service, submission_service
+from backend.services import match_service as match_svc
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +108,7 @@ async def check_and_submit_bot_code(
                 selectinload(Match.player1),
                 selectinload(Match.player2),
                 selectinload(Match.problem),
+                selectinload(Match.match_problems).selectinload(MatchProblem.problem),
             )
         )
         match = result.scalar_one_or_none()
@@ -143,6 +147,23 @@ async def _get_latest_submission(
     return result.scalar_one_or_none()
 
 
+async def _accepted_problem_ids(
+    db: AsyncSession,
+    match_id: uuid.UUID,
+    user_id: uuid.UUID,
+) -> set[uuid.UUID]:
+    result = await db.execute(
+        select(Submission.problem_id)
+        .where(
+            Submission.match_id == match_id,
+            Submission.user_id == user_id,
+            Submission.status == SubmissionStatus.ACCEPTED,
+        )
+        .distinct()
+    )
+    return {row[0] for row in result.all()}
+
+
 async def _try_bot_submission(
     db: AsyncSession,
     redis: Redis,
@@ -165,14 +186,34 @@ async def _try_bot_submission(
 
     try:
         latest_submission = await _get_latest_submission(db, match.id, user_id)
-        if latest_submission and latest_submission.status in {"queued", "running", "accepted"}:
+        if latest_submission and latest_submission.status in {"queued", "running"}:
             return
 
-        difficulty = getattr(match.problem, "difficulty", None)
+        problems = match_svc.get_ordered_match_problems(match)
+        if not problems:
+            return
+
+        accepted_ids = await _accepted_problem_ids(db, match.id, user_id)
+        target = next((p for p in problems if p.id not in accepted_ids), None)
+        if target is None:
+            return
+
+        difficulty = getattr(target, "difficulty", None) or getattr(match.problem, "difficulty", None)
         max_attempts = bot_service.get_bot_max_attempts(profile, difficulty)
         state_key = BotSubmissionState.get_key(match_id_str, user_id_str)
         raw_state = await redis.hgetall(state_key)
         state = {_decode(key): _decode(value) for key, value in raw_state.items()}
+
+        current_problem_id = state.get("problem_id", "")
+        target_id_str = str(target.id)
+        # Reset attempt counter when advancing to the next unsolved problem
+        if current_problem_id and current_problem_id != target_id_str:
+            state = {
+                "attempts": "0",
+                "next_due_at": "0",
+                "language": state.get("language", ""),
+                "problem_id": target_id_str,
+            }
 
         attempts = int(state.get("attempts", "0"))
         next_due_at = float(state.get("next_due_at", "0") or 0)
@@ -198,13 +239,14 @@ async def _try_bot_submission(
                 match_duration_seconds=match.duration_seconds or 900,
             )
             next_due_at = started_at.timestamp() + delay
-            selected_language = bot_service.choose_language(profile, match.problem.title, attempts)
+            selected_language = bot_service.choose_language(profile, target.title, attempts)
             await redis.hset(
                 state_key,
                 mapping={
                     "attempts": str(attempts),
                     "next_due_at": str(next_due_at),
                     "language": selected_language,
+                    "problem_id": target_id_str,
                 },
             )
             await redis.expire(state_key, 3600)
@@ -214,8 +256,8 @@ async def _try_bot_submission(
             return
 
         code, is_likely_correct = bot_service.BotCodeGenerator.generate_solution(
-            problem_title=match.problem.title,
-            language=selected_language or bot_service.choose_language(profile, match.problem.title, attempts),
+            problem_title=target.title,
+            language=selected_language or bot_service.choose_language(profile, target.title, attempts),
             difficulty=difficulty,
             bot_profile=profile,
             attempt_index=attempts,
@@ -225,14 +267,16 @@ async def _try_bot_submission(
             db=db,
             match_id=match.id,
             user_id=user_id,
-            problem_id=match.problem_id,
+            problem_id=target.id,
             code=code,
-            language=selected_language or bot_service.choose_language(profile, match.problem.title, attempts),
+            language=selected_language or bot_service.choose_language(profile, target.title, attempts),
             redis=redis,
         )
 
         attempts += 1
         follow_up_due_at = 0.0
+        next_problem_id = target_id_str
+        next_attempts = attempts
 
         if attempts < max_attempts and not is_likely_correct:
             follow_up_delay = bot_service.get_bot_submit_delay_seconds(
@@ -242,21 +286,35 @@ async def _try_bot_submission(
                 match_duration_seconds=match.duration_seconds or 900,
             )
             follow_up_due_at = now + follow_up_delay
+        elif is_likely_correct:
+            remaining = [p for p in problems if p.id not in accepted_ids and p.id != target.id]
+            next_attempts = 0
+            if remaining:
+                next_problem_id = str(remaining[0].id)
+                follow_up_delay = bot_service.get_bot_submit_delay_seconds(
+                    profile=profile,
+                    difficulty=getattr(remaining[0], "difficulty", difficulty),
+                    attempt_index=0,
+                    match_duration_seconds=match.duration_seconds or 900,
+                )
+                follow_up_due_at = now + follow_up_delay
 
         await redis.hset(
             state_key,
             mapping={
-                "attempts": str(attempts),
+                "attempts": str(next_attempts),
                 "next_due_at": str(follow_up_due_at),
-                "language": selected_language or bot_service.choose_language(profile, match.problem.title, attempts),
+                "language": selected_language or bot_service.choose_language(profile, target.title, attempts),
+                "problem_id": next_problem_id,
             },
         )
         await redis.expire(state_key, 3600)
 
         logger.info(
-            "[BOT] %s submitted for match %s (attempt=%s/%s, likely_correct=%s, submission_id=%s)",
+            "[BOT] %s submitted for match %s problem=%s (attempt=%s/%s, likely_correct=%s, submission_id=%s)",
             user.username,
             match.id,
+            target.title,
             attempts,
             max_attempts,
             is_likely_correct,
