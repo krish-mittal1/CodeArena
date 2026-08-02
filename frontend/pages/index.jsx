@@ -11,14 +11,13 @@ export default function HomePage() {
     return (
         <>
             <SEOHead
-                title="Competitive Coding Arena for DSA and CP Practice"
-                description="Practice company-wise DSA problems, Codeforces-style competitive programming, AI analysis, and real coding battles on CodeArena."
+                title="Competitive Coding Arena for DSA Practice"
+                description="Practice company-wise DSA problems, AI analysis, and real coding battles on CodeArena."
                 path="/"
                 keywords={[
-                    'competitive programming platform',
                     'DSA practice',
-                    'Codeforces style practice',
                     'coding interview preparation',
+                    '1v1 coding battles',
                     'AI analysis for code',
                 ]}
             />

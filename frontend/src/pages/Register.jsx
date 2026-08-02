@@ -119,7 +119,7 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-[calc(100vh-64px)] bg-bg-root flex items-center justify-center p-4">
+        <div className="min-h-[calc(100dvh-64px)] bg-bg-root flex items-center justify-center p-3 sm:p-4">
 
             <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -127,7 +127,7 @@ export default function Register() {
                 transition={{ duration: 0.3, ease: 'easeOut' }}
                 className="w-full max-w-[520px]"
             >
-                <div className="paper-card grain-panel p-8 sm:p-12">
+                <div className="paper-card grain-panel p-5 sm:p-12">
 
                     {/* Header */}
                     <div className="flex flex-col items-center text-center mb-10">

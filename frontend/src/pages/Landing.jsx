@@ -10,13 +10,13 @@ const heroLogLines = [
     '[BOOT] Arena systems online',
     '[QUEUE] Matchmaking ready — find opponents in seconds',
     '[DSA] Company problems loaded — Google, Amazon, Meta...',
-    '[CP] Competitive problems active — rated 800 to 2000+',
+    '[TOPICS] DP, Graphs, Trees, Arrays and more',
     '[JUDGE] Docker execution runners active',
 ];
 
 const platformInfo = [
     { label: 'Match Format', value: '1v1 Real-time Battles' },
-    { label: 'Practice Tracks', value: 'Company DSA + Competitive' },
+    { label: 'Practice', value: 'Company-wise DSA' },
     { label: 'Code Execution', value: 'Docker-isolated Judging' },
     { label: 'Progress', value: 'ELO Rating + Match History' },
 ];
@@ -25,29 +25,29 @@ export default function Landing() {
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
     return (
-        <div className="min-h-[calc(100vh-64px)] bg-[#120c08] text-[#f3e7da] overflow-hidden">
+        <div className="min-h-[calc(100dvh-64px)] bg-[#120c08] text-[#f3e7da] overflow-x-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(201,109,58,0.16),transparent_38%),linear-gradient(180deg,rgba(36,21,14,0.96),rgba(18,12,8,1))]" />
             <div className="absolute inset-x-0 top-0 h-[520px] opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:28px_28px]" />
             <div className="absolute inset-x-0 bottom-0 h-[420px] bg-[linear-gradient(180deg,transparent,rgba(201,109,58,0.06))]" />
 
-            <div className="relative max-w-7xl mx-auto px-6 sm:px-8 pb-24">
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-8 pb-24">
 
                 {/* ═══ HERO ═══ */}
-                <section className="pt-14 sm:pt-18">
+                <section className="pt-10 sm:pt-14 lg:pt-18">
                     <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_420px] lg:items-center">
-                        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: 'easeOut' }} className="max-w-3xl">
-                            <div className="inline-flex items-center gap-3 border border-[#5d4435] bg-[#251911]/80 px-4 py-2 text-[11px] uppercase tracking-[0.28em] text-[#f0b18a] shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
-                                <span className="h-3 w-1 bg-[#f0a06f]" />
-                                <span>System status: operational // Arena v2.4</span>
+                        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: 'easeOut' }} className="max-w-3xl min-w-0">
+                            <div className="inline-flex items-center gap-2 sm:gap-3 border border-[#5d4435] bg-[#251911]/80 px-3 sm:px-4 py-2 text-[10px] sm:text-[11px] uppercase tracking-[0.18em] sm:tracking-[0.28em] text-[#f0b18a] shadow-[0_0_0_1px_rgba(255,255,255,0.03)] max-w-full">
+                                <span className="h-3 w-1 bg-[#f0a06f] shrink-0" />
+                                <span className="truncate">System status: operational // Arena v2.4</span>
                             </div>
 
-                            <h1 className="mt-8 text-[3.2rem] leading-[0.92] sm:text-[4.9rem] lg:text-[5.8rem] font-black tracking-[-0.06em] uppercase">
+                            <h1 className="mt-6 sm:mt-8 text-[2.4rem] leading-[0.95] sm:text-[4.9rem] lg:text-[5.8rem] font-black tracking-[-0.06em] uppercase">
                                 <span className="block text-[#f6eadf] drop-shadow-[0_2px_0_rgba(0,0,0,0.45)]">Competitive coding</span>
                                 <span className="block text-[#f0a06f] drop-shadow-[0_2px_0_rgba(0,0,0,0.45)]">with some grit.</span>
                             </h1>
 
-                            <p className="mt-8 max-w-2xl text-lg sm:text-xl leading-relaxed text-[#dbc4b3]">
-                                CodeArena is built for real practice. Battle other coders 1v1, solve company interview problems, or grind competitive programming — all with proper judging and your own ELO rating.
+                            <p className="mt-6 sm:mt-8 max-w-2xl text-base sm:text-xl leading-relaxed text-[#dbc4b3]">
+                                CodeArena is built for real practice. Battle other coders 1v1, solve company interview problems across DP, Graphs, Trees, and more — all with proper judging and your own ELO rating.
                             </p>
 
                             <div className="mt-10 flex flex-col sm:flex-row gap-4">
@@ -186,18 +186,18 @@ export default function Landing() {
                         </p>
                     </motion.div>
 
-                    {/* Row 3: CP + Secure Execution */}
+                    {/* Row 3: Topics + Secure Execution */}
                     <div className="mt-5 grid gap-5 md:grid-cols-2">
                         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.30, duration: 0.42 }} className="border border-[#3a281d] bg-[#1b120d]/90 p-6 sm:p-7">
                             <div className="flex items-center justify-between gap-4">
-                                <p className="text-[10px] uppercase tracking-[0.24em] text-[#9e7b66]">Competitive programming</p>
+                                <p className="text-[10px] uppercase tracking-[0.24em] text-[#9e7b66]">DSA topics</p>
                                 <Code2 size={20} className="text-[#f0a06f]" />
                             </div>
                             <h3 className="mt-6 text-xl sm:text-2xl leading-[1.06] font-black uppercase tracking-[-0.05em] text-[#f6eadf]">
-                                Codeforces-style practice with ratings.
+                                DP, Graphs, Trees, and beyond.
                             </h3>
                             <p className="mt-4 text-sm leading-relaxed text-[#d6b7a0]">
-                                Write full solutions with raw stdin and stdout. Problems are sorted by difficulty rating from 800 to 2000+, just like a competitive programming ladder.
+                                Practice LeetCode-style method signatures across the topics interviewers actually ask — with hidden tests and AI feedback after every submit.
                             </p>
                         </motion.div>
 
@@ -223,7 +223,7 @@ export default function Landing() {
                             Ready to enter the <span className="text-[#f0a06f]">arena</span>?
                         </h2>
                         <p className="mx-auto mt-5 max-w-2xl text-base sm:text-lg leading-relaxed text-[#d6b7a0]">
-                            Battle other coders, practice interview problems, grind competitive programming, and track your progress with a real rating. No fluff. Just code and compete.
+                            Battle other coders, practice interview problems across core DSA topics, and track your progress with a real rating. No fluff. Just code and compete.
                         </p>
                         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
                             <Link to={isAuthenticated ? '/problems' : '/register'} className="inline-flex items-center justify-center gap-3 bg-[#f0a06f] px-8 py-4 text-sm font-black uppercase tracking-[0.22em] text-[#1b120d] shadow-[0_14px_34px_rgba(240,160,111,0.14)] transition-transform hover:-translate-y-0.5">

@@ -2,7 +2,7 @@ import { COMPANIES } from '../src/utils/companies';
 import { SITE_URL } from '../src/next/seo';
 
 function buildSitemap() {
-    const staticPaths = ['/', '/problems', '/practice/dsa', '/practice/competitive'];
+    const staticPaths = ['/', '/problems', '/practice/dsa'];
     const urls = [
         ...staticPaths.map((path) => `${SITE_URL}${path === '/' ? '' : path}`),
         ...COMPANIES.map((company) => `${SITE_URL}/company/${company.id}`),

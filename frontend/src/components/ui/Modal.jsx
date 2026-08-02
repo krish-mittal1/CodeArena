@@ -12,7 +12,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[500] flex items-end sm:items-center justify-center p-0 sm:p-4">
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -25,20 +25,20 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' })
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ type: 'spring', duration: 0.4 }}
-                        className={`relative w-full ${sizes[size]} bg-bg-elevated border border-border rounded-2xl shadow-2xl`}
+                        className={`relative w-full ${sizes[size]} max-h-[min(92dvh,900px)] overflow-y-auto bg-bg-elevated border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl`}
                     >
                         {title && (
-                            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                            <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border sticky top-0 bg-bg-elevated z-10">
                                 <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
                                 <button
                                     onClick={onClose}
-                                    className="p-1 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-hover transition-colors cursor-pointer"
+                                    className="p-2 min-h-[40px] min-w-[40px] rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-hover transition-colors cursor-pointer flex items-center justify-center"
                                 >
                                     <X size={20} />
                                 </button>
                             </div>
                         )}
-                        <div className="p-6">{children}</div>
+                        <div className="p-4 sm:p-6">{children}</div>
                     </motion.div>
                 </div>
             )}

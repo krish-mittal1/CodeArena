@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Swords, Briefcase, Trophy, Zap } from 'lucide-react';
+import { Swords, Briefcase, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { userApi, matchmakingApi } from '../../api/auth';
 import { useAuthStore } from '../../stores/authStore';
@@ -12,12 +12,6 @@ const TRACKS = [
         title: 'Interview Prep',
         desc: 'Company-style problems and timed practice.',
         icon: Briefcase,
-    },
-    {
-        id: 'cp',
-        title: 'Competitive Programming',
-        desc: 'Harder problems and rating grind.',
-        icon: Trophy,
     },
     {
         id: 'battle',
@@ -57,11 +51,11 @@ export default function OnboardingModal({ onComplete }) {
     };
 
     return (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center bg-bg-root/95 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[500] flex items-end sm:items-center justify-center bg-bg-root/95 backdrop-blur-sm p-0 sm:p-4">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-bg-primary border border-border max-w-lg w-full p-8 shadow-2xl"
+                className="bg-bg-primary border border-border max-w-lg w-full p-5 sm:p-8 shadow-2xl max-h-[min(92dvh,800px)] overflow-y-auto rounded-t-2xl sm:rounded-none"
             >
                 <p className="editorial-kicker mb-2">Welcome to CodeArena</p>
                 <h2 className="text-2xl font-bold text-text-primary mb-2">Pick your track</h2>

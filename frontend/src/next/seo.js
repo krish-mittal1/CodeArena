@@ -3,7 +3,7 @@ import Head from 'next/head';
 export const SITE_NAME = 'CodeArena';
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://codexarena.app';
 export const DEFAULT_DESCRIPTION =
-    'Practice company-wise DSA, competitive programming, and coding interview problems with AI analysis, hidden tests, and a real coding arena workflow.';
+    'Practice company-wise DSA and coding interview problems with AI analysis, hidden tests, and a real coding arena workflow.';
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/logo.svg`;
 
 export function buildCanonicalUrl(path = '/') {

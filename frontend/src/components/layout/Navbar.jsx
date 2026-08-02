@@ -56,15 +56,31 @@ export default function Navbar() {
         <nav className="sticky top-0 z-[200] bg-bg-primary/92 backdrop-blur-md border-b border-border shadow-[0_10px_18px_rgba(0,0,0,0.12)]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
-                    {/* Logo */}
-                    <Link to="/" className="flex items-center gap-3 group shrink-0">
-                        <div className="w-9 h-9 rounded-[13px_10px_11px_8px] bg-accent flex items-center justify-center shadow-[3px_3px_0_rgba(0,0,0,0.25)]">
-                            <Swords size={18} className="text-white" />
-                        </div>
-                        <span className="text-lg font-bold tracking-[-0.03em] text-text-primary">
-                            Code<span className="text-accent">Arena</span>
-                        </span>
-                    </Link>
+                    {/* Logo — locked to battle while a match is active */}
+                    {matchId ? (
+                        <button
+                            type="button"
+                            onClick={() => navigate(`/battle/${matchId}`)}
+                            className="flex items-center gap-3 group shrink-0 cursor-pointer bg-transparent border-0 p-0"
+                            title="Return to active battle"
+                        >
+                            <div className="w-9 h-9 rounded-[13px_10px_11px_8px] bg-accent flex items-center justify-center shadow-[3px_3px_0_rgba(0,0,0,0.25)]">
+                                <Swords size={18} className="text-white" />
+                            </div>
+                            <span className="text-lg font-bold tracking-[-0.03em] text-text-primary">
+                                Code<span className="text-accent">Arena</span>
+                            </span>
+                        </button>
+                    ) : (
+                        <Link to="/" className="flex items-center gap-2 sm:gap-3 group shrink-0 min-w-0">
+                            <div className="w-9 h-9 rounded-[13px_10px_11px_8px] bg-accent flex items-center justify-center shadow-[3px_3px_0_rgba(0,0,0,0.25)] shrink-0">
+                                <Swords size={18} className="text-white" />
+                            </div>
+                            <span className="text-lg font-bold tracking-[-0.03em] text-text-primary">
+                                Code<span className="text-accent">Arena</span>
+                            </span>
+                        </Link>
+                    )}
 
                     {/* Desktop Nav Links — hidden below md */}
                     {isAuthenticated && (
@@ -135,18 +151,45 @@ export default function Navbar() {
                                                     <div className="text-sm font-bold text-text-primary">{user?.username}</div>
                                                     <div className="text-xs text-accent font-mono mt-0.5">{user?.elo} ELO</div>
                                                 </div>
-                                                <Link to="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors">
+                                                <Link
+                                                    to="/profile"
+                                                    onClick={(e) => {
+                                                        setDropdownOpen(false);
+                                                        if (matchId) {
+                                                            e.preventDefault();
+                                                            navigate(`/battle/${matchId}`);
+                                                        }
+                                                    }}
+                                                    className={`flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors ${matchId ? 'opacity-50' : ''}`}
+                                                >
                                                     <User size={16} /> Profile
                                                 </Link>
-                                                <Link to="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors">
+                                                <Link
+                                                    to="/settings"
+                                                    onClick={(e) => {
+                                                        setDropdownOpen(false);
+                                                        if (matchId) {
+                                                            e.preventDefault();
+                                                            navigate(`/battle/${matchId}`);
+                                                        }
+                                                    }}
+                                                    className={`flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors ${matchId ? 'opacity-50' : ''}`}
+                                                >
                                                     <Settings size={16} /> Settings
                                                 </Link>
                                                 <div className="h-px bg-border/50 my-1" />
                                                 <button
-                                                    onClick={() => { setDropdownOpen(false); handleLogout(); }}
+                                                    onClick={() => {
+                                                        setDropdownOpen(false);
+                                                        if (matchId) {
+                                                            navigate(`/battle/${matchId}`);
+                                                            return;
+                                                        }
+                                                        handleLogout();
+                                                    }}
                                                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-loss hover:bg-loss/10 transition-colors cursor-pointer"
                                                 >
-                                                    <LogOut size={16} /> Logout
+                                                    <LogOut size={16} /> {matchId ? 'Return to Battle' : 'Logout'}
                                                 </button>
                                             </motion.div>
                                         )}
@@ -162,11 +205,11 @@ export default function Navbar() {
                                 </button>
                             </>
                         ) : (
-                            <div className="flex items-center gap-3">
-                                <Link to="/login" className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors">
+                            <div className="flex items-center gap-1.5 sm:gap-3">
+                                <Link to="/login" className="px-3 sm:px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors min-h-[40px] flex items-center">
                                     Login
                                 </Link>
-                                <Link to="/register" className="px-4 py-2 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-[14px_11px_13px_9px] border border-[#e29a6c] shadow-[3px_3px_0_rgba(0,0,0,0.2)] transition-colors">
+                                <Link to="/register" className="px-3 sm:px-4 py-2 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-[14px_11px_13px_9px] border border-[#e29a6c] shadow-[3px_3px_0_rgba(0,0,0,0.2)] transition-colors min-h-[40px] flex items-center">
                                     Register
                                 </Link>
                             </div>

@@ -109,6 +109,7 @@ body {
     background-color: var(--color-bg-root);
     line-height: 1.6;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 #root {
@@ -694,6 +695,19 @@ select {
         align-items: flex-end;
         gap: 4px;
     }
+
+    .db-hero__title {
+        font-size: 1.55rem;
+    }
+
+    .db-battle__btn {
+        min-height: 44px;
+        width: 100%;
+    }
+
+    .db-wrap {
+        padding: 20px 12px 40px;
+    }
 }
 
 /* ── Resizable Split Pane ────────────────────────── */
@@ -766,9 +780,11 @@ select {
 
     .resizable-split__left {
         width: 100% !important;
+        max-height: 38vh;
         border-right: none;
         border-bottom: 1px solid var(--color-border);
-        overflow: visible;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .resizable-split__handle {
@@ -776,8 +792,27 @@ select {
     }
 
     .resizable-split__right {
-        min-height: 400px;
-        height: 60vh;
+        min-height: 0;
+        flex: 1;
+        height: auto;
+    }
+}
+
+/* ── Battle page mobile ─────────────────────────── */
+
+.battle-problem-pane {
+    min-width: 0;
+}
+
+@media (max-width: 767px) {
+    .battle-problem-pane {
+        width: 100% !important;
+        flex: 1 1 auto !important;
+    }
+
+    .battle-page {
+        /* Avoid double-scroll under sticky navbar */
+        overscroll-behavior: contain;
     }
 }
 

@@ -12,7 +12,6 @@ import Problems from '../src/pages/Problems';
 import Practice from '../src/pages/Practice';
 import CompanyProblems from '../src/pages/CompanyProblems';
 import DsaPracticeHub from '../src/pages/DsaPracticeHub';
-import CompetitiveProblems from '../src/pages/CompetitiveProblems';
 import Leaderboard from '../src/pages/Leaderboard';
 import Spectate from '../src/pages/Spectate';
 import MatchRecap from '../src/pages/MatchRecap';
@@ -59,7 +58,7 @@ function resolveRoute(slug) {
     if (slug.length === 1 && slug[0] === 'problems') return { kind: 'public', component: Problems, params: {} };
     if (slug.length === 2 && slug[0] === 'practice' && slug[1] === 'dsa') return { kind: 'public', component: DsaPracticeHub, params: {} };
     if (slug.length === 3 && slug[0] === 'practice' && slug[1] === 'dsa' && slug[2] === 'topics') return { kind: 'public', component: TopicBrowse, params: {} };
-    if (slug.length === 2 && slug[0] === 'practice' && slug[1] === 'competitive') return { kind: 'public', component: CompetitiveProblems, params: {} };
+    if (slug.length === 2 && slug[0] === 'practice' && slug[1] === 'competitive') return { kind: 'redirect', to: '/practice/dsa' };
     if (slug.length === 2 && slug[0] === 'practice') return { kind: 'protected', component: Practice, params: { problemId: slug[1] } };
     if (slug.length === 2 && slug[0] === 'company') return { kind: 'public', component: CompanyProblems, params: { companyId: slug[1] } };
     if (slug.length === 2 && slug[0] === 'battle') return { kind: 'protected', component: Battle, params: { matchId: slug[1] } };
@@ -88,8 +87,18 @@ export default function CatchAllPage() {
             return;
         }
 
+        if (route.kind === 'redirect') {
+            router.replace(route.to);
+            return;
+        }
+
         if (route.kind === 'publicOnly' && isAuthenticated) {
             router.replace(matchId ? `/battle/${matchId}` : '/dashboard');
+            return;
+        }
+
+        if (route.kind === 'public' && matchId && currentPath === '/') {
+            router.replace(`/battle/${matchId}`);
             return;
         }
 
@@ -109,7 +118,7 @@ export default function CatchAllPage() {
         }
     }, [router, route, isAuthenticated, isLoading, currentPath, matchId]);
 
-    if (!router.isReady || isLoading || !route) {
+    if (!router.isReady || isLoading || !route || route.kind === 'redirect') {
         return <LoadingScreen />;
     }
 
