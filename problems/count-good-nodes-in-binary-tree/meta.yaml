@@ -1,0 +1,25 @@
+slug: count-good-nodes-in-binary-tree
+title: Count Good Nodes in Binary Tree
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: 'Given a binary tree root, a node X in the tree is named good if in the
+  path from root to X there are no nodes with a value greater than X.
+
+  Return the number of good nodes in the binary tree.'
+input_format: 'Line 1: JSON array root'
+output_format: Integer count of good nodes
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 'The number of nodes in the binary tree is in the range [1, 10^5].
+
+  Each node''s value is between [-10^4, 10^4].'
+method_name: goodNodes
+parameters:
+- name: root
+  type: TreeNode
+return_type: int
+generator:
+  count: 60
+  seed: 21040

@@ -1,0 +1,31 @@
+slug: subtree-of-another-tree
+title: Subtree of Another Tree
+problem_type: dsa
+difficulty: easy
+rating: 1000
+description: 'Given the roots of two binary trees root and subRoot, return true if
+  there is a subtree of root with the same structure and node values of subRoot and
+  false otherwise.
+
+  A subtree of a binary tree tree is a tree that consists of a node in tree and all
+  of this node''s descendants.'
+input_format: 'Line 1: JSON array root
+
+  Line 2: JSON array subRoot'
+output_format: Boolean true/false
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 'The number of nodes in the root tree is in the range [1, 2000].
+
+  The number of nodes in the subRoot tree is in the range [1, 1000].'
+method_name: isSubtree
+parameters:
+- name: root
+  type: TreeNode
+- name: subRoot
+  type: TreeNode
+return_type: bool
+generator:
+  count: 50
+  seed: 21039

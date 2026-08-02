@@ -1,0 +1,33 @@
+slug: binary-tree-inorder-traversal
+title: Binary Tree Inorder Traversal
+problem_type: dsa
+difficulty: easy
+rating: 850
+description: Given the root of a binary tree, return the inorder traversal of its
+  nodes' values.
+input_format: 'Line 1: JSON array root'
+output_format: JSON array of values in inorder
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 'The number of nodes in the tree is in the range [0, 100].
+
+  -100 <= Node.val <= 100'
+method_name: inorderTraversal
+parameters:
+- name: root
+  type: TreeNode
+return_type: int[]
+generator:
+  count: 60
+  seed: 21041
+images:
+  - src: /problem-assets/binary-tree-inorder-traversal/diagram.svg
+    alt: Inorder visit order left → root → right
+examples:
+  - explanation: |
+      Inorder traversal visits left subtree, then root, then right: 1, then 3, then 2.
+  - explanation: |
+      An empty tree has an empty traversal.
+  - explanation: |
+      A single-node tree returns that node's value.

@@ -1,0 +1,36 @@
+slug: range-sum-of-bst
+title: Range Sum of BST
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: Given the root node of a binary search tree and two integers low and
+  high, return the sum of values of all nodes with a value in the inclusive range
+  [low, high].
+input_format: 'Line 1: JSON array root
+
+  Line 2: integer low
+
+  Line 3: integer high'
+output_format: Integer range sum
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 'The number of nodes in the tree is in the range [1, 2*10^4].
+
+  1 <= Node.val <= 10^5
+
+  1 <= low <= high <= 10^5
+
+  All Node.val are unique.'
+method_name: rangeSumBST
+parameters:
+- name: root
+  type: TreeNode
+- name: low
+  type: int
+- name: high
+  type: int
+return_type: int
+generator:
+  count: 60
+  seed: 21042

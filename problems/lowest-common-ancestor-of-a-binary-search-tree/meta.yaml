@@ -1,0 +1,36 @@
+slug: lowest-common-ancestor-of-a-binary-search-tree
+title: Lowest Common Ancestor of a Binary Search Tree
+problem_type: dsa
+difficulty: medium
+rating: 1050
+description: |
+  Given a binary search tree (BST), find the lowest common ancestor (LCA) of two given nodes in the BST.
+  According to the definition of LCA on Wikipedia: “The lowest common ancestor is defined between two nodes
+  p and q as the lowest node in T that has both p and q as descendants (where we allow a node to be a descendant of itself).”
+  You are given the root of a BST and the values p and q that exist in the tree. Return the value of the LCA node.
+input_format: |
+  Line 1: JSON array root in level-order form using null for missing children
+  Line 2: integer p
+  Line 3: integer q
+output_format: |
+  Single integer: the value of the lowest common ancestor
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: |
+  The number of nodes in the tree is in the range [2, 10^5].
+  All Node.val are unique.
+  p != q
+  p and q will exist in the BST.
+method_name: lowestCommonAncestorValue
+parameters:
+  - name: root
+    type: TreeNode
+  - name: p
+    type: int
+  - name: q
+    type: int
+return_type: int
+generator:
+  count: 50
+  seed: 21038
