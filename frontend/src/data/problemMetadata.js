@@ -20,6 +20,26 @@ export const DEFAULT_PROBLEM_COMPANIES = [
 ];
 
 export const PROBLEM_METADATA = {
+    "01 Matrix": {
+        "topic": "Graphs",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Uber",
+            "Meta"
+        ]
+    },
+    "4Sum": {
+        "topic": "Two Pointers",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta",
+            "Adobe"
+        ]
+    },
     "Add Two Numbers": {
         "topic": "Linked List",
         "companies": [
@@ -41,7 +61,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "All Nodes Distance K in Binary Tree": {
-        "topic": "Linked List",
+        "topic": "Trees",
         "companies": [
             "Google",
             "Amazon",
@@ -61,7 +81,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Array Partition": {
-        "topic": "Linked List",
+        "topic": "Arrays",
         "companies": [
             "Google",
             "Amazon",
@@ -98,6 +118,17 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Asteroid Collision": {
+        "topic": "Stack",
+        "companies": [
+            "Amazon",
+            "Meta",
+            "Google",
+            "Microsoft",
+            "Uber",
+            "LinkedIn"
         ]
     },
     "Bag of Tokens": {
@@ -141,7 +172,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Best Time to Buy and Sell Stock": {
-        "topic": "Linked List",
+        "topic": "Arrays",
         "companies": [
             "Google",
             "Amazon",
@@ -161,7 +192,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Best Time to Buy and Sell Stock II": {
-        "topic": "Linked List",
+        "topic": "Arrays",
         "companies": [
             "Google",
             "Amazon",
@@ -218,6 +249,19 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Binary Tree Inorder Traversal": {
+        "topic": "Trees",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
         ]
     },
     "Binary Tree Level Order Traversal": {
@@ -420,6 +464,77 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Climbing Stairs": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "Oracle",
+            "Goldman Sachs",
+            "Flipkart",
+            "Infosys",
+            "TCS",
+            "Wipro",
+            "Accenture"
+        ]
+    },
+    "Coin Change": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "Oracle",
+            "Goldman Sachs",
+            "Flipkart",
+            "Infosys",
+            "TCS",
+            "Wipro",
+            "Accenture"
+        ]
+    },
+    "Coin Change II": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta",
+            "Uber"
+        ]
+    },
+    "Combination Sum": {
+        "topic": "Backtracking",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Uber"
+        ]
+    },
+    "Combination Sum IV": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta",
+            "Uber"
+        ]
+    },
     "Construct Binary Tree from Preorder and Inorder Traversal": {
         "topic": "Trees",
         "companies": [
@@ -441,7 +556,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Container With Most Water": {
-        "topic": "Arrays",
+        "topic": "Two Pointers",
         "companies": [
             "Google",
             "Amazon",
@@ -520,6 +635,16 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Count Good Nodes in Binary Tree": {
+        "topic": "Trees",
+        "companies": [
+            "Amazon",
+            "Meta",
+            "Google",
+            "Microsoft",
+            "Apple"
+        ]
+    },
     "Count number of Nice subarrays": {
         "topic": "Sliding Window",
         "companies": [
@@ -540,8 +665,52 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Counting Bits": {
+        "topic": "Bit Manipulation",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
+        ]
+    },
+    "Course Schedule": {
+        "topic": "Graphs",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "Oracle",
+            "Goldman Sachs",
+            "Flipkart",
+            "Infosys",
+            "TCS",
+            "Wipro",
+            "Accenture"
+        ]
+    },
+    "Course Schedule II": {
+        "topic": "Graphs",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta",
+            "Uber",
+            "LinkedIn"
+        ]
+    },
     "Course Schedule III": {
-        "topic": "Arrays",
+        "topic": "Graphs",
         "companies": [
             "Google",
             "Amazon",
@@ -580,6 +749,16 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Daily Temperatures": {
+        "topic": "Stack",
+        "companies": [
+            "Amazon",
+            "Meta",
+            "Google",
+            "Microsoft",
+            "Uber"
+        ]
+    },
     "Decode String": {
         "topic": "String",
         "companies": [
@@ -598,6 +777,19 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Decode Ways": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
         ]
     },
     "Delete the element with value X": {
@@ -661,7 +853,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Deletion of the Kth element of LL": {
-        "topic": "Linked List",
+        "topic": "Arrays",
         "companies": [
             "Google",
             "Amazon",
@@ -681,7 +873,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Deletion of the tail of LL": {
-        "topic": "Linked List",
+        "topic": "Arrays",
         "companies": [
             "Google",
             "Amazon",
@@ -740,8 +932,52 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Edit Distance": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Uber",
+            "Meta",
+            "LinkedIn"
+        ]
+    },
+    "Evaluate Reverse Polish Notation": {
+        "topic": "Stack",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta",
+            "LinkedIn"
+        ]
+    },
+    "Fibonacci Number": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
+        ]
+    },
+    "Find All Anagrams in a String": {
+        "topic": "Sliding Window",
+        "companies": [
+            "Amazon",
+            "Meta",
+            "Google",
+            "Microsoft",
+            "Uber"
+        ]
+    },
     "Find All Duplicates in an Array": {
-        "topic": "Linked List",
+        "topic": "Arrays",
         "companies": [
             "Google",
             "Amazon",
@@ -761,7 +997,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Find All Numbers Disappeared in an Array": {
-        "topic": "Linked List",
+        "topic": "Arrays",
         "companies": [
             "Google",
             "Amazon",
@@ -838,6 +1074,16 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Find Peak Element": {
+        "topic": "Binary Search",
+        "companies": [
+            "Google",
+            "Meta",
+            "Amazon",
+            "Microsoft",
+            "Apple"
         ]
     },
     "Find Pivot Index": {
@@ -940,6 +1186,26 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Flood Fill": {
+        "topic": "Graphs",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "Oracle",
+            "Goldman Sachs",
+            "Flipkart",
+            "Infosys",
+            "TCS",
+            "Wipro",
+            "Accenture"
+        ]
+    },
     "Fruit Into Baskets": {
         "topic": "Sliding Window",
         "companies": [
@@ -1000,6 +1266,20 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Generate Parentheses": {
+        "topic": "Backtracking",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "LinkedIn"
+        ]
+    },
     "Group Anagrams": {
         "topic": "String",
         "companies": [
@@ -1040,6 +1320,16 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Happy Number": {
+        "topic": "Hash Map",
+        "companies": [
+            "Uber",
+            "Google",
+            "Amazon",
+            "Apple",
+            "Adobe"
+        ]
+    },
     "Height Checker": {
         "topic": "Arrays",
         "companies": [
@@ -1058,6 +1348,39 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "House Robber": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "Oracle",
+            "Goldman Sachs",
+            "Flipkart",
+            "Infosys",
+            "TCS",
+            "Wipro",
+            "Accenture"
+        ]
+    },
+    "House Robber II": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
         ]
     },
     "House Robber III": {
@@ -1100,6 +1423,20 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Insert Interval": {
+        "topic": "Intervals",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "LinkedIn"
+        ]
+    },
     "Insertion at the head of Linked List": {
         "topic": "Linked List",
         "companies": [
@@ -1140,6 +1477,17 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Intersection of Two Arrays": {
+        "topic": "Hash Map",
+        "companies": [
+            "Amazon",
+            "Meta",
+            "Google",
+            "Microsoft",
+            "Apple",
+            "Uber"
+        ]
+    },
     "Invert Binary Tree": {
         "topic": "Trees",
         "companies": [
@@ -1178,6 +1526,25 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Is Graph Bipartite": {
+        "topic": "Graphs",
+        "companies": [
+            "Google",
+            "Meta",
+            "Amazon",
+            "Microsoft",
+            "Uber"
+        ]
+    },
+    "Is Subsequence": {
+        "topic": "Two Pointers",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Meta",
+            "Uber"
         ]
     },
     "Isomorphic Strings": {
@@ -1240,6 +1607,37 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "K Closest Points to Origin": {
+        "topic": "Heap",
+        "companies": [
+            "Amazon",
+            "Meta",
+            "Google",
+            "Microsoft",
+            "Uber",
+            "LinkedIn"
+        ]
+    },
+    "Keys and Rooms": {
+        "topic": "Graphs",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "Oracle",
+            "Goldman Sachs",
+            "Flipkart",
+            "Infosys",
+            "TCS",
+            "Wipro",
+            "Accenture"
+        ]
+    },
     "Koko Eating Bananas": {
         "topic": "Binary Search",
         "companies": [
@@ -1260,8 +1658,20 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Kth Largest Element in an Array": {
+        "topic": "Heap",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Meta",
+            "Microsoft",
+            "Uber",
+            "Apple",
+            "LinkedIn"
+        ]
+    },
     "Kth Smallest Element in a BST": {
-        "topic": "Linked List",
+        "topic": "Trees",
         "companies": [
             "Google",
             "Amazon",
@@ -1300,6 +1710,17 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Last Stone Weight": {
+        "topic": "Heap",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Meta",
+            "Microsoft",
+            "Uber",
+            "Apple"
+        ]
+    },
     "Lemonade Change": {
         "topic": "Greedy",
         "companies": [
@@ -1318,6 +1739,17 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Letter Combinations of a Phone Number": {
+        "topic": "Backtracking",
+        "companies": [
+            "Amazon",
+            "Meta",
+            "Google",
+            "Microsoft",
+            "Apple",
+            "Uber"
         ]
     },
     "Longest Common Prefix": {
@@ -1340,8 +1772,52 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Longest Common Subsequence": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
+        ]
+    },
+    "Longest Consecutive Sequence": {
+        "topic": "Hash Map",
+        "companies": [
+            "Google",
+            "Meta",
+            "Amazon",
+            "Microsoft",
+            "Uber",
+            "Adobe"
+        ]
+    },
+    "Longest Increasing Subsequence": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "Oracle",
+            "Goldman Sachs",
+            "Flipkart",
+            "Infosys",
+            "TCS",
+            "Wipro",
+            "Accenture"
+        ]
+    },
     "Longest Palindromic Substring": {
-        "topic": "Trees",
+        "topic": "Dynamic Programming",
         "companies": [
             "Google",
             "Amazon",
@@ -1381,7 +1857,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Longest Substring With At Most K Distinct Characters": {
-        "topic": "Trees",
+        "topic": "String",
         "companies": [
             "Google",
             "Amazon",
@@ -1401,7 +1877,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Longest Substring Without Repeating Characters": {
-        "topic": "Trees",
+        "topic": "String",
         "companies": [
             "Google",
             "Amazon",
@@ -1418,6 +1894,19 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Lowest Common Ancestor of a Binary Search Tree": {
+        "topic": "Trees",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
         ]
     },
     "Lowest Common Ancestor of a Binary Tree": {
@@ -1458,6 +1947,15 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Max Area of Island": {
+        "topic": "Graphs",
+        "companies": [
+            "Amazon",
+            "Meta",
+            "Google",
+            "Microsoft"
         ]
     },
     "Max Consecutive Ones III": {
@@ -1560,6 +2058,19 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Maximum Product Subarray": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
+        ]
+    },
     "Maximum Subarray": {
         "topic": "Arrays",
         "companies": [
@@ -1641,7 +2152,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Merge Intervals": {
-        "topic": "Greedy",
+        "topic": "Intervals",
         "companies": [
             "Google",
             "Amazon",
@@ -1720,6 +2231,16 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Min Cost Climbing Stairs": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta",
+            "Apple"
+        ]
+    },
     "Minimum Depth of Binary Tree": {
         "topic": "Trees",
         "companies": [
@@ -1741,7 +2262,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Minimum Number of Arrows to Burst Balloons": {
-        "topic": "Linked List",
+        "topic": "Greedy",
         "companies": [
             "Google",
             "Amazon",
@@ -1841,7 +2362,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Minimum Window Substring": {
-        "topic": "Trees",
+        "topic": "String",
         "companies": [
             "Google",
             "Amazon",
@@ -1940,6 +2461,15 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Network Delay Time": {
+        "topic": "Graphs",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta"
+        ]
+    },
     "Next Permutation": {
         "topic": "Arrays",
         "companies": [
@@ -1980,8 +2510,51 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Number of 1 Bits": {
+        "topic": "Bit Manipulation",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
+        ]
+    },
+    "Number of Islands": {
+        "topic": "Graphs",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "Oracle",
+            "Goldman Sachs",
+            "Flipkart",
+            "Infosys",
+            "TCS",
+            "Wipro",
+            "Accenture"
+        ]
+    },
+    "Number of Provinces": {
+        "topic": "Graphs",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta",
+            "Uber"
+        ]
+    },
     "Number of Substrings Containing All Three Characters": {
-        "topic": "Linked List",
+        "topic": "String",
         "companies": [
             "Google",
             "Amazon",
@@ -2020,6 +2593,17 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Pacific Atlantic Water Flow": {
+        "topic": "Graphs",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Uber",
+            "Meta",
+            "Apple"
+        ]
+    },
     "Palindrome Linked List": {
         "topic": "Linked List",
         "companies": [
@@ -2041,7 +2625,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Palindromic Substrings": {
-        "topic": "Trees",
+        "topic": "Dynamic Programming",
         "companies": [
             "Google",
             "Amazon",
@@ -2058,6 +2642,16 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Partition Equal Subset Sum": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Amazon",
+            "Meta",
+            "Google",
+            "Microsoft",
+            "Uber"
         ]
     },
     "Partition Labels": {
@@ -2101,7 +2695,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Pascal's Triangle": {
-        "topic": "Arrays",
+        "topic": "Dynamic Programming",
         "companies": [
             "Google",
             "Amazon",
@@ -2200,6 +2794,16 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Perfect Squares": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Uber",
+            "Meta"
+        ]
+    },
     "Permutation in String": {
         "topic": "String",
         "companies": [
@@ -2218,6 +2822,19 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Permutations": {
+        "topic": "Backtracking",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
         ]
     },
     "Plus One": {
@@ -2240,6 +2857,19 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Power of Two": {
+        "topic": "Bit Manipulation",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
+        ]
+    },
     "Product of Array Except Self": {
         "topic": "Arrays",
         "companies": [
@@ -2258,6 +2888,15 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Range Sum of BST": {
+        "topic": "Trees",
+        "companies": [
+            "Amazon",
+            "Meta",
+            "Google",
+            "Microsoft"
         ]
     },
     "Recover Binary Search Tree": {
@@ -2300,6 +2939,19 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Remove Duplicates from Sorted Array": {
+        "topic": "Two Pointers",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
+        ]
+    },
     "Remove Nth Node From End of List": {
         "topic": "Linked List",
         "companies": [
@@ -2320,6 +2972,16 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Reorganize String": {
+        "topic": "Heap",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta",
+            "Uber"
+        ]
+    },
     "Replace Elements with Greatest Element on Right Side": {
         "topic": "Arrays",
         "companies": [
@@ -2338,6 +3000,16 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Reverse Bits": {
+        "topic": "Bit Manipulation",
+        "companies": [
+            "Apple",
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta"
         ]
     },
     "Reverse Linked List": {
@@ -2400,6 +3072,17 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Reverse Words in a String": {
+        "topic": "String",
+        "companies": [
+            "Amazon",
+            "Meta",
+            "Google",
+            "Microsoft",
+            "Apple",
+            "Uber"
+        ]
+    },
     "Roman to Integer": {
         "topic": "String",
         "companies": [
@@ -2440,8 +3123,41 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Rotate Image": {
+        "topic": "Matrix",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
+        ]
+    },
     "Rotate List": {
         "topic": "Linked List",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "Oracle",
+            "Goldman Sachs",
+            "Flipkart",
+            "Infosys",
+            "TCS",
+            "Wipro",
+            "Accenture"
+        ]
+    },
+    "Rotting Oranges": {
+        "topic": "Graphs",
         "companies": [
             "Google",
             "Amazon",
@@ -2481,7 +3197,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Search a 2D Matrix": {
-        "topic": "Matrix",
+        "topic": "Binary Search",
         "companies": [
             "Google",
             "Amazon",
@@ -2498,6 +3214,16 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Search a 2D Matrix II": {
+        "topic": "Binary Search",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta",
+            "Apple"
         ]
     },
     "Search in Rotated Sorted Array": {
@@ -2620,6 +3346,19 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Single Number": {
+        "topic": "Bit Manipulation",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
+        ]
+    },
     "Sliding Window Maximum": {
         "topic": "Sliding Window",
         "companies": [
@@ -2641,7 +3380,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Smallest String Starting From Leaf": {
-        "topic": "Linked List",
+        "topic": "Trees",
         "companies": [
             "Google",
             "Amazon",
@@ -2678,6 +3417,20 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Spiral Matrix": {
+        "topic": "Matrix",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "Oracle"
         ]
     },
     "Split Array Largest Sum": {
@@ -2740,8 +3493,41 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Subarray Sum Equals K": {
+        "topic": "Hash Map",
+        "companies": [
+            "Google",
+            "Meta",
+            "Amazon",
+            "Microsoft",
+            "Uber",
+            "LinkedIn"
+        ]
+    },
+    "Subsets": {
+        "topic": "Backtracking",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
+        ]
+    },
+    "Subtree of Another Tree": {
+        "topic": "Trees",
+        "companies": [
+            "Amazon",
+            "Meta",
+            "Google",
+            "Microsoft"
+        ]
+    },
     "Successful Pairs of Spells and Potions": {
-        "topic": "Linked List",
+        "topic": "Binary Search",
         "companies": [
             "Google",
             "Amazon",
@@ -2778,6 +3564,15 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Sum of Two Integers": {
+        "topic": "Bit Manipulation",
+        "companies": [
+            "Apple",
+            "Amazon",
+            "Google",
+            "Microsoft"
         ]
     },
     "Sum Root to Leaf Numbers": {
@@ -2818,6 +3613,16 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Surrounded Regions": {
+        "topic": "Graphs",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta",
+            "Uber"
         ]
     },
     "Swap Nodes in Pairs": {
@@ -2900,6 +3705,20 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Top K Frequent Elements": {
+        "topic": "Heap",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "LinkedIn"
+        ]
+    },
     "Transform to Sum Tree": {
         "topic": "Trees",
         "companies": [
@@ -2921,7 +3740,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Trapping Rain Water": {
-        "topic": "Arrays",
+        "topic": "Two Pointers",
         "companies": [
             "Google",
             "Amazon",
@@ -2960,8 +3779,18 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Triangle": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta",
+            "Apple"
+        ]
+    },
     "Two Sum": {
-        "topic": "Arrays",
+        "topic": "Hash Map",
         "companies": [
             "Google",
             "Amazon",
@@ -2981,7 +3810,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Two Sum II - Input Array Is Sorted": {
-        "topic": "Arrays",
+        "topic": "Hash Map",
         "companies": [
             "Google",
             "Amazon",
@@ -2998,6 +3827,36 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Unique Paths": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "Oracle",
+            "Goldman Sachs",
+            "Flipkart",
+            "Infosys",
+            "TCS",
+            "Wipro",
+            "Accenture"
+        ]
+    },
+    "Unique Paths II": {
+        "topic": "Dynamic Programming",
+        "companies": [
+            "Amazon",
+            "Google",
+            "Microsoft",
+            "Meta",
+            "Apple"
         ]
     },
     "Valid Anagram": {
@@ -3060,6 +3919,33 @@ export const PROBLEM_METADATA = {
             "Accenture"
         ]
     },
+    "Valid Parentheses": {
+        "topic": "Stack",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe",
+            "LinkedIn"
+        ]
+    },
+    "Valid Sudoku": {
+        "topic": "Hash Map",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
+        ]
+    },
     "Validate Binary Search Tree": {
         "topic": "Trees",
         "companies": [
@@ -3101,7 +3987,7 @@ export const PROBLEM_METADATA = {
         ]
     },
     "Word Break": {
-        "topic": "String",
+        "topic": "Dynamic Programming",
         "companies": [
             "Google",
             "Amazon",
@@ -3118,6 +4004,19 @@ export const PROBLEM_METADATA = {
             "TCS",
             "Wipro",
             "Accenture"
+        ]
+    },
+    "Word Search": {
+        "topic": "Backtracking",
+        "companies": [
+            "Google",
+            "Amazon",
+            "Microsoft",
+            "Meta",
+            "Apple",
+            "Netflix",
+            "Uber",
+            "Adobe"
         ]
     },
     "Zigzag Conversion": {
@@ -3144,6 +4043,7 @@ export const PROBLEM_METADATA = {
 
 export function getProblemMetadata(title) {
   if (!title) return null;
-  if (title.includes('Spiral')) title = 'Print the matrix in spiral manner';
+  if (title === 'Spiral Matrix') return PROBLEM_METADATA[title] || null;
+  if (title.includes('Spiral') && title !== 'Spiral Matrix') title = 'Print the matrix in spiral manner';
   return PROBLEM_METADATA[title] || null;
 }
