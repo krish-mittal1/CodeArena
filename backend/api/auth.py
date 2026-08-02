@@ -3,10 +3,13 @@ Auth routes — register, login, refresh tokens.
 """
 
 from fastapi import APIRouter, Depends, BackgroundTasks, Request
+from typing import Optional
+from redis.asyncio import Redis
+
 from backend.db.session import get_db, AsyncSession
 from backend.schemas.user import UserRegister, UserLogin, TokenResponse, TokenRefresh
 from backend.services import auth_service
-from backend.dependencies import get_client_ip
+from backend.dependencies import get_client_ip, get_redis
 from backend.core.auth_rate_limit import (
     ensure_login_allowed,
     record_login_failure,
@@ -30,16 +33,21 @@ async def register(
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(data: UserLogin, request: Request, db: AsyncSession = Depends(get_db)):
+async def login(
+    data: UserLogin,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    redis: Optional[Redis] = Depends(get_redis),
+):
     """Login with username and password."""
     ip = get_client_ip(request)
-    ensure_login_allowed(data.username, ip)
+    await ensure_login_allowed(data.username, ip, redis=redis)
     try:
         _, tokens = await auth_service.login_user(db, data.username, data.password)
     except InvalidCredentials:
-        record_login_failure(data.username, ip)
+        await record_login_failure(data.username, ip, redis=redis)
         raise
-    clear_login_failures(data.username, ip)
+    await clear_login_failures(data.username, ip, redis=redis)
     return tokens
 
 

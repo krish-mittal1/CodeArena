@@ -10,7 +10,7 @@ from backend.db.session import get_db, AsyncSession
 from backend.schemas.otp import OTPRequest, OTPVerify, OTPResponse
 from backend.schemas.user import TokenResponse
 from backend.services import otp_service
-from backend.dependencies import get_client_ip
+from backend.dependencies import get_client_ip, get_redis
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +48,7 @@ async def verify_otp(
     data: OTPVerify,
     request: Request,
     db: AsyncSession = Depends(get_db),
+    redis=Depends(get_redis),
 ):
     """
     Verify OTP and return JWT tokens.
@@ -59,7 +60,7 @@ async def verify_otp(
 
     from backend.core.auth_rate_limit import ensure_login_allowed, record_login_failure, clear_login_failures
     verify_key = f"otp_verify:{data.email}"
-    ensure_login_allowed(verify_key, ip)
+    await ensure_login_allowed(verify_key, ip, redis=redis)
 
     try:
         result = await otp_service.verify_otp(
@@ -69,15 +70,19 @@ async def verify_otp(
             user_agent=user_agent,
             db=db,
         )
-        clear_login_failures(verify_key, ip)
+        await clear_login_failures(verify_key, ip, redis=redis)
         return result
     except Exception:
-        record_login_failure(verify_key, ip)
+        await record_login_failure(verify_key, ip, redis=redis)
         raise
 
 
 @router.post("/verify-otp-only", response_model=OTPResponse)
-async def verify_otp_only(data: OTPVerify, request: Request):
+async def verify_otp_only(
+    data: OTPVerify,
+    request: Request,
+    redis=Depends(get_redis),
+):
     """
     Verify OTP only — does NOT create a user or issue tokens.
     Used for registration email verification.
@@ -87,12 +92,12 @@ async def verify_otp_only(data: OTPVerify, request: Request):
 
     from backend.core.auth_rate_limit import ensure_login_allowed, record_login_failure, clear_login_failures
     verify_key = f"otp_verify_only:{data.email}"
-    ensure_login_allowed(verify_key, ip)
+    await ensure_login_allowed(verify_key, ip, redis=redis)
 
     try:
         await otp_service.verify_otp_only(email=data.email, otp=data.otp)
-        clear_login_failures(verify_key, ip)
+        await clear_login_failures(verify_key, ip, redis=redis)
         return OTPResponse(message="Email verified successfully.")
     except Exception:
-        record_login_failure(verify_key, ip)
+        await record_login_failure(verify_key, ip, redis=redis)
         raise
