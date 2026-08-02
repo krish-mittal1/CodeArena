@@ -36,6 +36,8 @@ from backend.core.exceptions import AppException
 from backend.websocket.manager import manager
 from backend.core.constants import WSEvent, MatchStatus, RedisKey
 from backend.models.match import Match
+from backend.models.match_problem import MatchProblem
+from backend.services.llm_client import close_llm_client
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -92,11 +94,13 @@ async def lifespan(app: FastAPI):
     logger.info(f"Starting {settings.app_name}...")
 
     # ── Apply database migrations ─────────────────────────
+    # Fail closed: do not serve traffic on a schema that may be wrong.
     try:
         await run_migrations()
     except Exception as exc:
-        logger.error(f"Alembic migration failed: {exc}", exc_info=True)
-    
+        logger.error(f"Alembic migration failed — aborting startup: {exc}", exc_info=True)
+        raise
+
     # ── Seed bot users ────────────────────────────────────
     redis = None
     judge_task = None
@@ -267,7 +271,15 @@ async def lifespan(app: FastAPI):
             logger.warning("Redis close timed out")
         except Exception as exc:
             logger.error(f"Redis close error: {exc}")
-    
+
+    # Close shared httpx client used by LLM calls
+    try:
+        await asyncio.wait_for(close_llm_client(), timeout=5)
+    except asyncio.TimeoutError:
+        logger.warning("LLM client close timed out")
+    except Exception as exc:
+        logger.error(f"LLM client close error: {exc}")
+
     logger.info("Shutdown complete")
 
 
@@ -307,13 +319,17 @@ async def _run_timer_sync_poller() -> None:
                         # Complete expired matches in dev mode
                         if remaining <= 0:
                             try:
+                                if await match_service.match_has_inflight_submissions(db, match):
+                                    logger.info(
+                                        "[MM-DEV] Deferring timeout for %s — submissions in flight",
+                                        room_id,
+                                    )
+                                    continue
                                 result_data = await match_service.complete_match(
                                     db, None, match.id, reason="timeout"
                                 )
                                 if result_data:
-                                    await manager.broadcast_to_room(
-                                        room_id, WSEvent.MATCH_ENDED, result_data
-                                    )
+                                    await manager.broadcast_match_ended(room_id, result_data)
                                     logger.info(f"[MM-DEV] Match {room_id} expired and completed")
                             except Exception as exp_err:
                                 logger.error(f"[MM-DEV] Error completing expired match {room_id}: {exp_err}")
@@ -349,22 +365,7 @@ async def _run_redis_matchmaking_poller(redis) -> None:
                     p2_id = str(match.player2.id)
                     mid = str(match.id)
 
-                    data = {
-                        "match_id": mid,
-                        "problem_id": str(match.problem_id),
-                        "problem_title": match.problem.title,
-                        "duration_seconds": match.duration_seconds,
-                        "player1": {
-                            "user_id": p1_id,
-                            "username": match.player1.username,
-                            "elo": match.player1.elo,
-                        },
-                        "player2": {
-                            "user_id": p2_id,
-                            "username": match.player2.username,
-                            "elo": match.player2.elo,
-                        },
-                    }
+                    data = match_service.build_match_found_payload(match)
 
                     # PRIMARY: send match_found directly to both players
                     # This is the reliable path — works on single-pod and
@@ -373,6 +374,22 @@ async def _run_redis_matchmaking_poller(redis) -> None:
                     await manager.send_to_user(p2_id, WSEvent.MATCH_FOUND, data)
                     await manager.join_room(mid, p1_id)
                     await manager.join_room(mid, p2_id)
+
+                    remaining = match.duration_seconds
+                    try:
+                        rem = await match_service.get_remaining_time(redis, match.id, db=db)
+                        if rem is not None:
+                            remaining = rem
+                    except Exception:
+                        pass
+
+                    room_joined = {
+                        "match_id": mid,
+                        "remaining_seconds": remaining,
+                        "reconnected": False,
+                    }
+                    await manager.send_to_user(p1_id, WSEvent.ROOM_JOINED, room_joined)
+                    await manager.send_to_user(p2_id, WSEvent.ROOM_JOINED, room_joined)
 
                     logger.info(
                         f"[MM-REDIS] PAIRED: {p1_id} vs {p2_id} | match={mid}"
@@ -388,9 +405,11 @@ async def _run_redis_matchmaking_poller(redis) -> None:
                         }),
                     )
 
-                completed = await match_service.check_and_complete_expired_matches(db, redis)
-                for match_id in completed:
-                    logger.info(f"Match {match_id} expired and completed")
+                completed_results = await match_service.check_and_complete_expired_matches(db, redis)
+                for result_data in completed_results:
+                    room_id = result_data["match_id"]
+                    await manager.broadcast_match_ended(room_id, result_data)
+                    logger.info(f"Match {room_id} expired and completed (timeout notified)")
 
         except asyncio.CancelledError:
             break
@@ -401,27 +420,37 @@ async def _run_redis_matchmaking_poller(redis) -> None:
 
 
 async def _run_bot_submission_poller(redis) -> None:
-    """Periodically submit code for bot players in active matches."""
+    """Periodically submit code for bot players in active matches.
+
+    Backs off to a 10 s sleep when there are no active matches so it does not
+    hit the DB every 3 s while the server is idle.
+    """
     from backend.services.bot_submission_service import process_bot_submissions_for_active_matches
 
     logger.info("Bot submission poller started")
     while True:
+        processed = 0
         try:
             async with AsyncSessionLocal() as db:
-                await process_bot_submissions_for_active_matches(db, redis)
+                processed = await process_bot_submissions_for_active_matches(db, redis)
         except asyncio.CancelledError:
             break
         except Exception as exc:
             logger.error("Bot submission poller error: %s", exc, exc_info=True)
-        await asyncio.sleep(3)
+        # Back off when idle to avoid unnecessary DB round-trips.
+        await asyncio.sleep(3 if processed else 10)
 
 
 async def _run_match_recovery_poller() -> None:
     """
     Dev-mode match_found recovery:
       - Some clients can miss match_found due to connect timing.
-      - Every 2s, for each connected user, if they have an ACTIVE match in DB but are not in the room,
-        resend match_found and join them to the room.
+      - Every 2s, for each connected user, if they have an ACTIVE match in DB but
+        are not in the room, resend match_found and join them to the room.
+
+    CONCURRENCY FIX: Uses a single batch query instead of N queries (one per
+    connected user). Fetches all active matches whose player1 or player2 is in
+    the connected-user set, then maps results back per-user in Python.
     """
     logger = logging.getLogger(__name__)
     logger.info("[MM-DEV] match_found recovery poller started (every 2s)")
@@ -430,55 +459,60 @@ async def _run_match_recovery_poller() -> None:
         try:
             user_ids = await manager.get_connected_user_ids()
             if user_ids:
-                async with AsyncSessionLocal() as db:
-                    for user_id in user_ids:
-                        try:
-                            uid = uuid.UUID(user_id)
-                        except Exception:
-                            continue
+                # Convert to UUID list for the batch query.
+                uid_list: list[uuid.UUID] = []
+                for raw_id in user_ids:
+                    try:
+                        uid_list.append(uuid.UUID(raw_id))
+                    except Exception:
+                        continue
 
+                if uid_list:
+                    async with AsyncSessionLocal() as db:
+                        # Single batch query: fetch all active matches for all
+                        # connected users at once instead of one query per user.
                         res = await db.execute(
                             select(Match)
                             .where(
                                 (Match.status == MatchStatus.ACTIVE)
-                                & ((Match.player1_id == uid) | (Match.player2_id == uid))
+                                & (
+                                    Match.player1_id.in_(uid_list)
+                                    | Match.player2_id.in_(uid_list)
+                                )
                             )
-                            .order_by(Match.started_at.desc())
                             .options(
                                 selectinload(Match.player1),
                                 selectinload(Match.player2),
                                 selectinload(Match.problem),
+                                selectinload(Match.match_problems).selectinload(MatchProblem.problem),
                             )
-                            .limit(1)
                         )
-                        match = res.scalar_one_or_none()
-                        if not match:
-                            continue
+                        active_matches = res.scalars().all()
 
-                        room_id = str(match.id)
-                        if await manager.is_user_in_room(room_id, user_id):
-                            continue
+                        # Build a map: user_id_str -> match (most recent wins if
+                        # a user appears in multiple matches, which shouldn't happen
+                        # but is defensive).
+                        user_to_match: dict[str, Match] = {}
+                        for match in active_matches:
+                            for uid in (str(match.player1_id), str(match.player2_id)):
+                                if uid in user_ids and uid not in user_to_match:
+                                    user_to_match[uid] = match
 
-                        payload = {
-                            "match_id": room_id,
-                            "problem_id": str(match.problem_id),
-                            "problem_title": match.problem.title if match.problem else "",
-                            "player1": {
-                                "user_id": str(match.player1.id),
-                                "username": match.player1.username,
-                                "elo": match.player1.elo,
-                            },
-                            "player2": {
-                                "user_id": str(match.player2.id),
-                                "username": match.player2.username,
-                                "elo": match.player2.elo,
-                            },
-                            "duration_seconds": match.duration_seconds,
-                        }
+                        for user_id, match in user_to_match.items():
+                            room_id = str(match.id)
+                            if await manager.is_user_in_room(room_id, user_id):
+                                continue
 
-                        await manager.send_to_user(user_id, WSEvent.MATCH_FOUND, payload)
-                        await manager.join_room(room_id, user_id)
-                        logger.info(f"[MM-DEV] Recovered match_found for {user_id} → {room_id}")
+                            payload = match_service.build_match_found_payload(match)
+
+                            await manager.send_to_user(user_id, WSEvent.MATCH_FOUND, payload)
+                            await manager.join_room(room_id, user_id)
+                            await manager.send_to_user(user_id, WSEvent.ROOM_JOINED, {
+                                "match_id": room_id,
+                                "remaining_seconds": match.duration_seconds,
+                                "reconnected": True,
+                            })
+                            logger.info(f"[MM-DEV] Recovered match_found for {user_id} → {room_id}")
 
         except asyncio.CancelledError:
             break
