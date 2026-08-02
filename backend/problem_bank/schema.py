@@ -21,6 +21,21 @@ class GeneratorConfig(BaseModel):
     seed: int = 42
 
 
+class ExampleSpec(BaseModel):
+    """Optional LeetCode-style example overlay (merged with samples/ at sync)."""
+
+    input: Optional[str] = None
+    output: Optional[str] = None
+    explanation: Optional[str] = None
+
+
+class ImageSpec(BaseModel):
+    """Diagram or illustration shown in the problem panel."""
+
+    src: str = Field(..., min_length=1)
+    alt: Optional[str] = None
+
+
 class ProblemPackageMeta(BaseModel):
     slug: str = Field(..., min_length=1, pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
     title: str = Field(..., min_length=1, max_length=200)
@@ -38,6 +53,14 @@ class ProblemPackageMeta(BaseModel):
     memory_limit_mb: int = Field(default=256, ge=32, le=512)
     is_active: bool = True
     generator: Optional[GeneratorConfig] = None
+    examples: Optional[list[ExampleSpec]] = None
+    images: Optional[list[ImageSpec]] = None
+    # Judge hint for Meta "return in any order" outputs: "outer" | "deep"
+    unordered_output: Optional[str] = Field(
+        default=None,
+        pattern=r"^(outer|deep)$",
+        description="JSON compare mode when answer order is free: outer=top-level only, deep=all levels",
+    )
 
     @model_validator(mode="after")
     def validate_signature(self) -> ProblemPackageMeta:
@@ -69,4 +92,19 @@ class ProblemPackageMeta(BaseModel):
             ),
             "return_type": self.return_type,
             "is_active": self.is_active,
+            "presentation": self.build_presentation(),
         }
+
+    def build_presentation(self) -> dict | None:
+        images = [img.model_dump() for img in self.images] if self.images else []
+        examples = [ex.model_dump(exclude_none=True) for ex in self.examples] if self.examples else []
+        if not images and not examples and not self.unordered_output:
+            return None
+        payload: dict = {}
+        if examples:
+            payload["examples"] = examples
+        if images:
+            payload["images"] = images
+        if self.unordered_output:
+            payload["unordered_output"] = self.unordered_output
+        return payload

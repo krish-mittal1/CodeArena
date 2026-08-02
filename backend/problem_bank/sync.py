@@ -18,6 +18,7 @@ from backend.problem_bank.loader import (
     list_package_dirs,
     load_meta,
     load_test_cases,
+    merge_presentation,
     resolve_problems_dir,
 )
 from backend.problem_bank.upsert import upsert_problem
@@ -41,6 +42,7 @@ async def sync_package(
 ) -> SyncResult:
     meta = load_meta(package_dir)
     cases = load_test_cases(package_dir, meta)
+    presentation = merge_presentation(meta, cases)
 
     if meta.slug != package_dir.name:
         logger.warning(
@@ -68,7 +70,21 @@ async def sync_package(
     )
     had_existing = existing_before.scalar_one_or_none() is not None
 
-    await upsert_problem(db, meta.title, meta.to_problem_kwargs(), cases)
+    kwargs = meta.to_problem_kwargs()
+    kwargs["presentation"] = presentation
+
+    # TestCase model has no explanation column — keep that in presentation.examples
+    db_cases = [
+        {
+            "input": c["input"],
+            "expected_output": c["expected_output"],
+            "order_index": c["order_index"],
+            "is_sample": c["is_sample"],
+        }
+        for c in cases
+    ]
+
+    await upsert_problem(db, meta.title, kwargs, db_cases)
 
     action = "updated" if had_existing else "created"
     logger.info(
