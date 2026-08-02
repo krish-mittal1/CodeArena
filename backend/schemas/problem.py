@@ -34,8 +34,20 @@ class TestCasePublic(BaseModel):
     input: str
     expected_output: str
     order_index: int
+    explanation: Optional[str] = None
 
     model_config = {"from_attributes": True}
+
+
+class ProblemExamplePublic(BaseModel):
+    input: str
+    output: str
+    explanation: Optional[str] = None
+
+
+class ProblemImagePublic(BaseModel):
+    src: str
+    alt: Optional[str] = None
 
 
 class ProblemPublic(BaseModel):
@@ -55,6 +67,8 @@ class ProblemPublic(BaseModel):
     return_type: Optional[str] = None
     solved: bool = False
     sample_cases: List[TestCasePublic] = []
+    examples: List[ProblemExamplePublic] = []
+    images: List[ProblemImagePublic] = []
 
     model_config = {"from_attributes": True}
 

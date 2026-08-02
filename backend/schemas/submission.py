@@ -18,6 +18,7 @@ class FailedTestCaseDetails(BaseModel):
 
 class SubmissionCreate(BaseModel):
     match_id: uuid.UUID
+    problem_id: Optional[uuid.UUID] = None
     code: str = Field(..., min_length=1, max_length=50000)
     language: Language
     

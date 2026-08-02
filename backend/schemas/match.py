@@ -9,11 +9,20 @@ from pydantic import BaseModel
 from backend.schemas.user import UserPublic
 
 
+class MatchProblemBrief(BaseModel):
+    id: uuid.UUID
+    title: str
+    difficulty: Optional[str] = None
+    order_index: int = 0
+
+
 class MatchResponse(BaseModel):
     id: uuid.UUID
     player1: UserPublic
     player2: UserPublic
     problem_id: uuid.UUID
+    problems: list[MatchProblemBrief] = []
+    solved_problem_ids: list[uuid.UUID] = []
     status: str
     winner_id: Optional[uuid.UUID] = None
     player1_elo_before: int
