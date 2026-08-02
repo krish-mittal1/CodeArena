@@ -33,6 +33,8 @@ class Problem(Base):
     method_name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     parameters: Mapped[Optional[Dict]] = mapped_column(JSONB, nullable=True)
     return_type: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    # Optional UI payload: { examples: [{input, output, explanation?}], images: [{src, alt?}] }
+    presentation: Mapped[Optional[Dict]] = mapped_column(JSONB, nullable=True)
     
     time_limit_ms: Mapped[int] = mapped_column(Integer, default=2000, nullable=False)
     memory_limit_mb: Mapped[int] = mapped_column(Integer, default=256, nullable=False)
