@@ -44,7 +44,7 @@ return_type: int[]
 
 The execution engine **generates drivers at runtime** from these fields — you do not author per-problem driver files.
 
-For **competitive programming** (`problem_type: cp`), omit `method_name` / `parameters` / `return_type` and use raw stdin/stdout in `.in` / `.out` files.
+> **Note:** The competitive-programming (`problem_type: cp`) track has been removed from product surfaces. New problems should use `problem_type: dsa`. Existing CP packages may remain on disk as inactive for archival sync.
 
 ### Optional generator
 
@@ -69,13 +69,20 @@ def generate_cases(*, count: int, seed: int, start_index: int):
 ## Test file format
 
 - Pair files by stem: `01.in` + `01.out`, `02.in` + `02.out`, …
-- **DSA mode**: one JSON value per line in `.in` (one line per parameter); JSON in `.out`
-- **CP mode**: raw stdin in `.in`, raw stdout in `.out`
+For **DSA mode**: one JSON value per line in `.in` (one line per parameter); JSON in `.out`
 
 `samples/` → `is_sample=True` (shown in UI, used by Run)  
 `tests/` → hidden (used by Submit only)
 
 ## Sync commands
+
+**Required for matchmaking:** new or edited packages under `problems/` only appear in
+3-problem battles after they are synced into PostgreSQL. Package files on disk alone
+are not enough — run:
+
+```bash
+python -m backend.tools.sync_problems --all
+```
 
 From the repo root (with backend env configured):
 
@@ -99,6 +106,22 @@ docker compose -f docker-compose.backend.yml exec api \
 ```
 
 Sync is **idempotent** — safe to re-run. Problems are matched by `title` and test cases are replaced.
+
+## Matchmaking selection
+
+Battles pick **3 distinct active DSA** problems (`problem_type: dsa`, `is_active: true`)
+via `get_problems_for_match` using the players' average Elo:
+
+| Player Elo | Primary band | Typical ratings |
+|------------|--------------|-----------------|
+| 0–400 | Easy | 800–950 |
+| 400–800 | Medium | 950–1200 |
+| 800+ | Hard | 1100–1450 |
+
+Fill order uses nearby bands, then a soft window around the target rating, then the
+full active DSA pool with Elo-weighted preference and topic diversity. Harder
+practice packs (e.g. rating 1450) still appear for high Elo via the hard band /
+weighted fallback — they are not CP.
 
 ## Adding a new problem
 

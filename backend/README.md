@@ -34,6 +34,10 @@ createdb codearena
 # Run migrations
 alembic revision --autogenerate -m "initial"
 alembic upgrade head
+
+# Sync problem packages into Postgres (required for practice + matchmaking)
+# New DSA packs under problems/ will not appear in battles until this runs:
+python -m backend.tools.sync_problems --all
 ```
 
 ### 4. Build Docker Runner Images
@@ -52,17 +56,33 @@ docker build -t codearena-runner-java:latest -f runners/java.Dockerfile .
 docker build -t codearena-runner-node:latest -f runners/node.Dockerfile .
 ```
 
+### Docker Compose / Docker socket risk
+
+`docker-compose.backend.yml` mounts the **host Docker socket** so the API can
+spawn judge runner containers. Anyone who can execute code inside the API
+container effectively has root on the host. Mitigations in the default compose:
+
+- Full repo is **not** bind-mounted RW (image copy + `./problems:ro`)
+- Sandbox I/O is confined to `./.sandbox_tmp` only
+- Set `POSTGRES_PASSWORD` via env (no plaintext password in compose)
+
+For hardened deploys prefer a rootless socket or a scoped Docker socket proxy.
+
 ### 5. Start Services
 
 ```bash
-# Terminal 1 — API server
+# Terminal 1 — API server (also starts in-process judge + matchmaking when Redis is on)
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-# Terminal 2 — Matchmaking worker
+# Terminal 2 (optional scale-out) — standalone judge worker
+# Prefer this when you want judge off the API process:
+python -m backend.workers.judge_worker
+
+# Terminal 3 — Matchmaking worker (optional if API lifespan already polls)
 python -m workers.matchmaking_worker
 
-# Terminal 3 — Submission worker (run multiple for scaling)
-python -m workers.submission_worker
+# Legacy alternate submission worker (same Redis queue as judge_worker):
+# python -m workers.submission_worker
 ```
 
 ## Architecture
