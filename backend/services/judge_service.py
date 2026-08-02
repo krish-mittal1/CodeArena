@@ -9,11 +9,45 @@ Supports both:
 import json
 import logging
 import re
-from typing import Any
+from typing import Any, Optional
 
 from backend.core.constants import Verdict
 
 logger = logging.getLogger(__name__)
+
+# Unordered JSON output modes (Meta "return in any order"):
+#
+#   "deep"  — sort lists at every nesting level. Use when both the outer
+#             collection and nested groups are order-insensitive
+#             (e.g. 3Sum triplets, Group Anagrams groups+strings, Subsets).
+#
+#   "outer" — sort only the outermost list; preserve inner list order.
+#             Use for list-of-lists where groups may be reordered but
+#             pairs/coords/permutations must stay intact (K Closest,
+#             Permutations). Flat "any order" arrays also use outer.
+#
+# Prefer presentation["unordered_output"] when set; else title allowlist.
+_UNORDERED_OUTPUT_MODES: dict[str, str] = {
+    # deep — nested order also free
+    "3 Sum": "deep",
+    "3Sum": "deep",
+    "Three Sum": "deep",
+    "ThreeSum": "deep",
+    "4Sum": "deep",
+    "Group Anagrams": "deep",
+    "Subsets": "deep",
+    "Combination Sum": "deep",
+    # outer — top-level any order; keep nested sequences
+    "Two Sum": "outer",
+    "Permutations": "outer",
+    "Letter Combinations of a Phone Number": "outer",
+    "Top K Frequent Elements": "outer",
+    "Find All Anagrams in a String": "outer",
+    "Intersection of Two Arrays": "outer",
+    "K Closest Points to Origin": "outer",
+}
+
+_VALID_UNORDERED_MODES = frozenset({"deep", "outer"})
 
 
 def judge(
@@ -24,6 +58,7 @@ def judge(
     oom_killed: bool,
     problem_title: str = None,
     is_leetcode_mode: bool = False,
+    unordered_mode: Optional[str] = None,
 ) -> Verdict:
     """
     Determine the verdict for a single test case execution.
@@ -36,6 +71,7 @@ def judge(
         oom_killed: whether the process was killed for exceeding memory
         problem_title: title of the problem (for custom checkers)
         is_leetcode_mode: if True, use JSON structural comparison
+        unordered_mode: optional "deep"|"outer" override (from problem meta)
 
     Returns:
         Verdict enum value
@@ -63,7 +99,12 @@ def judge(
 
     # LeetCode driver mode: JSON structural comparison
     if is_leetcode_mode:
-        return _judge_json(actual, expected)
+        return _judge_json(
+            actual,
+            expected,
+            problem_title=problem_title,
+            unordered_mode=unordered_mode,
+        )
 
     # Legacy custom checker for 3 Sum (non-driver mode fallback)
     if problem_title in ("3 Sum", "3Sum", "Three Sum", "ThreeSum") and not is_leetcode_mode:
@@ -114,26 +155,78 @@ def _normalize_output(output: str) -> list[str]:
 #  JSON-based comparison (LeetCode driver mode)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-def _normalize_json_value(val: Any, sort_lists: bool = False) -> Any:
+def _json_sort_key(item: Any) -> Any:
+    """Stable sort key for heterogeneous / nested JSON list elements."""
+    if isinstance(item, list):
+        return (0, [_json_sort_key(x) for x in item])
+    if isinstance(item, dict):
+        return (1, sorted((k, _json_sort_key(v)) for k, v in item.items()))
+    if isinstance(item, bool):
+        return (2, item)
+    if isinstance(item, (int, float)):
+        return (3, item)
+    if isinstance(item, str):
+        return (4, item)
+    if item is None:
+        return (5, 0)
+    return (6, str(item))
+
+
+def _normalize_json_value(
+    val: Any,
+    mode: Optional[str] = None,
+    *,
+    depth: int = 0,
+) -> Any:
     """
     Recursively normalize a parsed JSON value for comparison.
-    Only sorts when sort_lists=True (for nested lists like 3Sum).
+
+    mode=None  — preserve list order at every level (default)
+    mode=deep  — sort every list level
+    mode=outer — sort only the outermost list; keep nested order
     """
     if isinstance(val, list):
-        normalized = [_normalize_json_value(item, sort_lists=True) for item in val]
-        if sort_lists:
+        normalized = [
+            _normalize_json_value(item, mode=mode, depth=depth + 1) for item in val
+        ]
+        sort_here = mode == "deep" or (mode == "outer" and depth == 0)
+        if sort_here:
             try:
-                normalized.sort()
+                normalized.sort(key=_json_sort_key)
             except TypeError:
                 pass
         return normalized
+    if isinstance(val, dict):
+        return {
+            k: _normalize_json_value(v, mode=mode, depth=depth)
+            for k, v in val.items()
+        }
     return val
 
 
-def _judge_json(actual: str, expected: str) -> Verdict:
+def _resolve_unordered_mode(
+    problem_title: Optional[str],
+    unordered_mode: Optional[str] = None,
+) -> Optional[str]:
+    """Resolve unordered compare mode from metadata override or title allowlist."""
+    if unordered_mode in _VALID_UNORDERED_MODES:
+        return unordered_mode
+    if not problem_title:
+        return None
+    return _UNORDERED_OUTPUT_MODES.get(problem_title)
+
+
+def _judge_json(
+    actual: str,
+    expected: str,
+    problem_title: Optional[str] = None,
+    unordered_mode: Optional[str] = None,
+) -> Verdict:
     """
     Parse both outputs as JSON, normalize, and compare structurally.
-    This handles order-independent comparison of arrays/lists.
+
+    Order is preserved by default. Known unordered problems sort via
+    deep or outer mode (see _UNORDERED_OUTPUT_MODES).
     """
     try:
         actual_val = json.loads(actual.strip())
@@ -155,16 +248,19 @@ def _judge_json(actual: str, expected: str) -> Verdict:
             return Verdict.ACCEPTED
         return Verdict.WRONG_ANSWER
 
-    # Normalize both values
-    actual_normalized = _normalize_json_value(actual_val)
-    expected_normalized = _normalize_json_value(expected_val)
+    mode = _resolve_unordered_mode(problem_title, unordered_mode)
+    actual_normalized = _normalize_json_value(actual_val, mode=mode)
+    expected_normalized = _normalize_json_value(expected_val, mode=mode)
 
     if actual_normalized == expected_normalized:
-        logger.debug("[JUDGE] Verdict=ACCEPTED (JSON comparison)")
+        logger.debug(
+            "[JUDGE] Verdict=ACCEPTED (JSON comparison, unordered_mode=%s)",
+            mode,
+        )
         return Verdict.ACCEPTED
 
     logger.info(
-        f"[JUDGE] Verdict=WRONG_ANSWER (JSON comparison)\n"
+        f"[JUDGE] Verdict=WRONG_ANSWER (JSON comparison, unordered_mode={mode})\n"
         f"        ACTUAL={repr(str(actual_normalized)[:300])}\n"
         f"      EXPECTED={repr(str(expected_normalized)[:300])}"
     )
