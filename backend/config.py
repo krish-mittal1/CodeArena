@@ -9,7 +9,7 @@ PRODUCTION: Fail-fast on missing required configs, no hardcoded secrets.
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field, field_validator
-from typing import Optional
+from typing import Optional, Union
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -88,6 +88,14 @@ class Settings(BaseSettings):
     sandbox_compile_timeout: int = Field(default=15, description="Compilation timeout (seconds)")
     sandbox_run_timeout_default: int = Field(default=5, description="Default run timeout (seconds)")
     sandbox_total_timeout: int = Field(default=60, description="Total sandbox timeout (seconds)")
+    sandbox_max_concurrent: int = Field(
+        default=8,
+        description="Max concurrent Docker sandbox containers (judge + practice Run share this)",
+    )
+    sandbox_acquire_timeout_seconds: float = Field(
+        default=30.0,
+        description="Max seconds to wait for a free sandbox slot before failing",
+    )
 
     # ── App ───────────────────────────────────────────────────
     app_name: str = Field(default="CodeArena", description="Application name")
@@ -110,6 +118,44 @@ class Settings(BaseSettings):
     private_room_code_rate_limit: int = Field(
         default=10, description="Max room code requests per IP per minute"
     )
+
+    # ── Reverse proxy / client IP ─────────────────────────────
+    # Default False: ignore X-Forwarded-For and use the direct TCP peer.
+    # Set True only when the app sits behind a reverse proxy that sets XFF
+    # (Azure App Gateway / Front Door, nginx, Pangolin, etc.).
+    trust_forwarded_headers: bool = Field(
+        default=False,
+        description="Honour X-Forwarded-For / forwarded client IP headers",
+    )
+    # Optional CIDR or IP list of trusted proxies. When non-empty, XFF is
+    # honoured only if request.client.host is in this set, and the client IP
+    # is the rightmost hop that is NOT in the set. When empty but
+    # trust_forwarded_headers=True, the leftmost XFF hop is used (proxy must
+    # strip client-supplied XFF before appending its own).
+    trusted_proxies: list[str] = Field(
+        default_factory=list,
+        description="Trusted proxy IPs/CIDRs (comma-separated or JSON list in env)",
+    )
+
+    @field_validator("trusted_proxies", mode="before")
+    @classmethod
+    def parse_trusted_proxies(cls, v: Union[str, list, None]):
+        if v is None or v == "":
+            return []
+        if isinstance(v, list):
+            return [str(item).strip() for item in v if str(item).strip()]
+        if isinstance(v, str):
+            s = v.strip()
+            if s.startswith("["):
+                import json
+                try:
+                    parsed = json.loads(s)
+                    if isinstance(parsed, list):
+                        return [str(item).strip() for item in parsed if str(item).strip()]
+                except json.JSONDecodeError:
+                    pass
+            return [part.strip() for part in s.split(",") if part.strip()]
+        return v
 
     # ── Email & Frontend ──────────────────────────────────────
     frontend_url: str = Field(default="http://localhost:5173", description="Frontend base URL for links")
