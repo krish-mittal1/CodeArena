@@ -4,61 +4,67 @@ AI Code Analysis Service — Groq or Google Gemini via unified LLM client.
 
 import json
 import logging
+import re
 from collections import OrderedDict
-from typing import Optional
+from dataclasses import dataclass
+from typing import Any, Optional
 
 from backend.services.llm_client import call_json_llm, llm_provider, parse_llm_json
 
 logger = logging.getLogger(__name__)
 
-_SYSTEM_PROMPT = """You are an expert competitive programming mentor and a patient teacher.
-Your job is to explain the user's code in a way that is easy to understand for someone practicing interview problems.
-Sound clear, warm, and direct. Prefer simple words over fancy words.
-Teach like a strong mentor, not like a research paper.
 
-Analyze the submitted code and return a JSON object with EXACTLY these keys:
+@dataclass(frozen=True)
+class AnalyzeCodeResult:
+    """Outcome of analyze_code — quota should tick only when used_llm is True."""
+
+    analysis: dict
+    from_cache: bool = False
+    used_llm: bool = False
+
+
+_SYSTEM_PROMPT = """You are an expert interview coach for competitive programming.
+Give short, structured feedback a learner can scan in under a minute.
+Warm, direct, concrete. No buzzwords. No essay paragraphs.
+
+Return ONLY a JSON object with EXACTLY these keys:
 
 {
-  "problem_concept": "string - 2 to 4 short paragraphs. Explain the core concept of the problem, what the problem is really asking, and what pattern or data structure is usually used.",
-  "verdict_explanation": "string - 2 to 4 short paragraphs. Explain why the code passed or failed in plain language. Mention the key idea, important edge cases, and the main reason behind the verdict.",
-  "submitted_approach": "string - Explain the user's current approach in simple language. Mention the pattern if recognizable.",
-  "time_complexity": "string - Big-O time complexity of submitted code, e.g. O(N log N)",
-  "space_complexity": "string - Big-O space complexity of submitted code, e.g. O(N)",
-  "worst_approach": "string - Explain a slower but still reasonable brute-force or weaker approach. Mention when someone might think of it first.",
-  "worst_time_complexity": "string - Big-O time of the slower or brute-force approach",
-  "worst_space_complexity": "string - Big-O space of the slower or brute-force approach",
-  "issues": ["list of strings - each item should be one specific issue in plain language. Keep each item short and concrete. Empty list [] if code is correct and clean"],
-  "failed_test_explanation": "string - If the code failed, explain the failing test case step by step in simple language. If the code passed, return an empty string.",
-  "optimized_approach": "string - Explain the best approach like a mini editorial. Use short paragraphs or short numbered steps. Cover: the idea, how it works, why it is correct, and what to watch out for.",
-  "optimized_time_complexity": "string - Big-O time of the optimal approach",
-  "optimized_space_complexity": "string - Big-O space of the optimal approach",
-  "alternative_approaches": [
-    {
-      "name": "string - short label for the approach",
-      "summary": "string - 1 to 3 short paragraphs on how the approach works",
-      "time_complexity": "string - Big-O time complexity",
-      "space_complexity": "string - Big-O space complexity",
-      "when_to_use": "string - when this approach is useful or why someone may choose it"
-    }
-  ],
-  "improved_code": "string - Clean, correct, idiomatic code in the SAME language as the submission. It must be fully working and easy to read.",
-  "tips": ["list of strings - 2 to 4 short, practical takeaways. Each tip should be something the user can remember for similar problems."]
+  "verdict_summary": "string — 1 to 2 short sentences. Pass/fail in plain language and the main takeaway.",
+  "root_cause": "string — If failed: the specific bug or wrong idea (1 to 3 sentences). If accepted: why the approach is correct (1 to 2 sentences). Empty string only if truly nothing to say.",
+  "time_complexity": "string — Big-O of THEIR submitted code, e.g. O(N) or O(N log N)",
+  "space_complexity": "string — Big-O of THEIR submitted code, e.g. O(1) or O(N)",
+  "key_insight": "string — The core correct idea / pattern in 2 to 4 sentences. Name the pattern if classic (two pointers, sliding window, binary search, etc.). Do NOT dump a full editorial.",
+  "fix_hints": ["string — 2 to 5 short coaching steps. Hint at the fix; do NOT paste a full solution walkthrough. Interview-coach tone: guide, don't spoil every line."],
+  "edge_cases": ["string — 0 to 4 concrete edge cases they missed or should re-check. Empty list [] if none."],
+  "improved_code": "string — Optional clean reference solution in the SAME language. Include ONLY when it clearly helps (failed submission, or accepted but messy). Otherwise return empty string \"\". Must be complete and runnable when non-empty.",
+  "tips": ["string — 2 to 3 short reusable takeaways for similar problems."]
 }
 
 Rules:
-- Return ONLY valid JSON, no markdown fences (NO ```json), no extra text.
-- Do NOT truncate the improved_code field; it must be complete and runnable.
-- Keep explanations easy to scan.
-- Avoid buzzwords like "architectural", "enterprise-grade", "profoundly insightful", or "master strategy".
-- Do not sound robotic.
-- If the code is accepted, still explain why it works and what pattern it is using.
-- If the problem uses a classic pattern like sliding window, two pointers, binary search, prefix sum, linked list reversal, etc., name the pattern clearly.
-- Always fill in the worst_approach and optimized_approach fields.
-- If there are other realistic approaches, include 1 to 3 items in alternative_approaches. If there are no meaningful alternatives, return [].
-- Make the analysis teach the user the whole problem, not only the submitted code.
+- Return ONLY valid JSON. No markdown fences. No prose outside JSON.
+- Prefer short sentences. No walls of text. No repeated explanations across fields.
+- fix_hints are coaching nudges, not a line-by-line rewrite of the solution.
+- If accepted and code is already clean, improved_code may be \"\".
+- If the code failed a test, root_cause must connect the bug to the failure when possible.
+- Always fill time_complexity and space_complexity for the submitted code (use \"N/A\" only if truly unknowable).
 """
 
 _AI_CACHE_MAX = 256
+
+# Section headers the model sometimes emits when JSON fails
+_SECTION_ALIASES = {
+    "verdict_summary": ("verdict summary", "verdict", "summary"),
+    "root_cause": ("root cause", "what's wrong", "what is wrong", "bug", "failure reason"),
+    "time_complexity": ("time complexity", "time"),
+    "space_complexity": ("space complexity", "space"),
+    "key_insight": ("key insight", "correct approach", "insight", "approach"),
+    "fix_hints": ("fix hints", "hints", "steps", "step-by-step", "how to fix"),
+    "edge_cases": ("edge cases", "edge case", "missed cases"),
+    "improved_code": ("improved code", "reference solution", "code", "solution"),
+    "tips": ("tips", "takeaways", "remember"),
+}
+
 
 class _LRUCache(OrderedDict):
     def get_cache(self, key):
@@ -73,50 +79,206 @@ class _LRUCache(OrderedDict):
         while len(self) > _AI_CACHE_MAX:
             self.popitem(last=False)
 
+
 AI_CACHE = _LRUCache()
 
 
+def has_cached_analysis(submission_id: Optional[str]) -> bool:
+    """True if analyze_code would return a cache hit for this submission_id."""
+    if not submission_id:
+        return False
+    return AI_CACHE.get_cache(submission_id) is not None
+
+
+def _as_str(value: Any, default: str = "") -> str:
+    if value is None:
+        return default
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, (int, float)):
+        return str(value)
+    return default
+
+
+def _as_str_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return []
+        # Split numbered / bulleted lines into list items when the model returns a blob
+        lines = re.split(r"\n+", text)
+        items = []
+        for line in lines:
+            cleaned = re.sub(r"^[\s\-\*\d\.\)\(]+", "", line).strip()
+            if cleaned:
+                items.append(cleaned)
+        return items if len(items) > 1 else [text]
+    if isinstance(value, list):
+        out = []
+        for item in value:
+            if isinstance(item, str) and item.strip():
+                out.append(item.strip())
+            elif isinstance(item, dict):
+                # legacy alternative approach objects
+                summary = _as_str(item.get("summary") or item.get("name"))
+                if summary:
+                    out.append(summary)
+        return out
+    return []
+
+
+def _join_paragraphs(*parts: str) -> str:
+    return "\n\n".join(p.strip() for p in parts if p and p.strip())
+
+
+def _parse_prose_sections(raw: str) -> Optional[dict]:
+    """Best-effort parse of labeled prose when the model ignores JSON mode."""
+    text = (raw or "").strip()
+    if not text:
+        return None
+
+    # Strip outer fences
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json|text)?\s*", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"\s*```$", "", text).strip()
+
+    # Prefer JSON slice if present
+    start = text.find("{")
+    end = text.rfind("}")
+    if start >= 0 and end > start:
+        try:
+            parsed = json.loads(text[start : end + 1])
+            if isinstance(parsed, dict):
+                return parsed
+        except json.JSONDecodeError:
+            pass
+
+    header_re = re.compile(
+        r"(?im)^\s*(?:#{1,3}\s*)?(?:\*\*)?([A-Za-z][A-Za-z0-9 dual/\-]{1,40})(?:\*\*)?\s*:?\s*$"
+    )
+    matches = list(header_re.finditer(text))
+    if not matches:
+        # Single prose blob → treat as verdict + insight
+        first = text.split("\n\n")[0].strip()[:400]
+        return {
+            "verdict_summary": first,
+            "root_cause": "",
+            "key_insight": text[:800],
+            "fix_hints": [],
+            "edge_cases": [],
+            "tips": [],
+            "improved_code": "",
+            "time_complexity": "N/A",
+            "space_complexity": "N/A",
+        }
+
+    sections: dict[str, str] = {}
+    for i, match in enumerate(matches):
+        label = match.group(1).strip().lower()
+        body_start = match.end()
+        body_end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+        body = text[body_start:body_end].strip()
+        sections[label] = body
+
+    result: dict[str, Any] = {}
+    for field, aliases in _SECTION_ALIASES.items():
+        for alias in aliases:
+            for label, body in sections.items():
+                if label == alias or label.startswith(alias):
+                    result[field] = body
+                    break
+            if field in result:
+                break
+
+    if not result:
+        return None
+    return result
+
+
 def _normalize_analysis_result(result: dict, verdict_status: str) -> dict:
-    """Backfill missing fields so the UI never receives half-shaped analysis."""
+    """
+    Normalize new or legacy LLM payloads into one stable shape for the UI.
+
+    Preferred fields (new):
+      verdict_summary, root_cause, time/space_complexity, key_insight,
+      fix_hints, edge_cases, improved_code, tips
+
+    Legacy fields are filled for older clients / insights list compatibility.
+    """
     if not isinstance(result, dict):
         return _fallback_analysis(verdict_status, "Invalid AI response format")
 
-    verdict_explanation = result.get("verdict_explanation") or "The AI review did not explain the verdict clearly."
-    optimized_approach = result.get("optimized_approach") or "The best-known approach explanation is not available yet."
-    submitted_approach = result.get("submitted_approach") or verdict_explanation
+    # --- Preferred fields (accept new names, fall back to legacy) ---
+    verdict_summary = _as_str(
+        result.get("verdict_summary")
+        or result.get("verdict_explanation")
+    )
+    if not verdict_summary:
+        verdict_summary = f"Submission verdict: {verdict_status}."
 
-    if not result.get("problem_concept"):
-        first_line = submitted_approach or optimized_approach
-        result["problem_concept"] = first_line
+    root_cause = _as_str(result.get("root_cause"))
+    if not root_cause:
+        issues = _as_str_list(result.get("issues"))
+        failed = _as_str(result.get("failed_test_explanation"))
+        if issues:
+            root_cause = issues[0]
+        elif failed:
+            root_cause = failed
 
-    result["verdict_explanation"] = verdict_explanation
-    result["submitted_approach"] = submitted_approach
-    result["time_complexity"] = result.get("time_complexity") or "N/A"
-    result["space_complexity"] = result.get("space_complexity") or "N/A"
+    time_complexity = _as_str(result.get("time_complexity"), "N/A") or "N/A"
+    space_complexity = _as_str(result.get("space_complexity"), "N/A") or "N/A"
 
-    if not result.get("worst_approach"):
-        result["worst_approach"] = (
-            "Start from the direct brute-force idea first, then remove repeated work until you reach the stronger pattern."
-        )
-    result["worst_time_complexity"] = result.get("worst_time_complexity") or "N/A"
-    result["worst_space_complexity"] = result.get("worst_space_complexity") or "N/A"
+    key_insight = _as_str(
+        result.get("key_insight")
+        or result.get("optimized_approach")
+        or result.get("problem_concept")
+    )
+    if not key_insight:
+        key_insight = "Focus on the core pattern for this problem, then check the edge cases that usually break naive solutions."
 
-    result["issues"] = result.get("issues") or []
-    result["failed_test_explanation"] = result.get("failed_test_explanation") or ""
-    result["optimized_approach"] = optimized_approach
-    result["optimized_time_complexity"] = result.get("optimized_time_complexity") or "N/A"
-    result["optimized_space_complexity"] = result.get("optimized_space_complexity") or "N/A"
+    fix_hints = _as_str_list(result.get("fix_hints"))
+    if not fix_hints:
+        # Derive coaching steps from legacy optimized_approach paragraphs
+        optimized = _as_str(result.get("optimized_approach"))
+        if optimized:
+            chunks = [c.strip() for c in re.split(r"\n+|(?<=\.)\s+(?=[A-Z0-9])", optimized) if c.strip()]
+            fix_hints = chunks[:5]
+        elif _as_str_list(result.get("tips")):
+            fix_hints = _as_str_list(result.get("tips"))[:3]
+
+    edge_cases = _as_str_list(result.get("edge_cases"))
+    improved_code = _as_str(result.get("improved_code"))
+    tips = _as_str_list(result.get("tips"))
+    if not tips and fix_hints:
+        tips = fix_hints[:2]
+
+    # Issues: prefer explicit list, else root_cause as single issue when failed-ish
+    issues = _as_str_list(result.get("issues"))
+    if not issues and root_cause and str(verdict_status).lower() not in ("accepted", "ac"):
+        issues = [root_cause]
+
+    failed_test_explanation = _as_str(result.get("failed_test_explanation"))
+    submitted_approach = _as_str(result.get("submitted_approach")) or verdict_summary
+    problem_concept = _as_str(result.get("problem_concept")) or key_insight
+    optimized_approach = _as_str(result.get("optimized_approach")) or _join_paragraphs(
+        key_insight, "\n".join(f"{i + 1}. {h}" for i, h in enumerate(fix_hints))
+    )
+    worst_approach = _as_str(result.get("worst_approach")) or (
+        "Start from the direct brute-force idea, then remove repeated work."
+    )
 
     alternatives = result.get("alternative_approaches")
     if not isinstance(alternatives, list):
         alternatives = []
     normalized_alternatives = []
     for index, item in enumerate(alternatives):
-        if isinstance(item, str):
+        if isinstance(item, str) and item.strip():
             normalized_alternatives.append(
                 {
                     "name": f"Alternative {index + 1}",
-                    "summary": item,
+                    "summary": item.strip(),
                     "time_complexity": "N/A",
                     "space_complexity": "N/A",
                     "when_to_use": "",
@@ -125,17 +287,39 @@ def _normalize_analysis_result(result: dict, verdict_status: str) -> dict:
         elif isinstance(item, dict):
             normalized_alternatives.append(
                 {
-                    "name": item.get("name") or f"Alternative {index + 1}",
-                    "summary": item.get("summary") or "",
-                    "time_complexity": item.get("time_complexity") or "N/A",
-                    "space_complexity": item.get("space_complexity") or "N/A",
-                    "when_to_use": item.get("when_to_use") or "",
+                    "name": _as_str(item.get("name")) or f"Alternative {index + 1}",
+                    "summary": _as_str(item.get("summary")),
+                    "time_complexity": _as_str(item.get("time_complexity"), "N/A") or "N/A",
+                    "space_complexity": _as_str(item.get("space_complexity"), "N/A") or "N/A",
+                    "when_to_use": _as_str(item.get("when_to_use")),
                 }
             )
-    result["alternative_approaches"] = normalized_alternatives
-    result["improved_code"] = result.get("improved_code") or ""
-    result["tips"] = result.get("tips") or []
-    return result
+
+    return {
+        # Preferred (UI primary)
+        "verdict_summary": verdict_summary,
+        "root_cause": root_cause,
+        "time_complexity": time_complexity,
+        "space_complexity": space_complexity,
+        "key_insight": key_insight,
+        "fix_hints": fix_hints,
+        "edge_cases": edge_cases,
+        "improved_code": improved_code,
+        "tips": tips,
+        # Legacy aliases (insights list, older UI, mock debrief)
+        "verdict_explanation": verdict_summary if not root_cause else _join_paragraphs(verdict_summary, root_cause),
+        "submitted_approach": submitted_approach,
+        "problem_concept": problem_concept,
+        "issues": issues,
+        "failed_test_explanation": failed_test_explanation,
+        "optimized_approach": optimized_approach,
+        "optimized_time_complexity": _as_str(result.get("optimized_time_complexity"), "N/A") or "N/A",
+        "optimized_space_complexity": _as_str(result.get("optimized_space_complexity"), "N/A") or "N/A",
+        "worst_approach": worst_approach,
+        "worst_time_complexity": _as_str(result.get("worst_time_complexity"), "N/A") or "N/A",
+        "worst_space_complexity": _as_str(result.get("worst_space_complexity"), "N/A") or "N/A",
+        "alternative_approaches": normalized_alternatives,
+    }
 
 
 async def analyze_code(
@@ -150,20 +334,33 @@ async def analyze_code(
     actual_output: Optional[str] = None,
     error_output: Optional[str] = None,
     submission_id: Optional[str] = None,
-) -> dict:
+) -> AnalyzeCodeResult:
     """
-    Call Groq REST API (Llama 3) to analyze submitted code.
-    Uses httpx directly - no Groq SDK needed.
+    Call Groq/Gemini to analyze submitted code.
+
+    Returns AnalyzeCodeResult. Callers must only consume analysis quota when
+    ``used_llm`` is True (not cache hits, not fallback/error placeholders).
     """
     if submission_id:
         cached = AI_CACHE.get_cache(submission_id)
         if cached is not None:
             logger.info("Returning cached AI analysis for submission %s", submission_id)
-            return _normalize_analysis_result(cached, verdict_status)
+            return AnalyzeCodeResult(
+                analysis=_normalize_analysis_result(cached, verdict_status),
+                from_cache=True,
+                used_llm=False,
+            )
 
     if not llm_provider():
         logger.warning("GROQ_API_KEY / GEMINI_API_KEY not set - returning placeholder analysis")
-        return _fallback_analysis(verdict_status, "AI API key missing. Add GROQ_API_KEY or GEMINI_API_KEY to .env")
+        return AnalyzeCodeResult(
+            analysis=_fallback_analysis(
+                verdict_status,
+                "AI API key missing. Add GROQ_API_KEY or GEMINI_API_KEY to .env",
+            ),
+            from_cache=False,
+            used_llm=False,
+        )
 
     failed_section = ""
     if failed_input:
@@ -193,9 +390,8 @@ Submitted Code:
 Verdict: {verdict_status}
 {failed_section}
 
-Before answering, think about what would help a learner understand this problem quickly.
-Keep the explanation simple, specific, and helpful.
-Return EXACTLY the JSON object as instructed."""
+Respond with the JSON object only. Keep every string field short and scannable.
+Coach with hints; do not write a textbook chapter."""
 
     max_retries = 3
     last_error = ""
@@ -213,15 +409,31 @@ Return EXACTLY the JSON object as instructed."""
             raw = await call_json_llm(
                 system=_SYSTEM_PROMPT,
                 user=prompt,
-                max_tokens=4096,
+                max_tokens=3072,
             )
-            result = _normalize_analysis_result(parse_llm_json(raw), verdict_status)
+
+            parsed: Any = None
+            try:
+                parsed = parse_llm_json(raw)
+            except json.JSONDecodeError:
+                parsed = _parse_prose_sections(raw)
+                if parsed is None:
+                    raise
+
+            if not isinstance(parsed, dict):
+                raise json.JSONDecodeError("Expected JSON object", str(parsed), 0)
+
+            result = _normalize_analysis_result(parsed, verdict_status)
 
             if submission_id:
                 AI_CACHE.set_cache(submission_id, result)
 
             logger.info("AI analysis complete for '%s'", problem_title)
-            return result
+            return AnalyzeCodeResult(
+                analysis=result,
+                from_cache=False,
+                used_llm=True,
+            )
 
         except json.JSONDecodeError as e:
             last_error = f"Invalid JSON: {e}"
@@ -230,7 +442,11 @@ Return EXACTLY the JSON object as instructed."""
                 import asyncio
                 await asyncio.sleep((attempt + 1) * 2)
                 continue
-            return _fallback_analysis(verdict_status, "Invalid AI response format")
+            return AnalyzeCodeResult(
+                analysis=_fallback_analysis(verdict_status, "Invalid AI response format"),
+                from_cache=False,
+                used_llm=False,
+            )
         except Exception as e:
             last_error = str(e)
             logger.error("LLM API error (attempt %d): %s", attempt + 1, last_error)
@@ -240,30 +456,37 @@ Return EXACTLY the JSON object as instructed."""
                 continue
 
     logger.error("All %d LLM API attempts failed: %s", max_retries, last_error)
-    return _fallback_analysis(verdict_status, f"AI Error: {last_error[:60]}")
+    return AnalyzeCodeResult(
+        analysis=_fallback_analysis(verdict_status, f"AI Error: {last_error[:60]}"),
+        from_cache=False,
+        used_llm=False,
+    )
 
 
 def _fallback_analysis(verdict_status: str, error_reason: str = "AI analysis is currently unavailable") -> dict:
     """Return a minimal analysis object when AI is unavailable."""
-    return {
-        "problem_concept": "This problem still has a core pattern behind it, but the AI explanation is not available right now. Try identifying the main data structure, the key state you need to track, and the simplest brute-force version first.",
-        "verdict_explanation": f"Your submission received verdict: {verdict_status}. A full AI explanation is not available right now.",
-        "submitted_approach": "The system could not generate a reliable explanation of your exact approach right now.",
-        "time_complexity": "N/A",
-        "space_complexity": "N/A",
-        "worst_approach": "Start from the most direct brute-force idea, then look for repeated work you can remove.",
-        "worst_time_complexity": "N/A",
-        "worst_space_complexity": "N/A",
-        "issues": [],
-        "failed_test_explanation": "",
-        "optimized_approach": f"{error_reason}. Please check your server configuration and API key.",
-        "optimized_time_complexity": "N/A",
-        "optimized_space_complexity": "N/A",
-        "alternative_approaches": [],
-        "improved_code": "",
-        "tips": [
-            "Test small edge cases first.",
-            "Check the time complexity before submitting.",
-            "Compare your approach with the common pattern for this problem type.",
-        ],
-    }
+    summary = f"Your submission received verdict: {verdict_status}."
+    insight = f"{error_reason}. Check server configuration and API keys, then try again."
+    tips = [
+        "Test small edge cases first.",
+        "Check the time complexity before submitting.",
+        "Compare your approach with the common pattern for this problem type.",
+    ]
+    return _normalize_analysis_result(
+        {
+            "verdict_summary": summary,
+            "root_cause": "A full AI explanation is not available right now.",
+            "time_complexity": "N/A",
+            "space_complexity": "N/A",
+            "key_insight": insight,
+            "fix_hints": [
+                "Re-read the failing case and walk the code by hand.",
+                "Check off-by-one and empty-input edge cases.",
+                "Retry analysis once the API key is configured.",
+            ],
+            "edge_cases": [],
+            "improved_code": "",
+            "tips": tips,
+        },
+        verdict_status,
+    )

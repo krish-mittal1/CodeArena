@@ -77,6 +77,34 @@ async def call_text_llm(
     raise RuntimeError("No LLM API key configured (set GROQ_API_KEY or GEMINI_API_KEY)")
 
 
+# ── Singleton HTTP client ─────────────────────────────────────────────────────
+# A shared httpx.AsyncClient enables connection pooling and TLS session reuse
+# across all LLM calls, saving ~50-200 ms per request compared to creating a
+# new client for every call.  The client is lazily initialised on first use and
+# closed by close_llm_client() in the FastAPI lifespan shutdown handler.
+
+_http_client: Optional[httpx.AsyncClient] = None
+
+
+def _get_http_client() -> httpx.AsyncClient:
+    """Return the shared HTTP client, creating it on first call."""
+    global _http_client
+    if _http_client is None or _http_client.is_closed:
+        _http_client = httpx.AsyncClient(
+            timeout=httpx.Timeout(connect=10.0, read=90.0, write=10.0, pool=5.0),
+            limits=httpx.Limits(max_connections=20, max_keepalive_connections=10),
+        )
+    return _http_client
+
+
+async def close_llm_client() -> None:
+    """Close the shared HTTP client. Call this from lifespan shutdown."""
+    global _http_client
+    if _http_client is not None and not _http_client.is_closed:
+        await _http_client.aclose()
+        _http_client = None
+
+
 async def _call_groq(system: str, user: str, max_tokens: int) -> str:
     headers = {
         "Authorization": f"Bearer {settings.groq_api_key}",
@@ -91,8 +119,8 @@ async def _call_groq(system: str, user: str, max_tokens: int) -> str:
         "response_format": {"type": "json_object"},
         "max_completion_tokens": max_tokens,
     }
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        response = await client.post(GROQ_API_URL, headers=headers, json=payload)
+    client = _get_http_client()
+    response = await client.post(GROQ_API_URL, headers=headers, json=payload)
     if response.status_code != 200:
         raise RuntimeError(f"Groq HTTP {response.status_code}: {response.text[:200]}")
     return response.json()["choices"][0]["message"]["content"].strip()
@@ -111,8 +139,8 @@ async def _call_groq_text(system: str, user: str, max_tokens: int) -> str:
         ],
         "max_completion_tokens": max_tokens,
     }
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        response = await client.post(GROQ_API_URL, headers=headers, json=payload)
+    client = _get_http_client()
+    response = await client.post(GROQ_API_URL, headers=headers, json=payload)
     if response.status_code != 200:
         raise RuntimeError(f"Groq HTTP {response.status_code}: {response.text[:200]}")
     return response.json()["choices"][0]["message"]["content"].strip()
@@ -131,8 +159,8 @@ async def _call_gemini(system: str, user: str, max_tokens: int, *, json_mode: bo
     }
     if json_mode:
         payload["generationConfig"]["responseMimeType"] = "application/json"
-    async with httpx.AsyncClient(timeout=90.0) as client:
-        response = await client.post(url, params=params, json=payload)
+    client = _get_http_client()
+    response = await client.post(url, params=params, json=payload)
     if response.status_code != 200:
         raise RuntimeError(f"Gemini HTTP {response.status_code}: {response.text[:300]}")
     data = response.json()
