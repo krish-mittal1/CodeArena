@@ -77,6 +77,7 @@ BOT_SUBMISSION_DELAY_MAX = 25  # Bot submits after random delay (max seconds)
 class WSEvent(str, Enum):
     # Server → Client
     MATCH_FOUND = "match_found"
+    ROOM_JOINED = "room_joined"
     MATCH_TIMER_SYNC = "match_timer_sync"
     SUBMISSION_QUEUED = "submission_queued"
     SUBMISSION_RUNNING = "submission_running"
@@ -98,6 +99,8 @@ class WSEvent(str, Enum):
 class RedisKey:
     MATCHMAKING_QUEUE = "matchmaking:queue"
     MATCHMAKING_LOCK = "matchmaking:lock:{user_id}"
+    MATCHMAKING_MEMBER = "matchmaking:member:{user_id}"
+    MATCHMAKING_CLAIM = "matchmaking:claim:{user_id}"
     MATCHMAKING_GLOBAL_LOCK = "matchmaking:global_lock"
     MATCH_STATE = "match:{match_id}:state"
     MATCH_TIMER = "match:{match_id}:timer"
@@ -108,6 +111,14 @@ class RedisKey:
     @classmethod
     def matchmaking_lock(cls, user_id: str) -> str:
         return cls.MATCHMAKING_LOCK.format(user_id=user_id)
+
+    @classmethod
+    def matchmaking_member(cls, user_id: str) -> str:
+        return cls.MATCHMAKING_MEMBER.format(user_id=user_id)
+
+    @classmethod
+    def matchmaking_claim(cls, user_id: str) -> str:
+        return cls.MATCHMAKING_CLAIM.format(user_id=user_id)
 
     @classmethod
     def match_state(cls, match_id: str) -> str:
