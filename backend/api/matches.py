@@ -3,7 +3,6 @@ Match routes — match details and history.
 """
 
 import uuid
-import json
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from typing import Optional, List
@@ -12,9 +11,8 @@ from redis.asyncio import Redis
 from backend.db.session import get_db, AsyncSession
 from backend.dependencies import get_current_user, get_redis
 from backend.models.user import User
-from backend.schemas.match import MatchResponse, MatchHistoryItem
+from backend.schemas.match import MatchResponse, MatchHistoryItem, MatchProblemBrief
 from backend.services import match_service
-from backend.core.constants import RedisKey, WSEvent
 from backend.websocket.manager import manager
 
 router = APIRouter(prefix="/matches", tags=["Matches"])
@@ -47,8 +45,53 @@ async def get_match(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have access to this match",
         )
-    
-    return match
+
+    problems = [
+        MatchProblemBrief(
+            id=uuid.UUID(str(item["id"])),
+            title=item["title"],
+            difficulty=item.get("difficulty"),
+            order_index=item.get("order_index", 0),
+        )
+        for item in match_service.match_problem_summaries(match)
+    ]
+
+    from backend.models.submission import Submission
+    from backend.core.constants import SubmissionStatus
+    from sqlalchemy import select
+
+    problem_ids = match_service.get_match_problem_ids(match)
+    solved_problem_ids: list[uuid.UUID] = []
+    if problem_ids:
+        solved_rows = await db.execute(
+            select(Submission.problem_id)
+            .where(
+                Submission.match_id == match.id,
+                Submission.user_id == current_user.id,
+                Submission.status == SubmissionStatus.ACCEPTED,
+                Submission.problem_id.in_(problem_ids),
+            )
+            .distinct()
+        )
+        solved_problem_ids = list(solved_rows.scalars().all())
+
+    return MatchResponse(
+        id=match.id,
+        player1=match.player1,
+        player2=match.player2,
+        problem_id=match.problem_id,
+        problems=problems,
+        solved_problem_ids=solved_problem_ids,
+        status=match.status,
+        winner_id=match.winner_id,
+        player1_elo_before=match.player1_elo_before,
+        player2_elo_before=match.player2_elo_before,
+        player1_elo_after=match.player1_elo_after,
+        player2_elo_after=match.player2_elo_after,
+        started_at=match.started_at,
+        ended_at=match.ended_at,
+        duration_seconds=match.duration_seconds,
+    )
 
 
 @router.get("/history/me", response_model=List[MatchHistoryItem])
@@ -114,19 +157,8 @@ async def forfeit_match(
 
     room_id = str(match_id)
 
-    # Redis-backed mode: publish event for all pods
-    if redis is not None:
-        channel = RedisKey.ws_channel(room_id)
-        await redis.publish(
-            channel,
-            json.dumps({
-                "event": WSEvent.MATCH_ENDED,
-                "data": result,
-            }),
-        )
-    else:
-        # Dev-mode (no Redis): broadcast directly via ConnectionManager
-        await manager.broadcast_match_ended(room_id, result)
+    # Personalized match_ended (local + Redis pub/sub for other pods)
+    await manager.broadcast_match_ended(room_id, result)
 
     # Dev-mode matchmaking uses in-memory active_matches tracking; clear it safely
     if redis is None:
