@@ -1,0 +1,30 @@
+slug: triangle
+title: Triangle
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: 'Given a triangle array, return the minimum path sum from top to bottom.
+
+  For each step, you may move to an adjacent number of the row below. More formally,
+  if you are on index i on the current row, you may move to either index i or index
+  i + 1 on the next row.'
+input_format: 'Line 1: JSON 2D array triangle'
+output_format: Integer minimum path sum
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= triangle.length <= 200
+
+  triangle[0].length == 1
+
+  triangle[i].length == triangle[i - 1].length + 1
+
+  -10^4 <= triangle[i][j] <= 10^4'
+method_name: minimumTotal
+parameters:
+- name: triangle
+  type: int[][]
+return_type: int
+generator:
+  count: 50
+  seed: 21057

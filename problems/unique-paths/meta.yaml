@@ -1,0 +1,43 @@
+slug: unique-paths
+title: Unique Paths
+problem_type: dsa
+difficulty: medium
+rating: 1000
+description: 'There is a robot on an m x n grid. The robot starts at the top-left corner (0, 0) and wants
+  to reach the bottom-right corner (m - 1, n - 1).
+
+  The robot can only move either down or right at any point in time.
+
+  Given integers m and n, return the number of possible unique paths the robot can take to reach the bottom-right
+  corner.
+
+  '
+input_format: 'Line 1: integer m
+
+  Line 2: integer n
+
+  '
+output_format: 'Integer number of unique paths
+
+  '
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= m, n <= 100
+
+  The answer will be less than or equal to 2 * 10^9
+
+  '
+method_name: uniquePaths
+parameters:
+- name: m
+  type: int
+- name: n
+  type: int
+return_type: int
+generator:
+  count: 80
+  seed: 10002
+examples:
+- explanation: A 3x7 grid has 28 unique paths from top-left to bottom-right moving only right or down.
+- explanation: A 3x2 grid has 3 unique paths.

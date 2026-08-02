@@ -1,0 +1,35 @@
+slug: combination-sum-iv
+title: Combination Sum IV
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'Given an array of distinct integers nums and a target integer target,
+  return the number of possible combinations that add up to target.
+
+  The test cases are generated so that the answer can fit in a 32-bit integer.
+
+  Note that different sequences are counted as different combinations.'
+input_format: 'Line 1: JSON array nums
+
+  Line 2: integer target'
+output_format: Integer number of combinations
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 200
+
+  1 <= nums[i] <= 1000
+
+  All elements are unique.
+
+  1 <= target <= 1000'
+method_name: combinationSum4
+parameters:
+- name: nums
+  type: int[]
+- name: target
+  type: int
+return_type: int
+generator:
+  count: 60
+  seed: 21055

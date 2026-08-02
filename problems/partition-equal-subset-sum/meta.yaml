@@ -1,0 +1,26 @@
+slug: partition-equal-subset-sum
+title: Partition Equal Subset Sum
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: Given an integer array nums, return true if you can partition the array into two subsets
+  such that the sum of the elements in both subsets is equal or false otherwise.
+input_format: 'Line 1: JSON array nums'
+output_format: Boolean true/false
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 200
+
+  1 <= nums[i] <= 100'
+method_name: canPartition
+parameters:
+- name: nums
+  type: int[]
+return_type: bool
+generator:
+  count: 80
+  seed: 21021
+examples:
+- explanation: The array sums to 22 and can be partitioned into [1,5,5] and [11].
+- explanation: The array sums to 11 (odd), so equal partition is impossible.

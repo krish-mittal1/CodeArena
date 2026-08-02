@@ -1,0 +1,25 @@
+slug: maximum-product-subarray
+title: Maximum Product Subarray
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: 'Given an integer array nums, find a contiguous non-empty subarray within
+  the array that has the largest product, and return the product.
+
+  The test cases are generated so that the answer will fit in a 32-bit integer.'
+input_format: 'Line 1: JSON array nums'
+output_format: Integer maximum product
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 2*10^4
+
+  -10 <= nums[i] <= 10'
+method_name: maxProduct
+parameters:
+- name: nums
+  type: int[]
+return_type: int
+generator:
+  count: 100
+  seed: 21001

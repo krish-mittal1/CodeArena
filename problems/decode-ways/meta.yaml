@@ -1,0 +1,33 @@
+slug: decode-ways
+title: Decode Ways
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'A message containing letters from A-Z can be encoded into numbers using the following mapping:
+
+  ''A'' -> ''1'', ''B'' -> ''2'', ..., ''Z'' -> ''26''.
+
+  To decode an encoded message, all the digits must be grouped then mapped back into letters using the
+  reverse of the mapping above (there may be multiple ways).
+
+  Given a string s containing only digits, return the number of ways to decode it.'
+input_format: 'Line 1: string s'
+output_format: Integer number of ways
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= s.length <= 100
+
+  s contains only digits and may contain leading zero(s).'
+method_name: numDecodings
+parameters:
+- name: s
+  type: str
+return_type: int
+generator:
+  count: 100
+  seed: 21005
+examples:
+- explanation: '"12" can be decoded as "AB" (1 2) or "L" (12) — 2 ways.'
+- explanation: '"226" can be decoded as "BZ" (2 26), "VF" (22 6), or "BBF" (2 2 6) — 3 ways.'
+- explanation: '"06" is invalid because it has a leading zero; return 0.'
