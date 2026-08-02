@@ -211,14 +211,27 @@ class ConnectionManager:
 
         logger.info(f"[WS] Player {user_id} connected")
 
-    async def disconnect_player(self, user_id: str):
+    async def disconnect_player(self, user_id: str, websocket: Optional[WebSocket] = None):
         """
         Remove a player from all rooms and notify room members.
         Called on WebSocketDisconnect or unrecoverable error.
+
+        If `websocket` is provided, only disconnect when it is still the
+        registered socket for this user (avoids reconnect races where an
+        old connection's finally block wipes the new connection).
         """
         rooms_to_notify: list[str] = []
 
         async with self._lock:
+            if websocket is not None:
+                current = self._user_ws.get(user_id)
+                if current is not None and current is not websocket:
+                    logger.info(
+                        f"[WS] Skipping disconnect for {user_id}: stale socket "
+                        f"(newer connection already registered)"
+                    )
+                    return
+
             ws = self._user_ws.pop(user_id, None)
             room_ids = self._user_rooms.pop(user_id, set())
 
@@ -402,53 +415,65 @@ class ConnectionManager:
         runtime_ms: Optional[int],
         memory_kb: Optional[int],
         submission_id: str,
+        problem_id: Optional[str] = None,
     ):
         """
         Specialized broadcast for submission results.
         Sends detailed result to the submitter, redacted result to opponent + spectators.
+        Also PUBLISHes raw payload for other pods to personalize.
         """
-        # Full result → submitter
-        await self.send_to_user(submitter_id, WSEvent.SUBMISSION_RESULT, {
+        event_data = {
             "submission_id": submission_id,
+            "user_id": submitter_id,
             "verdict": verdict,
             "passed": passed,
             "total": total,
             "runtime_ms": runtime_ms,
             "memory_kb": memory_kb,
-        })
-
-        # Redacted result → opponent + spectators
-        await self.broadcast_to_room_except(
-            room_id, WSEvent.OPPONENT_SUBMITTED,
-            {"verdict": verdict, "user_id": submitter_id},
-            exclude_user_id=submitter_id,
-        )
+            "problem_id": problem_id,
+        }
+        await self._deliver_personalized_submission_result(room_id, event_data)
+        await self._publish(room_id, WSEvent.SUBMISSION_RESULT, event_data)
 
     async def broadcast_match_ended(self, room_id: str, result_data: dict):
         """
         Send match_ended to all room members with personalized ELO deltas.
         result_data must contain: player1_id, player2_id, winner_id,
         player1_elo_delta, player2_elo_delta, player1_new_elo, player2_new_elo, reason.
+
+        Also PUBLISHes the raw result to Redis so other pods can personalize locally.
         """
-        p1_id = result_data["player1_id"]
-        p2_id = result_data["player2_id"]
+        await self._deliver_personalized_match_ended(room_id, result_data)
+        # Cross-pod: publish raw payload; other pods personalize on receive
+        await self._publish(room_id, WSEvent.MATCH_ENDED, result_data)
+        # Clean up room after match ends (local)
+        await self._cleanup_room(room_id)
+
+    async def _deliver_personalized_match_ended(self, room_id: str, result_data: dict):
+        """Send personalized match_ended to local players + neutral to spectators."""
+        p1_id = result_data.get("player1_id")
+        p2_id = result_data.get("player2_id")
+        if not p1_id or not p2_id:
+            # Already-personalized or incomplete — fall back to raw room broadcast
+            await self._dispatch_local(room_id, WSEvent.MATCH_ENDED, result_data)
+            return
 
         # Player 1's view
         await self.send_to_user(p1_id, WSEvent.MATCH_ENDED, {
             "winner_id": result_data.get("winner_id"),
             "winner_username": result_data.get("winner_username"),
-            "reason": result_data["reason"],
-            "your_elo_delta": result_data["player1_elo_delta"],
-            "new_elo": result_data["player1_new_elo"],
+            "reason": result_data.get("reason"),
+            "your_elo_delta": result_data.get("player1_elo_delta", 0),
+            "new_elo": result_data.get("player1_new_elo"),
         })
 
         # Player 2's view
         await self.send_to_user(p2_id, WSEvent.MATCH_ENDED, {
             "winner_id": result_data.get("winner_id"),
             "winner_username": result_data.get("winner_username"),
-            "reason": result_data["reason"],
-            "your_elo_delta": result_data["player2_elo_delta"],
-            "new_elo": result_data["player2_new_elo"],
+            "reason": result_data.get("reason"),
+            "your_elo_delta": result_data.get("player2_elo_delta", 0),
+            "new_elo": result_data.get("player2_new_elo"),
         })
 
         # Spectators get a neutral view
@@ -458,7 +483,7 @@ class ConnectionManager:
 
         neutral = {
             "winner_id": result_data.get("winner_id"),
-            "reason": result_data["reason"],
+            "reason": result_data.get("reason"),
         }
         for ws in spectators:
             try:
@@ -466,8 +491,34 @@ class ConnectionManager:
             except Exception:
                 pass
 
-        # Clean up room after match ends
-        await self._cleanup_room(room_id)
+    async def _deliver_personalized_submission_result(self, room_id: str, data: dict):
+        """
+        Route SUBMISSION_RESULT: full details to submitter, redacted to opponent.
+        Expects data with user_id (submitter) + verdict fields.
+        """
+        submitter_id = data.get("user_id") or data.get("submitter_id")
+        if not submitter_id:
+            await self._dispatch_local(room_id, WSEvent.SUBMISSION_RESULT, data)
+            return
+
+        await self.send_to_user(submitter_id, WSEvent.SUBMISSION_RESULT, {
+            "submission_id": data.get("submission_id"),
+            "verdict": data.get("verdict"),
+            "passed": data.get("passed"),
+            "total": data.get("total"),
+            "runtime_ms": data.get("runtime_ms"),
+            "memory_kb": data.get("memory_kb"),
+            "problem_id": data.get("problem_id"),
+        })
+        await self.broadcast_to_room_except(
+            room_id, WSEvent.OPPONENT_SUBMITTED,
+            {
+                "verdict": data.get("verdict"),
+                "user_id": submitter_id,
+                "problem_id": data.get("problem_id"),
+            },
+            exclude_user_id=submitter_id,
+        )
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     #  Introspection
@@ -624,7 +675,25 @@ class ConnectionManager:
                     # Extract room_id: channel is "ws:match:{match_id}"
                     room_id = channel.replace("ws:match:", "")
 
-                    await self._dispatch_local(room_id, event, data)
+                    # Personalize events that must not be fanned out raw
+                    if event == WSEvent.MATCH_ENDED and (
+                        data.get("player1_id") and data.get("player2_id")
+                    ):
+                        await self._deliver_personalized_match_ended(room_id, data)
+                        await self._cleanup_room(room_id)
+                    elif event == WSEvent.SUBMISSION_RESULT and (
+                        data.get("user_id") or data.get("submitter_id")
+                    ):
+                        await self._deliver_personalized_submission_result(room_id, data)
+                    elif event == WSEvent.SUBMISSION_RUNNING and (
+                        data.get("user_id") or data.get("submitter_id")
+                    ):
+                        submitter = data.get("user_id") or data.get("submitter_id")
+                        await self.send_to_user(submitter, WSEvent.SUBMISSION_RUNNING, {
+                            "submission_id": data.get("submission_id"),
+                        })
+                    else:
+                        await self._dispatch_local(room_id, event, data)
 
             except asyncio.CancelledError:
                 logger.info("[WS] Redis listener cancelled")

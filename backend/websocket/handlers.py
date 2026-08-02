@@ -24,11 +24,11 @@ from backend.config import settings
 from backend.core.constants import WSEvent, RedisKey
 from backend.core.security import decode_token
 from backend.websocket.manager import manager
-from backend.services import matchmaking_service
-from backend.services.matchmaking_memory import memory_queue
 from backend.db.session import AsyncSessionLocal
 from backend.core.constants import MatchStatus
 from backend.models.match import Match
+from backend.models.match_problem import MatchProblem
+from backend.services.match_service import build_match_found_payload
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -93,19 +93,11 @@ async def handle_player_connection(websocket: WebSocket, token: str, redis: Opti
     except Exception as e:
         logger.error(f"[WS] Player {user_id} error: {e}", exc_info=True)
     finally:
-        # Always remove player from matchmaking queue on disconnect to prevent stale entries.
-        # This is safe because leave_queue is idempotent in both Redis and dev-memory modes.
-        try:
-            if redis is not None:
-                await matchmaking_service.leave_queue(redis, uuid.UUID(user_id))
-            else:
-                await memory_queue.leave_queue(uuid.UUID(user_id))
-        except Exception as e:
-            logger.debug(f"[WS] Failed to auto-leave matchmaking for {user_id}: {e}", exc_info=True)
-
+        # Do NOT leave_queue on disconnect — mobile flaps / brief network drops
+        # would dequeue mid-wait. Explicit cancel + queue ghost cleanup on rejoin
+        # (lock TTL / stale member) handle abandonment.
         # ── 6. Cleanup ────────────────────────────────────
-        await manager.disconnect_player(user_id)
-
+        await manager.disconnect_player(user_id, websocket)
 
 async def _auto_join_match_room(user_id: str, redis: Optional[Redis]):
     """
@@ -168,6 +160,7 @@ async def _recover_active_match_from_db(
                 selectinload(Match.player1),
                 selectinload(Match.player2),
                 selectinload(Match.problem),
+                selectinload(Match.match_problems).selectinload(MatchProblem.problem),
             )
             .limit(1)
         )
@@ -182,22 +175,7 @@ async def _recover_active_match_from_db(
         await manager.join_room(room_id, user_id)
 
     # Rebuild match_found payload (must match frontend expectations)
-    payload = {
-        "match_id": room_id,
-        "problem_id": str(match.problem_id),
-        "problem_title": match.problem.title if match.problem else "",
-        "player1": {
-            "user_id": str(match.player1.id),
-            "username": match.player1.username,
-            "elo": match.player1.elo,
-        },
-        "player2": {
-            "user_id": str(match.player2.id),
-            "username": match.player2.username,
-            "elo": match.player2.elo,
-        },
-        "duration_seconds": match.duration_seconds,
-    }
+    payload = build_match_found_payload(match)
 
     await manager.send_to_user(user_id, WSEvent.MATCH_FOUND, payload)
 
@@ -214,7 +192,7 @@ async def _recover_active_match_from_db(
             remaining = match.duration_seconds
 
     await manager.send_to_user(user_id, WSEvent.MATCH_TIMER_SYNC, {"remaining_seconds": remaining})
-    await manager.send_to_user(user_id, "room_joined", {
+    await manager.send_to_user(user_id, WSEvent.ROOM_JOINED, {
         "match_id": room_id,
         "remaining_seconds": remaining,
         "reconnected": True,
