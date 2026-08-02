@@ -38,29 +38,23 @@ async def run_worker():
                             RedisKey.ws_channel(str(match_id)),
                             json.dumps({
                                 "event": WSEvent.MATCH_FOUND,
-                                "data": {
-                                    "match_id": str(match.id),
-                                    "problem_id": str(match.problem_id),
-                                    "problem_title": match.problem.title,
-                                    "duration_seconds": match.duration_seconds,
-                                    "player1": {
-                                        "user_id": str(match.player1.id),
-                                        "username": match.player1.username,
-                                        "elo": match.player1.elo,
-                                    },
-                                    "player2": {
-                                        "user_id": str(match.player2.id),
-                                        "username": match.player2.username,
-                                        "elo": match.player2.elo,
-                                    },
-                                },
+                                "data": match_service.build_match_found_payload(match),
                             })
                         )
 
-                # Check for expired matches
-                completed = await match_service.check_and_complete_expired_matches(db, redis)
-                for match_id in completed:
-                    logger.info(f"Match {match_id} expired and completed")
+                # Check for expired matches and notify players
+                completed_results = await match_service.check_and_complete_expired_matches(db, redis)
+                for result_data in completed_results:
+                    room_id = result_data["match_id"]
+                    # Standalone worker: publish raw; API pods personalize via Redis listener
+                    await redis.publish(
+                        RedisKey.ws_channel(room_id),
+                        json.dumps({
+                            "event": WSEvent.MATCH_ENDED,
+                            "data": result_data,
+                        }),
+                    )
+                    logger.info(f"Match {room_id} expired and completed (timeout notified)")
                 
         except Exception as e:
             logger.error(f"Matchmaking worker error: {e}", exc_info=True)

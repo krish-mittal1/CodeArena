@@ -303,31 +303,37 @@ class InMemoryMatchmakingQueue:
         p1_id: str, p1_elo: int,
         p2_id: str, p2_elo: int,
     ) -> uuid.UUID:
-        """Create match in PostgreSQL with an ELO-appropriate problem."""
-        from backend.services.problem_service import get_problem_for_match
+        """Create match in PostgreSQL with ELO-appropriate problems."""
+        from backend.services.problem_service import get_problems_for_match
+        from backend.services import match_service as match_svc
         from backend.models.match import Match
 
         avg_elo = (p1_elo + p2_elo) // 2
 
         async with session_factory() as db:
-            problem = await get_problem_for_match(db, avg_elo)
+            problems = await get_problems_for_match(
+                db, avg_elo, count=match_svc.MATCH_PROBLEM_COUNT
+            )
+            primary = problems[0]
 
             match = Match(
                 player1_id=uuid.UUID(p1_id),
                 player2_id=uuid.UUID(p2_id),
-                problem_id=problem.id,
+                problem_id=primary.id,
                 status=MatchStatus.ACTIVE,
                 player1_elo_before=p1_elo,
                 player2_elo_before=p2_elo,
                 duration_seconds=settings.match_duration_seconds,
             )
             db.add(match)
+            await db.flush()
+            await match_svc.attach_match_problems(db, match, problems)
             await db.commit()
             await db.refresh(match)
 
             logger.info(
                 f"[MM-DEV] Match {match.id} created in DB: "
-                f"{p1_id} vs {p2_id} | problem={problem.title}"
+                f"{p1_id} vs {p2_id} | problems={[p.title for p in problems]}"
             )
             return match.id
 
@@ -341,38 +347,15 @@ class InMemoryMatchmakingQueue:
         """
         Send match_found event to both players via WebSocket.
 
-        Frontend expects payload:
-          {
-            "match_id": "...",
-            "problem_id": "...",
-            "problem_title": "...",
-            "player1": { "user_id": "..." },
-            "player2": { "user_id": "..." },
-            "duration_seconds": ...
-          }
+        Frontend expects payload with problems[] (and legacy problem_id).
         """
         from backend.websocket.manager import manager
-        from backend.services.match_service import get_match
+        from backend.services.match_service import get_match, build_match_found_payload
 
         async with session_factory() as db:
             match = await get_match(db, match_id)
 
-        payload = {
-            "match_id": str(match.id),
-            "problem_id": str(match.problem_id),
-            "problem_title": match.problem.title if match.problem else "",
-            "player1": {
-                "user_id": str(match.player1.id),
-                "username": match.player1.username,
-                "elo": match.player1.elo,
-            },
-            "player2": {
-                "user_id": str(match.player2.id),
-                "username": match.player2.username,
-                "elo": match.player2.elo,
-            },
-            "duration_seconds": match.duration_seconds,
-        }
+        payload = build_match_found_payload(match)
 
         # Notify both players
         await manager.send_to_user(p1_id, "match_found", payload)
@@ -382,6 +365,14 @@ class InMemoryMatchmakingQueue:
         mid = str(match.id)
         await manager.join_room(mid, p1_id)
         await manager.join_room(mid, p2_id)
+
+        room_joined = {
+            "match_id": mid,
+            "remaining_seconds": match.duration_seconds,
+            "reconnected": False,
+        }
+        await manager.send_to_user(p1_id, "room_joined", room_joined)
+        await manager.send_to_user(p2_id, "room_joined", room_joined)
 
         logger.info(f"[MM-DEV] match_found sent to {p1_id},{p2_id}; both joined room {mid}")
 
