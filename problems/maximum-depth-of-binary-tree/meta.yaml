@@ -3,11 +3,9 @@ title: Maximum Depth of Binary Tree
 problem_type: dsa
 difficulty: easy
 rating: 900
-description: Given the root of a binary tree, return its maximum depth. A binary tree's
-  maximum depth is the number of nodes along the longest path from the root node down
-  to the farthest leaf node.
-input_format: 'Line 1: JSON array root in level-order form using null for missing
-  children'
+description: Given the root of a binary tree, return its maximum depth. A binary tree's maximum depth
+  is the number of nodes along the longest path from the root node down to the farthest leaf node.
+input_format: 'Line 1: JSON array root in level-order form using null for missing children'
 output_format: 'Single integer: the maximum depth of the binary tree'
 time_limit_ms: 1500
 memory_limit_mb: 256
@@ -23,3 +21,6 @@ return_type: int
 generator:
   count: 530
   seed: 2589
+examples:
+- explanation: The longest root-to-leaf path has 3 nodes, so depth is 3.
+- explanation: Root → right child forms a path of depth 2.

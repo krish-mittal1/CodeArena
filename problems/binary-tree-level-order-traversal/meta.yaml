@@ -3,10 +3,9 @@ title: Binary Tree Level Order Traversal
 problem_type: dsa
 difficulty: medium
 rating: 1150
-description: Given the root of a binary tree, return the level order traversal of
-  its nodes' values from left to right, level by level.
-input_format: 'Line 1: JSON array root in level-order form using null for missing
-  children'
+description: Given the root of a binary tree, return the level order traversal of its nodes' values from
+  left to right, level by level.
+input_format: 'Line 1: JSON array root in level-order form using null for missing children'
 output_format: JSON matrix representing the node values level by level
 time_limit_ms: 1500
 memory_limit_mb: 256
@@ -22,3 +21,7 @@ return_type: int[][]
 generator:
   count: 529
   seed: 3101
+examples:
+- explanation: 'Level order visits nodes level by level: [[3],[9,20],[15,7]].'
+- explanation: 'A single-node tree has one level: [[1]].'
+- explanation: An empty tree has no levels.

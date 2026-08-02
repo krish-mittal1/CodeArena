@@ -22,3 +22,11 @@ return_type: TreeNode
 generator:
   count: 530
   seed: 1709
+images:
+  - src: /problem-assets/invert-binary-tree/diagram.svg
+    alt: Invert each node's left and right children
+examples:
+  - explanation: |
+      Swap every left and right child. The tree [4,2,7,1,3,6,9] becomes [4,7,2,9,6,3,1].
+  - explanation: |
+      The tree [2,1,3] inverts to [2,3,1].

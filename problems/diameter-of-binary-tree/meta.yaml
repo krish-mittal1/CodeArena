@@ -3,10 +3,9 @@ title: Diameter of Binary Tree
 problem_type: dsa
 difficulty: easy
 rating: 1000
-description: The diameter of a binary tree is the length of the longest path between
-  any two nodes. Return the diameter of the tree.
-input_format: 'Line 1: JSON array root in level-order form using null for missing
-  children'
+description: The diameter of a binary tree is the length of the longest path between any two nodes. Return
+  the diameter of the tree.
+input_format: 'Line 1: JSON array root in level-order form using null for missing children'
 output_format: 'Single integer: the diameter of the binary tree'
 time_limit_ms: 1500
 memory_limit_mb: 256
@@ -22,3 +21,6 @@ return_type: int
 generator:
   count: 530
   seed: 2133
+examples:
+- explanation: The longest path is 4→2→1→3 or 5→2→1→3 with length 3 (edges).
+- explanation: The path 2→1 has length 1.

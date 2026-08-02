@@ -3,8 +3,8 @@ title: Word Break
 problem_type: dsa
 difficulty: medium
 rating: 1300
-description: 'Given a string s and a dictionary of strings wordDict, return true if
-  s can be segmented into a space-separated sequence of one or more dictionary words.
+description: 'Given a string s and a dictionary of strings wordDict, return true if s can be segmented
+  into a space-separated sequence of one or more dictionary words.
 
 
   The same word in the dictionary may be reused multiple times.'
@@ -32,3 +32,7 @@ return_type: boolean
 generator:
   count: 567
   seed: 929
+examples:
+- explanation: Return true because "leetcode" can be segmented as "leet code".
+- explanation: Return true because "applepenapple" can be segmented as "apple pen apple".
+- explanation: Return false because "catsandog" cannot be segmented using the dictionary.

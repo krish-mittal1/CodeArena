@@ -3,8 +3,8 @@ title: Merge Two Sorted Lists
 problem_type: dsa
 difficulty: easy
 rating: 900
-description: You are given the heads of two sorted linked lists. Merge them into one
-  sorted linked list and return its head.
+description: You are given the heads of two sorted linked lists. Merge them into one sorted linked list
+  and return its head.
 input_format: 'Line 1: JSON array list1
 
   Line 2: JSON array list2. The runner converts each array into a ListNode chain.'
@@ -25,3 +25,7 @@ return_type: ListNode
 generator:
   count: 169
   seed: 2058
+examples:
+- explanation: Merge the two sorted lists into one sorted list.
+- explanation: Both lists empty yields an empty list.
+- explanation: Merging empty with [0] yields [0].

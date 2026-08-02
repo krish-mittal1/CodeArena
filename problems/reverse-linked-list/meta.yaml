@@ -3,10 +3,8 @@ title: Reverse Linked List
 problem_type: dsa
 difficulty: easy
 rating: 900
-description: Given the head of a singly linked list, reverse the list and return the
-  new head.
-input_format: 'Line 1: JSON array of node values. The runner converts this array into
-  head: ListNode.'
+description: Given the head of a singly linked list, reverse the list and return the new head.
+input_format: 'Line 1: JSON array of node values. The runner converts this array into head: ListNode.'
 output_format: JSON array representing the reversed linked list
 time_limit_ms: 1500
 memory_limit_mb: 256
@@ -22,3 +20,7 @@ return_type: ListNode
 generator:
   count: 169
   seed: 1807
+examples:
+- explanation: Reversing 1→2→3→4→5 yields 5→4→3→2→1.
+- explanation: Reversing 1→2 yields 2→1.
+- explanation: An empty list reverses to an empty list.

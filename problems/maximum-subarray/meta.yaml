@@ -3,30 +3,32 @@ title: Maximum Subarray
 problem_type: dsa
 difficulty: medium
 rating: 1100
-
 method_name: maxSubArray
 parameters:
-  - name: nums
-    type: int[]
+- name: nums
+  type: int[]
 return_type: int
-
 time_limit_ms: 1500
 memory_limit_mb: 256
 is_active: true
+description: 'Given an integer array nums, find the subarray with the largest sum, and return its sum.
 
-description: |
-  Given an integer array nums, find the subarray with the largest sum, and return its sum.
+  '
+input_format: 'Line 1: JSON array nums
 
-input_format: |
-  Line 1: JSON array nums
+  '
+output_format: 'Single integer: maximum subarray sum
 
-output_format: |
-  Single integer: maximum subarray sum
+  '
+constraints: '1 <= nums.length <= 420
 
-constraints: |
-  1 <= nums.length <= 420
   -10^4 <= nums[i] <= 10^4
 
+  '
 generator:
   count: 576
   seed: 2026040203
+examples:
+- explanation: The subarray [4,-1,2,1] has the largest sum 6.
+- explanation: Single-element array; the answer is 1.
+- explanation: The entire array is the maximum subarray with sum 23.

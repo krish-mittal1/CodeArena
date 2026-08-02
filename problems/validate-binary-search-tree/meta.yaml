@@ -3,11 +3,10 @@ title: Validate Binary Search Tree
 problem_type: dsa
 difficulty: medium
 rating: 1250
-description: Given the root of a binary tree, determine if it is a valid binary search
-  tree. Every node in the left subtree must be smaller than the node, every node in
-  the right subtree must be larger, and both subtrees must also be valid BSTs.
-input_format: 'Line 1: JSON array root in level-order form using null for missing
-  children'
+description: Given the root of a binary tree, determine if it is a valid binary search tree. Every node
+  in the left subtree must be smaller than the node, every node in the right subtree must be larger, and
+  both subtrees must also be valid BSTs.
+input_format: 'Line 1: JSON array root in level-order form using null for missing children'
 output_format: Boolean true/false
 time_limit_ms: 1800
 memory_limit_mb: 256
@@ -23,3 +22,6 @@ return_type: bool
 generator:
   count: 530
   seed: 2517
+examples:
+- explanation: Left < root < right holds for every subtree; it is a valid BST.
+- explanation: Node 4 has left child 3, but 4 is on the right of 5, violating the BST range.

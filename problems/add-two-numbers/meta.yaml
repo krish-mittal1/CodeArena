@@ -28,3 +28,13 @@ return_type: ListNode
 generator:
   count: 457
   seed: 1375
+images:
+  - src: /problem-assets/add-two-numbers/diagram.svg
+    alt: Add digits stored in reverse-order linked lists
+examples:
+  - explanation: |
+      342 + 465 = 807. Digits are stored in reverse order, so the result list is [7,0,8].
+  - explanation: |
+      0 + 0 = 0.
+  - explanation: |
+      9999999 + 9999 = 10009998, returned as [8,9,9,9,0,0,0,1].

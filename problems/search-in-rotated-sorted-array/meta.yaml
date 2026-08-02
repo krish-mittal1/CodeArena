@@ -3,8 +3,8 @@ title: Search in Rotated Sorted Array
 problem_type: dsa
 difficulty: medium
 rating: 1100
-description: 'Given a sorted array of distinct integers that has been rotated at an
-  unknown pivot, return the index of target if it exists, otherwise return -1.
+description: 'Given a sorted array of distinct integers that has been rotated at an unknown pivot, return
+  the index of target if it exists, otherwise return -1.
 
 
   Example 1
@@ -39,3 +39,6 @@ return_type: int
 generator:
   count: 200
   seed: 2800
+examples:
+- explanation: After rotation, target 0 is found at index 4.
+- explanation: Target 3 is not present in the array, so return -1.

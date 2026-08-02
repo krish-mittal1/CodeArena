@@ -3,8 +3,7 @@ title: Set Matrix Zeroes
 problem_type: dsa
 difficulty: medium
 rating: 1250
-description: 'Given an m x n integer matrix, if an element is 0, set its entire row
-  and column to 0.
+description: 'Given an m x n integer matrix, if an element is 0, set its entire row and column to 0.
 
 
   On this platform, return the final matrix after applying the in-place transformation.'
@@ -24,3 +23,7 @@ return_type: int[][]
 generator:
   count: 597
   seed: 1625
+examples:
+- explanation: Cell (1,1) is 0, so row 1 and column 1 become all zeros.
+- explanation: Zeros at (0,0) and (0,3) zero out the first row and columns 0 and 3.
+- explanation: A single non-zero cell is unchanged.

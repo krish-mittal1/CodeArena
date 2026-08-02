@@ -3,30 +3,32 @@ title: Jump Game
 problem_type: dsa
 difficulty: medium
 rating: 1000
-
 method_name: canJump
 parameters:
-  - name: nums
-    type: int[]
+- name: nums
+  type: int[]
 return_type: bool
-
 time_limit_ms: 1500
 memory_limit_mb: 256
 is_active: true
+description: 'Given an array nums where each element is your maximum jump length from that position, return
+  true if you can reach the last index.
 
-description: |
-  Given an array nums where each element is your maximum jump length from that position, return true if you can reach the last index.
+  '
+input_format: 'Line 1: JSON array nums (int[])
 
-input_format: |
-  Line 1: JSON array nums (int[])
+  '
+output_format: 'Boolean: true if the last index is reachable
 
-output_format: |
-  Boolean: true if the last index is reachable
+  '
+constraints: '1 <= nums.length <= 10^4
 
-constraints: |
-  1 <= nums.length <= 10^4
   0 <= nums[i] <= 10^5
 
+  '
 generator:
   count: 170
   seed: 20260331
+examples:
+- explanation: From index 0 you can reach the last index (e.g. 0→1→4).
+- explanation: You get stuck at index 3 (value 0) and cannot reach the end.

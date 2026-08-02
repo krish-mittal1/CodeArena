@@ -3,8 +3,7 @@ title: Trapping Rain Water
 problem_type: dsa
 difficulty: hard
 rating: 1400
-description: Given elevation heights, compute how much rain water can be trapped after
-  raining.
+description: Given elevation heights, compute how much rain water can be trapped after raining.
 input_format: 'Line 1: JSON array height (int[])'
 output_format: 'Single integer: total trapped water'
 time_limit_ms: 2000
@@ -19,3 +18,6 @@ return_type: int
 generator:
   count: 170
   seed: 1810
+examples:
+- explanation: Water is trapped in the valleys between bars; total units trapped = 6.
+- explanation: Water trapped between the bars sums to 9.

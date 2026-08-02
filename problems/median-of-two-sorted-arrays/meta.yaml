@@ -3,8 +3,7 @@ title: Median of Two Sorted Arrays
 problem_type: dsa
 difficulty: hard
 rating: 1500
-description: Given two sorted arrays nums1 and nums2, return the median of the combined
-  numbers.
+description: Given two sorted arrays nums1 and nums2, return the median of the combined numbers.
 input_format: 'Line 1: JSON array nums1 (int[])
 
   Line 2: JSON array nums2 (int[])'
@@ -23,3 +22,6 @@ return_type: float
 generator:
   count: 160
   seed: 2496
+examples:
+- explanation: Merged sorted array is [1,2,3]; median is 2.
+- explanation: Merged sorted array is [1,2,3,4]; median is (2+3)/2 = 2.5.

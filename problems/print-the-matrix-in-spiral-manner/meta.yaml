@@ -14,7 +14,7 @@ input_format: 'First line contains two integers M and N.
 output_format: Print all elements space-separated in clockwise spiral order.
 time_limit_ms: 2000
 memory_limit_mb: 256
-is_active: true
+is_active: false
 constraints: '1 <= M, N <= 100
 
   -1000 <= matrix[i][j] <= 1000'

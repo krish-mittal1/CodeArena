@@ -3,10 +3,9 @@ title: Lowest Common Ancestor of a Binary Tree
 problem_type: dsa
 difficulty: medium
 rating: 1300
-description: Given the root of a binary tree with unique node values and two values
-  p and q that exist in the tree, return the value of their lowest common ancestor.
-input_format: 'Line 1: JSON array root in level-order form using null for missing
-  children
+description: Given the root of a binary tree with unique node values and two values p and q that exist
+  in the tree, return the value of their lowest common ancestor.
+input_format: 'Line 1: JSON array root in level-order form using null for missing children
 
   Line 2: integer p
 
@@ -32,3 +31,6 @@ return_type: int
 generator:
   count: 530
   seed: 3601
+examples:
+- explanation: Nodes 5 and 1 have LCA 3 (the root).
+- explanation: Nodes 5 and 4 have LCA 5 (one node is an ancestor of the other).
