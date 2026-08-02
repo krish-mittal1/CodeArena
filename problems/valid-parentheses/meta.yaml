@@ -1,0 +1,31 @@
+slug: valid-parentheses
+title: Valid Parentheses
+problem_type: dsa
+difficulty: easy
+rating: 850
+description: 'Given a string s containing just the characters ''('', '')'', ''{'', ''}'', ''['' and '']'',
+  determine if the input string is valid.
+
+  An input string is valid if open brackets are closed by the same type of brackets, in the correct order,
+  and every close bracket has a corresponding open bracket of the same type.'
+input_format: 'Line 1: string s'
+output_format: Boolean true/false
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= s.length <= 10^4
+
+  s consists of parentheses only ''()[]{}''.'
+method_name: isValid
+parameters:
+- name: s
+  type: str
+return_type: bool
+generator:
+  count: 100
+  seed: 21016
+examples:
+- explanation: The string contains a matching pair of parentheses.
+- explanation: Every opening bracket has a corresponding closing bracket of the same type in the correct
+    order.
+- explanation: A closing bracket does not match the most recent unmatched opening bracket.

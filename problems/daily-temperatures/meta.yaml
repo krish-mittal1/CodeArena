@@ -1,0 +1,28 @@
+slug: daily-temperatures
+title: Daily Temperatures
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: Given an array of integers temperatures represents the daily temperatures, return an array
+  answer such that answer[i] is the number of days you have to wait after the ith day to get a warmer
+  temperature. If there is no future day for which this is possible, keep answer[i] == 0 instead.
+input_format: 'Line 1: JSON array temperatures'
+output_format: JSON array answer
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= temperatures.length <= 10^5
+
+  30 <= temperatures[i] <= 100'
+method_name: dailyTemperatures
+parameters:
+- name: temperatures
+  type: int[]
+return_type: int[]
+generator:
+  count: 80
+  seed: 21017
+examples:
+- explanation: For each day, wait until a warmer temperature; 0 means none exists later.
+- explanation: Temperatures strictly increase until the last day.
+- explanation: Each day (except the last) has a warmer day the next day.

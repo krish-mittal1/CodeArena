@@ -1,0 +1,33 @@
+slug: asteroid-collision
+title: Asteroid Collision
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: 'We are given an array asteroids of integers representing asteroids in
+  a row.
+
+  For each asteroid, the absolute value represents its size, and the sign represents
+  its direction (positive meaning right, negative meaning left). Each asteroid moves
+  at the same speed.
+
+  Find out the state of the asteroids after all collisions. If two asteroids meet,
+  the smaller one will explode. If both are the same size, both will explode. Two
+  asteroids moving in the same direction will never meet.'
+input_format: 'Line 1: JSON array asteroids'
+output_format: JSON array remaining asteroids
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '2 <= asteroids.length <= 10^4
+
+  -1000 <= asteroids[i] <= 1000
+
+  asteroids[i] != 0'
+method_name: asteroidCollision
+parameters:
+- name: asteroids
+  type: int[]
+return_type: int[]
+generator:
+  count: 80
+  seed: 21053

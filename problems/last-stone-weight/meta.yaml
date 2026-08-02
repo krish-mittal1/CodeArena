@@ -1,0 +1,31 @@
+slug: last-stone-weight
+title: Last Stone Weight
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: 'You are given an array of integers stones where stones[i] is the weight
+  of the ith stone.
+
+  We are playing a game with the stones. On each turn, we choose the heaviest two
+  stones and smash them together. Suppose the heaviest two stones have weights x and
+  y with x <= y. The result of this smash is: If x == y, both stones are destroyed;
+  if x != y, x is destroyed and y has new weight y - x.
+
+  At the end of the game, there is at most one stone left. Return the weight of the
+  last remaining stone. If there are no stones left, return 0.'
+input_format: 'Line 1: JSON array stones'
+output_format: Integer last stone weight
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= stones.length <= 30
+
+  1 <= stones[i] <= 1000'
+method_name: lastStoneWeight
+parameters:
+- name: stones
+  type: int[]
+return_type: int
+generator:
+  count: 80
+  seed: 21050

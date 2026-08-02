@@ -1,0 +1,27 @@
+slug: evaluate-reverse-polish-notation
+title: Evaluate Reverse Polish Notation
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: 'You are given an array of strings tokens that represents an arithmetic
+  expression in Reverse Polish Notation.
+
+  Evaluate the expression. Return an integer that represents the value of the expression.
+
+  Division truncates toward zero.'
+input_format: 'Line 1: JSON array of strings tokens'
+output_format: Integer result
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= tokens.length <= 10^4
+
+  tokens[i] is an operator +, -, *, / or an integer in range [-200, 200]'
+method_name: evalRPN
+parameters:
+- name: tokens
+  type: str[]
+return_type: int
+generator:
+  count: 60
+  seed: 21018

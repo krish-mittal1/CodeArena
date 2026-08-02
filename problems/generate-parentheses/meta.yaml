@@ -1,0 +1,24 @@
+slug: generate-parentheses
+title: Generate Parentheses
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: Given n pairs of parentheses, write a function to generate all combinations of well-formed
+  parentheses.
+input_format: 'Line 1: integer n'
+output_format: JSON array of strings
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 1 <= n <= 8
+method_name: generateParenthesis
+parameters:
+- name: n
+  type: int
+return_type: str[]
+generator:
+  count: 8
+  seed: 21009
+examples:
+- explanation: All valid parentheses strings with n = 3 pairs.
+- explanation: For n = 1 the only string is "()".

@@ -1,0 +1,33 @@
+slug: k-closest-points-to-origin
+title: K Closest Points to Origin
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: 'Given an array of points where points[i] = [xi, yi] represents a point
+  on the X-Y plane and an integer k, return the k closest points to the origin (0,
+  0).
+
+  The distance between two points on the X-Y plane is the Euclidean distance.
+
+  You may return the answer in any order. The answer is guaranteed to be unique (except
+  for the order that it is in).'
+input_format: 'Line 1: JSON 2D array points
+
+  Line 2: integer k'
+output_format: JSON 2D array of k closest points
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= k <= points.length <= 10^4
+
+  -10^4 <= xi, yi <= 10^4'
+method_name: kClosest
+parameters:
+- name: points
+  type: int[][]
+- name: k
+  type: int
+return_type: int[][]
+generator:
+  count: 60
+  seed: 21051

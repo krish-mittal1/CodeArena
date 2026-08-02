@@ -1,0 +1,31 @@
+slug: kth-largest-element-in-an-array
+title: Kth Largest Element in an Array
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: 'Given an integer array nums and an integer k, return the kth largest element in the array.
+
+  Note that it is the kth largest element in the sorted order, not the kth distinct element.'
+input_format: 'Line 1: JSON array nums
+
+  Line 2: integer k'
+output_format: Integer kth largest
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= k <= nums.length <= 10^5
+
+  -10^4 <= nums[i] <= 10^4'
+method_name: findKthLargest
+parameters:
+- name: nums
+  type: int[]
+- name: k
+  type: int
+return_type: int
+generator:
+  count: 100
+  seed: 21015
+examples:
+- explanation: The 2nd largest element in the array is 5.
+- explanation: The 4th largest element is 4.
