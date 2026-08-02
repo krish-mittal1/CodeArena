@@ -1,0 +1,49 @@
+slug: course-schedule
+title: Course Schedule
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'There are a total of numCourses courses you have to take, labeled from 0 to numCourses -
+  1.
+
+  You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take
+  course bi first if you want to take course ai.
+
+  Return true if you can finish all courses. Otherwise, return false.
+
+  '
+input_format: 'Line 1: integer numCourses
+
+  Line 2: JSON 2D array prerequisites
+
+  '
+output_format: 'Boolean true/false
+
+  '
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= numCourses <= 2000
+
+  0 <= prerequisites.length <= 5000
+
+  prerequisites[i].length == 2
+
+  0 <= ai, bi < numCourses
+
+  All prerequisite pairs are unique
+
+  '
+method_name: canFinish
+parameters:
+- name: numCourses
+  type: int
+- name: prerequisites
+  type: int[][]
+return_type: boolean
+generator:
+  count: 80
+  seed: 12003
+examples:
+- explanation: Take course 1 after course 0; there is no cycle, so it is possible.
+- explanation: Courses 0 and 1 depend on each other, forming a cycle; return false.

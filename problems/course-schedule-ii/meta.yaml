@@ -1,0 +1,33 @@
+slug: course-schedule-ii
+title: Course Schedule II
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'There are a total of numCourses courses you have to take, labeled from
+  0 to numCourses - 1. You are given an array prerequisites where prerequisites[i]
+  = [ai, bi] indicates that you must take course bi first if you want to take course
+  ai.
+
+  Return the ordering of courses you should take to finish all courses. If there are
+  many valid answers, return any of them. If it is impossible to finish all courses,
+  return an empty array.'
+input_format: 'Line 1: integer numCourses
+
+  Line 2: JSON 2D array prerequisites'
+output_format: JSON array course order (any valid topo order)
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= numCourses <= 2000
+
+  0 <= prerequisites.length <= numCourses * (numCourses - 1)'
+method_name: findOrder
+parameters:
+- name: numCourses
+  type: int
+- name: prerequisites
+  type: int[][]
+return_type: int[]
+generator:
+  count: 60
+  seed: 21047

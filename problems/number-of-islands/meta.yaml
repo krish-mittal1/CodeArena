@@ -1,0 +1,32 @@
+slug: number-of-islands
+title: Number of Islands
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: |
+  Given an `m x n` 2D binary grid which represents a map of `'1'`s (land) and `'0'`s (water), return the number of islands.
+
+  An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
+input_format: |
+  Line 1: JSON 2D character grid (each cell is "1" or "0")
+output_format: |
+  Integer number of islands
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: |
+  m == grid.length
+  n == grid[i].length
+  1 <= m, n <= 50
+  grid[i][j] is '0' or '1'
+method_name: numIslands
+parameters:
+  - name: grid
+    type: char[][]
+return_type: int
+generator:
+  count: 80
+  seed: 11001
+examples:
+  - explanation: All land cells are connected into a single island, so the answer is 1.
+  - explanation: There are three islands — the top-left 2x2 block, the middle cell, and the bottom-right 1x2 block.

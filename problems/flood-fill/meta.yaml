@@ -1,0 +1,59 @@
+slug: flood-fill
+title: Flood Fill
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: 'An image is represented by an m x n integer grid image where image[i][j] represents the
+  pixel value of the image.
+
+  You are also given three integers sr, sc, and color. Starting from pixel (sr, sc), flood fill all 4-directionally
+  connected pixels with the same original color to the new color.
+
+  Return the modified image after performing the flood fill.
+
+  '
+input_format: 'Line 1: JSON 2D array image
+
+  Line 2: integer sr
+
+  Line 3: integer sc
+
+  Line 4: integer color
+
+  '
+output_format: 'JSON 2D array of the filled image
+
+  '
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: 'm == image.length
+
+  n == image[i].length
+
+  1 <= m, n <= 50
+
+  0 <= image[i][j], color < 2^16
+
+  0 <= sr < m
+
+  0 <= sc < n
+
+  '
+method_name: floodFill
+parameters:
+- name: image
+  type: int[][]
+- name: sr
+  type: int
+- name: sc
+  type: int
+- name: color
+  type: int
+return_type: int[][]
+generator:
+  count: 80
+  seed: 9001
+examples:
+- explanation: Starting at (1,1), all 4-connected cells with the old color are recolored to 2.
+- explanation: The starting pixel already has the new color; the image is unchanged.

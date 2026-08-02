@@ -1,0 +1,35 @@
+slug: max-area-of-island
+title: Max Area of Island
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: 'You are given an m x n binary matrix grid. An island is a group of 1''s (representing land)
+  connected 4-directionally (horizontal or vertical). You may assume all four edges of the grid are surrounded
+  by water.
+
+  The area of an island is the number of cells with a value 1 in the island.
+
+  Return the maximum area of an island in grid. If there is no island, return 0.'
+input_format: 'Line 1: JSON 2D array grid'
+output_format: Integer max area
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 'm == grid.length
+
+  n == grid[i].length
+
+  1 <= m, n <= 50
+
+  grid[i][j] is 0 or 1'
+method_name: maxAreaOfIsland
+parameters:
+- name: grid
+  type: int[][]
+return_type: int
+generator:
+  count: 60
+  seed: 21044
+examples:
+- explanation: The largest island (4-connected land cells) has area 6.
+- explanation: There is no land; return 0.

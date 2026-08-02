@@ -1,0 +1,39 @@
+slug: network-delay-time
+title: Network Delay Time
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'You are given a network of n nodes, labeled from 1 to n. You are also given times, a list
+  of travel times as directed edges times[i] = (ui, vi, wi), where ui is the source node, vi is the target
+  node, and wi is the time it takes for a signal to travel from source to target.
+
+  We will send a signal from a given node k. Return the minimum time it takes for all the n nodes to receive
+  the signal. If it is impossible for all the n nodes to receive the signal, return -1.'
+input_format: 'Line 1: JSON 2D array times
+
+  Line 2: integer n
+
+  Line 3: integer k'
+output_format: Integer min time or -1
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= k <= n <= 100
+
+  1 <= times.length <= 6000'
+method_name: networkDelayTime
+parameters:
+- name: times
+  type: int[][]
+- name: n
+  type: int
+- name: k
+  type: int
+return_type: int
+generator:
+  count: 60
+  seed: 21049
+examples:
+- explanation: From node 2, the farthest reachable node takes time 2.
+- explanation: The signal reaches node 2 from 1 in time 1.
+- explanation: Starting at node 2 cannot reach node 1, so return -1.

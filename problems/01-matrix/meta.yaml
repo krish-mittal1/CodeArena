@@ -1,0 +1,33 @@
+slug: 01-matrix
+title: 01 Matrix
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'Given an m x n binary matrix mat, return the distance of the nearest
+  0 for each cell.
+
+  The distance between two cells sharing a common edge is 1.'
+input_format: 'Line 1: JSON 2D array mat'
+output_format: JSON 2D array of distances
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 'm == mat.length
+
+  n == mat[i].length
+
+  1 <= m, n <= 50
+
+  1 <= m * n <= 10^4
+
+  mat[i][j] is 0 or 1
+
+  There is at least one 0 in mat.'
+method_name: updateMatrix
+parameters:
+- name: mat
+  type: int[][]
+return_type: int[][]
+generator:
+  count: 50
+  seed: 21045

@@ -1,0 +1,32 @@
+slug: is-graph-bipartite
+title: Is Graph Bipartite
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'There is an undirected graph with n nodes, where each node is numbered between 0 and n -
+  1. You are given a 2D array graph, where graph[u] is an array of nodes that node u is adjacent to.
+
+  Return true if and only if it is bipartite.'
+input_format: 'Line 1: JSON 2D array graph (adjacency list)'
+output_format: Boolean true/false
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 'graph.length == n
+
+  1 <= n <= 100
+
+  0 <= graph[u].length < n
+
+  No self-edges; undirected'
+method_name: isBipartite
+parameters:
+- name: graph
+  type: int[][]
+return_type: bool
+generator:
+  count: 60
+  seed: 21048
+examples:
+- explanation: Odd cycles exist (e.g. 0-1-2), so the graph is not bipartite.
+- explanation: The graph is a cycle of even length and can be 2-colored.

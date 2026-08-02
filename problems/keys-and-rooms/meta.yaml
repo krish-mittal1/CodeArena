@@ -1,0 +1,48 @@
+slug: keys-and-rooms
+title: Keys and Rooms
+problem_type: dsa
+difficulty: medium
+rating: 1000
+description: 'There are n rooms labeled from 0 to n - 1. You start in room 0 with all rooms initially
+  locked except room 0.
+
+  Your goal is to visit every room. When you visit a room, you may find a set of keys in it that allow
+  you to open other rooms.
+
+  Given an array rooms where rooms[i] is the list of keys you can obtain if you visit room i, return true
+  if you can visit all the rooms, or false otherwise.
+
+  '
+input_format: 'Line 1: JSON 2D array rooms
+
+  '
+output_format: 'Boolean true/false
+
+  '
+time_limit_ms: 1500
+memory_limit_mb: 256
+is_active: true
+constraints: 'n == rooms.length
+
+  1 <= n <= 1000
+
+  0 <= rooms[i].length <= 1000
+
+  1 <= sum(rooms[i].length) <= 3000
+
+  0 <= rooms[i][j] < n
+
+  All values in rooms[i] are unique
+
+  '
+method_name: canVisitAllRooms
+parameters:
+- name: rooms
+  type: int[][]
+return_type: boolean
+generator:
+  count: 80
+  seed: 10003
+examples:
+- explanation: Starting from room 0 you can visit every room via collected keys.
+- explanation: Room 2 is unreachable from room 0; return false.
