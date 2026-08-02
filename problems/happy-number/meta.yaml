@@ -1,0 +1,27 @@
+slug: happy-number
+title: Happy Number
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: 'Write an algorithm to determine if a number n is happy.
+
+  A happy number is a number defined by the following process: Starting with any positive
+  integer, replace the number by the sum of the squares of its digits. Repeat until
+  the number equals 1 (where it will stay), or it loops endlessly in a cycle which
+  does not include 1. Those numbers for which this process ends in 1 are happy.
+
+  Return true if n is a happy number, and false if not.'
+input_format: 'Line 1: integer n'
+output_format: Boolean true/false
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 1 <= n <= 2^31 - 1
+method_name: isHappy
+parameters:
+- name: n
+  type: int
+return_type: bool
+generator:
+  count: 80
+  seed: 21030

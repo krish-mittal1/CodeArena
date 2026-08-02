@@ -1,0 +1,25 @@
+slug: sum-of-two-integers
+title: Sum of Two Integers
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: Given two integers a and b, return the sum of the two integers without
+  using the operators + and -.
+input_format: 'Line 1: integer a
+
+  Line 2: integer b'
+output_format: Integer sum
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: -1000 <= a, b <= 1000
+method_name: getSum
+parameters:
+- name: a
+  type: int
+- name: b
+  type: int
+return_type: int
+generator:
+  count: 100
+  seed: 21029

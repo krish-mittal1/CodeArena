@@ -1,0 +1,29 @@
+slug: subsets
+title: Subsets
+problem_type: dsa
+difficulty: medium
+rating: 1050
+description: 'Given an integer array nums of unique elements, return all possible subsets (the power set).
+
+  The solution set must not contain duplicate subsets. Return the solution in any order.'
+input_format: 'Line 1: JSON array nums'
+output_format: JSON 2D array of subsets
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 10
+
+  -10 <= nums[i] <= 10
+
+  All integers are unique.'
+method_name: subsets
+parameters:
+- name: nums
+  type: int[]
+return_type: int[][]
+generator:
+  count: 40
+  seed: 21007
+examples:
+- explanation: All subsets of [1,2,3] are listed (order among subsets may vary).
+- explanation: A single-element set has the empty set and itself.

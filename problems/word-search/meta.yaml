@@ -1,0 +1,36 @@
+slug: word-search
+title: Word Search
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: |
+  Given an `m x n` grid of characters `board` and a string `word`, return `true` if `word` exists in the grid.
+
+  The word can be constructed from letters of sequentially adjacent cells, where adjacent cells are horizontally or vertically neighboring. The same letter cell may not be used more than once.
+input_format: |
+  Line 1: JSON 2D character grid board
+  Line 2: string word
+output_format: |
+  Boolean true/false
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: |
+  m == board.length
+  n == board[i].length
+  1 <= m, n <= 6
+  1 <= word.length <= 15
+method_name: exist
+parameters:
+  - name: board
+    type: char[][]
+  - name: word
+    type: str
+return_type: bool
+generator:
+  count: 50
+  seed: 21011
+examples:
+  - explanation: The word "ABCCED" exists along a contiguous path on the board.
+  - explanation: The word "SEE" exists on the board.
+  - explanation: The word "ABCB" cannot be formed without reusing a cell.

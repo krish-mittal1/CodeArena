@@ -1,0 +1,37 @@
+slug: insert-interval
+title: Insert Interval
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: 'You are given an array of non-overlapping intervals intervals where
+  intervals[i] = [starti, endi] represent the start and the end of the ith interval
+  and intervals is sorted in ascending order by starti. You are also given an interval
+  newInterval = [start, end] that represents the start and end of another interval.
+
+  Insert newInterval into intervals such that intervals is still sorted in ascending
+  order by starti and intervals still does not have any overlapping intervals (merge
+  overlapping intervals if necessary).
+
+  Return intervals after the insertion.'
+input_format: 'Line 1: JSON 2D array intervals
+
+  Line 2: JSON array newInterval [start, end]'
+output_format: JSON 2D array of merged intervals
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= intervals.length <= 10^4
+
+  intervals[i].length == 2
+
+  0 <= starti <= endi <= 10^5'
+method_name: insert
+parameters:
+- name: intervals
+  type: int[][]
+- name: newInterval
+  type: int[]
+return_type: int[][]
+generator:
+  count: 80
+  seed: 21013

@@ -1,0 +1,22 @@
+slug: counting-bits
+title: Counting Bits
+problem_type: dsa
+difficulty: easy
+rating: 900
+description: Given an integer n, return an array ans of length n + 1 such that for
+  each i (0 <= i <= n), ans[i] is the number of 1's in the binary representation of
+  i.
+input_format: 'Line 1: integer n'
+output_format: JSON array ans
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 0 <= n <= 10^5
+method_name: countBits
+parameters:
+- name: n
+  type: int
+return_type: int[]
+generator:
+  count: 40
+  seed: 21027

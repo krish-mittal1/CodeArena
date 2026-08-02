@@ -1,0 +1,29 @@
+slug: spiral-matrix
+title: Spiral Matrix
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: Given an m x n matrix, return all elements of the matrix in spiral order.
+input_format: 'Line 1: JSON 2D array matrix'
+output_format: JSON array of elements in spiral order
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 'm == matrix.length
+
+  n == matrix[i].length
+
+  1 <= m, n <= 10
+
+  -100 <= matrix[i][j] <= 100'
+method_name: spiralOrder
+parameters:
+- name: matrix
+  type: int[][]
+return_type: int[]
+generator:
+  count: 60
+  seed: 21025
+examples:
+- explanation: 'Traverse clockwise from the top-left: 1→2→3→6→9→8→7→4→5.'
+- explanation: Spiral order of the 3×4 matrix.

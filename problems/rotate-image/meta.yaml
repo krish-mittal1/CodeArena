@@ -1,0 +1,32 @@
+slug: rotate-image
+title: Rotate Image
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: 'You are given an n x n 2D matrix representing an image, rotate the image by 90 degrees (clockwise).
+
+  You have to rotate the image in-place, which means you have to modify the input 2D matrix directly.
+  DO NOT allocate another 2D matrix and do the rotation.
+
+  Return the rotated matrix.'
+input_format: 'Line 1: JSON 2D array matrix'
+output_format: JSON 2D array rotated matrix
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 'n == matrix.length == matrix[i].length
+
+  1 <= n <= 20
+
+  -1000 <= matrix[i][j] <= 1000'
+method_name: rotate
+parameters:
+- name: matrix
+  type: int[][]
+return_type: int[][]
+generator:
+  count: 50
+  seed: 21024
+examples:
+- explanation: 'Rotate 90° clockwise: first row becomes last column.'
+- explanation: Rotate the 4×4 matrix 90° clockwise in place.

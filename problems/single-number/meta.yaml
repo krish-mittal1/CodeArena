@@ -1,0 +1,28 @@
+slug: single-number
+title: Single Number
+problem_type: dsa
+difficulty: easy
+rating: 850
+description: 'Given a non-empty array of integers nums, every element appears twice
+  except for one. Find that single one.
+
+  You must implement a solution with a linear runtime complexity and use only constant
+  extra space.'
+input_format: 'Line 1: JSON array nums'
+output_format: Integer single number
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 3*10^4
+
+  -3*10^4 <= nums[i] <= 3*10^4
+
+  Each element appears twice except one.'
+method_name: singleNumber
+parameters:
+- name: nums
+  type: int[]
+return_type: int
+generator:
+  count: 80
+  seed: 21033

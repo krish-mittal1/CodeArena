@@ -1,0 +1,38 @@
+slug: combination-sum
+title: Combination Sum
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: 'Given an array of distinct integers candidates and a target integer target, return a list
+  of all unique combinations of candidates where the chosen numbers sum to target. You may return the
+  combinations in any order.
+
+  The same number may be chosen from candidates an unlimited number of times.'
+input_format: 'Line 1: JSON array candidates
+
+  Line 2: integer target'
+output_format: JSON 2D array of combinations (order of combinations may vary; judge sorts)
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= candidates.length <= 30
+
+  2 <= candidates[i] <= 40
+
+  All elements are distinct.
+
+  1 <= target <= 40'
+method_name: combinationSum
+parameters:
+- name: candidates
+  type: int[]
+- name: target
+  type: int
+return_type: int[][]
+generator:
+  count: 60
+  seed: 21006
+examples:
+- explanation: 'Combinations that sum to 7: [2,2,3] and [7] (reuse allowed).'
+- explanation: Combinations that sum to 8 using [2,3,5].
+- explanation: No combination of 2s sums to 1; return an empty list.

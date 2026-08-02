@@ -1,0 +1,33 @@
+slug: search-a-2d-matrix-ii
+title: Search a 2D Matrix II
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'Write an efficient algorithm that searches for a value target in an
+  m x n integer matrix matrix. This matrix has the following properties: Integers
+  in each row are sorted in ascending from left to right. Integers in each column
+  are sorted in ascending from top to bottom.'
+input_format: 'Line 1: JSON 2D array matrix
+
+  Line 2: integer target'
+output_format: Boolean true/false
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 'm == matrix.length
+
+  n == matrix[i].length
+
+  1 <= n, m <= 300
+
+  -10^9 <= matrix[i][j] <= 10^9'
+method_name: searchMatrix
+parameters:
+- name: matrix
+  type: int[][]
+- name: target
+  type: int
+return_type: bool
+generator:
+  count: 50
+  seed: 21062

@@ -1,0 +1,23 @@
+slug: power-of-two
+title: Power of Two
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: 'Given an integer n, return true if it is a power of two. Otherwise,
+  return false.
+
+  An integer n is a power of two, if there exists an integer x such that n == 2^x.'
+input_format: 'Line 1: integer n'
+output_format: Boolean true/false
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: -2^31 <= n <= 2^31 - 1
+method_name: isPowerOfTwo
+parameters:
+- name: n
+  type: int
+return_type: bool
+generator:
+  count: 60
+  seed: 21059

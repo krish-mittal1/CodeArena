@@ -1,0 +1,21 @@
+slug: number-of-1-bits
+title: Number of 1 Bits
+problem_type: dsa
+difficulty: easy
+rating: 800
+description: Write a function that takes an unsigned integer and returns the number
+  of '1' bits it has (also known as the Hamming weight).
+input_format: 'Line 1: integer n'
+output_format: Integer hamming weight
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 0 <= n <= 2^31 - 1
+method_name: hammingWeight
+parameters:
+- name: n
+  type: int
+return_type: int
+generator:
+  count: 80
+  seed: 21026

@@ -1,0 +1,31 @@
+slug: reverse-words-in-a-string
+title: Reverse Words in a String
+problem_type: dsa
+difficulty: medium
+rating: 1000
+description: 'Given an input string s, reverse the order of the words.
+
+  A word is defined as a sequence of non-space characters. The words in s will be
+  separated by at least one space.
+
+  Return a string of the words in reverse order concatenated by a single space.
+
+  Note that s may contain leading or trailing spaces or multiple spaces between two
+  words. The returned string should only have a single space separating the words.
+  Do not include any extra spaces.'
+input_format: 'Line 1: string s'
+output_format: String with words reversed
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= s.length <= 10^4
+
+  s contains English letters, digits, and spaces'
+method_name: reverseWords
+parameters:
+- name: s
+  type: str
+return_type: str
+generator:
+  count: 60
+  seed: 21037

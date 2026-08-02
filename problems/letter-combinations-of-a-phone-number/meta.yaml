@@ -1,0 +1,30 @@
+slug: letter-combinations-of-a-phone-number
+title: Letter Combinations of a Phone Number
+problem_type: dsa
+difficulty: medium
+rating: 1050
+description: 'Given a string containing digits from 2-9 inclusive, return all possible letter combinations
+  that the number could represent. Return the answer in any order.
+
+  A mapping of digits to letters (just like on the telephone buttons) is given below. Note that 1 does
+  not map to any letters.'
+input_format: 'Line 1: string digits'
+output_format: JSON array of strings
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= digits.length <= 4
+
+  digits[i] is a digit in the range [''2'', ''9''].'
+method_name: letterCombinations
+parameters:
+- name: digits
+  type: str
+return_type: str[]
+generator:
+  count: 40
+  seed: 21010
+examples:
+- explanation: Digits "23" map to letter combinations of abc × def.
+- explanation: An empty digits string yields no combinations.
+- explanation: Digit "2" maps to ["a","b","c"].
