@@ -1,0 +1,29 @@
+slug: remove-duplicates-from-sorted-array
+title: Remove Duplicates from Sorted Array
+problem_type: dsa
+difficulty: easy
+rating: 850
+description: 'Given an integer array nums sorted in non-decreasing order, remove the
+  duplicates in-place such that each unique element appears only once. The relative
+  order of the elements should be kept the same.
+
+  Return k after placing the final result in the first k slots of nums. For this platform,
+  return the list of unique values in order (first k elements).'
+input_format: 'Line 1: JSON array nums (sorted)'
+output_format: JSON array of unique values in order
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 3*10^4
+
+  -100 <= nums[i] <= 100
+
+  nums is sorted in non-decreasing order.'
+method_name: removeDuplicates
+parameters:
+- name: nums
+  type: int[]
+return_type: int[]
+generator:
+  count: 80
+  seed: 21061

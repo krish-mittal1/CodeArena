@@ -1,0 +1,25 @@
+slug: longest-consecutive-sequence
+title: Longest Consecutive Sequence
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'Given an unsorted array of integers nums, return the length of the longest
+  consecutive elements sequence.
+
+  You must write an algorithm that runs in O(n) time.'
+input_format: 'Line 1: JSON array nums'
+output_format: Integer length
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= nums.length <= 10^5
+
+  -10^9 <= nums[i] <= 10^9'
+method_name: longestConsecutive
+parameters:
+- name: nums
+  type: int[]
+return_type: int
+generator:
+  count: 90
+  seed: 21002

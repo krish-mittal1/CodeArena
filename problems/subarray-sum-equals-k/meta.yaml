@@ -1,0 +1,31 @@
+slug: subarray-sum-equals-k
+title: Subarray Sum Equals K
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'Given an array of integers nums and an integer k, return the total number
+  of subarrays whose sum equals k.
+
+  A subarray is a contiguous non-empty sequence of elements within an array.'
+input_format: 'Line 1: JSON array nums
+
+  Line 2: integer k'
+output_format: Integer count
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 2*10^4
+
+  -1000 <= nums[i] <= 1000
+
+  -10^7 <= k <= 10^7'
+method_name: subarraySum
+parameters:
+- name: nums
+  type: int[]
+- name: k
+  type: int
+return_type: int
+generator:
+  count: 80
+  seed: 21031

@@ -1,0 +1,29 @@
+slug: valid-sudoku
+title: Valid Sudoku
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: 'Determine if a 9 x 9 Sudoku board is valid. Only the filled cells need
+  to be validated according to the following rules: each row, each column, and each
+  of the nine 3x3 sub-boxes must contain the digits 1-9 without repetition.
+
+  Note: A Sudoku board (partially filled) could be valid but is not necessarily solvable.
+  Board is given as string[] of length 9 (each string length 9, ''.'' for empty).'
+input_format: 'Line 1: JSON array of 9 strings (rows)'
+output_format: Boolean true/false
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: 'board.length == 9
+
+  board[i].length == 9
+
+  board[i][j] is a digit 1-9 or ''.'''
+method_name: isValidSudoku
+parameters:
+- name: board
+  type: str[]
+return_type: bool
+generator:
+  count: 40
+  seed: 21034

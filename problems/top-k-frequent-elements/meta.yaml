@@ -1,0 +1,32 @@
+slug: top-k-frequent-elements
+title: Top K Frequent Elements
+problem_type: dsa
+difficulty: medium
+rating: 1100
+description: Given an integer array nums and an integer k, return the k most frequent elements. You may
+  return the answer in any order.
+input_format: 'Line 1: JSON array nums
+
+  Line 2: integer k'
+output_format: JSON array of k most frequent elements
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 10^5
+
+  -10^4 <= nums[i] <= 10^4
+
+  k is in the range [1, number of unique elements]'
+method_name: topKFrequent
+parameters:
+- name: nums
+  type: int[]
+- name: k
+  type: int
+return_type: int[]
+generator:
+  count: 80
+  seed: 21014
+examples:
+- explanation: 1 appears three times and 2 appears twice — the top 2 frequencies.
+- explanation: Only one element exists; return it.

@@ -1,0 +1,27 @@
+slug: find-all-anagrams-in-a-string
+title: Find All Anagrams in a String
+problem_type: dsa
+difficulty: medium
+rating: 1150
+description: Given two strings s and p, return an array of all the start indices of
+  p's anagrams in s. You may return the answer in any order.
+input_format: 'Line 1: string s
+
+  Line 2: string p'
+output_format: JSON array of start indices
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= s.length, p.length <= 3*10^4
+
+  s and p consist of lowercase English letters.'
+method_name: findAnagrams
+parameters:
+- name: s
+  type: str
+- name: p
+  type: str
+return_type: int[]
+generator:
+  count: 60
+  seed: 21035

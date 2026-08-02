@@ -1,0 +1,33 @@
+slug: is-subsequence
+title: Is Subsequence
+problem_type: dsa
+difficulty: easy
+rating: 850
+description: 'Given two strings s and t, return true if s is a subsequence of t, or
+  false otherwise.
+
+  A subsequence of a string is a new string that is formed from the original string
+  by deleting some (can be none) of the characters without disturbing the relative
+  positions of the remaining characters.'
+input_format: 'Line 1: string s
+
+  Line 2: string t'
+output_format: Boolean true/false
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '0 <= s.length <= 100
+
+  0 <= t.length <= 10^4
+
+  s and t consist only of lowercase English letters.'
+method_name: isSubsequence
+parameters:
+- name: s
+  type: str
+- name: t
+  type: str
+return_type: bool
+generator:
+  count: 80
+  seed: 21036

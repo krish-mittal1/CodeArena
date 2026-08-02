@@ -1,0 +1,32 @@
+slug: 4sum
+title: 4Sum
+problem_type: dsa
+difficulty: medium
+rating: 1200
+description: 'Given an array nums of n integers, return an array of all the unique
+  quadruplets [nums[a], nums[b], nums[c], nums[d]] such that 0 <= a, b, c, d < n,
+  a/b/c/d are distinct, and nums[a] + nums[b] + nums[c] + nums[d] == target.
+
+  You may return the answer in any order.'
+input_format: 'Line 1: JSON array nums
+
+  Line 2: integer target'
+output_format: JSON 2D array of unique quadruplets
+time_limit_ms: 2000
+memory_limit_mb: 256
+is_active: true
+constraints: '1 <= nums.length <= 200
+
+  -10^9 <= nums[i] <= 10^9
+
+  -10^9 <= target <= 10^9'
+method_name: fourSum
+parameters:
+- name: nums
+  type: int[]
+- name: target
+  type: int
+return_type: int[][]
+generator:
+  count: 50
+  seed: 21032
