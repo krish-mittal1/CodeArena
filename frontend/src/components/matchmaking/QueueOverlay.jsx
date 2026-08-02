@@ -55,10 +55,10 @@ export default function QueueOverlay() {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: 20 }}
                     transition={{ type: 'spring', duration: 0.5 }}
-                    className="relative w-full max-w-md mx-4 paper-card grain-panel p-8 sm:p-10 overflow-hidden"
+                    className="relative w-full max-w-md mx-3 sm:mx-4 paper-card grain-panel p-5 sm:p-10 overflow-y-auto max-h-[min(92dvh,720px)]"
                 >
                     {status === 'searching' && (
-                        <div className="flex flex-col items-center justify-between w-full min-h-[420px] gap-8 mt-2">
+                        <div className="flex flex-col items-center justify-between w-full min-h-0 sm:min-h-[380px] gap-6 sm:gap-8 mt-2">
                             {/* Top Section: Icon & Text */}
                             <div className="flex flex-col items-center gap-5 w-full">
                                 {/* Animated Swords Badge */}

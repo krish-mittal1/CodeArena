@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { Users, UserPlus, X, Loader2, Copy, CheckCircle2 } from 'lucide-react';
 import { matchmakingApi } from '../../api/auth';
-import Button from '../ui/Button';
+import { useBattleStore } from '../../stores/battleStore';
 
 export default function PrivateRoomOverlay({ isOpen, onClose }) {
     const navigate = useNavigate();
+    const battleMatchId = useBattleStore((s) => s.matchId);
     
     // 'select' | 'create' | 'join'
     const [view, setView] = useState('select');
@@ -16,28 +18,55 @@ export default function PrivateRoomOverlay({ isOpen, onClose }) {
     const [isCreating, setIsCreating] = useState(false);
     const [copied, setCopied] = useState(false);
     const pollIntervalRef = useRef(null);
+    const waitingRef = useRef(false);
 
     // Join state
     const [joinInput, setJoinInput] = useState('');
     const [isJoining, setIsJoining] = useState(false);
     const [joinError, setJoinError] = useState('');
 
+    const clearPoll = () => {
+        if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+        }
+    };
+
+    const handleCancel = () => {
+        waitingRef.current = false;
+        clearPoll();
+        onClose();
+    };
+
     useEffect(() => {
         if (!isOpen) {
-            setView('select');
-            setRoomCode('');
-            setJoinInput('');
-            setJoinError('');
-            setIsCreating(false);
-            setIsJoining(false);
-            if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+            // Keep poll alive while waiting for opponent — only tear down on cancel
+            // or when battle has loaded (handled below / unmount).
+            if (!waitingRef.current) {
+                setView('select');
+                setRoomCode('');
+                setJoinInput('');
+                setJoinError('');
+                setIsCreating(false);
+                setIsJoining(false);
+                clearPoll();
+            }
         }
     }, [isOpen]);
+
+    // When WS/battle store gets a match while we're waiting, navigate and stop poll
+    useEffect(() => {
+        if (!waitingRef.current || !battleMatchId) return;
+        clearPoll();
+        waitingRef.current = false;
+        navigate(`/battle/${battleMatchId}`, { replace: true });
+        onClose();
+    }, [battleMatchId, navigate, onClose]);
 
     // Cleanup interval on unmount
     useEffect(() => {
         return () => {
-            if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+            clearPoll();
         };
     }, []);
 
@@ -48,14 +77,16 @@ export default function PrivateRoomOverlay({ isOpen, onClose }) {
         try {
             const res = await matchmakingApi.createPrivateRoom();
             setRoomCode(res.code);
+            waitingRef.current = true;
             
-            // Start polling for opponent
+            // Poll until battle loaded or user cancels
             pollIntervalRef.current = setInterval(async () => {
                 try {
                     const statusRes = await matchmakingApi.getPrivateRoomStatus(res.code);
-                    if (statusRes.status === 'matched') {
-                        clearInterval(pollIntervalRef.current);
-                        navigate(`/battle/${statusRes.match_id}`);
+                    if (statusRes.status === 'matched' && statusRes.match_id) {
+                        clearPoll();
+                        waitingRef.current = false;
+                        navigate(`/battle/${statusRes.match_id}`, { replace: true });
                         onClose();
                     }
                 } catch (err) {
@@ -65,6 +96,8 @@ export default function PrivateRoomOverlay({ isOpen, onClose }) {
             
         } catch (err) {
             console.error("Failed to create room:", err);
+            waitingRef.current = false;
+            toast.error(err.response?.data?.detail || err.response?.data?.error || 'Failed to create room');
             setView('select');
         } finally {
             setIsCreating(false);
@@ -86,11 +119,13 @@ export default function PrivateRoomOverlay({ isOpen, onClose }) {
         try {
             const res = await matchmakingApi.joinPrivateRoom(code);
             if (res.status === 'matched') {
-                navigate(`/battle/${res.match_id}`);
+                waitingRef.current = false;
+                clearPoll();
+                navigate(`/battle/${res.match_id}`, { replace: true });
                 onClose();
             }
         } catch (err) {
-            setJoinError(err.response?.data?.error || "Failed to join room");
+            setJoinError(err.response?.data?.error || err.response?.data?.detail || "Failed to join room");
         } finally {
             setIsJoining(false);
         }
@@ -110,18 +145,18 @@ export default function PrivateRoomOverlay({ isOpen, onClose }) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[700] flex items-center justify-center bg-black/78 backdrop-blur-sm"
+                className="fixed inset-0 z-[700] flex items-end sm:items-center justify-center bg-black/78 backdrop-blur-sm p-0 sm:p-4"
             >
-                <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
+                <div className="absolute inset-0 cursor-pointer" onClick={handleCancel} />
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 10 }}
                     transition={{ type: 'spring', duration: 0.5 }}
-                    className="relative w-full max-w-sm mx-4 paper-card grain-panel p-6 sm:p-8 overflow-hidden"
+                    className="relative w-full sm:max-w-sm sm:mx-0 mx-0 paper-card grain-panel p-5 sm:p-8 overflow-y-auto max-h-[min(92dvh,640px)] rounded-t-2xl sm:rounded-[inherit]"
                 >
                     <button 
-                        onClick={onClose}
+                        onClick={handleCancel}
                         className="absolute top-4 right-4 text-text-muted hover:text-text-primary transition-colors rounded-[12px_9px_11px_8px] p-1 hover:bg-bg-hover"
                     >
                         <X size={20} />
