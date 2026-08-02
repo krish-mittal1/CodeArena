@@ -5,6 +5,7 @@ Docker sandbox — secure, isolated code execution via subprocess.
 """
 
 import os
+import math
 import time
 import uuid
 import asyncio
@@ -23,13 +24,34 @@ logger = logging.getLogger(__name__)
 DOCKER_OOM_EXIT_CODE = 137
 TIMEOUT_EXIT_CODE = 124
 
-MAX_CONCURRENT_CONTAINERS = 4
-_container_semaphore = asyncio.Semaphore(MAX_CONCURRENT_CONTAINERS)
+# Shared across judge workers and practice Run — configurable via settings.
+_container_semaphore = asyncio.Semaphore(settings.sandbox_max_concurrent)
+
+
+async def _acquire_container_slot() -> None:
+    """
+    Wait for a free sandbox slot, failing fast if the pool is saturated.
+
+    Practice Run and judge share this semaphore so API requests cannot spawn
+    unbounded Docker containers under load.
+    """
+    try:
+        await asyncio.wait_for(
+            _container_semaphore.acquire(),
+            timeout=settings.sandbox_acquire_timeout_seconds,
+        )
+    except asyncio.TimeoutError as exc:
+        raise TimeoutError(
+            f"Sandbox capacity exhausted "
+            f"(max_concurrent={settings.sandbox_max_concurrent}, "
+            f"waited={settings.sandbox_acquire_timeout_seconds}s)"
+        ) from exc
+
 
 # Docker-in-Docker path translation:
 # The API container writes files to /app/.sandbox_tmp/ (container path).
-# The .:/app bind mount maps this to $SANDBOX_HOST_WORKDIR/.sandbox_tmp/ on the host.
-# Runner containers need the HOST path in their -v flag.
+# Compose mounts ./.sandbox_tmp → /app/.sandbox_tmp; SANDBOX_HOST_WORKDIR is
+# the host project dir so runner -v flags use $SANDBOX_HOST_WORKDIR/.sandbox_tmp/.
 _CONTAINER_APP_DIR = "/app"
 _HOST_WORKDIR = os.environ.get("SANDBOX_HOST_WORKDIR", _CONTAINER_APP_DIR)
 
@@ -37,6 +59,38 @@ def _to_host_path(container_path: str) -> str:
     """Translate a container path under /app/ to the equivalent host path."""
     rel = os.path.relpath(container_path, _CONTAINER_APP_DIR)
     return os.path.join(_HOST_WORKDIR, rel)
+
+
+def _ensure_sandbox_tmp() -> str:
+    """Create the dedicated sandbox scratch dir (not world-writable)."""
+    sandbox_tmp = os.path.join(_CONTAINER_APP_DIR, ".sandbox_tmp")
+    os.makedirs(sandbox_tmp, exist_ok=True)
+    try:
+        os.chmod(sandbox_tmp, 0o700)
+    except OSError:
+        pass
+    return sandbox_tmp
+
+
+def _chmod_tree(path: str, mode: int) -> None:
+    """Best-effort chmod for files under path (defense in depth before RO mount)."""
+    try:
+        os.chmod(path, mode)
+    except OSError:
+        pass
+    if not os.path.isdir(path):
+        return
+    for root, dirs, files in os.walk(path):
+        for name in dirs:
+            try:
+                os.chmod(os.path.join(root, name), mode)
+            except OSError:
+                pass
+        for name in files:
+            try:
+                os.chmod(os.path.join(root, name), mode)
+            except OSError:
+                pass
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -100,16 +154,11 @@ class Sandbox:
         if stdin_data and not stdin_data.endswith("\n"):
             stdin_data += "\n"
 
-        # Write temp files under /app/.sandbox_tmp/ which is shared
-        # with the host via the .:/app bind mount in docker-compose
-        sandbox_tmp = os.path.join(_CONTAINER_APP_DIR, ".sandbox_tmp")
-        os.makedirs(sandbox_tmp, exist_ok=True)
-        # Ensure the parent directory is fully accessible to runner containers
-        os.chmod(sandbox_tmp, 0o777)
+        # Write temp files under /app/.sandbox_tmp/ (dedicated compose mount)
+        sandbox_tmp = _ensure_sandbox_tmp()
 
         with tempfile.TemporaryDirectory(prefix=f"codearena_{exec_id}_", dir=sandbox_tmp) as tmpdir:
-            # Make the generated tmpdir world-accessible
-            os.chmod(tmpdir, 0o777)
+            os.chmod(tmpdir, 0o755)
 
             # ── Write source code
             filename = (
@@ -121,18 +170,18 @@ class Sandbox:
             code_path = os.path.join(tmpdir, filename)
             with open(code_path, "w", encoding="utf-8") as f:
                 f.write(code)
-            os.chmod(code_path, 0o777)
+            os.chmod(code_path, 0o644)
 
             # ── Write input
             stdin_path = os.path.join(tmpdir, "input.txt")
             with open(stdin_path, "w", encoding="utf-8") as f:
                 f.write(stdin_data or "")
-            os.chmod(stdin_path, 0o777)
+            os.chmod(stdin_path, 0o644)
 
-            async with _container_semaphore:
+            await _acquire_container_slot()
+            try:
 
-
-                # ── Compilation step (if needed)
+                # ── Compilation step (if needed) — needs RW
                 if config.needs_compilation:
                     compile_result = await self._run_compile(
                         exec_id, config, tmpdir, mem_mb
@@ -140,10 +189,13 @@ class Sandbox:
                     if compile_result is not None:
                         return compile_result
 
+                # Lock down inputs/code before the submission process runs
+                _chmod_tree(tmpdir, 0o555)
+
                 # ── Build run command
                 inner_cmd = f"{config.run_cmd} < /sandbox/input.txt"
 
-                # ── Docker command
+                # ── Docker command — RO workspace (stdout captured from process)
                 container_name = f"codearena-{exec_id}"
 
                 docker_args = [
@@ -161,7 +213,7 @@ class Sandbox:
                     "--cpus", "0.5",
 
                     "--tmpfs", "/tmp:size=64m,nosuid",
-                    "-v", f"{_to_host_path(tmpdir)}:/sandbox:rw",
+                    "-v", f"{_to_host_path(tmpdir)}:/sandbox:ro",
 
                     "--rm",
                     "--entrypoint", "sh",
@@ -179,6 +231,8 @@ class Sandbox:
                 )
 
                 return result
+            finally:
+                _container_semaphore.release()
 
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -221,12 +275,16 @@ class Sandbox:
         except ValueError:
             mem_mb = memory_limit_mb or 256
 
-        sandbox_tmp = os.path.join(_CONTAINER_APP_DIR, ".sandbox_tmp")
-        os.makedirs(sandbox_tmp, exist_ok=True)
-        os.chmod(sandbox_tmp, 0o777)
+        sandbox_tmp = _ensure_sandbox_tmp()
 
         with tempfile.TemporaryDirectory(prefix=f"codearena_{exec_id}_", dir=sandbox_tmp) as tmpdir:
-            os.chmod(tmpdir, 0o777)
+            # in/: code, driver, inputs, runner, binaries (RO during run)
+            # out/: per-test stdout/stderr/meta (RW only)
+            in_dir = os.path.join(tmpdir, "in")
+            out_dir = os.path.join(tmpdir, "out")
+            os.makedirs(in_dir, mode=0o755)
+            os.makedirs(out_dir, mode=0o755)
+            os.chmod(tmpdir, 0o755)
 
             # ── Write source code (once) ──────────────────
             # In LeetCode driver mode for Python, save as solution.py
@@ -238,10 +296,10 @@ class Sandbox:
                 filename = f"solution{config.file_extension}"
             else:
                 filename = f"code{config.file_extension}"
-            code_path = os.path.join(tmpdir, filename)
+            code_path = os.path.join(in_dir, filename)
             with open(code_path, "w", encoding="utf-8") as f:
                 f.write(code)
-            os.chmod(code_path, 0o777)
+            os.chmod(code_path, 0o644)
 
             # ── Generate and write driver (LeetCode mode) ──
             driver_code = None
@@ -265,10 +323,10 @@ class Sandbox:
                     driver_filename = "Main.java"
                 
                 if driver_filename:
-                    driver_path = os.path.join(tmpdir, driver_filename)
+                    driver_path = os.path.join(in_dir, driver_filename)
                     with open(driver_path, "w", encoding="utf-8") as f:
                         f.write(driver_code)
-                    os.chmod(driver_path, 0o777)
+                    os.chmod(driver_path, 0o644)
                     logger.info(f"[SANDBOX] {exec_id}: LeetCode driver injected ({driver_filename})")
 
             # ── Write ALL test inputs ─────────────────────
@@ -276,49 +334,58 @@ class Sandbox:
                 inp_data = inp or ""
                 if inp_data and not inp_data.endswith("\n"):
                     inp_data += "\n"
-                inp_path = os.path.join(tmpdir, f"input_{i}.txt")
+                inp_path = os.path.join(in_dir, f"input_{i}.txt")
                 with open(inp_path, "w", encoding="utf-8") as f:
                     f.write(inp_data)
-                os.chmod(inp_path, 0o777)
+                os.chmod(inp_path, 0o644)
 
-            async with _container_semaphore:
+            await _acquire_container_slot()
+            try:
 
                 # ── Compile once (if needed) ──────────────
                 # Skip normal compilation in driver mode for compiled languages
                 # (C++/Java) — the driver handles its own compilation below
                 if config.needs_compilation and not (driver_code and language in ("cpp", "java")):
                     compile_result = await self._run_compile(
-                        exec_id, config, tmpdir, mem_mb
+                        exec_id, config, in_dir, mem_mb
                     )
                     if compile_result is not None:
                         # Compilation failed → return same error for ALL tests
                         return [compile_result] * num_tests
 
                 # ── Write runner script ───────────────────
-                # Use integer timeout (ceiling) for the `timeout` command
-                timeout_s = int(timeout_per_test) + 1
+                # Soft wall for `timeout` command: ceil(limit) so we can still
+                # observe wall-clock; hard TLE is enforced below via time_ms.
+                timeout_s = max(1, math.ceil(timeout_per_test))
                 
-                # Determine run command: use driver if available
+                # Determine run command: use driver if available (paths under /sandbox/in)
                 if driver_code and driver_filename:
                     if language == "python":
-                        run_cmd = "python3 /sandbox/driver.py"
+                        run_cmd = "python3 /sandbox/in/driver.py"
                     elif language == "javascript":
-                        run_cmd = "node /sandbox/driver.js"
+                        run_cmd = "node /sandbox/in/driver.js"
                     elif language == "cpp":
                         # For C++, driver includes user code via #include
-                        # We need to compile the driver instead
-                        run_cmd = "/sandbox/solution"  # compiled binary
+                        run_cmd = "/sandbox/in/solution"  # compiled binary
                     elif language == "java":
-                        run_cmd = "java -cp /sandbox Main"
+                        run_cmd = "java -cp /sandbox/in Main"
                     else:
                         run_cmd = config.run_cmd
                 else:
-                    run_cmd = config.run_cmd
+                    # Non-driver: language run_cmd assumes cwd /sandbox with code file
+                    # Rewrite common patterns to /sandbox/in
+                    run_cmd = (
+                        config.run_cmd
+                        .replace("/sandbox/", "/sandbox/in/")
+                    )
+                    if run_cmd == config.run_cmd and " /" not in config.run_cmd:
+                        # Relative run cmds (e.g. python3 code.py) need cwd
+                        run_cmd = f"cd /sandbox/in && {config.run_cmd}"
                     
                 # For C++ with driver, we need to compile the driver file
                 if driver_code and language == "cpp":
                     compile_result = await self._run_compile_custom(
-                        exec_id, config, tmpdir, mem_mb,
+                        exec_id, config, in_dir, mem_mb,
                         compile_cmd=f"g++ -O2 -std=gnu++17 -Wall -o /sandbox/solution /sandbox/driver.cpp"
                     )
                     if compile_result is not None:
@@ -326,16 +393,17 @@ class Sandbox:
                 elif driver_code and language == "java":
                     # Compile both Main.java (driver) and Solution.java (user code)
                     compile_result = await self._run_compile_custom(
-                        exec_id, config, tmpdir, mem_mb,
+                        exec_id, config, in_dir, mem_mb,
                         compile_cmd="javac /sandbox/Main.java /sandbox/Solution.java -d /sandbox"
                     )
                     if compile_result is not None:
                         return [compile_result] * num_tests
+
                 runner_script = f"""#!/bin/sh
 i=0
 while [ $i -lt {num_tests} ]; do
     START_NS=$(date +%s%N 2>/dev/null || echo 0)
-    timeout {timeout_s}s {run_cmd} < /sandbox/input_${{i}}.txt > /sandbox/output_${{i}}.txt 2>/sandbox/error_${{i}}.txt &
+    timeout {timeout_s}s {run_cmd} < /sandbox/in/input_${{i}}.txt > /sandbox/out/output_${{i}}.txt 2>/sandbox/out/error_${{i}}.txt &
     PID=$!
     PEAK_KB=0
     # Find the actual child process (not the timeout wrapper)
@@ -360,17 +428,20 @@ while [ $i -lt {num_tests} ]; do
     else
         ELAPSED_MS=0
     fi
-    echo "${{EXIT_CODE}}|${{ELAPSED_MS}}|${{PEAK_KB}}" > /sandbox/meta_${{i}}.txt
+    echo "${{EXIT_CODE}}|${{ELAPSED_MS}}|${{PEAK_KB}}" > /sandbox/out/meta_${{i}}.txt
     i=$((i + 1))
 done
 """
-                runner_path = os.path.join(tmpdir, "runner.sh")
+                runner_path = os.path.join(in_dir, "runner.sh")
                 with open(runner_path, "w", encoding="utf-8") as f:
                     f.write(runner_script)
-                os.chmod(runner_path, 0o777)
+                os.chmod(runner_path, 0o555)
+
+                # Freeze inputs/code/binaries so a test cannot rewrite later inputs
+                _chmod_tree(in_dir, 0o555)
 
                 # ── Run ALL tests in ONE container ────────
-                # Total timeout = per_test * num_tests + generous overhead
+                # RO mount for inputs/code; separate RW out-only mount
                 total_timeout = (timeout_per_test + 1) * num_tests + 15.0
                 container_name = f"codearena-batch-{exec_id}"
 
@@ -389,13 +460,14 @@ done
                     "--cpus", "0.5",
 
                     "--tmpfs", "/tmp:size=64m,nosuid",
-                    "-v", f"{_to_host_path(tmpdir)}:/sandbox:rw",
+                    "-v", f"{_to_host_path(in_dir)}:/sandbox/in:ro",
+                    "-v", f"{_to_host_path(out_dir)}:/sandbox/out:rw",
 
                     "--rm",
                     "--entrypoint", "sh",
 
                     config.image,
-                    "/sandbox/runner.sh",
+                    "/sandbox/in/runner.sh",
                 ]
 
                 batch_timed_out = False
@@ -427,13 +499,13 @@ done
                 results: list[ExecutionResult] = []
                 for i in range(num_tests):
                     stdout = self._read_file_safe(
-                        os.path.join(tmpdir, f"output_{i}.txt")
+                        os.path.join(out_dir, f"output_{i}.txt")
                     )
                     stderr = self._read_file_safe(
-                        os.path.join(tmpdir, f"error_{i}.txt")
+                        os.path.join(out_dir, f"error_{i}.txt")
                     )
                     meta = self._read_file_safe(
-                        os.path.join(tmpdir, f"meta_{i}.txt")
+                        os.path.join(out_dir, f"meta_{i}.txt")
                     )
 
                     exit_code = 1
@@ -468,6 +540,12 @@ done
                     if exit_code == TIMEOUT_EXIT_CODE:
                         tc_timed_out = True
 
+                    # Hard TLE: measured time exceeds problem limit even if soft
+                    # wall allowed the process to finish.
+                    time_limit_ms_int = int(timeout_per_test * 1000)
+                    if time_ms > 0 and time_ms > time_limit_ms_int:
+                        tc_timed_out = True
+
                     # Docker OOM killer returns 137
                     if exit_code == DOCKER_OOM_EXIT_CODE:
                         oom_killed = True
@@ -482,7 +560,6 @@ done
                         oom_killed=oom_killed,
                         stage="run",
                     ))
-
                 # If batch container itself timed out, fill remaining with TLE
                 if batch_timed_out and len(results) < num_tests:
                     for _ in range(num_tests - len(results)):
@@ -494,6 +571,8 @@ done
                         ))
 
                 return results
+            finally:
+                _container_semaphore.release()
 
     @staticmethod
     def _read_file_safe(path: str) -> str:
