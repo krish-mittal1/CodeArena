@@ -161,3 +161,33 @@ export function getCompanyLogoUrl(companyId) {
     if (!domain) return null;
     return `https://logo.clearbit.com/${domain}`;
 }
+
+function normalizeCompanyName(value) {
+    return (value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+export function companyNameMatches(datasetName, mappedName) {
+    const dataset = normalizeCompanyName(datasetName);
+    const mapped = normalizeCompanyName(mappedName);
+    if (!dataset || !mapped) return false;
+    return dataset === mapped || dataset.includes(mapped) || mapped.includes(dataset);
+}
+
+/**
+ * Companies that appear on ≥1 problem in problemMetadata.
+ * Prefer this for hub listings so empty company cards stay hidden.
+ */
+export function getCompaniesWithMappedProblems(problemMetadata) {
+    if (!problemMetadata || typeof problemMetadata !== 'object') return [];
+
+    const mappedNames = new Set();
+    Object.values(problemMetadata).forEach((meta) => {
+        (meta?.companies || []).forEach((name) => {
+            if (name) mappedNames.add(name);
+        });
+    });
+
+    return COMPANIES.filter((company) =>
+        [...mappedNames].some((mapped) => companyNameMatches(company.name, mapped))
+    );
+}

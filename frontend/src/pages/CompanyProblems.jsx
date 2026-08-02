@@ -3,22 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Building2, Check, Clock, Code2, Play, Search, Terminal, ChevronRight, Zap } from 'lucide-react';
-import { COMPANIES } from '../utils/companies';
+import { COMPANIES, companyNameMatches } from '../utils/companies';
 import { problemApi } from '../api/auth';
 import CompanyLogo from '../components/ui/CompanyLogo';
-import { getProblemMetadata, DEFAULT_PROBLEM_COMPANIES } from '../data/problemMetadata';
-
-function normalizeCompanyName(value) {
-    return (value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
-function companyNameMatches(datasetName, mappedName) {
-    const dataset = normalizeCompanyName(datasetName);
-    const mapped = normalizeCompanyName(mappedName);
-
-    if (!dataset || !mapped) return false;
-    return dataset === mapped || dataset.includes(mapped) || mapped.includes(dataset);
-}
+import { getProblemMetadata } from '../data/problemMetadata';
 
 export default function CompanyProblems() {
     const { companyId } = useParams();
@@ -36,12 +24,14 @@ export default function CompanyProblems() {
     });
 
     const companyProblems = problems
-        .filter((p) => p.problem_type !== 'cp')
+        .filter((p) => (p.problem_type || 'dsa') === 'dsa')
         .map((p) => {
             let title = p.title;
             if (title.includes("Spiral")) title = "Print the matrix in spiral manner";
 
-            const metadata = getProblemMetadata(title) || { topic: "Arrays", companies: DEFAULT_PROBLEM_COMPANIES };
+            // Only use explicit problemMetadata mappings — no DEFAULT_PROBLEM_COMPANIES fill
+            const metadata = getProblemMetadata(title);
+            if (!metadata?.companies?.length) return null;
 
             const isMappedToCompany = metadata.companies.some((mappedCompany) =>
                 companyNameMatches(company?.name, mappedCompany)
