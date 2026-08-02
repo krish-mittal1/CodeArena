@@ -3,8 +3,8 @@ title: Move Zeroes
 problem_type: dsa
 difficulty: easy
 rating: 800
-description: Move all 0's to the end of the array while maintaining the relative order
-  of the non-zero elements.
+description: Move all 0's to the end of the array while maintaining the relative order of the non-zero
+  elements.
 input_format: 'Line 1: JSON array nums (int[])'
 output_format: JSON array after moving all zeroes to the end
 time_limit_ms: 2000
@@ -21,3 +21,6 @@ return_type: int[]
 generator:
   count: 530
   seed: 1071
+examples:
+- explanation: Non-zero elements keep relative order and move forward; zeros fill the end.
+- explanation: A single zero stays in place.

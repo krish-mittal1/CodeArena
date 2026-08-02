@@ -3,8 +3,8 @@ title: Sliding Window Maximum
 problem_type: dsa
 difficulty: hard
 rating: 1500
-description: 'Given an integer array nums and an integer k, move a window of size
-  k from left to right across the array and report the maximum value in each window.
+description: 'Given an integer array nums and an integer k, move a window of size k from left to right
+  across the array and report the maximum value in each window.
 
 
   Return the list of window maximums in order.
@@ -25,8 +25,7 @@ description: 'Given an integer array nums and an integer k, move a window of siz
 input_format: 'Line 1: JSON array nums (int[])
 
   Line 2: integer k'
-output_format: 'JSON array of integers: maximum value for each contiguous window of
-  size k'
+output_format: 'JSON array of integers: maximum value for each contiguous window of size k'
 time_limit_ms: 2500
 memory_limit_mb: 256
 is_active: true
@@ -45,3 +44,6 @@ return_type: int[]
 generator:
   count: 190
   seed: 2144
+examples:
+- explanation: For each window of size 3, record the maximum value in that window.
+- explanation: A window covering the single element returns that element.

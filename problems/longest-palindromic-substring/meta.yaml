@@ -20,3 +20,7 @@ return_type: string
 generator:
   count: 570
   seed: 2895
+examples:
+- explanation: '"bab" is a longest palindromic substring of "babad" ("aba" is also valid).'
+- explanation: '"bb" is the longest palindromic substring of "cbbd".'
+- explanation: A single character is a palindrome of length 1.

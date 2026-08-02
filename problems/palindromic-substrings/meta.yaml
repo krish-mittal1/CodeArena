@@ -6,8 +6,8 @@ rating: 1250
 description: 'Given a string s, return the number of palindromic substrings in it.
 
 
-  A string is a palindrome when it reads the same backward as forward. A substring
-  is a contiguous sequence of characters within the string.'
+  A string is a palindrome when it reads the same backward as forward. A substring is a contiguous sequence
+  of characters within the string.'
 input_format: 'Line 1: string s'
 output_format: Single integer count
 time_limit_ms: 2000
@@ -24,3 +24,7 @@ return_type: int
 generator:
   count: 548
   seed: 2246
+examples:
+- explanation: 'Three palindromic substrings: "a", "b", "c".'
+- explanation: Six palindromic substrings in "aaa" (three singles, two doubles, one triple).
+- explanation: Six palindromic substrings in "abba".

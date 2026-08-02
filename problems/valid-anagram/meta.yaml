@@ -3,33 +3,36 @@ title: Valid Anagram
 problem_type: dsa
 difficulty: easy
 rating: 850
-
 method_name: isAnagram
 parameters:
-  - name: s
-    type: string
-  - name: t
-    type: string
+- name: s
+  type: string
+- name: t
+  type: string
 return_type: boolean
-
 time_limit_ms: 1500
 memory_limit_mb: 256
 is_active: true
+description: 'Given two strings s and t, return true if t is an anagram of s, and false otherwise.
 
-description: |
-  Given two strings s and t, return true if t is an anagram of s, and false otherwise.
+  '
+input_format: 'Line 1: string s
 
-input_format: |
-  Line 1: string s
   Line 2: string t
 
-output_format: |
-  Boolean true/false
+  '
+output_format: 'Boolean true/false
 
-constraints: |
-  0 <= s.length, t.length <= 5 * 10^4
+  '
+constraints: '0 <= s.length, t.length <= 5 * 10^4
+
   s and t consist of lowercase English letters.
 
+  '
 generator:
   count: 527
   seed: 20260402022
+examples:
+- explanation: '"anagram" and "nagaram" use the same multiset of letters.'
+- explanation: '"rat" and "car" differ in letter counts.'
+- explanation: Two empty strings are anagrams.

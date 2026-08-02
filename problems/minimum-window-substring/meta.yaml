@@ -3,9 +3,8 @@ title: Minimum Window Substring
 problem_type: dsa
 difficulty: hard
 rating: 1500
-description: 'Given two strings s and t, return the smallest substring of s that contains
-  every character from t, including duplicates. If no such substring exists, return
-  an empty string.
+description: 'Given two strings s and t, return the smallest substring of s that contains every character
+  from t, including duplicates. If no such substring exists, return an empty string.
 
 
   Example 1
@@ -23,8 +22,7 @@ description: 'Given two strings s and t, return the smallest substring of s that
 input_format: 'Line 1: JSON string s
 
   Line 2: JSON string t'
-output_format: 'JSON string: the minimum window in s containing all characters of
-  t'
+output_format: 'JSON string: the minimum window in s containing all characters of t'
 time_limit_ms: 2500
 memory_limit_mb: 256
 is_active: true
@@ -43,3 +41,6 @@ return_type: str
 generator:
   count: 180
   seed: 2389
+examples:
+- explanation: The minimum window in s covering all of t = "ABC" is "BANC".
+- explanation: s and t are both "a", so the window is "a".

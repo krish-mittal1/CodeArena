@@ -38,3 +38,11 @@ constraints: |
 generator:
   count: 590
   seed: 2026040201
+
+examples:
+  - explanation: |
+      Because nums[0] + nums[1] == 9, we return [0, 1].
+  - explanation: |
+      Because nums[1] + nums[2] == 6, we return [1, 2].
+  - explanation: |
+      Because nums[0] + nums[1] == 6, we return [0, 1].

@@ -3,8 +3,8 @@ title: Product of Array Except Self
 problem_type: dsa
 difficulty: medium
 rating: 1200
-description: 'Given an integer array nums, return an array answer such that answer[i]
-  is equal to the product of all the elements of nums except nums[i].
+description: 'Given an integer array nums, return an array answer such that answer[i] is equal to the
+  product of all the elements of nums except nums[i].
 
 
   The product of any prefix or suffix of nums is guaranteed to fit in a 32-bit integer.'
@@ -26,3 +26,7 @@ return_type: int[]
 generator:
   count: 632
   seed: 2600
+examples:
+- explanation: For each index i, answer[i] is the product of all nums[j] where j != i.
+- explanation: Zeros force most products to 0; only the positions that exclude the single zero stay non-zero.
+- explanation: Both elements are zero, so every product-except-self is zero.

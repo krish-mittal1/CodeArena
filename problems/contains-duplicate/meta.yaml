@@ -3,8 +3,8 @@ title: Contains Duplicate
 problem_type: dsa
 difficulty: easy
 rating: 700
-description: Given an integer array nums, return true if any value appears at least
-  twice and false if every element is distinct.
+description: Given an integer array nums, return true if any value appears at least twice and false if
+  every element is distinct.
 input_format: 'Line 1: JSON array nums (int[])'
 output_format: Boolean indicating whether any duplicate exists
 time_limit_ms: 2000
@@ -21,3 +21,6 @@ return_type: bool
 generator:
   count: 530
   seed: 1786
+examples:
+- explanation: Value 1 appears twice, so return true.
+- explanation: All values are unique, so return false.

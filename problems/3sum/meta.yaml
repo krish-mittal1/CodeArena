@@ -6,7 +6,7 @@ rating: 1500
 
 time_limit_ms: 3000
 memory_limit_mb: 256
-is_active: true
+is_active: false
 
 description: |
   Given an integer array `nums`, return all triplets `[nums[i], nums[j], nums[k]]` such that `i != j`, `i != k`, and `j != k`, and `nums[i] + nums[j] + nums[k] == 0`.

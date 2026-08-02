@@ -3,8 +3,8 @@ title: Group Anagrams
 problem_type: dsa
 difficulty: medium
 rating: 1200
-description: Given an array of strings strs, group the anagrams together. You can
-  return the answer in any order.
+description: Given an array of strings strs, group the anagrams together. You can return the answer in
+  any order.
 input_format: 'Line 1: JSON array strs'
 output_format: JSON array of string groups
 time_limit_ms: 2000
@@ -23,3 +23,7 @@ return_type: string[][]
 generator:
   count: 512
   seed: 1367
+examples:
+- explanation: 'Group words by sorted letter signature: "eat"/"tea"/"ate", "tan"/"nat", and "bat".'
+- explanation: A single empty string forms one group.
+- explanation: A single character forms one group.
