@@ -45,8 +45,15 @@ async def list_insights(
             "problem_title": row.problem_title,
             "topic": row.topic,
             "verdict": row.verdict,
-            "tip": (row.analysis.get("tips") or [""])[0] if row.analysis else "",
-            "pattern": row.analysis.get("optimized_approach", "")[:200] if row.analysis else "",
+            "tip": (
+                (row.analysis.get("tips") or [""])[0]
+                or (row.analysis.get("verdict_summary") or "")
+            ) if row.analysis else "",
+            "pattern": (
+                row.analysis.get("key_insight")
+                or row.analysis.get("optimized_approach")
+                or ""
+            )[:200] if row.analysis else "",
             "share_slug": row.share_slug,
             "created_at": row.created_at.isoformat(),
         })
@@ -64,9 +71,18 @@ async def get_shared_insight(share_slug: str, db: AsyncSession = Depends(get_db)
         "topic": row.topic,
         "verdict": row.verdict,
         "analysis": {
-            "problem_concept": row.analysis.get("problem_concept", ""),
+            "verdict_summary": row.analysis.get("verdict_summary") or row.analysis.get("verdict_explanation", ""),
+            "root_cause": row.analysis.get("root_cause", ""),
+            "key_insight": row.analysis.get("key_insight") or row.analysis.get("optimized_approach", ""),
+            "fix_hints": row.analysis.get("fix_hints") or [],
+            "edge_cases": row.analysis.get("edge_cases") or [],
+            "time_complexity": row.analysis.get("time_complexity", "N/A"),
+            "space_complexity": row.analysis.get("space_complexity", "N/A"),
             "tips": row.analysis.get("tips", []),
-            "optimized_approach": row.analysis.get("optimized_approach", ""),
+            "improved_code": row.analysis.get("improved_code", ""),
+            # Legacy keys for older clients
+            "problem_concept": row.analysis.get("problem_concept") or row.analysis.get("key_insight", ""),
+            "optimized_approach": row.analysis.get("optimized_approach") or row.analysis.get("key_insight", ""),
         },
     }
 
