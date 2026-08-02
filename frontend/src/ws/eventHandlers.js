@@ -69,18 +69,18 @@ export function registerEventHandlers() {
                 // Transform backend data structure to match frontend expectations
                 // Backend sends: { match_id, problem_id, problem_title, problem?, duration_seconds, player1, player2 }
                 // Frontend expects: { match_id, problem, opponent, duration_seconds }
-                const currentUserId = useAuthStore.getState().user?.id;
+                const currentUserId = String(useAuthStore.getState().user?.id ?? '');
 
                 // Determine opponent (the player that's not the current user)
                 let opponent = null;
                 if (data.player1 && data.player2) {
-                    // Find which player is NOT the current user
-                    if (data.player1.user_id === currentUserId) {
+                    const p1Id = String(data.player1.user_id ?? '');
+                    const p2Id = String(data.player2.user_id ?? '');
+                    if (p1Id === currentUserId) {
                         opponent = data.player2;
-                    } else if (data.player2.user_id === currentUserId) {
+                    } else if (p2Id === currentUserId) {
                         opponent = data.player1;
                     } else {
-                        // Fallback: use player2 as opponent
                         opponent = data.player2;
                     }
                 }
@@ -90,6 +90,7 @@ export function registerEventHandlers() {
                     match_id: data.match_id,
                     problem_id: data.problem_id,
                     problem_title: data.problem_title,
+                    problems: data.problems || [],
                     opponent: opponent,
                     duration_seconds: data.duration_seconds || 1800,
                 };
@@ -98,9 +99,18 @@ export function registerEventHandlers() {
                 const currentState = useBattleStore.getState();
                 if (currentState.matchId === battleData.match_id) {
                     // Reconnecting to same match — only update metadata, preserve code/submissions
+                    const problems = Array.isArray(battleData.problems) && battleData.problems.length
+                        ? battleData.problems.map((p, i) => ({
+                            id: String(p.id),
+                            title: p.title || `Problem ${i + 1}`,
+                            difficulty: p.difficulty || null,
+                            order_index: p.order_index ?? i,
+                        }))
+                        : currentState.problems;
                     useBattleStore.setState({
                         opponent: battleData.opponent || currentState.opponent,
                         duration: battleData.duration_seconds || currentState.duration,
+                        problems: problems.length ? problems : currentState.problems,
                     });
                 } else {
                     currentState.setMatch(battleData);
@@ -147,22 +157,25 @@ export function registerEventHandlers() {
             console.log('[WS] match_ended received:', data);
 
             const battleState = useBattleStore.getState();
-            const currentUserId = useAuthStore.getState().user?.id;
+            const authState = useAuthStore.getState();
+            const currentUserId = String(authState.user?.id ?? '');
             const opponent = battleState.opponent;
 
             // Data from server (via ConnectionManager.broadcast_match_ended):
             // { winner_id, winner_username, reason, your_elo_delta, new_elo }
-            const isWinner = data.winner_id && data.winner_id === currentUserId;
-            const isDraw = !data.winner_id;
+            const winnerId = data.winner_id != null ? String(data.winner_id) : null;
+            const isWinner = !!winnerId && winnerId === currentUserId;
+            const isDraw = !winnerId;
 
             const result =
                 isDraw ? (data.reason === 'timeout' ? 'time_up' : 'draw') :
                     isWinner ? 'win' : 'loss';
 
             const elo_change = data.your_elo_delta ?? 0;
+            const opponent_username = opponent?.username || 'Your opponent';
             const winner_username = data.winner_username
-                || (data.winner_id
-                    ? (isWinner ? 'You' : opponent?.username || 'Your opponent')
+                || (winnerId
+                    ? (isWinner ? 'You' : opponent_username)
                     : null);
 
             // Update battle state
@@ -171,9 +184,15 @@ export function registerEventHandlers() {
                 result,
                 elo_change,
                 winner_username,
+                opponent_username,
                 reason: data.reason,
                 new_elo: data.new_elo,
             });
+
+            // Refresh Navbar/Dashboard ELO from server payload
+            if (data.new_elo != null && authState.user) {
+                authState.setUser({ ...authState.user, elo: data.new_elo });
+            }
 
             // Also reset matchmaking store so UI never thinks we're still queued/found
             try {
