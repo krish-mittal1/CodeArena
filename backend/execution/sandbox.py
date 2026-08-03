@@ -415,24 +415,7 @@ class Sandbox:
 i=0
 while [ $i -lt {num_tests} ]; do
     START_NS=$(date +%s%N 2>/dev/null || echo 0)
-    timeout {timeout_s}s {run_cmd} < /sandbox/in/input_${{i}}.txt > /sandbox/out/output_${{i}}.txt 2>/sandbox/out/error_${{i}}.txt &
-    PID=$!
-    PEAK_KB=0
-    # Find the actual child process (not the timeout wrapper)
-    sleep 0.02
-    CHILD_PID=$(cat /proc/$PID/task/$PID/children 2>/dev/null | awk '{{print $1}}')
-    if [ -z "$CHILD_PID" ]; then CHILD_PID=$PID; fi
-    while kill -0 $PID 2>/dev/null; do
-        MEM_FILE="/proc/$CHILD_PID/status"
-        if [ -f "$MEM_FILE" ]; then
-            CUR_KB=$(grep VmRSS "$MEM_FILE" 2>/dev/null | awk '{{print $2}}')
-            if [ -n "$CUR_KB" ] && [ "$CUR_KB" -gt "$PEAK_KB" ] 2>/dev/null; then
-                PEAK_KB=$CUR_KB
-            fi
-        fi
-        sleep 0.05
-    done
-    wait $PID
+    timeout {timeout_s}s {run_cmd} < /sandbox/in/input_${{i}}.txt > /sandbox/out/output_${{i}}.txt 2>/sandbox/out/error_${{i}}.txt
     EXIT_CODE=$?
     END_NS=$(date +%s%N 2>/dev/null || echo 0)
     if [ "$START_NS" != "0" ] && [ "$END_NS" != "0" ]; then
@@ -440,7 +423,7 @@ while [ $i -lt {num_tests} ]; do
     else
         ELAPSED_MS=0
     fi
-    echo "${{EXIT_CODE}}|${{ELAPSED_MS}}|${{PEAK_KB}}" > /sandbox/out/meta_${{i}}.txt
+    echo "${{EXIT_CODE}}|${{ELAPSED_MS}}|0" > /sandbox/out/meta_${{i}}.txt
     i=$((i + 1))
 done
 exit 0
@@ -551,9 +534,6 @@ exit 0
                         if batch_timed_out:
                             tc_timed_out = True
                             exit_code = TIMEOUT_EXIT_CODE
-                        elif i > 0 and not stdout and not stderr:
-                            oom_killed = True
-                            exit_code = DOCKER_OOM_EXIT_CODE
                         else:
                             exit_code = 1
 
