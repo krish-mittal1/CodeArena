@@ -718,7 +718,7 @@ vector<string> parseJsonStringArray(const string& s) {{
             }}
             inStr = !inStr;
         }} else if (inStr) {{
-            current += s[i];
+            if (s[i] != '\\r') current += s[i];
         }}
     }}
     return res;
