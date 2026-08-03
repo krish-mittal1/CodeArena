@@ -214,6 +214,7 @@ async def _send_otp_email(email: str, otp: str) -> bool:
         return False
 
     resend.api_key = settings.resend_api_key
+    sender = settings.otp_from_email or "CodeArena <onboarding@resend.dev>"
 
     html = f"""
     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 480px; margin: 0 auto;
@@ -234,23 +235,27 @@ async def _send_otp_email(email: str, otp: str) -> bool:
 
     try:
         resend.Emails.send({
-            "from": settings.otp_from_email,
+            "from": sender,
             "to": [email],
             "subject": "Your CodeArena login code",
             "html": html,
         })
-        logger.info(f"OTP email sent to {email}")
+        logger.info(f"OTP email sent to {email} via Resend ({sender})")
         return True
     except Exception as exc:
+        logger.warning(
+            f"Failed to send OTP email to {email} via Resend ({sender}): {exc}",
+            exc_info=True,
+        )
+        logger.info(f"[DEV/FALLBACK] OTP for {email}: {otp}")
         if settings.is_development:
-            logger.warning(
-                f"Failed to send OTP email to {email}; using development fallback: {exc}",
-                exc_info=True,
-            )
-            logger.info(f"[DEV] OTP for {email}: {otp}")
             return False
-        logger.error(f"Failed to send OTP email to {email}: {exc}", exc_info=True)
-        raise
+        from backend.core.exceptions import AppException
+        from fastapi import status
+        raise AppException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Email delivery error: {exc}. If using Resend, check API key or sender email."
+        )
 
 
 async def request_otp(email: str, ip: str) -> Optional[str]:
