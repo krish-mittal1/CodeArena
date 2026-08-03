@@ -607,7 +607,11 @@ async def _sweep_stuck_submissions(session_factory: async_sessionmaker, redis) -
     (e.g. worker crash after BRPOP removed the job from the queue).
     """
     try:
-        cutoff = datetime.now(timezone.utc).timestamp() - 90
+        now_ts = datetime.now(timezone.utc).timestamp()
+        queued_cutoff = now_ts - 90    # QUEUED for >90s → likely lost in transit
+        running_cutoff = now_ts - 300  # RUNNING for >5 min → worker probably crashed
+        # (We don't store when a submission transitioned to RUNNING, so we use
+        # submitted_at with a generous cutoff to avoid racing an active worker.)
         async with session_factory() as db:
             result = await db.execute(
                 select(Submission)
@@ -619,14 +623,16 @@ async def _sweep_stuck_submissions(session_factory: async_sessionmaker, redis) -
             stuck = list(result.scalars().all())
 
         for sub in stuck:
-            submitted = sub.submitted_at
-            if submitted is None:
+            ref_time = sub.submitted_at
+            if ref_time is None:
                 continue
-            if submitted.tzinfo is None:
-                submitted = submitted.replace(tzinfo=timezone.utc)
-            if submitted.timestamp() > cutoff:
+            if ref_time.tzinfo is None:
+                ref_time = ref_time.replace(tzinfo=timezone.utc)
+            age_cutoff = (
+                running_cutoff if sub.status == SubmissionStatus.RUNNING else queued_cutoff
+            )
+            if ref_time.timestamp() > age_cutoff:
                 continue
-            # Only requeue RUNNING older than 90s, or QUEUED older than 90s
             payload = json.dumps({"submission_id": str(sub.id)})
             await redis.lpush(RedisKey.SUBMISSION_QUEUE, payload)
             logger.warning(

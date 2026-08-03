@@ -148,13 +148,16 @@ async def _recover_active_match_from_db(
         return
 
     async with AsyncSessionLocal() as db:
+        filters = [
+            Match.status == MatchStatus.ACTIVE,
+            (Match.player1_id == uid) | (Match.player2_id == uid),
+        ]
+        if expected_match_id:
+            filters.append(Match.id == uuid.UUID(expected_match_id))
+
         result = await db.execute(
             select(Match)
-            .where(
-                (Match.status == MatchStatus.ACTIVE)
-                & ((Match.player1_id == uid) | (Match.player2_id == uid))
-                & (Match.id == uuid.UUID(expected_match_id) if expected_match_id else True)
-            )
+            .where(*filters)
             .order_by(Match.started_at.desc())
             .options(
                 selectinload(Match.player1),
