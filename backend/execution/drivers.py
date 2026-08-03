@@ -518,10 +518,28 @@ def generate_cpp_driver(method_name: str, parameters: List[Dict[str, str]], retu
     uses_listnode = _uses_listnode(parameters, return_type)
     uses_treenode = _uses_treenode(parameters, return_type)
 
-    read_blocks = ""
-    for p in parameters:
-        read_blocks += "    getline(cin, line);\n"
-        read_blocks += _cpp_json_parser(p["type"], p["name"]) + "\n"
+    if len(parameters) == 1:
+        read_blocks = (
+            "    string input_data;\n"
+            "    string temp_line;\n"
+            "    while (getline(cin, temp_line)) {\n"
+            "        input_data += temp_line + \"\\n\";\n"
+            "    }\n"
+            "    string line = input_data;\n"
+        )
+        read_blocks += _cpp_json_parser(parameters[0]["type"], parameters[0]["name"]) + "\n"
+    else:
+        read_blocks = (
+            "    vector<string> lines;\n"
+            "    string temp_line;\n"
+            "    while (getline(cin, temp_line)) {\n"
+            "        if (!temp_line.empty()) lines.push_back(temp_line);\n"
+            "    }\n"
+            "    int idx = 0;\n"
+        )
+        for p in parameters:
+            read_blocks += f"    string line = idx < lines.size() ? lines[idx++] : \"\";\n"
+            read_blocks += _cpp_json_parser(p["type"], p["name"]) + "\n"
 
     listnode_defs = ""
     if uses_listnode:
@@ -793,7 +811,6 @@ int main() {{
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    string line;
 {read_blocks}    Solution sol;
     {_cpp_type(return_type)} result = sol.{method_name}({call_args});
 
