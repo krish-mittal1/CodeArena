@@ -32,8 +32,10 @@ Return ONLY a JSON object with EXACTLY these keys:
 {
   "verdict_summary": "string — 1 to 2 short sentences. Pass/fail in plain language and the main takeaway.",
   "root_cause": "string — If failed: the specific bug or wrong idea (1 to 3 sentences). If accepted: why the approach is correct (1 to 2 sentences). Empty string only if truly nothing to say.",
-  "time_complexity": "string — Big-O of THEIR submitted code, e.g. O(N) or O(N log N)",
-  "space_complexity": "string — Big-O of THEIR submitted code, e.g. O(1) or O(N)",
+  "time_complexity": "string — Big-O time complexity of THEIR submitted code, e.g. O(N) or O(N log N)",
+  "space_complexity": "string — Big-O space complexity of THEIR submitted code, e.g. O(1) or O(N)",
+  "optimal_time_complexity": "string — Best possible / optimal Big-O time complexity for this problem, e.g. O(N)",
+  "optimal_space_complexity": "string — Best possible / optimal Big-O space complexity for this problem, e.g. O(1)",
   "key_insight": "string — The core correct idea / pattern in 2 to 4 sentences. Name the pattern if classic (two pointers, sliding window, binary search, etc.). Do NOT dump a full editorial.",
   "fix_hints": ["string — 2 to 5 short coaching steps. Hint at the fix; do NOT paste a full solution walkthrough. Interview-coach tone: guide, don't spoil every line."],
   "edge_cases": ["string — 0 to 4 concrete edge cases they missed or should re-check. Empty list [] if none."],
@@ -295,12 +297,25 @@ def _normalize_analysis_result(result: dict, verdict_status: str) -> dict:
                 }
             )
 
+    opt_time = (
+        _as_str(result.get("optimal_time_complexity"))
+        or _as_str(result.get("optimized_time_complexity"))
+        or "N/A"
+    )
+    opt_space = (
+        _as_str(result.get("optimal_space_complexity"))
+        or _as_str(result.get("optimized_space_complexity"))
+        or "N/A"
+    )
+
     return {
         # Preferred (UI primary)
         "verdict_summary": verdict_summary,
         "root_cause": root_cause,
         "time_complexity": time_complexity,
         "space_complexity": space_complexity,
+        "optimal_time_complexity": opt_time,
+        "optimal_space_complexity": opt_space,
         "key_insight": key_insight,
         "fix_hints": fix_hints,
         "edge_cases": edge_cases,

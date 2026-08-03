@@ -55,6 +55,8 @@ const normalizeAnalysis = (analysis) => {
         rootCause,
         timeComplexity: analysis.time_complexity || 'N/A',
         spaceComplexity: analysis.space_complexity || 'N/A',
+        optimalTimeComplexity: analysis.optimal_time_complexity || analysis.optimized_time_complexity || 'N/A',
+        optimalSpaceComplexity: analysis.optimal_space_complexity || analysis.optimized_space_complexity || 'N/A',
         keyInsight,
         fixHints,
         edgeCases: asList(analysis.edge_cases),
@@ -71,10 +73,10 @@ const resolveVerdictStatus = (verdict) => {
     return verdict.status || '';
 };
 
-const ComplexityPill = ({ label, value }) => (
-    <div className="flex flex-col gap-0.5 min-w-0 rounded-lg border border-border bg-bg-surface px-3 py-2.5">
+const ComplexityPill = ({ label, value, highlight = false }) => (
+    <div className={`flex flex-col gap-0.5 min-w-0 rounded-lg border px-3 py-2.5 ${highlight ? 'border-accent/30 bg-accent/5' : 'border-border bg-bg-surface'}`}>
         <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">{label}</span>
-        <span className="font-mono text-sm font-semibold text-text-primary truncate">{value || 'N/A'}</span>
+        <span className={`font-mono text-sm font-semibold truncate ${highlight ? 'text-accent' : 'text-text-primary'}`}>{value || 'N/A'}</span>
     </div>
 );
 
@@ -237,10 +239,12 @@ export default function AIAnalysisPanel({ analysis, verdict, onClose, shareSlug,
                         </div>
                     </div>
 
-                    {/* Complexity */}
-                    <div className="grid grid-cols-2 gap-2.5">
+                    {/* Complexity Comparison */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         <ComplexityPill label="Your time" value={view.timeComplexity} />
+                        <ComplexityPill label="Optimal time" value={view.optimalTimeComplexity} highlight />
                         <ComplexityPill label="Your space" value={view.spaceComplexity} />
+                        <ComplexityPill label="Optimal space" value={view.optimalSpaceComplexity} highlight />
                     </div>
 
                     {/* Root cause */}
