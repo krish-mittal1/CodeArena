@@ -415,7 +415,7 @@ class Sandbox:
 i=0
 while [ $i -lt {num_tests} ]; do
     START_NS=$(date +%s%N 2>/dev/null || echo 0)
-    timeout {timeout_s}s {run_cmd} < /sandbox/in/input_${{i}}.txt > /sandbox/out/output_${{i}}.txt 2>/sandbox/out/error_${{i}}.txt
+    timeout {timeout_s} {run_cmd} < /sandbox/in/input_${{i}}.txt > /sandbox/out/output_${{i}}.txt 2>/sandbox/out/error_${{i}}.txt
     EXIT_CODE=$?
     END_NS=$(date +%s%N 2>/dev/null || echo 0)
     if [ "$START_NS" != "0" ] && [ "$END_NS" != "0" ]; then
