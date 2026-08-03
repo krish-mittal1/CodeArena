@@ -29,24 +29,32 @@ def llm_provider() -> Optional[str]:
     return None
 
 
-def parse_llm_json(raw: str) -> dict[str, Any]:
-    """Parse JSON from LLM output, tolerating markdown fences and extra text."""
-    text = (raw or "").strip()
-    if not text:
-        raise json.JSONDecodeError("empty response", text, 0)
+def _clean_json_str(s: str) -> str:
+    text = (s or "").strip()
+    text = re.sub(r"^```(?:json|text)?\s*", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*```$", "", text).strip()
 
-    if text.startswith("```"):
-        text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.IGNORECASE)
-        text = re.sub(r"\s*```$", "", text).strip()
+    start = text.find("{")
+    end = text.rfind("}")
+    if start >= 0 and end > start:
+        text = text[start : end + 1]
+
+    text = re.sub(r",\s*([}\]])", r"\1", text)
+    return text
+
+
+def parse_llm_json(raw: str) -> dict[str, Any]:
+    """Parse JSON from LLM output, tolerating markdown fences, trailing commas, and extra text."""
+    if not raw or not raw.strip():
+        raise json.JSONDecodeError("empty response", raw or "", 0)
+
+    cleaned = _clean_json_str(raw)
 
     try:
-        return json.loads(text)
+        return json.loads(cleaned, strict=False)
     except json.JSONDecodeError:
-        start = text.find("{")
-        end = text.rfind("}")
-        if start >= 0 and end > start:
-            return json.loads(text[start : end + 1])
-        raise
+        cleaned2 = re.sub(r",\s*([}\]])", r"\1", cleaned)
+        return json.loads(cleaned2, strict=False)
 
 
 async def call_json_llm(

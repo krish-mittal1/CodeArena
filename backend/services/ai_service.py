@@ -164,31 +164,31 @@ def _parse_prose_sections(raw: str) -> Optional[dict]:
     start = text.find("{")
     end = text.rfind("}")
     if start >= 0 and end > start:
+        candidate = text[start : end + 1]
         try:
-            parsed = json.loads(text[start : end + 1])
+            parsed = json.loads(candidate, strict=False)
             if isinstance(parsed, dict):
                 return parsed
         except json.JSONDecodeError:
-            pass
+            # Try removing trailing commas
+            c2 = re.sub(r",\s*([}\]])", r"\1", candidate)
+            try:
+                parsed = json.loads(c2, strict=False)
+                if isinstance(parsed, dict):
+                    return parsed
+            except json.JSONDecodeError:
+                pass
 
-    header_re = re.compile(
-        r"(?im)^\s*(?:#{1,3}\s*)?(?:\*\*)?([A-Za-z][A-Za-z0-9 dual/\-]{1,40})(?:\*\*)?\s*:?\s*$"
-    )
-    matches = list(header_re.finditer(text))
-    if not matches:
-        # Single prose blob → treat as verdict + insight
-        first = text.split("\n\n")[0].strip()[:400]
-        return {
-            "verdict_summary": first,
-            "root_cause": "",
-            "key_insight": text[:800],
-            "fix_hints": [],
-            "edge_cases": [],
-            "tips": [],
-            "improved_code": "",
-            "time_complexity": "N/A",
-            "space_complexity": "N/A",
-        }
+    # Regex fallback for JSON key-values if strict parsing failed
+    extracted: dict[str, Any] = {}
+    for key in ["verdict_summary", "root_cause", "time_complexity", "space_complexity", "optimal_time_complexity", "optimal_space_complexity", "key_insight", "improved_code"]:
+        m = re.search(rf'"{key}"\s*:\s*"((?:[^"\\]|\\.)*)"', text)
+        if m:
+            val = m.group(1).replace(r'\"', '"').replace(r'\n', '\n').strip()
+            if val:
+                extracted[key] = val
+    if extracted and "verdict_summary" in extracted:
+        return extracted
 
     sections: dict[str, str] = {}
     for i, match in enumerate(matches):

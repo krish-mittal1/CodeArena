@@ -17,53 +17,78 @@ const hasText = (value) => {
     return !!text && text !== 'n/a' && text !== 'not available yet.';
 };
 
+const unpackField = (val, preferredKey) => {
+    if (!val) return '';
+    let text = String(val).trim();
+    if (text.startsWith('{') && text.includes('}')) {
+        try {
+            const parsed = JSON.parse(text);
+            if (parsed && typeof parsed === 'object') {
+                if (preferredKey && parsed[preferredKey]) return String(parsed[preferredKey]).trim();
+                return String(parsed.verdict_summary || parsed.root_cause || parsed.key_insight || text).trim();
+            }
+        } catch (e) {
+            if (preferredKey) {
+                const m = text.match(new RegExp(`"${preferredKey}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`));
+                if (m && m[1]) return m[1].replace(/\\"/g, '"').replace(/\\n/g, '\n').trim();
+            }
+        }
+    }
+    return text;
+};
+
 /** Normalize new + legacy analysis payloads into one view model. */
 const normalizeAnalysis = (analysis) => {
     if (!analysis || typeof analysis !== 'object') return null;
 
-    const verdictSummary =
-        analysis.verdict_summary
-        || analysis.verdict_explanation
-        || '';
+    let target = { ...analysis };
+    if (typeof target.verdict_summary === 'string' && target.verdict_summary.trim().startsWith('{')) {
+        try {
+            const parsed = JSON.parse(target.verdict_summary.trim());
+            if (parsed && typeof parsed === 'object') {
+                target = { ...target, ...parsed };
+            }
+        } catch (e) {}
+    }
+    if (typeof target.key_insight === 'string' && target.key_insight.trim().startsWith('{')) {
+        try {
+            const parsed = JSON.parse(target.key_insight.trim());
+            if (parsed && typeof parsed === 'object') {
+                target = { ...target, ...parsed };
+            }
+        } catch (e) {}
+    }
 
-    const rootCause =
-        analysis.root_cause
-        || asList(analysis.issues)[0]
-        || analysis.failed_test_explanation
-        || '';
+    const verdictSummary = unpackField(target.verdict_summary || target.verdict_explanation, 'verdict_summary');
+    const rootCause = unpackField(target.root_cause || asList(target.issues)[0] || target.failed_test_explanation, 'root_cause');
+    const keyInsight = unpackField(target.key_insight || target.optimized_approach || target.problem_concept, 'key_insight');
 
-    const keyInsight =
-        analysis.key_insight
-        || analysis.optimized_approach
-        || analysis.problem_concept
-        || '';
-
-    let fixHints = asList(analysis.fix_hints);
-    if (!fixHints.length && hasText(analysis.optimized_approach)) {
-        fixHints = String(analysis.optimized_approach)
+    let fixHints = asList(target.fix_hints);
+    if (!fixHints.length && hasText(target.optimized_approach)) {
+        fixHints = String(target.optimized_approach)
             .split(/\n+/)
             .map((p) => p.trim())
             .filter(Boolean)
             .slice(0, 5);
     }
     if (!fixHints.length) {
-        fixHints = asList(analysis.tips).slice(0, 3);
+        fixHints = asList(target.tips).slice(0, 3);
     }
 
     return {
         verdictSummary,
         rootCause,
-        timeComplexity: analysis.time_complexity || 'N/A',
-        spaceComplexity: analysis.space_complexity || 'N/A',
-        optimalTimeComplexity: analysis.optimal_time_complexity || analysis.optimized_time_complexity || 'N/A',
-        optimalSpaceComplexity: analysis.optimal_space_complexity || analysis.optimized_space_complexity || 'N/A',
+        timeComplexity: unpackField(target.time_complexity, 'time_complexity') || 'N/A',
+        spaceComplexity: unpackField(target.space_complexity, 'space_complexity') || 'N/A',
+        optimalTimeComplexity: unpackField(target.optimal_time_complexity || target.optimized_time_complexity, 'optimal_time_complexity') || 'N/A',
+        optimalSpaceComplexity: unpackField(target.optimal_space_complexity || target.optimized_space_complexity, 'optimal_space_complexity') || 'N/A',
         keyInsight,
         fixHints,
-        edgeCases: asList(analysis.edge_cases),
-        improvedCode: analysis.improved_code || '',
-        tips: asList(analysis.tips),
-        failedTest: analysis.failed_test_explanation || '',
-        issues: asList(analysis.issues),
+        edgeCases: asList(target.edge_cases),
+        improvedCode: unpackField(target.improved_code, 'improved_code'),
+        tips: asList(target.tips),
+        failedTest: unpackField(target.failed_test_explanation, 'failed_test_explanation'),
+        issues: asList(target.issues),
     };
 };
 
