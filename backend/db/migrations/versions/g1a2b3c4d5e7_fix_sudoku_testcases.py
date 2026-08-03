@@ -54,7 +54,7 @@ def _is_valid_sudoku(raw_input: str) -> bool:
 def upgrade() -> None:
     conn = op.get_bind()
     prob = conn.execute(
-        sa.text("SELECT id FROM problems WHERE title = 'Valid Sudoku' OR slug = 'valid-sudoku'")
+        sa.text("SELECT id FROM problems WHERE title = 'Valid Sudoku'")
     ).fetchone()
 
     if not prob:
