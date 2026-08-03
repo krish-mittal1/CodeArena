@@ -96,7 +96,21 @@ def _as_str(value: Any, default: str = "") -> str:
     if value is None:
         return default
     if isinstance(value, str):
-        return value.strip()
+        text = value.strip()
+        if text.startswith("{") and ("verdict_summary" in text or "root_cause" in text):
+            try:
+                parsed = json.loads(text)
+                if isinstance(parsed, dict):
+                    extracted = (
+                        parsed.get("verdict_summary")
+                        or parsed.get("root_cause")
+                        or parsed.get("key_insight")
+                    )
+                    if extracted and isinstance(extracted, str):
+                        return extracted.strip()
+            except Exception:
+                pass
+        return text
     if isinstance(value, (int, float)):
         return str(value)
     return default
