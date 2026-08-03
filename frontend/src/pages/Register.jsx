@@ -67,11 +67,11 @@ export default function Register() {
             setStep('verify');
             setCooldown(60);
         } catch (err) {
-            setClientError(
-                err?.response?.data?.error ||
-                err?.response?.data?.detail ||
-                'Failed to send verification code. Try again.'
-            );
+            const detail = err?.response?.data?.detail;
+            const errorMsg = typeof detail === 'string'
+                ? detail
+                : (err?.response?.data?.error || err?.message || 'Failed to send verification code. Try again.');
+            setClientError(errorMsg);
         } finally {
             setOtpLoading(false);
         }

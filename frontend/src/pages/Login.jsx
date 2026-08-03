@@ -233,11 +233,11 @@ function OTPForm() {
             setStep('verify');
             setCooldown(60);
         } catch (err) {
-            setError(
-                err?.response?.data?.error ||
-                err?.response?.data?.detail ||
-                'Failed to send OTP. Please try again.'
-            );
+            const detail = err?.response?.data?.detail;
+            const errorMsg = typeof detail === 'string'
+                ? detail
+                : (err?.response?.data?.error || err?.message || 'Failed to send OTP. Please try again.');
+            setError(errorMsg);
         } finally {
             setIsLoading(false);
         }
