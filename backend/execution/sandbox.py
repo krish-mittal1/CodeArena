@@ -183,9 +183,12 @@ class Sandbox:
 
                 # ── Compilation step (if needed) — needs RW
                 if config.needs_compilation:
+                    # Allow the non-root container user to write the compiled binary
+                    os.chmod(tmpdir, 0o777)
                     compile_result = await self._run_compile(
                         exec_id, config, tmpdir, mem_mb
                     )
+                    os.chmod(tmpdir, 0o755)
                     if compile_result is not None:
                         return compile_result
 
@@ -346,9 +349,12 @@ class Sandbox:
                 # Skip normal compilation in driver mode for compiled languages
                 # (C++/Java) — the driver handles its own compilation below
                 if config.needs_compilation and not (driver_code and language in ("cpp", "java")):
+                    # Allow the non-root container user to write the compiled binary
+                    os.chmod(in_dir, 0o777)
                     compile_result = await self._run_compile(
                         exec_id, config, in_dir, mem_mb
                     )
+                    os.chmod(in_dir, 0o755)
                     if compile_result is not None:
                         # Compilation failed → return same error for ALL tests
                         return [compile_result] * num_tests
@@ -384,18 +390,24 @@ class Sandbox:
                     
                 # For C++ with driver, we need to compile the driver file
                 if driver_code and language == "cpp":
+                    # Allow the non-root container user to write the compiled binary
+                    os.chmod(in_dir, 0o777)
                     compile_result = await self._run_compile_custom(
                         exec_id, config, in_dir, mem_mb,
                         compile_cmd=f"g++ -O2 -std=gnu++17 -Wall -o /sandbox/solution /sandbox/driver.cpp"
                     )
+                    os.chmod(in_dir, 0o755)
                     if compile_result is not None:
                         return [compile_result] * num_tests
                 elif driver_code and language == "java":
                     # Compile both Main.java (driver) and Solution.java (user code)
+                    # Allow the non-root container user to write .class files
+                    os.chmod(in_dir, 0o777)
                     compile_result = await self._run_compile_custom(
                         exec_id, config, in_dir, mem_mb,
                         compile_cmd="javac /sandbox/Main.java /sandbox/Solution.java -d /sandbox"
                     )
+                    os.chmod(in_dir, 0o755)
                     if compile_result is not None:
                         return [compile_result] * num_tests
 
@@ -702,7 +714,7 @@ done
             )
 
         try:
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             proc = await loop.run_in_executor(None, _sync_run)
             stdout_bytes = proc.stdout
             stderr_bytes = proc.stderr
@@ -761,7 +773,7 @@ done
                 timeout=5.0
             )
         try:
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             await loop.run_in_executor(None, _kill)
         except Exception:
             pass
