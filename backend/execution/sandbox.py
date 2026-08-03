@@ -492,7 +492,13 @@ done
                         )
 
                     loop = asyncio.get_running_loop()
-                    await loop.run_in_executor(None, _sync_run)
+                    batch_proc = await loop.run_in_executor(None, _sync_run)
+                    if batch_proc.returncode != 0:
+                        batch_stderr = batch_proc.stderr.decode(errors="replace")[:2000]
+                        logger.warning(
+                            "[SANDBOX] %s: Batch container exited %d — stderr: %s",
+                            exec_id[:8], batch_proc.returncode, batch_stderr,
+                        )
 
                 except subprocess.TimeoutExpired:
                     batch_timed_out = True
