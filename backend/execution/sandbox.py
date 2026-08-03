@@ -540,13 +540,12 @@ done
                             except ValueError:
                                 pass
                     else:
-                        # No meta file means test never ran or container crashed
+                        # No meta file means test never ran or process exited abnormally
                         if batch_timed_out:
                             tc_timed_out = True
                             exit_code = TIMEOUT_EXIT_CODE
-                        elif i > 0 and not stdout and not stderr:
-                            oom_killed = True
-                            exit_code = DOCKER_OOM_EXIT_CODE
+                        else:
+                            exit_code = 1
 
                     # timeout command returns 124 on timeout
                     if exit_code == TIMEOUT_EXIT_CODE:
