@@ -12,7 +12,6 @@ from redis.asyncio import Redis
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional, List
 
 from backend.core.constants import SubmissionStatus, RedisKey
 from backend.models.submission import Submission
