@@ -443,6 +443,7 @@ while [ $i -lt {num_tests} ]; do
     echo "${{EXIT_CODE}}|${{ELAPSED_MS}}|${{PEAK_KB}}" > /sandbox/out/meta_${{i}}.txt
     i=$((i + 1))
 done
+exit 0
 """
                 runner_path = os.path.join(in_dir, "runner.sh")
                 with open(runner_path, "w", encoding="utf-8") as f:
@@ -546,10 +547,13 @@ done
                             except ValueError:
                                 pass
                     else:
-                        # No meta file means test never ran or process exited abnormally
+                        # No meta file means test never ran or container crashed
                         if batch_timed_out:
                             tc_timed_out = True
                             exit_code = TIMEOUT_EXIT_CODE
+                        elif i > 0 and not stdout and not stderr:
+                            oom_killed = True
+                            exit_code = DOCKER_OOM_EXIT_CODE
                         else:
                             exit_code = 1
 
