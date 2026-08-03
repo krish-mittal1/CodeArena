@@ -285,9 +285,11 @@ class Sandbox:
             # out/: per-test stdout/stderr/meta (RW only)
             in_dir = os.path.join(tmpdir, "in")
             out_dir = os.path.join(tmpdir, "out")
-            os.makedirs(in_dir, mode=0o755)
-            os.makedirs(out_dir, mode=0o755)
-            os.chmod(tmpdir, 0o755)
+            os.makedirs(in_dir, mode=0o777, exist_ok=True)
+            os.makedirs(out_dir, mode=0o777, exist_ok=True)
+            os.chmod(tmpdir, 0o777)
+            os.chmod(in_dir, 0o777)
+            os.chmod(out_dir, 0o777)
 
             # ── Write source code (once) ──────────────────
             # In LeetCode driver mode for Python, save as solution.py
@@ -435,6 +437,8 @@ exit 0
 
                 # Freeze inputs/code/binaries so a test cannot rewrite later inputs
                 _chmod_tree(in_dir, 0o555)
+                # Ensure output directory is world-writable so container user can write output files
+                os.chmod(out_dir, 0o777)
 
                 # ── Run ALL tests in ONE container ────────
                 # RO mount for inputs/code; separate RW out-only mount
@@ -477,11 +481,12 @@ exit 0
 
                     loop = asyncio.get_running_loop()
                     batch_proc = await loop.run_in_executor(None, _sync_run)
-                    if batch_proc.returncode != 0:
-                        batch_stderr = batch_proc.stderr.decode(errors="replace")[:2000]
+                    batch_stderr = batch_proc.stderr.decode(errors="replace").strip()
+                    batch_stdout = batch_proc.stdout.decode(errors="replace").strip()
+                    if batch_proc.returncode != 0 or batch_stderr:
                         logger.warning(
-                            "[SANDBOX] %s: Batch container exited %d — stderr: %s",
-                            exec_id[:8], batch_proc.returncode, batch_stderr,
+                            "[SANDBOX] %s: Batch container exit=%d stdout=%s stderr=%s",
+                            exec_id[:8], batch_proc.returncode, repr(batch_stdout[:500]), repr(batch_stderr[:500]),
                         )
 
                 except subprocess.TimeoutExpired:
