@@ -542,15 +542,6 @@ exit 0
                         else:
                             exit_code = 1
 
-                    # DEBUG: Log per-test details for diagnosis
-                    logger.info(
-                        "[SANDBOX] %s: test=%d meta=%s exit=%d stdout=%s stderr=%s",
-                        exec_id[:8], i,
-                        repr(meta.strip() if meta else None),
-                        exit_code,
-                        repr(stdout[:200] if stdout else ""),
-                        repr(stderr[:500] if stderr else ""),
-                    )
                     if exit_code == TIMEOUT_EXIT_CODE:
                         tc_timed_out = True
 

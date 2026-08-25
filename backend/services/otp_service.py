@@ -12,6 +12,7 @@ OTP authentication service.
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import hmac
 import logging
@@ -234,14 +235,33 @@ async def _send_otp_email(email: str, otp: str) -> bool:
     """
 
     try:
-        resend.Emails.send({
-            "from": sender,
-            "to": [email],
-            "subject": "Your CodeArena login code",
-            "html": html,
-        })
+        await asyncio.wait_for(
+            asyncio.to_thread(
+                resend.Emails.send,
+                {
+                    "from": sender,
+                    "to": [email],
+                    "subject": "Your CodeArena login code",
+                    "html": html,
+                },
+            ),
+            timeout=10.0,
+        )
         logger.info(f"OTP email sent to {email} via Resend ({sender})")
         return True
+    except asyncio.TimeoutError:
+        logger.warning(
+            f"OTP email dispatch timed out for {email} via Resend ({sender}) after 10s"
+        )
+        logger.info(f"[DEV/FALLBACK] OTP for {email}: {otp}")
+        if settings.is_development:
+            return False
+        from backend.core.exceptions import AppException
+        from fastapi import status
+        raise AppException(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            detail="Email service timed out. Please try again in a few moments."
+        )
     except Exception as exc:
         logger.warning(
             f"Failed to send OTP email to {email} via Resend ({sender}): {exc}",
