@@ -39,7 +39,7 @@ The platform also includes authentication, OTP login, match history, rating/stat
 - User profile, rating, wins, and statistics
 - AI-based code analysis and feedback
 - Frontend deployment on Vercel
-- Backend deployment on Microsoft Azure VM with Docker
+- Backend deployment on Oracle Cloud VPS with Docker, proxied by Pangolin (https://api.codexarena.app)
 
 ## Tech Stack
 
@@ -129,7 +129,7 @@ Next.js Frontend on Vercel
     |
     | REST API + WebSocket
     v
-FastAPI Backend on Azure VM
+FastAPI Backend on Oracle Cloud VPS (Pangolin/Caddy reverse proxy)
     |
     |----------------------|
     |                      |
@@ -280,6 +280,9 @@ RESEND_API_KEY=
 OTP_FROM_EMAIL=
 GROQ_API_KEY=
 GEMINI_API_KEY=
+API_HOST_PORT=
+TRUST_FORWARDED_HEADERS=
+TRUSTED_PROXIES=
 ```
 
 Never commit real `.env` secrets to GitHub.
@@ -346,7 +349,11 @@ wss://api.codexarena.app
 
 ### Backend
 
-The backend runs on a Microsoft Azure VM using Docker Compose.
+The backend runs on an Oracle Cloud VPS using Docker Compose.
+Port 8000 of the API container is published on the host as `$API_HOST_PORT`
+(default 8000) and public traffic is routed through Pangolin at
+`https://api.codexarena.app` → `http://api:8000` on the shared `pangolin`
+docker network. Keep the published host port firewalled.
 
 The backend stack includes:
 
