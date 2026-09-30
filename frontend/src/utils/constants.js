@@ -2,7 +2,8 @@
    Frontend Constants — mirrors backend's core/constants.py
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-// Current Azure VM Public IP
+// Legacy Azure VM public IP — no longer used for production routing.
+// Production goes through https://api.codexarena.app (Pangolin on the Oracle VPS).
 const PROD_IP = '20.197.31.143';
 const isBrowser = typeof window !== 'undefined';
 const hostname = isBrowser ? window.location.hostname : '';
