@@ -1,7 +1,7 @@
 """fix valid sudoku test cases expected output
 
 Revision ID: g1a2b3c4d5e7
-Revises: f9a2b3c4d5e6
+Revises: c9f3a1b2d4e5
 Create Date: 2026-08-03
 """
 
