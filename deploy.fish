@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # Deployment script for CodeArena security fixes + new problem seed
-# Run on Azure Linux VM after git pull
+# Run on the Oracle Cloud VPS after git pull
 
 set PROJECT_DIR /home/krish/PROJECT2
 
@@ -14,6 +14,19 @@ if not test -d $PROJECT_DIR
 end
 
 cd $PROJECT_DIR
+
+# Load DB password from the project .env — never hardcode credentials here.
+if not test -f .env
+    echo "❌ .env not found in $PROJECT_DIR (need POSTGRES_PASSWORD / POSTGRES_DB)"
+    exit 1
+end
+set -x POSTGRES_PASSWORD (grep -E '^POSTGRES_PASSWORD=' .env | cut -d= -f2- | tr -d '"')
+set -x POSTGRES_DB (grep -E '^POSTGRES_DB=' .env | cut -d= -f2- | tr -d '"'); or set -x POSTGRES_DB codexarena
+
+if test -z "$POSTGRES_PASSWORD"
+    echo "❌ POSTGRES_PASSWORD missing from .env"
+    exit 1
+end
 echo "✓ Working directory: $PROJECT_DIR"
 echo ""
 
@@ -37,8 +50,8 @@ if not docker ps | grep -q api_postgres
     docker run -d \
         --name api_postgres \
         -e POSTGRES_USER=postgres \
-        -e POSTGRES_PASSWORD=krishisunique \
-        -e POSTGRES_DB=codexarena \
+        -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
+        -e POSTGRES_DB=$POSTGRES_DB \
         -p 5432:5432 \
         postgres:17-alpine || echo "❌ Failed to start PostgreSQL"
     
