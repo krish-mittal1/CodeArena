@@ -17,8 +17,12 @@ services:
       dockerfile: Dockerfile.backend
     env_file: .env
     restart: unless-stopped
+    # Host port is configurable so multiple projects can share one server.
+    # Set API_HOST_PORT in .env (default 8000). Prefer keeping this port
+    # UNPUBLISHED (firewall it) and routing traffic via the pangolin network:
+    # Pangolin resource target → http://api:8000 (Docker DNS on that network).
     ports:
-      - "8000:8000"
+      - "${API_HOST_PORT:-8000}:8000"
     volumes:
       # Code is baked into the image via Dockerfile — no full-repo RW bind.
       - ./problems:/app/problems:ro
@@ -35,8 +39,17 @@ services:
       # Host path that maps to /app inside the container for sandbox volume translation.
       # Must be the compose project directory so /app/.sandbox_tmp → ${PWD}/.sandbox_tmp.
       - SANDBOX_HOST_WORKDIR=${PWD}
+      # Behind pangolin/caddy, rate limits must key on the real client IP from
+      # X-Forwarded-For — otherwise every visitor shares the proxy's IP and one
+      # actor exhausts OTP/login limits for everyone. The caddy container sits
+      # on the same compose network, so its IP is the direct TCP peer.
+      - TRUST_FORWARDED_HEADERS=${TRUST_FORWARDED_HEADERS:-true}
+      - TRUSTED_PROXIES=${TRUSTED_PROXIES:-172.20.0.0/16}
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider --timeout=3 http://$$(hostname -i):8000/health || exit 1"]
+      # Loopback inside the container — immune to multi-network hostname -i
+      # returning multiple IPs (which broke busybox wget and flagged the
+      # container unhealthy while the app was fine).
+      test: ["CMD-SHELL", "wget -q --spider --timeout=3 http://127.0.0.1:8000/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 2
